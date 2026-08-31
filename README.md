@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1977 lines, 191 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+2552 lines, 235 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -77,6 +77,12 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | **`jacobi` — the commutator is a Lie bracket** | `TotalSpace.lean` | **proved** |
 | **`LieRing` and `LieAlgebra R` on `Tot R P`** — mathlib instances | `TotalSpace.lean` | **proved** |
 | `Gerstenhaber R V` — the bracket on `End R V` | `TotalSpace.lean` | proved |
+| Planar trees and forests, grafting, arity of a graft | `Tree.lean` | proved |
+| The four operad laws for grafting, at tree level | `Tree.lean` | **proved** |
+| **`NSOperad R (Free R E)`** — the operad of planar trees | `Free.lean` | **proved** |
+| `sstar` — the signed circle product of the suspension | `DG.lean` | proved |
+| **`maurerCartan_iff` — `Θ ⋆ₛ Θ = 0` is associativity** | `DG.lean` | **proved** |
+| `ass_maurerCartan` — `Ass` solves Maurer–Cartan | `DG.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -176,17 +182,20 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **A graded/dg layer — and it is a real gate, not a preference.** Everything here is ungraded,
-   and the Maurer–Cartan story is *not* available until that changes. Two things fail without
-   signs. First, `Θ ⋆ Θ = 0` for a binary `Θ` says `Θ ∘₁ Θ = -(Θ ∘₂ Θ)`, which is
-   anti-associativity, not associativity; making the equation mean what it should requires the
-   operadic suspension. Second, `d² = 0` does not follow from Jacobi in an ungraded Lie ring —
-   Jacobi with `x = y = Θ` degenerates to `0 = 0`, and `ad_Θ²` is genuinely nonzero in general.
-   The dg layer is therefore the next substantial item, and it decorates the ungraded pre-Lie
-   structure rather than replacing it.
+1. **Graded Jacobi, and `d² = 0`.** `DG.lean` now carries the signs of the operadic suspension:
+   `α ⋆ₛ β = ∑ₐ (-1)^(a k) α ∘ₐ β`, and with them `Θ ⋆ₛ Θ = 0` *is* associativity, which the
+   unsigned product could not say — there the same equation reads `Θ ∘₀ Θ = -(Θ ∘₁ Θ)`. What
+   remains is the signed analogue of `star_assoc_symm`: the graded right pre-Lie identity, whose
+   associator picks up `(-1)^(k l)`. That gives graded Jacobi, and `d = ⁅Θ, -⁆` with `d² = 0`
+   follows from it together with Maurer–Cartan. The combinatorial decomposition is the one in
+   `PreLie.lean`; what is new is carrying a sign through each of the two index bijections.
 2. **The species spine**, per the decision above.
-3. **The free ns-operad on planar trees** — the prerequisite for presentations by generators and
-   relations, hence for anything about quadraticity or Koszulness.
+3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
+   by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
+   proved is that it is free — that a map of collections `E → P` extends uniquely to an operad
+   morphism `Free R E → P`. Until that is done the name records the intent, not a theorem. The
+   extension is a mutual recursion over trees and forests, and the forest half needs total
+   composition, which the library does not yet have.
 4. **A worked non-trivial example** beyond `Ass` and `End` — a concrete operad presented by
    generators and relations, which is what makes items 1 and 3 pay off.
 
