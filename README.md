@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3197 lines, 293 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3281 lines, 300 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -90,6 +90,7 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `two_smul_associator_odd` — the obstruction at 2 | `TotalSpaceS.lean` | proved |
 | **`dsq_eq_zero` — `d² = 0` (with `2` invertible)** | `TotalSpaceS.lean` | **proved** |
 | `dLin`, cocycles, coboundaries, `cohomology` | `Cohomology.lean` | proved |
+| `substF`, `extend` — total composition, tree evaluation | `TotalComp.lean` | defined |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -189,12 +190,13 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Total composition, and the universal property of `Free`.** Deformation theory is finished:
-   `d² = 0` holds with `2` invertible, and `cohomology` is defined. The next structural item is
-   total composition `γ(α; β₁, …, β_k)`, built from iterated partial composition. It is what the
-   universal property of `Free` needs — extending a map of collections `E → Q` over a tree means
-   substituting the extensions of all subtrees into a generator at once — and until it exists,
-   the name `Free` records intent rather than a theorem.
+1. **The universal property of `Free`.** Total composition exists: `substF` substitutes a forest
+   into the last `k` slots of an operation, and `extend` evaluates a tree in any operad `Q`. What
+   is missing is the theory around it — `extend_corolla` (evaluation returns the generator) and
+   `extend_graft` (evaluation is an operad morphism), and then uniqueness. See the note in
+   `TotalComp.lean`: the obstruction is that `substF`'s inserted operation carries the arity
+   `Tree.leaf.arity` rather than the literal `1`, so `comp_one_right` will not match. The fix is
+   to restructure `substF` rather than to fight the matcher.
 2. **The species spine**, per the decision above.
 3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
    by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
