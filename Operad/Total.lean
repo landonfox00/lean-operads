@@ -38,8 +38,10 @@ def star {j k : ℕ} (α : P (j + 1)) (β : P (k + 1)) : P (j + k + 1) :=
 lemma star_def {j k : ℕ} (α : P (j + 1)) (β : P (k + 1)) :
     star (R := R) α β = ∑ i : Fin (j + 1), compFin (R := R) i α β := rfl
 
-/-- Pulling a scalar out of a finite sum. (`Finset.smul_sum` is not available under that name in
-this Mathlib revision, so we get it from `map_sum` for `LinearMap.lsmul`.) -/
+/-- Pulling a scalar out of a finite sum, obtained from `map_sum` for `LinearMap.lsmul`.
+(`Finset.smul_sum` does exist, in `Mathlib.Algebra.BigOperators.GroupWithZero.Action`, but it is
+not imported here; it is also stated for a general `DistribSMul`, which `rw` and `simp` both fail
+to match against a `Module`-derived action.) -/
 private lemma smul_sum' {M : Type*} [AddCommGroup M] [Module R M] {n : ℕ} (r : R)
     (f : Fin n → M) : r • ∑ i, f i = ∑ i, r • f i :=
   map_sum (LinearMap.lsmul R M r) f Finset.univ

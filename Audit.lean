@@ -124,3 +124,8 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] :
 /-- Planar trees labelled by any collection `E` form a non-symmetric operad. -/
 noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
     NSOperad R (Operad.Free R E) := inferInstance
+
+/-! ## The signed product and Maurer–Cartan -/
+
+#print axioms Operad.maurerCartan_iff
+#print axioms Operad.ass_maurerCartan
