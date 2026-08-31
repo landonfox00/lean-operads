@@ -96,3 +96,13 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] (j k : 
 #print axioms Operad.sum_after_eq
 #print axioms Operad.disjointPart_symm
 #print axioms Operad.star_assoc_symm
+
+/-! ## The total space as a pre-Lie ring -/
+
+#print axioms Operad.tot_assoc_symm
+#print axioms Operad.jacobi
+
+/-- `⨁ k, P (k+1)` is a right pre-Lie ring for every non-symmetric operad `P`. -/
+example (R : Type) [CommRing R] (P : ℕ → Type)
+    [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] :
+    RightPreLieRing (Operad.Tot R P) := inferInstance
