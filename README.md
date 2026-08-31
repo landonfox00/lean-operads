@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3154 lines, 259 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3039 lines,  declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -85,6 +85,9 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `ass_maurerCartan` — `Ass` solves Maurer–Cartan | `DG.lean` | proved |
 | **`sstar_assoc_symm` — the graded pre-Lie identity** | `GradedPreLie.lean` | **proved** |
 | `disjointPartS_symm` — the signed disjoint part | `GradedPreLie.lean` | proved |
+| `TotS`, the signed total space | `TotalSpaceS.lean` | proved |
+| **`jacobiS` — the graded Jacobi identity** | `TotalSpaceS.lean` | **proved** |
+| `two_smul_associator_odd` — the obstruction at 2 | `TotalSpaceS.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -184,11 +187,12 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Graded Jacobi, and `d² = 0`.** The graded pre-Lie identity is now proved:
-   `(α ⋆ₛ β) ⋆ₛ γ - α ⋆ₛ (β ⋆ₛ γ) = (-1)^(k l) [(α ⋆ₛ γ) ⋆ₛ β - α ⋆ₛ (γ ⋆ₛ β)]`. What remains
-   is the graded Jacobi identity for `⁅-,-⁆ₛ`, which follows from it exactly as the ungraded
-   Jacobi followed from `star_assoc_symm` — six associators cancelling in pairs, now with signs
-   — and then `d = ⁅Θ, -⁆ₛ` with `d² = 0` from graded Jacobi together with `Θ ⋆ₛ Θ = 0`.
+1. **`d = ⁅Θ, -⁆ₛ` and `d² = 0`.** Graded Jacobi is proved. What remains is the differential
+   itself, and here the formalisation turned up a real constraint rather than a missing lemma:
+   expanding `d²` for odd `Θ` with `Θ ⋆ₛ Θ = 0` leaves `d²(x) = -A(x, Θ, Θ)`, and the graded
+   pre-Lie identity with equal odd arguments only gives `A(x, Θ, Θ) = -A(x, Θ, Θ)`. So `2 d² = 0`
+   holds over any `R`, and `d² = 0` needs 2 to be a non-zero-divisor. `two_smul_associator_odd`
+   records the torsion statement; the differential and the char-2 hypothesis are next.
 2. **The species spine**, per the decision above.
 3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
    by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
