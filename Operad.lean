@@ -4,5 +4,6 @@ import Operad.Associativity
 import Operad.Endomorphism
 import Operad.Algebra
 import Operad.Total
+import Operad.PreLie
 import Operad.AssAlgebra
 import Operad.Suboperad
