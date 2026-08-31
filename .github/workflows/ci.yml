@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Cancel superseded runs on the same ref.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      # Installs the toolchain named in `lean-toolchain`, fetches the Mathlib
+      # olean cache, and runs `lake build`.
+      - name: Build
+        uses: leanprover/lean-action@v1
+
+      - name: No sorry or admit in library sources
+        run: |
+          if grep -rnE '\b(sorry|admit|native_decide)\b' Operad/ Operad.lean; then
+            echo "::error::library sources contain sorry, admit, or native_decide"
+            exit 1
+          fi
+          echo "Library sources are clean."
+
+      # The build above does not compile Audit.lean: it is deliberately outside the
+      # `Operad` lean_lib so that a failing audit is reported as its own step.
+      - name: Axiom audit
+        run: |
+          set -o pipefail
+          lake env lean Audit.lean 2>&1 | tee audit.txt
+          if grep -q 'sorryAx' audit.txt; then
+            echo "::error::a declaration depends on sorryAx"
+            exit 1
+          fi
+          echo "No declaration depends on sorryAx."
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### lean-operads"
+            echo
+            echo "| Metric | Value |"
+            echo "| --- | --- |"
+            echo "| Lines | $(cat Operad/*.lean Operad.lean | wc -l) |"
+            echo "| Declarations | $(grep -chE '^(@\[[^]]*\] )?(private |protected |noncomputable )*(def|lemma|theorem|instance|structure|class|abbrev)' Operad/*.lean | paste -sd+ | bc) |"
+            echo "| Toolchain | \`$(cat lean-toolchain)\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
