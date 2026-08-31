@@ -139,3 +139,10 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
 
 #print axioms Operad.jacobiS
 #print axioms Operad.two_smul_associator_odd
+
+/-! ## The differential and cohomology -/
+
+#print axioms Operad.dsq_eq
+#print axioms Operad.dsq_eq_zero
+#print axioms Operad.dLin_dLin
+#print axioms Operad.coboundaries_le_cocycles

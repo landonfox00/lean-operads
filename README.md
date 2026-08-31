@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3039 lines, 275 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3197 lines, 293 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -88,6 +88,8 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `TotS`, the signed total space | `TotalSpaceS.lean` | proved |
 | **`jacobiS` — the graded Jacobi identity** | `TotalSpaceS.lean` | **proved** |
 | `two_smul_associator_odd` — the obstruction at 2 | `TotalSpaceS.lean` | proved |
+| **`dsq_eq_zero` — `d² = 0` (with `2` invertible)** | `TotalSpaceS.lean` | **proved** |
+| `dLin`, cocycles, coboundaries, `cohomology` | `Cohomology.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -187,12 +189,12 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **`d = ⁅Θ, -⁆ₛ` and `d² = 0`.** Graded Jacobi is proved. What remains is the differential
-   itself, and here the formalisation turned up a real constraint rather than a missing lemma:
-   expanding `d²` for odd `Θ` with `Θ ⋆ₛ Θ = 0` leaves `d²(x) = -A(x, Θ, Θ)`, and the graded
-   pre-Lie identity with equal odd arguments only gives `A(x, Θ, Θ) = -A(x, Θ, Θ)`. So `2 d² = 0`
-   holds over any `R`, and `d² = 0` needs 2 to be a non-zero-divisor. `two_smul_associator_odd`
-   records the torsion statement; the differential and the char-2 hypothesis are next.
+1. **Total composition, and the universal property of `Free`.** Deformation theory is finished:
+   `d² = 0` holds with `2` invertible, and `cohomology` is defined. The next structural item is
+   total composition `γ(α; β₁, …, β_k)`, built from iterated partial composition. It is what the
+   universal property of `Free` needs — extending a map of collections `E → Q` over a tree means
+   substituting the extensions of all subtrees into a generator at once — and until it exists,
+   the name `Free` records intent rather than a theorem.
 2. **The species spine**, per the decision above.
 3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
    by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
