@@ -40,6 +40,13 @@ lemma comp_arity_congr (a b : ℕ) {n n' : ℕ} (hn : n = n') (α : P (a + 1 + b
       = reindex R P (by omega) (comp (R := R) a b α β) := by
   subst hn; simp
 
+/-- `comp` only depends on its *leading* index up to equality. The third companion to
+`comp_index_congr` (trailing index) and `comp_arity_congr` (arity of the second argument). -/
+lemma comp_leading_congr {a a' : ℕ} (ha : a = a') (b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
+    comp (R := R) a' b (reindex R P (by omega) α) β
+      = reindex R P (by omega) (comp (R := R) a b α β) := by
+  subst ha; simp
+
 lemma compFin_add_left {m n : ℕ} (i : Fin m) (α α' : P m) (β : P n) :
     compFin (R := R) i (α + α') β = compFin (R := R) i α β + compFin (R := R) i α' β := by
   simp only [compFin, map_add, LinearMap.add_apply]

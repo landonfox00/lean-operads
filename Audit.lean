@@ -87,3 +87,5 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] (j k : 
 #print axioms Operad.Suboperad.incl
 #print axioms Operad.comp_arity_congr
 #print axioms Operad.compFin_assoc_seq
+#print axioms Operad.comp_leading_congr
+#print axioms Operad.compFin_assoc_par

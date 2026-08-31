@@ -62,4 +62,58 @@ lemma compFin_assoc_seq {m n p : ℕ} (i : Fin m) (j : Fin n) (α : P m) (β : P
   rw [comp_arity_congr]
   simp only [reindex_reindex]
 
+/-- **Parallel associativity, `∘ᵢ` form.** Composing into two distinct slots of `α` gives the same
+result in either order. The slot of the second insertion shifts by `n - 1` when `β` goes in
+first, which is what the index `i' + n - 1` records. -/
+lemma compFin_assoc_par {m n p : ℕ} (i i' : Fin m) (hlt : (i : ℕ) < (i' : ℕ))
+    (α : P m) (β : P n) (γ : P p) :
+    compFin (R := R)
+        (⟨(i' : ℕ) + n - 1, by have := i'.isLt; omega⟩ : Fin (m - 1 + n))
+        (compFin (R := R) i α β) γ
+      = reindex R P (by have := i'.isLt; omega)
+          (compFin (R := R) (⟨(i : ℕ), by have := i'.isLt; omega⟩ : Fin (m - 1 + p))
+            (compFin (R := R) i' α γ) β) := by
+  have hi := i.isLt
+  have hi' := i'.isLt
+  -- Present the shifted slot as `a + n + b`, the shape the positional axiom uses.
+  rw [show (⟨(i' : ℕ) + n - 1, by omega⟩ : Fin (m - 1 + n))
+      = ⟨(i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1), by omega⟩ from
+    Fin.ext (show (i' : ℕ) + n - 1 = (i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1) by omega)]
+  simp only [compFin, reindex_reindex]
+  -- Route both transports of `α` through `P (a+1+b+1+c)` and freeze that term, so the remaining
+  -- reindex bookkeeping can be collapsed without destroying the axiom's shape.
+  rw [← reindex_reindex
+      (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega)
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
+  rw [← reindex_reindex
+      (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega)
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i' : ℕ) + 1 + (m - (i' : ℕ) - 1) by omega)]
+  set A := reindex R P (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega) α with hA
+  -- Left side, inner: trailing index `m - i - 1` becomes `b + 1 + c`.
+  rw [← reindex_reindex
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
+  rw [comp_index_congr (i : ℕ) (show ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = m - (i : ℕ) - 1 by omega)]
+  simp only [reindex_reindex]
+  -- Left side, outer: trailing index becomes `c`.
+  rw [← reindex_reindex
+      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - (i' : ℕ) - 1) by omega)
+      (show ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - (i' : ℕ) - 1)
+          = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - 1 + n - ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) - 1) by omega)]
+  rw [comp_index_congr ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1))
+      (show (m - (i' : ℕ) - 1) = m - 1 + n - ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) - 1 by omega)]
+  -- Right side: leading index `i'` becomes `a + 1 + b`, trailing becomes `b + p + c`.
+  rw [comp_leading_congr (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) = (i' : ℕ) by omega) (m - (i' : ℕ) - 1)]
+  simp only [reindex_reindex]
+  rw [← reindex_reindex
+      (show ((i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) = (i : ℕ) + 1 + (m - 1 + p - (i : ℕ) - 1) by omega)]
+  rw [comp_index_congr (i : ℕ) (show ((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1) = m - 1 + p - (i : ℕ) - 1 by omega)]
+  simp only [reindex_reindex]
+  -- Split off exactly the transport the axiom carries, then apply it.
+  rw [← reindex_reindex
+      (show ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1) = (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) = m - 1 + n - 1 + p by omega)]
+  rw [comp_assoc_par]
+
 end Operad

@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1346 lines, 137 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+1407 lines, 140 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -67,7 +67,7 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | **Algebras over `Ass` are associative algebras** | `AssAlgebra.lean` | **proved** |
 | `Suboperad`, inherits all four axioms; inclusion morphism | `Suboperad.lean` | proved |
 | `compFin_assoc_seq` — sequential associativity in `∘ᵢ` form | `Associativity.lean` | proved |
-| `compFin_assoc_par` — parallel associativity in `∘ᵢ` form | `Associativity.lean` | **not yet** |
+| `compFin_assoc_par` — parallel associativity in `∘ᵢ` form | `Associativity.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -167,9 +167,6 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-0. **`compFin_assoc_par`.** The parallel companion to `compFin_assoc_seq`, by the same reindex
-   plumbing. Needed before the pre-Lie identity, since the disjoint terms are exactly where
-   parallel associativity is used.
 1. **The pre-Lie identity.** `⋆` is in place; what remains is that the associator
    `(α ⋆ β) ⋆ γ - α ⋆ (β ⋆ γ)` is symmetric in `β, γ`, which would make the total space an
    instance of mathlib's `RightPreLieRing` and turn `⁅-,-⁆` into a genuine Lie bracket. The
