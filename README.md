@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1544 lines, 149 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+1740 lines, 162 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -70,7 +70,8 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `compFin_assoc_par` — parallel associativity in `∘ᵢ` form | `Associativity.lean` | proved |
 | `compFin` distributes over `Finset.sum`; both bracketings as double sums | `PreLie.lean` | proved |
 | `star_star_left_split` — the associator equals `disjointPart` | `PreLie.lean` | **proved** |
-| `disjointPart_symm` — that `disjointPart` is symmetric in `β, γ` | `PreLie.lean` | **not yet** |
+| `disjointPart_symm` — `disjointPart` is symmetric in `β, γ` | `PreLie.lean` | **proved** |
+| **`star_assoc_symm` — the pre-Lie identity** | `PreLie.lean` | **proved** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -170,15 +171,12 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Finish the pre-Lie identity.** The split is done: `star_star_left_split` proves
-   `(α ⋆ β) ⋆ γ = α ⋆ (β ⋆ γ) + disjointPart α β γ`, so the associator is now an explicit,
-   named object rather than a difference. What remains is `disjointPart_symm`: that
-   `disjointPart α β γ` and `disjointPart α γ β` agree. Term by term this is exactly
-   `compFin_assoc_par`; the work is the index bijection, which sends a pair `(i, i')` with
-   `i'` outside `α`'s `i`-block to the corresponding pair of *distinct slots of `α`*, in the two
-   cases `i' < i` and `i' > i + k`. Once it lands the total space is an instance of mathlib's
-   `RightPreLieRing` and `⁅-,-⁆` is a genuine Lie bracket, which is what Maurer–Cartan,
-   `d = ⁅Θ, -⁆` and H² all sit on.
+1. **The `RightPreLieRing` instance.** The pre-Lie identity is proved
+   (`star_assoc_symm`), but `⋆` is currently *graded* — `P (j+1) → P (k+1) → P (j+k+1)` — rather
+   than a multiplication on one object. Bundling the total space as `⨁ k, P (k+1)` and extending
+   `⋆` bilinearly turns it into an instance of mathlib's `RightPreLieRing`, and upgrades
+   `⁅-,-⁆` to a genuine Lie bracket with Jacobi. From there: Maurer–Cartan elements
+   (`Θ ⋆ Θ = 0`), the differential `d = ⁅Θ, -⁆` with `d² = 0`, and H².
 2. **Suboperads**, so that concrete operads can be exhibited inside `End` without re-proving
    axioms.
 3. **The species spine**, per the decision above.

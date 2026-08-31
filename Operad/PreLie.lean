@@ -134,4 +134,176 @@ lemma star_star_left_split {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ :
   rw [star_star_right]
   exact (map_sum _ _ _).symm
 
+/-! ### Splitting the disjoint slots into "before" and "after"
+
+A slot of `α ⋆ β` outside `β`'s block is either strictly before `α`'s slot `i`, or strictly
+after the block `[i, i+k]`. Treating the two separately makes each of the two reindexing
+bijections below single-case. -/
+
+lemma not_mem_nested_iff {j k : ℕ} (i : Fin (j + 1)) (i' : Fin (j + k + 1)) :
+    i' ∉ nested (k := k) i ↔ (i' : ℕ) < (i : ℕ) ∨ (i : ℕ) + k < (i' : ℕ) := by
+  simp only [mem_nested, not_exists]
+  constructor
+  · intro h
+    by_contra hc
+    push Not at hc
+    exact h ⟨(i' : ℕ) - (i : ℕ), by omega⟩
+      (by show (i' : ℕ) = (i : ℕ) + ((i' : ℕ) - (i : ℕ)); omega)
+  · rintro (h | h) i'' hi''
+    · have := i''.isLt; omega
+    · have := i''.isLt; omega
+
+/-- Slots of `α ⋆ β` strictly before `α`'s slot `i`. -/
+def before {j k : ℕ} (i : Fin (j + 1)) : Finset (Fin (j + k + 1)) :=
+  Finset.univ.filter fun i' => (i' : ℕ) < (i : ℕ)
+
+/-- Slots of `α ⋆ β` strictly after the block contributed by `β`. -/
+def after {j k : ℕ} (i : Fin (j + 1)) : Finset (Fin (j + k + 1)) :=
+  Finset.univ.filter fun i' => (i : ℕ) + k < (i' : ℕ)
+
+@[simp] lemma mem_before {j k : ℕ} (i : Fin (j + 1)) (i' : Fin (j + k + 1)) :
+    i' ∈ before (k := k) i ↔ (i' : ℕ) < (i : ℕ) := by simp [before]
+
+@[simp] lemma mem_after {j k : ℕ} (i : Fin (j + 1)) (i' : Fin (j + k + 1)) :
+    i' ∈ after (k := k) i ↔ (i : ℕ) + k < (i' : ℕ) := by simp [after]
+
+lemma sum_compl_nested {j k : ℕ} {M : Type w} [AddCommMonoid M] (i : Fin (j + 1))
+    (f : Fin (j + k + 1) → M) :
+    ∑ i' ∈ (nested (k := k) i)ᶜ, f i'
+      = (∑ i' ∈ before (k := k) i, f i') + ∑ i' ∈ after (k := k) i, f i' := by
+  rw [← Finset.sum_filter_add_sum_filter_not ((nested (k := k) i)ᶜ)
+      fun i' => (i' : ℕ) < (i : ℕ)]
+  congr 1
+  · refine Finset.sum_congr ?_ fun _ _ => rfl
+    ext i'
+    simp only [Finset.mem_filter, Finset.mem_compl, not_mem_nested_iff, mem_before]
+    omega
+  · refine Finset.sum_congr ?_ fun _ _ => rfl
+    ext i'
+    simp only [Finset.mem_filter, Finset.mem_compl, not_mem_nested_iff, mem_after]
+    omega
+
+/-! ### The two reindexing bijections
+
+A `β`-then-`γ` pair with `γ` *before* `β` is the same data as a `γ`-then-`β` pair with `β`
+*after* `γ`, and vice versa. Term by term the identification is `compFin_assoc_par`. -/
+
+lemma sum_before_eq {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P (l + 1)) :
+    ((∑ i : Fin (j + 1), ∑ i' ∈ before (k := k) i,
+        compFin (R := R) i' (compFin (R := R) i α β) γ) : P (j + k + l + 1))
+      = ∑ s : Fin (j + 1), ∑ t ∈ after (k := l) s,
+          reindex R P (by omega) (compFin (R := R) t (compFin (R := R) s α γ) β) := by
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  refine Finset.sum_nbij'
+    (fun x => ⟨⟨min (x.2 : ℕ) j, by omega⟩, ⟨(x.1 : ℕ) + l, by have := x.1.isLt; omega⟩⟩)
+    (fun y => ⟨⟨(y.2 : ℕ) - l, by have := y.2.isLt; omega⟩,
+               ⟨(y.1 : ℕ), by have := y.1.isLt; omega⟩⟩)
+    ?_ ?_ ?_ ?_ ?_
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and] at hx
+    have := i.isLt
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and]
+    show min (i' : ℕ) j + l < (i : ℕ) + l
+    omega
+  · rintro ⟨s, t⟩ hy
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and] at hy
+    have := s.isLt
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and]
+    show (s : ℕ) < (t : ℕ) - l
+    omega
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and] at hx
+    have := i.isLt
+    simp only [Sigma.mk.injEq, heq_iff_eq, Fin.ext_iff]
+    omega
+  · rintro ⟨s, t⟩ hy
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and] at hy
+    have := s.isLt
+    simp only [Sigma.mk.injEq, heq_iff_eq, Fin.ext_iff]
+    omega
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and] at hx
+    have hij := i.isLt
+    have hmin : min (i' : ℕ) j = (i' : ℕ) := by omega
+    dsimp only
+    have key : compFin (R := R) (⟨(i : ℕ) + l, by omega⟩ : Fin (j + l + 1))
+          (compFin (R := R) (⟨min (i' : ℕ) j, by omega⟩ : Fin (j + 1)) α γ) β
+        = reindex R P (by omega)
+            (compFin (R := R) (⟨min (i' : ℕ) j, by omega⟩ : Fin (j + k + 1))
+              (compFin (R := R) i α β) γ) :=
+      compFin_assoc_par _ _ (by show min (i' : ℕ) j < (i : ℕ); omega) α γ β
+    rw [key, show (⟨min (i' : ℕ) j, by omega⟩ : Fin (j + k + 1)) = i' from Fin.ext hmin,
+      reindex_reindex]
+    exact (reindex_self (R := R) (P := P) _ _).symm
+
+lemma sum_after_eq {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P (l + 1)) :
+    ((∑ i : Fin (j + 1), ∑ i' ∈ after (k := k) i,
+        compFin (R := R) i' (compFin (R := R) i α β) γ) : P (j + k + l + 1))
+      = ∑ s : Fin (j + 1), ∑ t ∈ before (k := l) s,
+          reindex R P (by omega) (compFin (R := R) t (compFin (R := R) s α γ) β) := by
+  rw [Finset.sum_sigma', Finset.sum_sigma']
+  refine Finset.sum_nbij'
+    (fun x => ⟨⟨(x.2 : ℕ) - k, by have := x.2.isLt; omega⟩,
+               ⟨(x.1 : ℕ), by have := x.1.isLt; omega⟩⟩)
+    (fun y => ⟨⟨min (y.2 : ℕ) j, by omega⟩,
+               ⟨(y.1 : ℕ) + k, by have := y.1.isLt; omega⟩⟩)
+    ?_ ?_ ?_ ?_ ?_
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and] at hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and]
+    show (i : ℕ) < (i' : ℕ) - k
+    omega
+  · rintro ⟨s, t⟩ hy
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and] at hy
+    have := s.isLt
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and]
+    show min (t : ℕ) j + k < (s : ℕ) + k
+    omega
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and] at hx
+    have := i.isLt
+    simp only [Sigma.mk.injEq, heq_iff_eq, Fin.ext_iff]
+    omega
+  · rintro ⟨s, t⟩ hy
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_before, true_and] at hy
+    have := s.isLt
+    simp only [Sigma.mk.injEq, heq_iff_eq, Fin.ext_iff]
+    omega
+  · rintro ⟨i, i'⟩ hx
+    simp only [Finset.mem_sigma, Finset.mem_univ, mem_after, true_and] at hx
+    have hi' := i'.isLt
+    dsimp only
+    have h := compFin_assoc_par (R := R) i (⟨(i' : ℕ) - k, by omega⟩ : Fin (j + 1))
+      (by show (i : ℕ) < (i' : ℕ) - k; omega) α β γ
+    dsimp only at h
+    conv_lhs =>
+      rw [show i' = (⟨(i' : ℕ) - k + k, by omega⟩ : Fin (j + k + 1)) from
+        Fin.ext (show (i' : ℕ) = (i' : ℕ) - k + k by omega)]
+    exact h
+
+/-! ### The pre-Lie identity -/
+
+/-- **The disjoint part is symmetric in `β` and `γ`.** Swapping the two inserted operations
+exchanges the "before" and "after" halves of the sum. -/
+theorem disjointPart_symm {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P (l + 1)) :
+    disjointPart (R := R) α β γ
+      = reindex R P (by omega) (disjointPart (R := R) α γ β) := by
+  unfold disjointPart
+  rw [Finset.sum_congr rfl fun i _ => sum_compl_nested i _,
+    Finset.sum_congr rfl fun s _ => sum_compl_nested s _,
+    Finset.sum_add_distrib, Finset.sum_add_distrib]
+  simp only [sum_before_eq α β γ, sum_after_eq α β γ, map_add, map_sum]
+  exact add_comm _ _
+
+/-- **The pre-Lie identity.** The associator of the circle product is symmetric in its last two
+arguments, so the total space of a non-symmetric operad is a right pre-Lie algebra. -/
+theorem star_assoc_symm {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P (l + 1)) :
+    star (R := R) (star (R := R) α β) γ
+        - reindex R P (by omega) (star (R := R) α (star (R := R) β γ))
+      = reindex R P (by omega) (star (R := R) (star (R := R) α γ) β)
+        - reindex R P (by omega) (star (R := R) α (star (R := R) γ β)) := by
+  rw [star_star_left_split, star_star_left_split α γ β]
+  rw [map_add, disjointPart_symm α β γ]
+  simp only [reindex_reindex, add_sub_cancel_left]
+
 end Operad
