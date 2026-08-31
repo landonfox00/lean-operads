@@ -134,3 +134,8 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
 
 #print axioms Operad.disjointPartS_symm
 #print axioms Operad.sstar_assoc_symm
+
+/-! ## Graded Jacobi -/
+
+#print axioms Operad.jacobiS
+#print axioms Operad.two_smul_associator_odd
