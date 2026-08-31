@@ -9,13 +9,14 @@ This is a local library, so it is free to make a definite choice and build on it
 
 ## Build
 
-Toolchain `leanprover/lean4:v4.30.0`. `.lake/packages` is a **directory junction** to the Mathlib
-already fetched and built at `~/Documents/Lean/mathematics_in_lean`, so nothing is downloaded and
-`lake build` is incremental (~20 s per touched file).
+Toolchain `leanprover/lean4:v4.30.0`, pinned in `lean-toolchain`.
 
 ```bash
+lake exe cache get
 lake build
 ```
+
+`Audit.lean` is not part of the library target; run it separately to reproduce the axiom audit.
 
 ## The design decision that makes this tractable
 
@@ -186,8 +187,21 @@ equivalence to the species picture is a later bridge.
 5. **A graded/dg layer.** Everything here is ungraded; deformation theory with signs needs a dg
    version. The ungraded pre-Lie structure is the right first step regardless — the dg version
    decorates it rather than replacing it.
-6. **The games operad** of the universal-Shapley project, replacing the hardcoded arity-3
-   computation in `Research/Public/universal-shapley/lean/UniversalShapley/Operad.lean`.
+6. **A worked non-trivial example** beyond `Ass` and `End` — a concrete operad presented by
+   generators and relations, which is what makes items 4 and 5 pay off.
+
+Further out, in rough dependency order:
+
+7. **The common operads.** Right now there are exactly two: `Ass` and `End`. `Com`, `Lie` and
+   `Pois` are all *symmetric*, so they are blocked on item 3 rather than on effort; the magmatic
+   operad, `uAss` and the free ns-operad on planar trees are reachable without symmetry.
+8. **Operad cohomology.** Once the pre-Lie identity gives `d = ⁅Θ, -⁆` with `d² = 0`, the
+   cohomology groups themselves are a further step, and cohomology in the technical sense
+   (Gerstenhaber for associative algebras, André–Quillen for algebras over an operad) needs the
+   dg layer of item 5.
+9. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
+   structures, ∞-operads. Each of these sits on top of the dg layer, and each is a substantial
+   project in its own right — this is the long-term destination, not a near-term item.
 
 ### A note for anyone taking the mathlib route later
 

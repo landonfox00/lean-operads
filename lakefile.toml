@@ -6,9 +6,6 @@ pp.unicode.fun = true
 autoImplicit = false
 relaxedAutoImplicit = false
 
-# Pinned to the Mathlib already fetched and built on this machine at
-# ~/Documents/Lean/mathematics_in_lean (same toolchain, same revision), which
-# `.lake/packages` is a directory junction to. Nothing is downloaded.
 [[require]]
 name = "mathlib"
 git = "https://github.com/leanprover-community/mathlib4"
