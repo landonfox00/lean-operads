@@ -11,3 +11,4 @@ import Operad.Suboperad
 import Operad.Tree
 import Operad.Free
 import Operad.DG
+import Operad.GradedPreLie
