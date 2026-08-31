@@ -115,3 +115,12 @@ example (R : Type) [CommRing R] (P : ℕ → Type)
 /-- Gerstenhaber's bracket on the endomorphism operad of a module. -/
 example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] :
     LieAlgebra R (Operad.Gerstenhaber R V) := inferInstance
+
+/-! ## The operad of planar trees -/
+
+#print axioms Operad.Tree.graft_graft_seq
+#print axioms Operad.Tree.graft_graft_par
+
+/-- Planar trees labelled by any collection `E` form a non-symmetric operad. -/
+noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
+    NSOperad R (Operad.Free R E) := inferInstance

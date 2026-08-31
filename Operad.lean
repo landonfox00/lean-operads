@@ -9,3 +9,4 @@ import Operad.TotalSpace
 import Operad.AssAlgebra
 import Operad.Suboperad
 import Operad.Tree
+import Operad.Free

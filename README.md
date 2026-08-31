@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1977 lines, 191 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+2407 lines, 219 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -77,6 +77,9 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | **`jacobi` — the commutator is a Lie bracket** | `TotalSpace.lean` | **proved** |
 | **`LieRing` and `LieAlgebra R` on `Tot R P`** — mathlib instances | `TotalSpace.lean` | **proved** |
 | `Gerstenhaber R V` — the bracket on `End R V` | `TotalSpace.lean` | proved |
+| Planar trees and forests, grafting, arity of a graft | `Tree.lean` | proved |
+| The four operad laws for grafting, at tree level | `Tree.lean` | **proved** |
+| **`NSOperad R (Free R E)`** — the operad of planar trees | `Free.lean` | **proved** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -185,8 +188,12 @@ equivalence to the species picture is a later bridge.
    The dg layer is therefore the next substantial item, and it decorates the ungraded pre-Lie
    structure rather than replacing it.
 2. **The species spine**, per the decision above.
-3. **The free ns-operad on planar trees** — the prerequisite for presentations by generators and
-   relations, hence for anything about quadraticity or Koszulness.
+3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
+   by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
+   proved is that it is free — that a map of collections `E → P` extends uniquely to an operad
+   morphism `Free R E → P`. Until that is done the name records the intent, not a theorem. The
+   extension is a mutual recursion over trees and forests, and the forest half needs total
+   composition, which the library does not yet have.
 4. **A worked non-trivial example** beyond `Ass` and `End` — a concrete operad presented by
    generators and relations, which is what makes items 1 and 3 pay off.
 
