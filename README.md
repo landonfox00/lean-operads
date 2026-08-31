@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1886 lines, 178 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+1977 lines, 191 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -75,6 +75,8 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `Tot`, the total space `⨁ k, P (k+1)`, as a graded ring | `TotalSpace.lean` | proved |
 | **`RightPreLieRing (Tot R P)`** — a mathlib instance | `TotalSpace.lean` | **proved** |
 | **`jacobi` — the commutator is a Lie bracket** | `TotalSpace.lean` | **proved** |
+| **`LieRing` and `LieAlgebra R` on `Tot R P`** — mathlib instances | `TotalSpace.lean` | **proved** |
+| `Gerstenhaber R V` — the bracket on `End R V` | `TotalSpace.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -174,31 +176,30 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Maurer–Cartan and the differential.** With the pre-Lie ring and Jacobi in place, the next
-   step is the deformation complex proper: an operad structure is a solution of
-   `Θ ⋆ Θ = 0`, the differential is `d = ⁅Θ, -⁆`, and `d² = 0` follows from Jacobi together with
-   the Maurer–Cartan equation. From there, cohomology.
-2. **Suboperads**, so that concrete operads can be exhibited inside `End` without re-proving
-   axioms.
-3. **The species spine**, per the decision above.
-4. **The free ns-operad on planar trees** — the prerequisite for presentations by generators and
+1. **A graded/dg layer — and it is a real gate, not a preference.** Everything here is ungraded,
+   and the Maurer–Cartan story is *not* available until that changes. Two things fail without
+   signs. First, `Θ ⋆ Θ = 0` for a binary `Θ` says `Θ ∘₁ Θ = -(Θ ∘₂ Θ)`, which is
+   anti-associativity, not associativity; making the equation mean what it should requires the
+   operadic suspension. Second, `d² = 0` does not follow from Jacobi in an ungraded Lie ring —
+   Jacobi with `x = y = Θ` degenerates to `0 = 0`, and `ad_Θ²` is genuinely nonzero in general.
+   The dg layer is therefore the next substantial item, and it decorates the ungraded pre-Lie
+   structure rather than replacing it.
+2. **The species spine**, per the decision above.
+3. **The free ns-operad on planar trees** — the prerequisite for presentations by generators and
    relations, hence for anything about quadraticity or Koszulness.
-5. **A graded/dg layer.** Everything here is ungraded; deformation theory with signs needs a dg
-   version. The ungraded pre-Lie structure is the right first step regardless — the dg version
-   decorates it rather than replacing it.
-6. **A worked non-trivial example** beyond `Ass` and `End` — a concrete operad presented by
-   generators and relations, which is what makes items 4 and 5 pay off.
+4. **A worked non-trivial example** beyond `Ass` and `End` — a concrete operad presented by
+   generators and relations, which is what makes items 1 and 3 pay off.
 
 Further out, in rough dependency order:
 
-7. **The common operads.** Right now there are exactly two: `Ass` and `End`. `Com`, `Lie` and
-   `Pois` are all *symmetric*, so they are blocked on item 3 rather than on effort; the magmatic
+5. **The common operads.** Right now there are exactly two: `Ass` and `End`. `Com`, `Lie` and
+   `Pois` are all *symmetric*, so they are blocked on item 2 rather than on effort; the magmatic
    operad, `uAss` and the free ns-operad on planar trees are reachable without symmetry.
-8. **Operad cohomology.** Once the pre-Lie identity gives `d = ⁅Θ, -⁆` with `d² = 0`, the
+6. **Operad cohomology.** Once the dg layer gives `d = ⁅Θ, -⁆` with `d² = 0`, the
    cohomology groups themselves are a further step, and cohomology in the technical sense
    (Gerstenhaber for associative algebras, André–Quillen for algebras over an operad) needs the
-   dg layer of item 5.
-9. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
+   dg layer of item 1.
+7. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
    structures, ∞-operads. Each of these sits on top of the dg layer, and each is a substantial
    project in its own right — this is the long-term destination, not a near-term item.
 

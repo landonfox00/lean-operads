@@ -17,8 +17,11 @@ them for having no synthesization order.
 -/
 import Operad.PreLie
 import Mathlib.Algebra.DirectSum.Ring
+import Mathlib.Algebra.DirectSum.Module
 import Mathlib.Algebra.NonAssoc.PreLie.Basic
 import Mathlib.Algebra.Ring.Associator
+import Mathlib.Algebra.Lie.Basic
+import Operad.Endomorphism
 
 universe u v
 
@@ -164,6 +167,94 @@ theorem jacobi (x y z : Tot R P) :
     comm (comm x y) z + comm (comm y z) x + comm (comm z x) y = 0 := by
   rw [jacobi_aux, tot_assoc_symm x y z, tot_assoc_symm y z x, tot_assoc_symm z x y]
   abel
+
+lemma comm_neg_right (x y : Tot R P) : comm x (-y) = - comm x y := by
+  simp only [comm_def, mul_neg, neg_mul]; abel
+
+lemma comm_add_left (x x' y : Tot R P) : comm (x + x') y = comm x y + comm x' y := by
+  simp only [comm_def, add_mul, mul_add]; abel
+
+lemma comm_add_right (x y y' : Tot R P) : comm x (y + y') = comm x y + comm x y' := by
+  simp only [comm_def, add_mul, mul_add]; abel
+
+/-- The commutator, packaged as mathlib's bracket. -/
+instance : Bracket (Tot R P) (Tot R P) := ⟨comm⟩
+
+lemma bracket_eq_comm (x y : Tot R P) : ⁅x, y⁆ = comm x y := rfl
+
+/-- **The total space is a Lie ring.** Mathlib states the Jacobi identity in Leibniz form; it
+follows from the cyclic form together with antisymmetry. -/
+instance : LieRing (Tot R P) where
+  add_lie x y z := comm_add_left x y z
+  lie_add x y z := comm_add_right x y z
+  lie_self x := comm_self x
+  leibniz_lie x y z := by
+    show comm x (comm y z) = comm (comm x y) z + comm y (comm x z)
+    have h := jacobi (R := R) (P := P) x y z
+    have a1 : comm (comm y z) x = - comm x (comm y z) := comm_antisymm _ _
+    have a2 : comm (comm z x) y = comm y (comm x z) := by
+      rw [comm_antisymm (comm z x) y, comm_antisymm z x, comm_neg_right, neg_neg]
+    have goal_eq : comm x (comm y z) - (comm (comm x y) z + comm y (comm x z))
+        = -(comm (comm x y) z + comm (comm y z) x + comm (comm z x) y) := by
+      rw [a1, a2]; abel
+    rw [← sub_eq_zero, goal_eq, h, neg_zero]
+
+/-! ### `R`-bilinearity, and the Lie algebra structure
+
+Mathlib's graded-ring machinery only knows that the multiplication on `⨁` is *additive* in each
+slot. `⋆` is `R`-bilinear, and that upgrades the Lie ring to a Lie algebra, but it has to be
+transported to the direct sum by hand. -/
+
+lemma smul_inc (t : R) {i : ℕ} (a : Piece R P i) :
+    t • (inc i a : Tot R P) = inc i (t • a) :=
+  (DirectSum.of_smul (R := R) i t a).symm
+
+lemma smul_mul_tot (t : R) (x y : Tot R P) : (t • x) * y = t • (x * y) := by
+  induction x using DirectSum.induction_on with
+  | zero => simp
+  | add x₁ x₂ h₁ h₂ => simp only [smul_add, add_mul, h₁, h₂]
+  | of i a =>
+    induction y using DirectSum.induction_on with
+    | zero => simp
+    | add y₁ y₂ h₁ h₂ => simp only [mul_add, smul_add, h₁, h₂]
+    | of j b =>
+      rw [smul_inc, inc_mul_inc, inc_mul_inc, smul_inc]
+      exact congrArg _ (star_smul_left t a b)
+
+lemma mul_smul_tot (t : R) (x y : Tot R P) : x * (t • y) = t • (x * y) := by
+  induction x using DirectSum.induction_on with
+  | zero => simp
+  | add x₁ x₂ h₁ h₂ => simp only [smul_add, add_mul, h₁, h₂]
+  | of i a =>
+    induction y using DirectSum.induction_on with
+    | zero => simp
+    | add y₁ y₂ h₁ h₂ => simp only [mul_add, smul_add, h₁, h₂]
+    | of j b =>
+      rw [smul_inc, inc_mul_inc, inc_mul_inc, smul_inc]
+      exact congrArg _ (star_smul_right t a b)
+
+/-- **The total space is a Lie algebra over `R`.** -/
+instance : LieAlgebra R (Tot R P) where
+  __ := (inferInstance : Module R (Tot R P))
+  lie_smul t x y := by
+    show comm x (t • y) = t • comm x y
+    rw [comm_def, comm_def, mul_smul_tot, smul_mul_tot, smul_sub]
+
+/-! ### The Gerstenhaber bracket
+
+Specialising to the endomorphism operad recovers Gerstenhaber's classical construction: the
+circle product on `⨁ n, End V (n+1)` is his `∘`, and the Lie ring structure above is the
+Gerstenhaber bracket. -/
+
+/-- The Gerstenhaber Lie ring of a module: the total space of its endomorphism operad. -/
+abbrev Gerstenhaber (R : Type u) [CommRing R] (V : Type v) [AddCommGroup V] [Module R V] :
+    Type v :=
+  Tot R (End R V)
+
+example (V : Type v) [AddCommGroup V] [Module R V] : LieRing (Gerstenhaber R V) := inferInstance
+
+example (V : Type v) [AddCommGroup V] [Module R V] : LieAlgebra R (Gerstenhaber R V) :=
+  inferInstance
 
 end
 
