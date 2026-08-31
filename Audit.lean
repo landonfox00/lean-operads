@@ -129,3 +129,8 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
 
 #print axioms Operad.maurerCartan_iff
 #print axioms Operad.ass_maurerCartan
+
+/-! ## The graded pre-Lie identity -/
+
+#print axioms Operad.disjointPartS_symm
+#print axioms Operad.sstar_assoc_symm

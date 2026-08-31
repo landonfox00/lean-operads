@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-2552 lines, 235 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3154 lines, 259 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -83,6 +83,8 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `sstar` — the signed circle product of the suspension | `DG.lean` | proved |
 | **`maurerCartan_iff` — `Θ ⋆ₛ Θ = 0` is associativity** | `DG.lean` | **proved** |
 | `ass_maurerCartan` — `Ass` solves Maurer–Cartan | `DG.lean` | proved |
+| **`sstar_assoc_symm` — the graded pre-Lie identity** | `GradedPreLie.lean` | **proved** |
+| `disjointPartS_symm` — the signed disjoint part | `GradedPreLie.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -182,13 +184,11 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Graded Jacobi, and `d² = 0`.** `DG.lean` now carries the signs of the operadic suspension:
-   `α ⋆ₛ β = ∑ₐ (-1)^(a k) α ∘ₐ β`, and with them `Θ ⋆ₛ Θ = 0` *is* associativity, which the
-   unsigned product could not say — there the same equation reads `Θ ∘₀ Θ = -(Θ ∘₁ Θ)`. What
-   remains is the signed analogue of `star_assoc_symm`: the graded right pre-Lie identity, whose
-   associator picks up `(-1)^(k l)`. That gives graded Jacobi, and `d = ⁅Θ, -⁆` with `d² = 0`
-   follows from it together with Maurer–Cartan. The combinatorial decomposition is the one in
-   `PreLie.lean`; what is new is carrying a sign through each of the two index bijections.
+1. **Graded Jacobi, and `d² = 0`.** The graded pre-Lie identity is now proved:
+   `(α ⋆ₛ β) ⋆ₛ γ - α ⋆ₛ (β ⋆ₛ γ) = (-1)^(k l) [(α ⋆ₛ γ) ⋆ₛ β - α ⋆ₛ (γ ⋆ₛ β)]`. What remains
+   is the graded Jacobi identity for `⁅-,-⁆ₛ`, which follows from it exactly as the ungraded
+   Jacobi followed from `star_assoc_symm` — six associators cancelling in pairs, now with signs
+   — and then `d = ⁅Θ, -⁆ₛ` with `d² = 0` from graded Jacobi together with `Θ ⋆ₛ Θ = 0`.
 2. **The species spine**, per the decision above.
 3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
    by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
