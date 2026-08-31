@@ -1,5 +1,6 @@
 import Operad.Basic
 import Operad.Constructions
+import Operad.Associativity
 import Operad.Endomorphism
 import Operad.Algebra
 import Operad.Total

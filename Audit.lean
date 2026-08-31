@@ -80,3 +80,10 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V]
 example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] (j k : ℕ)
     (α : End R V (j + 1)) (β : End R V (k + 1)) : End R V (j + k + 1) :=
   star (R := R) α β
+
+/-! ## Suboperads and associativity in `∘ᵢ` form -/
+
+#print axioms Operad.Suboperad.instNSOperadSub
+#print axioms Operad.Suboperad.incl
+#print axioms Operad.comp_arity_congr
+#print axioms Operad.compFin_assoc_seq
