@@ -166,6 +166,53 @@ lemma two_smul_associator_odd (m : ℕ) (x : PieceS R P m) (T : PieceS R P 1) :
   rw [two_smul]
   exact add_eq_zero_iff_eq_neg.2 h
 
+/-! ### The differential
+
+For an odd `Θ` solving the Maurer–Cartan equation, `d = ⁅Θ, -⁆` squares to `-A(x, Θ, Θ)`. That
+term is 2-torsion by `two_smul_associator_odd` but not zero, so `d² = 0` is stated with `2`
+invertible. -/
+
+/-- `d²` collapses to a single associator: everything else cancels, using the graded pre-Lie
+identity once and the Maurer–Cartan equation twice. -/
+theorem dsq_eq (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
+    (hMC : (incS 1 T : TotS R P) * incS 1 T = 0) :
+    brT 1 (1 + m) (incS 1 T) (brT 1 m (incS 1 T) (incS m x))
+      = - associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) := by
+  have hA := associatorS_inc 1 m 1 T x T
+  rw [Nat.mul_one] at hA
+  have expand : brT 1 (1 + m) (incS 1 T) (brT 1 m (incS 1 T) (incS m x))
+      = (incS 1 T * incS 1 T : TotS R P) * incS m x
+        - associator (incS 1 T : TotS R P) (incS 1 T) (incS m x)
+        + ((-1 : R) ^ m) • associator (incS 1 T : TotS R P) (incS m x) (incS 1 T)
+        - associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)
+        - (incS m x : TotS R P) * (incS 1 T * incS 1 T) := by
+    simp only [brT, associator, mul_sub, sub_mul, smul_mul_totS, mul_smul_totS, smul_sub,
+      smul_smul, ← pow_add]
+    match_scalars
+    all_goals ring_nf
+    all_goals try simp only [neg_one_mul_two, neg_one_two_mul, mul_one, one_mul]
+    all_goals try ring
+  rw [expand, hA, smul_smul, ← pow_add, show m + m = 2 * m from by ring, neg_one_two_mul,
+    one_smul, hMC]
+  simp
+
+/-- **The differential squares to zero**, once `2` is invertible. -/
+theorem dsq_eq_zero [Invertible (2 : R)] (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
+    (hMC : (incS 1 T : TotS R P) * incS 1 T = 0) :
+    brT 1 (1 + m) (incS 1 T) (brT 1 m (incS 1 T) (incS m x)) = 0 := by
+  rw [dsq_eq m T x hMC, neg_eq_zero]
+  have h2 : ((2 : R)) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) = 0 := by
+    have h := two_smul_associator_odd m x T
+    rw [two_smul] at h
+    rw [two_smul]
+    exact h
+  calc associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)
+      = (⅟(2 : R) * 2) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) := by
+        rw [invOf_mul_self, one_smul]
+    _ = ⅟(2 : R) • ((2 : R) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)) := by
+        rw [mul_smul]
+    _ = 0 := by rw [h2, smul_zero]
+
 end
 
 end Operad

@@ -13,3 +13,4 @@ import Operad.Free
 import Operad.DG
 import Operad.GradedPreLie
 import Operad.TotalSpaceS
+import Operad.Cohomology
