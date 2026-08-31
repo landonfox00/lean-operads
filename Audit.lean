@@ -89,3 +89,6 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] (j k : 
 #print axioms Operad.compFin_assoc_seq
 #print axioms Operad.comp_leading_congr
 #print axioms Operad.compFin_assoc_par
+#print axioms Operad.compFin_sum_left
+#print axioms Operad.sum_nested
+#print axioms Operad.star_star_left_split

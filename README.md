@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-1407 lines, 140 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+1544 lines, 149 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -68,6 +68,9 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `Suboperad`, inherits all four axioms; inclusion morphism | `Suboperad.lean` | proved |
 | `compFin_assoc_seq` — sequential associativity in `∘ᵢ` form | `Associativity.lean` | proved |
 | `compFin_assoc_par` — parallel associativity in `∘ᵢ` form | `Associativity.lean` | proved |
+| `compFin` distributes over `Finset.sum`; both bracketings as double sums | `PreLie.lean` | proved |
+| `star_star_left_split` — the associator equals `disjointPart` | `PreLie.lean` | **proved** |
+| `disjointPart_symm` — that `disjointPart` is symmetric in `β, γ` | `PreLie.lean` | **not yet** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -167,15 +170,15 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **The pre-Lie identity.** `⋆` is in place; what remains is that the associator
-   `(α ⋆ β) ⋆ γ - α ⋆ (β ⋆ γ)` is symmetric in `β, γ`, which would make the total space an
-   instance of mathlib's `RightPreLieRing` and turn `⁅-,-⁆` into a genuine Lie bracket. The
-   mathematical content is a slot-sum split: for fixed `i`, the slots of `α ⋆ β` that lie
-   *inside* the `β`-block give the nested terms (sequential associativity), and those outside
-   give disjoint terms that are symmetric in `β, γ` (parallel associativity). The formalisation
-   cost is not the algebra but the `Finset.sum` partition over `Fin (j+k+1) × Fin (j+1)` and the
-   `compFin`-level restatements of the two associativity axioms. This is the single most valuable
-   next item: Maurer–Cartan elements, `d = ⁅Θ, -⁆`, and H² all sit directly on top of it.
+1. **Finish the pre-Lie identity.** The split is done: `star_star_left_split` proves
+   `(α ⋆ β) ⋆ γ = α ⋆ (β ⋆ γ) + disjointPart α β γ`, so the associator is now an explicit,
+   named object rather than a difference. What remains is `disjointPart_symm`: that
+   `disjointPart α β γ` and `disjointPart α γ β` agree. Term by term this is exactly
+   `compFin_assoc_par`; the work is the index bijection, which sends a pair `(i, i')` with
+   `i'` outside `α`'s `i`-block to the corresponding pair of *distinct slots of `α`*, in the two
+   cases `i' < i` and `i' > i + k`. Once it lands the total space is an instance of mathlib's
+   `RightPreLieRing` and `⁅-,-⁆` is a genuine Lie bracket, which is what Maurer–Cartan,
+   `d = ⁅Θ, -⁆` and H² all sit on.
 2. **Suboperads**, so that concrete operads can be exhibited inside `End` without re-proving
    axioms.
 3. **The species spine**, per the decision above.
