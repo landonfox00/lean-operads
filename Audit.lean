@@ -106,3 +106,12 @@ example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] (j k : 
 example (R : Type) [CommRing R] (P : ℕ → Type)
     [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] :
     RightPreLieRing (Operad.Tot R P) := inferInstance
+
+/-- ... and a Lie algebra over `R`. -/
+example (R : Type) [CommRing R] (P : ℕ → Type)
+    [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] :
+    LieAlgebra R (Operad.Tot R P) := inferInstance
+
+/-- Gerstenhaber's bracket on the endomorphism operad of a module. -/
+example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] :
+    LieAlgebra R (Operad.Gerstenhaber R V) := inferInstance
