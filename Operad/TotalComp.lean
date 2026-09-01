@@ -71,13 +71,32 @@ def corolla {k : ℕ} (e : E k) : Tree E := .node e (corollaF E k)
 @[simp] lemma arity_corolla {k : ℕ} (e : E k) : (corolla e).arity = k := by
   simp only [corolla, Tree.arity_node, arityF_corollaF]
 
-/- The next step is `extend_corolla`: evaluating a corolla returns its generator, which is the
-base case of the universal property. It is not proved yet. The obstruction is mechanical rather
-than mathematical: in `substF`'s `cons` branch the inserted operation has arity `Tree.leaf.arity`
-rather than the literal `1`, so `comp_one_right` — whose statement fixes that index to `1` —
-matches neither by `rw` nor by `simp`, and supplying the equation by hand does not match either,
-because the two `reindex` proof terms are produced by different `omega` invocations. The likely
-fix is to give `substF` an arity argument that is definitionally reduced at the leaf, rather than
-to fight the matching. -/
+/-- Substituting bare leaves changes nothing. -/
+lemma substF_corollaF (f : ∀ k, E k → Q k) : ∀ (k a : ℕ) (α : Q (a + k)),
+    substF (R := R) f a α (corollaF E k)
+      = reindex R Q (by rw [arityF_corollaF]) α
+  | 0, a, α => by
+      simp only [corollaF, substF]
+      exact (reindex_self (R := R) (P := Q) _ _).symm
+  | (k + 1), a, α => by
+      simp only [corollaF, substF, Tree.arity_leaf]
+      rw [substF_corollaF f k (a + 1)]
+      have h : (comp (R := R) a k
+            ((reindex R Q (show a + (k + 1) = a + 1 + k by omega)) α))
+              (extend (R := R) f Tree.leaf)
+          = (reindex R Q (show a + (k + 1) = a + 1 + k by omega)) α :=
+        comp_one_right a k _
+      refine (congrArg _ (congrArg _ h)).trans ?_
+      refine (congrArg _ (reindex_reindex (R := R) (P := Q) _ _ α)).trans ?_
+      exact reindex_reindex (R := R) (P := Q) _ _ α
+
+/-- **Evaluating a corolla returns the generator.** This is the base case of the universal
+property: `extend f` agrees with `f` on generators. -/
+theorem extend_corolla (f : ∀ k, E k → Q k) {k : ℕ} (e : E k) :
+    extend (R := R) f (corolla e) = reindex R Q (arity_corolla e).symm (f k e) := by
+  simp only [corolla, extend]
+  rw [substF_corollaF]
+  simp only [reindex_reindex]
+  rfl
 
 end Operad

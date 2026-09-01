@@ -15,3 +15,4 @@ import Operad.GradedPreLie
 import Operad.TotalSpaceS
 import Operad.Cohomology
 import Operad.TotalComp
+import Operad.Magmatic

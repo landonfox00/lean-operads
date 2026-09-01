@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3281 lines, 300 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3362 lines, 309 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -90,7 +90,9 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `two_smul_associator_odd` — the obstruction at 2 | `TotalSpaceS.lean` | proved |
 | **`dsq_eq_zero` — `d² = 0` (with `2` invertible)** | `TotalSpaceS.lean` | **proved** |
 | `dLin`, cocycles, coboundaries, `cohomology` | `Cohomology.lean` | proved |
-| `substF`, `extend` — total composition, tree evaluation | `TotalComp.lean` | defined |
+| `substF`, `extend` — total composition, tree evaluation | `TotalComp.lean` | proved |
+| **`extend_corolla` — evaluation returns the generator** | `TotalComp.lean` | **proved** |
+| `genOf`; **`Mag`, the magmatic operad** | `Magmatic.lean` | **proved** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -190,13 +192,12 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **The universal property of `Free`.** Total composition exists: `substF` substitutes a forest
-   into the last `k` slots of an operation, and `extend` evaluates a tree in any operad `Q`. What
-   is missing is the theory around it — `extend_corolla` (evaluation returns the generator) and
-   `extend_graft` (evaluation is an operad morphism), and then uniqueness. See the note in
-   `TotalComp.lean`: the obstruction is that `substF`'s inserted operation carries the arity
-   `Tree.leaf.arity` rather than the literal `1`, so `comp_one_right` will not match. The fix is
-   to restructure `substF` rather than to fight the matcher.
+1. **`extend_graft`, and the universal property of `Free`.** Total composition and the base case
+   are done: `extend` evaluates a tree in any operad, and `extend_corolla` shows it returns the
+   generator. What remains is that `extend` respects grafting, which makes it an operad morphism,
+   and then uniqueness. That proof is the substantial one: a mutual induction over trees and
+   forests needing *both* associativity axioms, plus an auxiliary lemma that substituting a forest
+   commutes with grafting at an earlier slot.
 2. **The species spine**, per the decision above.
 3. **The universal property of `Free`.** `Free.lean` builds the operad of planar trees labelled
    by a collection `E` and proves all four axioms, which is the construction; what is *not* yet
@@ -209,7 +210,7 @@ equivalence to the species picture is a later bridge.
 
 Further out, in rough dependency order:
 
-5. **The common operads.** Right now there are exactly two: `Ass` and `End`. `Com`, `Lie` and
+5. **The common operads.** `Mag` now joins `Ass` and `End`. `Com`, `Lie` and
    `Pois` are all *symmetric*, so they are blocked on item 2 rather than on effort; the magmatic
    operad, `uAss` and the free ns-operad on planar trees are reachable without symmetry.
 6. **Operad cohomology.** Once the dg layer gives `d = ⁅Θ, -⁆` with `d² = 0`, the
