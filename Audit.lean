@@ -146,3 +146,7 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
 #print axioms Operad.dsq_eq_zero
 #print axioms Operad.dLin_dLin
 #print axioms Operad.coboundaries_le_cocycles
+
+/-! ## Total composition -/
+
+#print axioms Operad.extend_corolla
