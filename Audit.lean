@@ -162,3 +162,11 @@ noncomputable example (R : Type) [CommRing R] (P : ℕ → Type)
 
 /-- The associative operad, by a presentation. -/
 noncomputable example (R : Type) [CommRing R] : NSOperad R (Operad.AssPres R) := inferInstance
+
+/-! ## Species -/
+
+#print axioms Operad.Species.act_trans
+
+/-- The endomorphism species exists for every module. -/
+noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] :
+    Operad.Species R := Operad.Species.endSpecies R V
