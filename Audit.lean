@@ -150,3 +150,15 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) :
 /-! ## Total composition -/
 
 #print axioms Operad.extend_corolla
+
+/-! ## Ideals, quotients, and presentations -/
+
+#print axioms Operad.OperadIdeal.projHom
+
+/-- The quotient of an operad by an ideal is an operad. -/
+noncomputable example (R : Type) [CommRing R] (P : ℕ → Type)
+    [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] (I : Operad.OperadIdeal R P) :
+    NSOperad R I.Quot := inferInstance
+
+/-- The associative operad, by a presentation. -/
+noncomputable example (R : Type) [CommRing R] : NSOperad R (Operad.AssPres R) := inferInstance

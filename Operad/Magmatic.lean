@@ -12,6 +12,7 @@ which is exactly what a free operad on one binary generator should present.
 -/
 import Operad.Free
 import Operad.TotalComp
+import Operad.Ideal
 
 universe u v w
 
@@ -57,5 +58,31 @@ noncomputable example (R : Type u) [CommRing R] : NSOperad R (Mag R) := inferIns
 
 /-- The binary operation of the magmatic operad. -/
 noncomputable def magOp (R : Type u) [CommRing R] : Mag R 2 := genOf magMul
+
+/-! ### An operad presented by generators and relations
+
+The associative operad is the magmatic operad modulo associativity. This is the first operad in
+the library given by a presentation rather than built by hand, which is what ideals were for. -/
+
+/-- The associator of the magmatic generator: the difference of the two ternary composites. -/
+noncomputable def assocRel (R : Type u) [CommRing R] : Mag R 3 :=
+  compFin (R := R) (⟨0, by omega⟩ : Fin 2) (magOp R) (magOp R)
+    - compFin (R := R) (⟨1, by omega⟩ : Fin 2) (magOp R) (magOp R)
+
+/-- The single relation presenting associativity, in arity three. -/
+def assocRels (R : Type u) [CommRing R] : ∀ n, Set (Mag R n)
+  | 3 => {assocRel R}
+  | _ => ∅
+
+/-- **The associative operad by a presentation**: one binary generator modulo associativity. -/
+noncomputable abbrev AssPres (R : Type u) [CommRing R] : ℕ → Type u :=
+  (generated (R := R) (assocRels R)).Quot
+
+noncomputable example (R : Type u) [CommRing R] : NSOperad R (AssPres R) := inferInstance
+
+/-- Associativity holds in the presented operad, by construction. -/
+theorem assocRel_eq_zero (R : Type u) [CommRing R] :
+    (generated (R := R) (assocRels R)).proj 3 (assocRel R) = 0 :=
+  (Submodule.Quotient.mk_eq_zero _).2 (subset_generated _ (by simp [assocRels]))
 
 end Operad
