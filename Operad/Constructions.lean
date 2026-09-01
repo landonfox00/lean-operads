@@ -81,6 +81,21 @@ lemma compFin_eq_comp (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
   rw [comp_index_congr a (show b = a + 1 + b - a - 1 by omega) α β]
   simp
 
+
+/-- `compFin` only depends on the arity of its first argument up to equality. -/
+lemma compFin_reindex_left {m m' n : ℕ} (h : m = m') {p : ℕ} (hp : p < m) (α : P m) (β : P n) :
+    compFin (R := R) (⟨p, by omega⟩ : Fin m') (reindex R P h α) β
+      = reindex R P (by omega) (compFin (R := R) ⟨p, hp⟩ α β) := by
+  subst h
+  simp
+
+/-- `compFin` only depends on the arity of its second argument up to equality. -/
+lemma compFin_reindex_right {m n n' : ℕ} (h : n = n') {p : ℕ} (hp : p < m) (α : P m) (β : P n) :
+    compFin (R := R) ⟨p, hp⟩ α (reindex R P h β)
+      = reindex R P (by omega) (compFin (R := R) ⟨p, hp⟩ α β) := by
+  subst h
+  simp
+
 end CompFin
 
 /-- A morphism of non-symmetric operads: a family of linear maps preserving the identity and

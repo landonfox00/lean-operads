@@ -16,3 +16,4 @@ import Operad.TotalSpaceS
 import Operad.Cohomology
 import Operad.TotalComp
 import Operad.Magmatic
+import Operad.Ideal
