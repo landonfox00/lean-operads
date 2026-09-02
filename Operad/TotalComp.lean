@@ -71,6 +71,16 @@ def corolla {k : ℕ} (e : E k) : Tree E := .node e (corollaF E k)
 @[simp] lemma arity_corolla {k : ℕ} (e : E k) : (corolla e).arity = k := by
   simp only [corolla, Tree.arity_node, arityF_corollaF]
 
+
+@[simp] lemma weightF_corollaF (k : ℕ) : (corollaF E k).weightF = 0 := by
+  induction k with
+  | zero => rfl
+  | succ k ih => simp only [corollaF, Tree.weightF_cons, Tree.weight_leaf, ih]
+
+/-- A corolla has weight one: it is a single vertex. -/
+@[simp] lemma weight_corolla {k : ℕ} (e : E k) : (corolla e).weight = 1 := by
+  simp only [corolla, Tree.weight_node, weightF_corollaF]
+
 /-- Substituting bare leaves changes nothing. -/
 lemma substF_corollaF (f : ∀ k, E k → Q k) : ∀ (k a : ℕ) (α : Q (a + k)),
     substF (R := R) f a α (corollaF E k)

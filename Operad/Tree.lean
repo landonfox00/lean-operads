@@ -254,6 +254,66 @@ theorem _root_.Operad.Forest.graftF_graftF_par :
 
 end
 
+
+/-! ### Weight
+
+The weight of a tree is its number of internal vertices. It is the grading that Koszul duality
+uses: grafting *adds* weights, because a graft replaces a leaf — which has weight zero — by the
+grafted tree. Unlike arity, weight is unchanged by where the graft happens. -/
+
+mutual
+
+/-- The number of internal vertices of a tree. -/
+def weight : Tree E → ℕ
+  | .leaf => 0
+  | .node _ f => f.weightF + 1
+
+/-- The total number of internal vertices of a forest. -/
+def _root_.Operad.Forest.weightF : ∀ {k : ℕ}, Forest E k → ℕ
+  | _, .nil => 0
+  | _, .cons t f => t.weight + f.weightF
+
+end
+
+@[simp] lemma weight_leaf : (Tree.leaf (E := E)).weight = 0 := rfl
+
+@[simp] lemma weight_node {k : ℕ} (e : E k) (f : Forest E k) :
+    (Tree.node e f).weight = f.weightF + 1 := rfl
+
+@[simp] lemma weightF_nil : (Forest.nil (E := E)).weightF = 0 := rfl
+
+@[simp] lemma weightF_cons {k : ℕ} (t : Tree E) (f : Forest E k) :
+    (Forest.cons t f).weightF = t.weight + f.weightF := rfl
+
+mutual
+
+/-- **Grafting adds weights.** -/
+theorem weight_graft : ∀ (t : Tree E) (i : ℕ) (s : Tree E), i < t.arity →
+    (t.graft i s).weight = t.weight + s.weight
+  | .leaf, _, s, _ => by simp
+  | .node _ f, i, s, h => by
+      simp only [graft_node, weight_node]
+      rw [Forest.weightF_graftF f i s h]
+      omega
+
+/-- The forest half of `weight_graft`. -/
+theorem _root_.Operad.Forest.weightF_graftF : ∀ {k : ℕ} (f : Forest E k) (i : ℕ) (s : Tree E),
+    i < f.arityF → (f.graftF i s).weightF = f.weightF + s.weight
+  | _, .nil, _, _, h => by simp at h
+  | _, .cons t f, i, s, h => by
+      simp only [arityF_cons] at h
+      by_cases hlt : i < t.arity
+      · rw [graftF_cons_of_lt s hlt]
+        simp only [weightF_cons]
+        rw [weight_graft t i s hlt]
+        omega
+      · rw [graftF_cons_of_ge s (by omega)]
+        simp only [weightF_cons]
+        rw [Forest.weightF_graftF f (i - t.arity) s (by omega)]
+        omega
+
+end
+
 end Tree
 
 end Operad
