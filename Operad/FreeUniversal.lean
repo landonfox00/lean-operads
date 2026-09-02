@@ -15,6 +15,7 @@ an `extend`-image, which makes it a plain induction on the forest rather than pa
 recursion, and it is exactly one application of the parallel associativity axiom per cons.
 -/
 import Operad.TotalComp
+import Operad.Free
 
 universe u v w
 
@@ -179,5 +180,64 @@ theorem substF_graftF (f : ∀ k, E k → Q k) :
         exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
 
 end
+
+/-! ### The universal property
+
+`extend` evaluates a tree; extending it linearly over the basis of trees gives a morphism of
+operads out of `Free R E`. `app_one` is `extend_corolla` at the bare leaf and `app_comp` is
+`extend_graft`, so the two theorems above are exactly the two morphism laws. -/
+
+/-- Evaluation, extended linearly over the basis of trees. -/
+noncomputable def extendApp (f : ∀ k, E k → Q k) (n : ℕ) : Free R E n →ₗ[R] Q n :=
+  Finsupp.lsum R fun t =>
+    LinearMap.toSpanSingleton R (Q n) (reindex R Q t.property (extend (R := R) f t.val))
+
+@[simp] lemma extendApp_gen (f : ∀ k, E k → Q k) {n : ℕ} (t : TreeOfArity E n) :
+    extendApp (R := R) f n (Free.gen t) = reindex R Q t.property (extend (R := R) f t.val) := by
+  simp only [extendApp, Free.gen, Finsupp.lsum_single, LinearMap.toSpanSingleton_apply_one]
+
+lemma extendApp_single (f : ∀ k, E k → Q k) {n : ℕ} (t : TreeOfArity E n) (r : R) :
+    extendApp (R := R) f n (Finsupp.single t r)
+      = r • reindex R Q t.property (extend (R := R) f t.val) := by
+  rw [← Free.smul_gen, map_smul, extendApp_gen]
+
+/-- **The universal property of the free operad, existence half.** A map of generators extends to
+a morphism of operads out of `Free R E`. -/
+noncomputable def extendHom (f : ∀ k, E k → Q k) : NSOperadHom R (Free R E) Q where
+  app := extendApp (R := R) f
+  app_one := by
+    show extendApp (R := R) f 1 (Free.gen TreeOfArity.one) = _
+    rw [extendApp_gen]
+    exact reindex_self _ _
+  app_comp := by
+    intro a b n α β
+    induction α using Finsupp.induction_linear with
+    | zero => simp
+    | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+    | single t r =>
+      induction β using Finsupp.induction_linear with
+      | zero => simp
+      | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+      | single s r' =>
+        show extendApp (R := R) f (a + n + b) (Free.compL a b _ _) = _
+        rw [Free.compL_single, extendApp_single, extendApp_single, extendApp_single]
+        have ht := t.property
+        have hs := s.property
+        have harg := Tree.arity_graft t.val a s.val (by omega)
+        simp only [TreeOfArity.graft_val]
+        rw [map_smul, map_smul, LinearMap.smul_apply, smul_smul, mul_comm r' r]
+        congr 1
+        rw [comp_arity_congr (R := R) (P := Q) a b hs]
+        rw [extend_graft f t.val a b s.val ht (by omega)]
+        exact (reindex_reindex (R := R) (P := Q) _ _ _).trans rfl
+
+/-- **The extension restricts to `f` on generators.** Together with `extendHom`, this is the
+existence half of the universal property: every map of generators is realised by a morphism of
+operads out of `Free R E`. -/
+@[simp] theorem extendHom_corolla (f : ∀ k, E k → Q k) {k : ℕ} (e : E k) :
+    (extendHom (R := R) f).app k (Free.gen ⟨corolla e, arity_corolla e⟩) = f k e := by
+  show extendApp (R := R) f k (Free.gen ⟨corolla e, arity_corolla e⟩) = _
+  rw [extendApp_gen, extend_corolla]
+  exact reindex_reindex _ _ _ |>.trans (reindex_self _ _)
 
 end Operad

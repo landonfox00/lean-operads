@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3875 lines, 348 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3935 lines, 353 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -197,12 +197,13 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **The universal property of `Free`.** `extend_graft` is proved: evaluating a tree in an
-   arbitrary operad respects grafting, which is the operad-morphism condition. With
-   `extend_corolla` (evaluation returns the generator) that gives existence pointwise. What
-   remains is packaging: bundle `extend` as an `NSOperadHom R (Free R E) Q` by extending it
-   linearly over the basis of trees, and then uniqueness — any morphism agreeing with `f` on
-   corollas equals it, by induction over trees.
+1. **Uniqueness for the universal property.** Existence is proved: `extendHom` bundles `extend`
+   as an `NSOperadHom R (Free R E) Q`, with `app_one` coming from `extend_corolla` and `app_comp`
+   from `extend_graft`, and `extendHom_corolla` says it restricts to `f` on generators. What is
+   left is uniqueness — that a morphism agreeing with `f` on corollas *is* `extendHom f`. That
+   needs a fresh induction, mirroring the definition of `extend`, showing every tree-generator of
+   `Free R E` is built from corolla generators by iterated composition; it does not follow from
+   what is already proved.
 2. **The symmetric operad structure on species.** The spine is in: `Species R` is a functor from
    the groupoid of finite sets and bijections to `ModuleCat R`, the `Σₙ`-actions come from
    functoriality rather than being imposed, and `endSpecies` shows the definition carries the

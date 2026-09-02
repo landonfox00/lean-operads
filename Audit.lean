@@ -177,3 +177,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.extend_graft
 #print axioms Operad.substF_graftF
+
+#print axioms Operad.extendHom
+#print axioms Operad.extendHom_corolla
