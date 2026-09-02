@@ -174,3 +174,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 /-! ## Toward the universal property -/
 
 #print axioms Operad.substF_comp
+
+#print axioms Operad.extend_graft
+#print axioms Operad.substF_graftF
