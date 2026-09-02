@@ -92,4 +92,92 @@ lemma substF_comp (f : ∀ k, E k → Q k) :
       congr 1
       exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
 
+/-! ### Evaluation respects grafting
+
+The mutual induction. The forest half splits on whether the grafted slot lies in the head tree
+(where the tree half applies, then `comp_assoc_seq` turns "graft into the operation just inserted"
+into "graft after inserting", and `substF_comp` carries the rest of the forest past it) or further
+along (where only the forest half recurses). -/
+
+mutual
+
+/-- **Evaluation is compatible with grafting** — the operad-morphism condition. -/
+theorem extend_graft (f : ∀ k, E k → Q k) :
+    ∀ (t : Tree E) (a b : ℕ) (s : Tree E) (hab : t.arity = a + 1 + b)
+      (h2 : a + (Tree.arity s) + b = (t.graft a s).arity),
+      extend (R := R) f (t.graft a s)
+        = reindex R Q h2
+            (comp (R := R) a b (reindex R Q hab (extend (R := R) f t)) (extend (R := R) f s))
+  | .leaf, a, b, s, hab, h2 => by
+      simp only [Tree.arity_leaf] at hab
+      obtain rfl : a = 0 := by omega
+      obtain rfl : b = 0 := by omega
+      simp only [Tree.graft_leaf, extend_leaf]
+      exact (comp_one_left (extend (R := R) f s)).symm
+  | .node (k := k) e fo, a, b, s, hab, h2 => by
+      simp only [Tree.arity_node] at hab
+      simp only [Tree.graft_node, Tree.arity_node] at h2
+      simp only [Tree.graft_node, extend]
+      rw [substF_graftF f fo 0 a b a s
+        (reindex R Q (show k = 0 + k by omega) (f k e)) (fo.graftF a s) rfl hab
+        (by omega) (by omega) (by omega)]
+      refine (reindex_reindex (R := R) (P := Q) _ _ _).trans ?_
+      congr 1
+      congr 1
+      congr 1
+      exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
+
+/-- The forest half of `extend_graft`. -/
+theorem substF_graftF (f : ∀ k, E k → Q k) :
+    ∀ {k : ℕ} (fo : Forest E k) (c a b w : ℕ) (s : Tree E) (α : Q (c + k))
+      (fo' : Forest E k) (hfo' : fo' = fo.graftF a s)
+      (hab : fo.arityF = a + 1 + b) (hw : w = c + a)
+      (h1 : c + fo.arityF = w + 1 + b)
+      (h2 : w + (Tree.arity s) + b = c + fo'.arityF),
+      substF (R := R) f c α fo'
+        = reindex R Q h2
+            (comp (R := R) w b (reindex R Q h1 (substF (R := R) f c α fo)) (extend (R := R) f s))
+  | _, .nil, c, a, b, w, s, α, fo', hfo', hab, hw, h1, h2 => by
+      simp only [Tree.arityF_nil] at hab; omega
+  | _, @Forest.cons _ k' t fo, c, a, b, w, s, α, fo', hfo', hab, hw, h1, h2 => by
+      simp only [Tree.arityF_cons] at hab
+      subst hw
+      by_cases hlt : a < t.arity
+      · rw [Tree.graftF_cons_of_lt s hlt] at hfo'
+        subst hfo'
+        have harg := Tree.arity_graft t a s hlt
+        simp only [substF, Tree.arityF_cons] at h2 ⊢
+        rw [extend_graft f t a (t.arity - a - 1) s (by omega) (by omega)]
+        rw [comp_arity_congr (R := R) (P := Q) c k'
+          (show a + (Tree.arity s) + (t.arity - a - 1) = (t.graft a s).arity by omega)]
+        rw [← comp_assoc_seq (R := R) (P := Q) c k' a (t.arity - a - 1)]
+        rw [comp_arity_congr (R := R) (P := Q) c k'
+          (show t.arity = a + 1 + (t.arity - a - 1) by omega)]
+        simp only [reindex_reindex]
+        rw [substF_comp (R := R) f fo (c + a) (t.arity - a - 1) (Tree.arity s)
+          (c + (t.graft a s).arity) (c + t.arity) b
+          (by omega) (by omega) (by omega) (by omega) (by omega)
+          (comp (R := R) c k' (reindex R Q (show c + (k' + 1) = c + 1 + k' by omega) α)
+            (extend (R := R) f t)) (extend (R := R) f s)]
+        refine (reindex_reindex (R := R) (P := Q) _ _ _).trans ?_
+        congr 1
+        congr 1
+        congr 1
+        exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
+      · rw [Tree.graftF_cons_of_ge s (by omega)] at hfo'
+        subst hfo'
+        simp only [substF, Tree.arityF_cons] at h2 ⊢
+        rw [substF_graftF f fo (c + t.arity) (a - t.arity) b (c + a) s
+          (comp (R := R) c k' (reindex R Q (show c + (k' + 1) = c + 1 + k' by omega) α)
+            (extend (R := R) f t))
+          (fo.graftF (a - t.arity) s) rfl
+          (by omega) (by omega) (by omega) (by omega)]
+        refine (reindex_reindex (R := R) (P := Q) _ _ _).trans ?_
+        congr 1
+        congr 1
+        congr 1
+        exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
+
+end
+
 end Operad

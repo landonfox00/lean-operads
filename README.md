@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3787 lines, 346 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+3875 lines, 348 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -197,13 +197,12 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **`extend_graft`, and the universal property of `Free`.** The load-bearing lemma is now
-   proved: `substF_comp` says substituting a forest into the trailing slots commutes with
-   grafting at an earlier slot. Stating it positionally, and for an *arbitrary* inserted element
-   rather than an `extend`-image, takes it out of the mutual recursion and reduces it to one
-   `comp_assoc_par` per `cons`. What remains is `extend_graft` itself — the mutual induction
-   over trees and forests, which uses `substF_comp` for the disjoint case and sequential
-   associativity for the nested one — and then uniqueness.
+1. **The universal property of `Free`.** `extend_graft` is proved: evaluating a tree in an
+   arbitrary operad respects grafting, which is the operad-morphism condition. With
+   `extend_corolla` (evaluation returns the generator) that gives existence pointwise. What
+   remains is packaging: bundle `extend` as an `NSOperadHom R (Free R E) Q` by extending it
+   linearly over the basis of trees, and then uniqueness — any morphism agreeing with `f` on
+   corollas equals it, by induction over trees.
 2. **The symmetric operad structure on species.** The spine is in: `Species R` is a functor from
    the groupoid of finite sets and bijections to `ModuleCat R`, the `Σₙ`-actions come from
    functoriality rather than being imposed, and `endSpecies` shows the definition carries the
