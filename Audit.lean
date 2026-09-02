@@ -186,3 +186,5 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.app_extend
 #print axioms Operad.arity_substTree
+
+#print axioms Operad.Species.unitSpecies

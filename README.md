@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4086 lines, 365 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4114 lines, 366 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -98,6 +98,7 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | **`AssPres` — associativity by a presentation** | `Magmatic.lean` | **proved** |
 | `Species`, the `Σₙ`-actions via functoriality | `Species.lean` | proved |
 | **`endSpecies`; its arity `n` is `End`'s** | `Species.lean` | **proved** |
+| `unitSpecies` — the unit for the substitution product | `Species.lean` | defined |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -209,13 +210,14 @@ equivalence to the species picture is a later bridge.
    `substForest (cons t F) c fo = cons t (substForest F (c - t.arity) fo)` for `t.arity ≤ c`,
    then `substForest (corollaF E k) 0 fo = fo`, then `substTree (node e F) c fo =
    node e (substForest F c fo)`, and finally the mutual induction itself.
-2. **The symmetric operad structure on species.** The spine is in: `Species R` is a functor from
-   the groupoid of finite sets and bijections to `ModuleCat R`, the `Σₙ`-actions come from
-   functoriality rather than being imposed, and `endSpecies` shows the definition carries the
-   example it has to — its arity-`n` component is exactly `End`'s. What is *not* built is the
-   substitution product `F ∘ G` and the notion of a symmetric operad as a monoid for it, which is
-   what `Com`, `Lie` and `Pois` actually need. That product needs finite coproducts and sums over
-   partitions, so it is a substantial build in its own right.
+2. **The substitution product on species.** The spine is in, and now so is the unit:
+   `unitSpecies` is the free module on the bijections `S ≃ Fin 1`, which is free of rank one on
+   one-element sets and zero elsewhere. Defining it that way rather than by a conditional on
+   cardinality means functoriality needs no case split at all — both functor laws reduce to
+   `Equiv.ext`. What is still missing is the product itself,
+   `(F ∘ G)(S) = ⊕_π F(π) ⊗ ⨂_{B ∈ π} G(B)`, and with it symmetric operads as monoids for it —
+   which is what `Com`, `Lie` and `Pois` need. That needs sums over partitions of a finite set,
+   so it remains a substantial build.
 3. **`AssPres R ≅ Ass R`.** The comparison map exists now: `OperadIdeal.liftHom` is the
    universal property of the quotient, and combining it with `extendHom` gives
    `assPresToAss : NSOperadHom R (AssPres R) (Ass R)`. Proving it an isomorphism is the remaining
