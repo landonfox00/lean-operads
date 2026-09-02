@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-3935 lines, 353 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4038 lines, 361 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -211,10 +211,12 @@ equivalence to the species picture is a later bridge.
    substitution product `F ∘ G` and the notion of a symmetric operad as a monoid for it, which is
    what `Com`, `Lie` and `Pois` actually need. That product needs finite coproducts and sums over
    partitions, so it is a substantial build in its own right.
-3. **`AssPres R ≅ Ass R`.** `Magmatic.lean` presents the associative operad as the magmatic operad
-   modulo associativity, and `assocRel_eq_zero` says the relation holds in the quotient. Showing
-   that this presentation agrees with the hand-built `Ass` is a separate theorem, and it needs the
-   universal property of item 1 to construct the comparison map.
+3. **`AssPres R ≅ Ass R`.** The comparison map exists now: `OperadIdeal.liftHom` is the
+   universal property of the quotient, and combining it with `extendHom` gives
+   `assPresToAss : NSOperadHom R (AssPres R) (Ass R)`. Proving it an isomorphism is the remaining
+   half, and it is a genuine theorem rather than plumbing: it amounts to a normal-form result,
+   that every planar tree is congruent modulo the associator to a fixed comb, so that
+   `AssPres R n` is spanned by one element. Surjectivity is easy; injectivity is that argument.
 4. **The common operads.** `Ass`, `End`, `Mag` and `AssPres` are in. The magmatic operad and
    `uAss` were the reachable ones; `Com`, `Lie` and `Pois` are all *symmetric*, so they are
    blocked on item 2 rather than on effort.

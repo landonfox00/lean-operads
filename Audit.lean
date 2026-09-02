@@ -180,3 +180,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.extendHom
 #print axioms Operad.extendHom_corolla
+
+#print axioms Operad.OperadIdeal.liftHom
+#print axioms Operad.assPresToAss

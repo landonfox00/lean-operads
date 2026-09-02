@@ -13,7 +13,7 @@ import Operad.Basic
 import Operad.Constructions
 import Mathlib.LinearAlgebra.Quotient.Basic
 
-universe u v
+universe u v w
 
 namespace Operad
 
@@ -172,5 +172,47 @@ lemma subset_generated (S : ∀ n, Set (P n)) {n : ℕ} {x : P n} (hx : x ∈ S 
     x ∈ (generated (R := R) S).carrier n := IsGenerated.basic hx
 
 end Generated
+
+/-! ### The universal property of the quotient
+
+A morphism that kills the relations factors through the operad they present. This is what makes a
+presentation usable: it is how one maps *out* of `AssPres` and friends. -/
+
+section Lift
+
+variable {R : Type u} [CommRing R] {P : ℕ → Type v}
+  [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P]
+  {Q : ℕ → Type w} [∀ n, AddCommGroup (Q n)] [∀ n, Module R (Q n)] [NSOperad R Q]
+
+/-- A morphism killing a family of relations kills the whole ideal they generate. -/
+lemma apply_eq_zero_of_isGenerated (φ : NSOperadHom R P Q) (S : ∀ n, Set (P n))
+    (hS : ∀ n, ∀ x ∈ S n, φ.app n x = 0) :
+    ∀ {n : ℕ} {x : P n}, IsGenerated (R := R) S n x → φ.app n x = 0 := by
+  intro n x hx
+  induction hx with
+  | basic h => exact hS _ _ h
+  | zero => exact map_zero _
+  | add _ _ ihx ihy => rw [map_add, ihx, ihy, add_zero]
+  | smul r _ ih => rw [map_smul, ih, smul_zero]
+  | compL a b β _ ih => rw [φ.app_comp, ih, map_zero, LinearMap.zero_apply]
+  | compR a b α _ ih => rw [φ.app_comp, ih, map_zero]
+
+/-- **The universal property of the quotient operad.** A morphism vanishing on the ideal factors
+through the quotient. -/
+noncomputable def OperadIdeal.liftHom (I : OperadIdeal R P) (φ : NSOperadHom R P Q)
+    (h : ∀ (n : ℕ), ∀ x ∈ I.carrier n, φ.app n x = 0) : NSOperadHom R I.Quot Q where
+  app n := Submodule.liftQ (I.carrier n) (φ.app n) (fun x hx => h n x hx)
+  app_one := φ.app_one
+  app_comp := by
+    intro a b n α β
+    obtain ⟨x, rfl⟩ := I.proj_surjective _ α
+    obtain ⟨y, rfl⟩ := I.proj_surjective _ β
+    exact φ.app_comp a b x y
+
+@[simp] lemma OperadIdeal.liftHom_proj (I : OperadIdeal R P) (φ : NSOperadHom R P Q)
+    (h : ∀ (n : ℕ), ∀ x ∈ I.carrier n, φ.app n x = 0) (n : ℕ) (x : P n) :
+    (I.liftHom φ h).app n (I.proj n x) = φ.app n x := rfl
+
+end Lift
 
 end Operad
