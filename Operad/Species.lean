@@ -17,6 +17,7 @@ import Mathlib.CategoryTheory.FintypeCat
 import Mathlib.CategoryTheory.Core
 import Mathlib.Algebra.Category.ModuleCat.Basic
 import Mathlib.LinearAlgebra.Multilinear.Basic
+import Mathlib.LinearAlgebra.Finsupp.Defs
 
 universe u
 
@@ -103,6 +104,33 @@ noncomputable def endSpeciesArity (R : Type u) [CommRing R] (V : Type u) [AddCom
     [Module R V] (n : ℕ) :
     ((endSpecies R V).arity n : Type u) ≃ₗ[R] MultilinearMap R (fun _ : Fin n => V) V :=
   MultilinearMap.domDomCongrLinearEquiv (R := R) (S := R) (M₂ := V) (M₃ := V) Equiv.ulift
+
+/-! ### The unit species
+
+The unit for the substitution product is the species that is `R` on one-element sets and zero
+elsewhere. Defining it by a conditional on cardinality would make functoriality a case split;
+instead it is the free module on the *bijections to a one-element type*. That index type is a
+singleton when `S` has one element and empty otherwise, it is functorial in `S` by precomposition,
+and no case analysis appears anywhere — the two functor laws reduce to `Equiv.ext`. -/
+
+/-- The unit species: the free `R`-module on the bijections `S ≃ Fin 1`. It is free of rank one on
+one-element sets and zero elsewhere, and it is the unit for the substitution product. -/
+noncomputable def unitSpecies (R : Type u) [Ring R] : Species R where
+  obj S := ModuleCat.of R (Finsupp (Equiv S.of (Fin 1)) R)
+  map f := ModuleCat.ofHom
+    (Finsupp.lmapDomain R R fun p => (FintypeCat.equivEquivIso.symm f.iso).symm.trans p)
+  map_id S := by
+    have h : (fun p : Equiv S.of (Fin 1) =>
+        (FintypeCat.equivEquivIso.symm (CoreHom.iso (𝟙 S))).symm.trans p) = _root_.id :=
+      funext fun _ => Equiv.ext fun _ => rfl
+    rw [h, Finsupp.lmapDomain_id, ModuleCat.ofHom_id]
+  map_comp f g := by
+    have h : (fun p : Equiv _ (Fin 1) =>
+          (FintypeCat.equivEquivIso.symm (f ≫ g).iso).symm.trans p)
+        = (fun q => (FintypeCat.equivEquivIso.symm g.iso).symm.trans q) ∘
+            (fun p => (FintypeCat.equivEquivIso.symm f.iso).symm.trans p) :=
+      funext fun _ => Equiv.ext fun _ => rfl
+    rw [h, Finsupp.lmapDomain_comp, ModuleCat.ofHom_comp]
 
 end Species
 
