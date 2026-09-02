@@ -134,6 +134,18 @@ lemma id_app (n : ℕ) : (NSOperadHom.id (R := R) (P := P)).app n = LinearMap.id
 
 variable {S : ℕ → Type w'} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)] [NSOperad R S]
 
+/-- Morphisms of operads commute with reindexing. -/
+lemma app_reindex (φ : NSOperadHom R P Q) {m n : ℕ} (h : m = n) (x : P m) :
+    φ.app n (reindex R P h x) = reindex R Q h (φ.app m x) := by
+  subst h
+  rw [reindex_self, reindex_self]
+
+/-- Morphisms of operads commute with `compFin`. -/
+lemma app_compFin (φ : NSOperadHom R P Q) {m n : ℕ} (i : Fin m) (α : P m) (β : P n) :
+    φ.app (m - 1 + n) (compFin (R := R) i α β)
+      = compFin (R := R) i (φ.app m α) (φ.app n β) := by
+  simp only [compFin, app_reindex, φ.app_comp]
+
 /-- Composition of morphisms of operads. -/
 protected def comp (g : NSOperadHom R Q S) (f : NSOperadHom R P Q) : NSOperadHom R P S where
   app n := (g.app n).comp (f.app n)

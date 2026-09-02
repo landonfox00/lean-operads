@@ -25,13 +25,6 @@ section
 
 variable {R : Type u} [CommRing R] {E : ℕ → Type v}
 
-/-- A generator, viewed inside the free operad as its corolla. -/
-noncomputable def genOf {k : ℕ} (e : E k) : Free R E k :=
-  Free.gen ⟨corolla e, arity_corolla e⟩
-
-lemma genOf_def {k : ℕ} (e : E k) :
-    genOf (R := R) e = Free.gen ⟨corolla e, arity_corolla e⟩ := rfl
-
 variable {Q : ℕ → Type w} [∀ n, AddCommGroup (Q n)] [∀ n, Module R (Q n)] [NSOperad R Q]
 
 /-- Evaluation sends a generator's corolla back to the generator. -/
@@ -92,26 +85,6 @@ The presentation maps to `Ass`. Building the map is what the universal propertie
 free operad turns the choice "binary generator ↦ the binary operation of `Ass`" into a morphism
 out of `Mag`, and the quotient turns the fact that this morphism kills the associator into a
 morphism out of `AssPres`. -/
-
-section Compare
-
-variable {R : Type u} [CommRing R]
-  {P : ℕ → Type v} [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P]
-  {Q : ℕ → Type w} [∀ n, AddCommGroup (Q n)] [∀ n, Module R (Q n)] [NSOperad R Q]
-
-/-- Morphisms of operads commute with reindexing. -/
-lemma NSOperadHom.app_reindex (φ : NSOperadHom R P Q) {m n : ℕ} (h : m = n) (x : P m) :
-    φ.app n (reindex R P h x) = reindex R Q h (φ.app m x) := by
-  subst h
-  rw [reindex_self, reindex_self]
-
-/-- Morphisms of operads commute with `compFin`. -/
-lemma NSOperadHom.app_compFin (φ : NSOperadHom R P Q) {m n : ℕ} (i : Fin m) (α : P m) (β : P n) :
-    φ.app (m - 1 + n) (compFin (R := R) i α β)
-      = compFin (R := R) i (φ.app m α) (φ.app n β) := by
-  simp only [compFin, φ.app_reindex, φ.app_comp]
-
-end Compare
 
 /-- The magmatic generator is sent to the binary operation of `Ass`. -/
 def magToAss (R : Type u) [CommRing R] : ∀ k, MagGen k → Ass R k
