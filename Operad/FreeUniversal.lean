@@ -240,4 +240,67 @@ operads out of `Free R E`. -/
   rw [extendApp_gen, extend_corolla]
   exact reindex_reindex _ _ _ |>.trans (reindex_self _ _)
 
+/-! ### Morphisms commute with evaluation
+
+Evaluating a tree and then applying a morphism is the same as evaluating with the transported
+generators. Unlike `extend_graft` this needs no associativity axiom at all — only the three
+morphism laws — so it is a short mutual induction. -/
+
+mutual
+
+/-- A morphism of operads commutes with evaluation of trees. -/
+theorem app_extend {S : ℕ → Type v} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
+    [NSOperad R S] (φ : NSOperadHom R Q S) (g : ∀ k, E k → Q k) :
+    ∀ (t : Tree E),
+      φ.app t.arity (extend (R := R) g t) = extend (R := R) (fun k e => φ.app k (g k e)) t
+  | .leaf => φ.app_one
+  | .node (k := k) e fo => by
+      simp only [extend]
+      rw [NSOperadHom.app_reindex, app_substF φ g 0
+        (reindex R Q (show k = 0 + k by omega) (g k e)) fo, NSOperadHom.app_reindex]
+
+/-- The forest half: a morphism commutes with substituting a forest. -/
+theorem app_substF {S : ℕ → Type v} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
+    [NSOperad R S] (φ : NSOperadHom R Q S) (g : ∀ k, E k → Q k) :
+    ∀ {k : ℕ} (c : ℕ) (α : Q (c + k)) (fo : Forest E k),
+      φ.app (c + fo.arityF) (substF (R := R) g c α fo)
+        = substF (R := R) (fun k e => φ.app k (g k e)) c (φ.app (c + k) α) fo
+  | _, c, α, .nil => rfl
+  | _, c, α, .cons t fo => by
+      simp only [substF]
+      rw [NSOperadHom.app_reindex, app_substF φ g (c + t.arity) _ fo, φ.app_comp,
+        NSOperadHom.app_reindex, app_extend φ g t]
+
+end
+
+/-! ### Trees are the image of their own generators
+
+`extend`, applied in the free operad itself with the canonical choice of generators, returns the
+basis element of the tree it started from. This is the statement that every tree is built from
+corollas by iterated composition, and it is what turns "agrees on generators" into "agrees".
+
+`substTree` is the tree-level counterpart of `substF`: it grafts the trees of a forest into the
+last `k` leaves of a tree, one at a time, exactly as `substF` does with `comp`. -/
+
+/-- A generator, viewed inside the free operad as its corolla. -/
+noncomputable def genOf {k : ℕ} (e : E k) : Free R E k :=
+  Free.gen ⟨corolla e, arity_corolla e⟩
+
+lemma genOf_def {k : ℕ} (e : E k) :
+    genOf (R := R) e = Free.gen ⟨corolla e, arity_corolla e⟩ := rfl
+
+/-- Graft the trees of a forest into the last `k` leaves of a tree. -/
+def substTree : ∀ {k : ℕ}, Tree E → ℕ → Forest E k → Tree E
+  | _, T, _, .nil => T
+  | _, T, c, .cons t fo => substTree (T.graft c t) (c + t.arity) fo
+
+lemma arity_substTree : ∀ {k : ℕ} (T : Tree E) (c : ℕ) (fo : Forest E k), T.arity = c + k →
+    (substTree T c fo).arity = c + fo.arityF
+  | _, T, c, .nil, h => by simpa [substTree] using h
+  | _, T, c, .cons t fo, h => by
+      have hlt : c < T.arity := by omega
+      rw [substTree, arity_substTree (T.graft c t) (c + t.arity) fo
+        (by rw [Tree.arity_graft T c t hlt]; omega), Tree.arityF_cons]
+      omega
+
 end Operad

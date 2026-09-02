@@ -183,3 +183,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.OperadIdeal.liftHom
 #print axioms Operad.assPresToAss
+
+#print axioms Operad.app_extend
+#print axioms Operad.arity_substTree

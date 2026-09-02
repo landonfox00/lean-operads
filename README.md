@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4038 lines, 361 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4086 lines, 365 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -197,13 +197,18 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Uniqueness for the universal property.** Existence is proved: `extendHom` bundles `extend`
-   as an `NSOperadHom R (Free R E) Q`, with `app_one` coming from `extend_corolla` and `app_comp`
-   from `extend_graft`, and `extendHom_corolla` says it restricts to `f` on generators. What is
-   left is uniqueness — that a morphism agreeing with `f` on corollas *is* `extendHom f`. That
-   needs a fresh induction, mirroring the definition of `extend`, showing every tree-generator of
-   `Free R E` is built from corolla generators by iterated composition; it does not follow from
-   what is already proved.
+1. **Uniqueness for the universal property.** Half of it is proved: `app_extend` says a morphism
+   commutes with evaluation, using only the three morphism laws and no associativity axiom. It
+   gives at once that any morphism agreeing with `f` on corollas agrees with `extendHom f` on
+   every element of the form `extend genOf t`.
+
+   What is left is that those elements are *all* the generators — i.e.
+   `extend genOf t = Free.gen ⟨t, rfl⟩`, the statement that every tree is built from corollas by
+   iterated composition. The route is now mapped out and needs, in order: `substForest` (the
+   forest-level counterpart of `substTree`, both already sketched here), a "skip the head" lemma
+   `substForest (cons t F) c fo = cons t (substForest F (c - t.arity) fo)` for `t.arity ≤ c`,
+   then `substForest (corollaF E k) 0 fo = fo`, then `substTree (node e F) c fo =
+   node e (substForest F c fo)`, and finally the mutual induction itself.
 2. **The symmetric operad structure on species.** The spine is in: `Species R` is a functor from
    the groupoid of finite sets and bijections to `ModuleCat R`, the `Σₙ`-actions come from
    functoriality rather than being imposed, and `endSpecies` shows the definition carries the
