@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4460 lines, 405 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4557 lines, 408 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -230,12 +230,20 @@ equivalence to the species picture is a later bridge.
    *quadratic*, which is exactly Koszul duality's hypothesis. Note the contrast with arity:
    composition changes arity in a way that depends on the slot, and weight not at all.
 
-   The remaining blocker for bar–cobar is **cooperads**, of which the library has none. They are
-   definable now by dualising the positional convention — decomposition maps
-   `P (a + n + b) → P (a + 1 + b) ⊗ P n` in place of `comp`, with the two coassociativity axioms
-   transposed — and all the `reindex` machinery carries over unchanged. Model structures need
-   limits and colimits in the category of operads, which is a separate and larger gap;
-   ∞-operads need dendroidal machinery and are far off.
+   **Cooperads now exist.** `NSCooperad` dualises the positional convention: infinitesimal
+   decomposition `decomp a b n : C (a + n + b) →ₗ C (a + 1 + b) ⊗ C n` in place of `comp`, with
+   each axiom the corresponding operad axiom reversed. Unlike the operad axioms these cannot be
+   stated elementwise — a tensor product has no description by elements — so each is an equality
+   of linear maps, and parallel coassociativity needs a braiding (`swapLast`) because the two
+   orders of decomposing produce the same three pieces transposed. `instNSCooperadAss` is the
+   first example and doubles as validation: a mis-stated coassociativity would have shown up
+   there as an unprovable goal.
+
+   What bar–cobar still needs on top of this is the bar construction itself — the cofree cooperad
+   on the suspension of an augmented operad's ideal, with the differential induced by composition
+   — which in turn wants augmentations and a suspension. Model structures need limits and
+   colimits in the category of operads, a separate and larger gap; ∞-operads need dendroidal
+   machinery and are far off.
 
 5. **A more thorough CI**, deliberately last. Today's workflow builds, greps for `sorry`, and
    runs the axiom audit. The additions worth making are mathlib's own linters, a scheduled build

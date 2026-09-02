@@ -200,3 +200,11 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 #print axioms Operad.Tree.weight_graft
 #print axioms Operad.Free.comp_mem_weightSpan
 #print axioms Operad.assocRel_mem_weightSpan
+
+/-! ## Cooperads -/
+
+#print axioms Operad.instNSCooperadAss
+
+/-- Every commutative ring gives an associative cooperad. -/
+noncomputable example (R : Type) [CommRing R] : Operad.NSCooperad R (Operad.Ass R) :=
+  inferInstance

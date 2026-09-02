@@ -21,3 +21,4 @@ import Operad.Species
 import Operad.FreeUniversal
 import Operad.Partition
 import Operad.Weight
+import Operad.Cooperad
