@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4114 lines, 366 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4189 lines, 374 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -99,6 +99,7 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | `Species`, the `Σₙ`-actions via functoriality | `Species.lean` | proved |
 | **`endSpecies`; its arity `n` is `End`'s** | `Species.lean` | **proved** |
 | `unitSpecies` — the unit for the substitution product | `Species.lean` | defined |
+| `partMap` — partitions transport along bijections, functorially | `Partition.lean` | proved |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -210,14 +211,21 @@ equivalence to the species picture is a later bridge.
    `substForest (cons t F) c fo = cons t (substForest F (c - t.arity) fo)` for `t.arity ≤ c`,
    then `substForest (corollaF E k) 0 fo = fo`, then `substTree (node e F) c fo =
    node e (substForest F c fo)`, and finally the mutual induction itself.
-2. **The substitution product on species.** The spine is in, and now so is the unit:
-   `unitSpecies` is the free module on the bijections `S ≃ Fin 1`, which is free of rank one on
-   one-element sets and zero elsewhere. Defining it that way rather than by a conditional on
-   cardinality means functoriality needs no case split at all — both functor laws reduce to
-   `Equiv.ext`. What is still missing is the product itself,
-   `(F ∘ G)(S) = ⊕_π F(π) ⊗ ⨂_{B ∈ π} G(B)`, and with it symmetric operads as monoids for it —
-   which is what `Com`, `Lie` and `Pois` need. That needs sums over partitions of a finite set,
-   so it remains a substantial build.
+2. **The substitution product on species.** Two layers of it are in. The *unit* is
+   `unitSpecies`, the free module on the bijections `S ≃ Fin 1`. The *indexing* is `Partition.lean`:
+   partitions of a finite type transport along a bijection, functorially — `partMap_refl` and
+   `partMap_trans` are the two laws the eventual `map` field will rest on.
+
+   The product itself is still to build:
+   `(F ∘ G)(S) = ⊕_π F(blocks π) ⊗ ⨂_{B ∈ π} G(B)`. The remaining work is to decorate each
+   partition with `F` of its block type and a `PiTensorProduct` of `G` over the blocks, sum over
+   `Finpartition univ` (a `Fintype`), and prove the functor laws for that sum — the last being the
+   hard part, since it means transporting a direct sum over a *transported* index. Symmetric
+   operads as monoids for the product then follow.
+
+   Worth weighing first: symmetric operads can instead be defined Markl-style, as our `NSOperad`
+   plus `Σₙ`-actions and an equivariance axiom for partial composition. That is a much cheaper
+   route to `Com`, `Lie` and `Pois`, which is what item 4 actually wants from this.
 3. **`AssPres R ≅ Ass R`.** The comparison map exists now: `OperadIdeal.liftHom` is the
    universal property of the quotient, and combining it with `extendHom` gives
    `assPresToAss : NSOperadHom R (AssPres R) (Ass R)`. Proving it an isomorphism is the remaining

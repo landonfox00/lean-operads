@@ -19,3 +19,4 @@ import Operad.Magmatic
 import Operad.Ideal
 import Operad.Species
 import Operad.FreeUniversal
+import Operad.Partition
