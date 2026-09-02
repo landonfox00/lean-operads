@@ -191,3 +191,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.partMap_refl
 #print axioms Operad.partMap_trans
+
+#print axioms Operad.extend_genMap_self
+#print axioms Operad.extendHom_unique

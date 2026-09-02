@@ -17,7 +17,7 @@ recursion, and it is exactly one application of the parallel associativity axiom
 import Operad.TotalComp
 import Operad.Free
 
-universe u v w
+universe u v w x
 
 namespace Operad
 
@@ -249,7 +249,7 @@ morphism laws — so it is a short mutual induction. -/
 mutual
 
 /-- A morphism of operads commutes with evaluation of trees. -/
-theorem app_extend {S : ℕ → Type v} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
+theorem app_extend {S : ℕ → Type x} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
     [NSOperad R S] (φ : NSOperadHom R Q S) (g : ∀ k, E k → Q k) :
     ∀ (t : Tree E),
       φ.app t.arity (extend (R := R) g t) = extend (R := R) (fun k e => φ.app k (g k e)) t
@@ -260,7 +260,7 @@ theorem app_extend {S : ℕ → Type v} [∀ n, AddCommGroup (S n)] [∀ n, Modu
         (reindex R Q (show k = 0 + k by omega) (g k e)) fo, NSOperadHom.app_reindex]
 
 /-- The forest half: a morphism commutes with substituting a forest. -/
-theorem app_substF {S : ℕ → Type v} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
+theorem app_substF {S : ℕ → Type x} [∀ n, AddCommGroup (S n)] [∀ n, Module R (S n)]
     [NSOperad R S] (φ : NSOperadHom R Q S) (g : ∀ k, E k → Q k) :
     ∀ {k : ℕ} (c : ℕ) (α : Q (c + k)) (fo : Forest E k),
       φ.app (c + fo.arityF) (substF (R := R) g c α fo)
@@ -302,5 +302,101 @@ lemma arity_substTree : ∀ {k : ℕ} (T : Tree E) (c : ℕ) (fo : Forest E k), 
       rw [substTree, arity_substTree (T.graft c t) (c + t.arity) fo
         (by rw [Tree.arity_graft T c t hlt]; omega), Tree.arityF_cons]
       omega
+
+/-- The forest-level counterpart of `substTree`. -/
+def substForest : ∀ {k₁ k₂ : ℕ}, Forest E k₁ → ℕ → Forest E k₂ → Forest E k₁
+  | _, _, F, _, .nil => F
+  | _, _, F, c, .cons t fo => substForest (F.graftF c t) (c + t.arity) fo
+
+/-- Substituting into a tree with a labelled root is substituting into its forest. -/
+lemma substTree_node {k' : ℕ} (e : E k') (F : Forest E k') :
+    ∀ {k : ℕ} (c : ℕ) (fo : Forest E k),
+      substTree (Tree.node e F) c fo = Tree.node e (substForest F c fo)
+  | _, _, .nil => rfl
+  | _, c, .cons t fo => by
+      rw [substTree, substForest, Tree.graft_node, substTree_node e (F.graftF c t)]
+
+/-- Substituting past a head tree that the offset already skips. -/
+lemma substForest_cons_of_ge {k₁ : ℕ} (t : Tree E) (F : Forest E k₁) :
+    ∀ {k : ℕ} (c : ℕ) (fo : Forest E k), t.arity ≤ c →
+      substForest (Forest.cons t F) c fo = Forest.cons t (substForest F (c - t.arity) fo)
+  | _, _, .nil, _ => rfl
+  | _, c, .cons s fo, h => by
+      rw [substForest, Tree.graftF_cons_of_ge s h,
+        substForest_cons_of_ge t (F.graftF (c - t.arity) s) (c + s.arity) fo (by omega),
+        substForest, show c + s.arity - t.arity = c - t.arity + s.arity by omega]
+
+/-- Substituting a forest into a forest of bare leaves returns the forest. -/
+lemma substForest_corollaF : ∀ {k : ℕ} (fo : Forest E k),
+    substForest (corollaF E k) 0 fo = fo
+  | _, .nil => rfl
+  | _, .cons t fo => by
+      rw [corollaF, substForest, Tree.graftF_cons_of_lt t (by simp),
+        Tree.graft_leaf, substForest_cons_of_ge t (corollaF E _) (0 + t.arity) fo (by omega),
+        show 0 + t.arity - t.arity = 0 by omega, substForest_corollaF fo]
+
+/-- Substituting a forest into a corolla rebuilds the labelled tree. -/
+lemma substTree_corolla {k : ℕ} (e : E k) (fo : Forest E k) :
+    substTree (corolla e) 0 fo = Tree.node e fo := by
+  rw [corolla, substTree_node, substForest_corollaF]
+
+/-- The canonical map of generators into the free operad. -/
+noncomputable def genMap (R : Type u) [CommRing R] (E : ℕ → Type w) :
+    ∀ k, E k → Free R E k := fun _ e => genOf (R := R) e
+
+@[simp] lemma genMap_apply {k : ℕ} (e : E k) : genMap R E k e = genOf (R := R) e := rfl
+
+/-- Composition of two tree generators is the generator of the grafted tree, stated for the
+operad-class `comp` rather than for `Free.compL`. -/
+lemma comp_gen_of_gen (a b : ℕ) {n : ℕ} (t : TreeOfArity E (a + 1 + b)) (s : TreeOfArity E n) :
+    comp (R := R) (P := Free R E) a b (Free.gen t) (Free.gen s)
+      = Free.gen (TreeOfArity.graft a b t s) := by
+  show Free.compL (R := R) (E := E) a b (Free.gen t) (Free.gen s) = _
+  exact Free.compL_gen a b t s
+
+mutual
+
+/-- **Evaluating a tree in the free operad returns its own basis element.** This is the statement
+that every tree is built from corollas by iterated composition. -/
+theorem extend_genMap_self : ∀ (t : Tree E),
+    extend (R := R) (genMap R E) t = Free.gen ⟨t, rfl⟩
+  | .leaf => rfl
+  | .node (k := k) e fo => by
+      simp only [extend, genMap, genOf]
+      rw [Free.reindex_gen, substF_genMap (corolla e) 0 (by simp) fo, Free.reindex_gen]
+      exact congrArg Free.gen (Subtype.ext (substTree_corolla e fo))
+
+/-- The forest half: substituting the generators of a forest realises `substTree`. -/
+theorem substF_genMap : ∀ {k : ℕ} (T : Tree E) (c : ℕ) (hT : T.arity = c + k) (fo : Forest E k),
+    substF (R := R) (genMap R E) c (Free.gen ⟨T, hT⟩) fo
+      = Free.gen ⟨substTree T c fo, arity_substTree T c fo hT⟩
+  | _, T, c, hT, .nil => rfl
+  | _, T, c, hT, .cons t fo => by
+      simp only [substF]
+      rw [Free.reindex_gen, extend_genMap_self t, comp_gen_of_gen]
+      simp only [TreeOfArity.graft]
+      rw [substF_genMap (T.graft c t) (c + t.arity) (by
+          rw [Tree.arity_graft T c t (by omega)]; omega) fo, Free.reindex_gen]
+      rfl
+
+end
+
+/-- **Uniqueness for the universal property.** A morphism agreeing with `f` on generators is
+`extendHom f`. -/
+theorem extendHom_unique (f : ∀ k, E k → Q k) (φ : NSOperadHom R (Free R E) Q)
+    (hφ : ∀ (k : ℕ) (e : E k), φ.app k (genOf (R := R) e) = f k e) :
+    φ = extendHom (R := R) f := by
+  refine NSOperadHom.ext fun n => ?_
+  refine Finsupp.lhom_ext fun t r => ?_
+  show φ.app n (Finsupp.single t r) = extendApp (R := R) f n (Finsupp.single t r)
+  rw [← Free.smul_gen, map_smul, map_smul, extendApp_gen]
+  congr 1
+  obtain ⟨T, hT⟩ := t
+  have hsplit : (Free.gen ⟨T, hT⟩ : Free R E n)
+      = reindex R (Free R E) hT (extend (R := R) (genMap R E) T) := by
+    rw [extend_genMap_self, Free.reindex_gen]
+  rw [hsplit, NSOperadHom.app_reindex, app_extend φ (genMap R E) T]
+  exact congrArg (reindex R Q hT)
+    (congrArg (fun g => extend (R := R) g T) (funext fun k => funext fun e => hφ k e))
 
 end Operad

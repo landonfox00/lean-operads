@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4189 lines, 374 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4285 lines, 385 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -199,19 +199,7 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
-1. **Uniqueness for the universal property.** Half of it is proved: `app_extend` says a morphism
-   commutes with evaluation, using only the three morphism laws and no associativity axiom. It
-   gives at once that any morphism agreeing with `f` on corollas agrees with `extendHom f` on
-   every element of the form `extend genOf t`.
-
-   What is left is that those elements are *all* the generators — i.e.
-   `extend genOf t = Free.gen ⟨t, rfl⟩`, the statement that every tree is built from corollas by
-   iterated composition. The route is now mapped out and needs, in order: `substForest` (the
-   forest-level counterpart of `substTree`, both already sketched here), a "skip the head" lemma
-   `substForest (cons t F) c fo = cons t (substForest F (c - t.arity) fo)` for `t.arity ≤ c`,
-   then `substForest (corollaF E k) 0 fo = fo`, then `substTree (node e F) c fo =
-   node e (substForest F c fo)`, and finally the mutual induction itself.
-2. **The substitution product on species.** Two layers of it are in. The *unit* is
+1. **The substitution product on species.** Two layers of it are in. The *unit* is
    `unitSpecies`, the free module on the bijections `S ≃ Fin 1`. The *indexing* is `Partition.lean`:
    partitions of a finite type transport along a bijection, functorially — `partMap_refl` and
    `partMap_trans` are the two laws the eventual `map` field will rest on.
@@ -226,19 +214,19 @@ equivalence to the species picture is a later bridge.
    Worth weighing first: symmetric operads can instead be defined Markl-style, as our `NSOperad`
    plus `Σₙ`-actions and an equivariance axiom for partial composition. That is a much cheaper
    route to `Com`, `Lie` and `Pois`, which is what item 4 actually wants from this.
-3. **`AssPres R ≅ Ass R`.** The comparison map exists now: `OperadIdeal.liftHom` is the
+2. **`AssPres R ≅ Ass R`.** The comparison map exists now: `OperadIdeal.liftHom` is the
    universal property of the quotient, and combining it with `extendHom` gives
    `assPresToAss : NSOperadHom R (AssPres R) (Ass R)`. Proving it an isomorphism is the remaining
    half, and it is a genuine theorem rather than plumbing: it amounts to a normal-form result,
    that every planar tree is congruent modulo the associator to a fixed comb, so that
    `AssPres R n` is spanned by one element. Surjectivity is easy; injectivity is that argument.
-4. **The common operads.** `Ass`, `End`, `Mag` and `AssPres` are in. The magmatic operad and
+3. **The common operads.** `Ass`, `End`, `Mag` and `AssPres` are in. The magmatic operad and
    `uAss` were the reachable ones; `Com`, `Lie` and `Pois` are all *symmetric*, so they are
-   blocked on item 2 rather than on effort.
-5. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
+   blocked on item 1 rather than on effort.
+4. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
    structures, ∞-operads. Each sits on top of the dg layer, and each is a substantial project in
    its own right — this is the long-term destination, not a near-term item.
-6. **A more thorough CI**, deliberately last. Today's workflow builds, greps for `sorry`, and
+5. **A more thorough CI**, deliberately last. Today's workflow builds, greps for `sorry`, and
    runs the axiom audit. The additions worth making are mathlib's own linters, a scheduled build
    against Mathlib master to catch upstream drift early, `doc-gen4` output published to Pages,
    and a badge row.
