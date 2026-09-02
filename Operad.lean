@@ -18,3 +18,4 @@ import Operad.TotalComp
 import Operad.Magmatic
 import Operad.Ideal
 import Operad.Species
+import Operad.FreeUniversal

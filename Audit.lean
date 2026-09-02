@@ -170,3 +170,7 @@ noncomputable example (R : Type) [CommRing R] : NSOperad R (Operad.AssPres R) :=
 /-- The endomorphism species exists for every module. -/
 noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Module R V] :
     Operad.Species R := Operad.Species.endSpecies R V
+
+/-! ## Toward the universal property -/
+
+#print axioms Operad.substF_comp
