@@ -188,3 +188,6 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 #print axioms Operad.arity_substTree
 
 #print axioms Operad.Species.unitSpecies
+
+#print axioms Operad.partMap_refl
+#print axioms Operad.partMap_trans
