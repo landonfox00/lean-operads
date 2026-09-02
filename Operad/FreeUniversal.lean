@@ -33,21 +33,22 @@ the induction hypothesis can be instantiated at `c + t.arity` without its syntac
 to match what `substF`'s own recursion produces. -/
 lemma substF_comp (f : ∀ k, E k → Q k) :
     ∀ {k : ℕ} (fo : Forest E k) (p q d c e g : ℕ) (hc : c = p + d + q) (he : e = p + 1 + q)
-      (hg : g = q + fo.arityF) (β : Q (e + k)) (δ : Q d),
+      (hg : g = q + fo.arityF)
+      (h3 : p + d + g = c + fo.arityF) (h4 : e + fo.arityF = p + 1 + g)
+      (β : Q (e + k)) (δ : Q d),
       substF (R := R) f c
           (reindex R Q (show p + d + (q + k) = c + k by omega)
             (comp (R := R) p (q + k)
               (reindex R Q (show e + k = p + 1 + (q + k) by omega) β) δ)) fo
-        = reindex R Q (show p + d + g = c + fo.arityF by omega)
+        = reindex R Q h3
             (comp (R := R) p g
-              (reindex R Q (show e + fo.arityF = p + 1 + g by omega)
-                (substF (R := R) f e β fo)) δ)
-  | _, .nil, p, q, d, c, e, g, hc, he, hg, β, δ => by
+              (reindex R Q h4 (substF (R := R) f e β fo)) δ)
+  | _, .nil, p, q, d, c, e, g, hc, he, hg, h3, h4, β, δ => by
       simp only [Tree.arityF_nil] at hg
-      simp only [substF]
       subst hg
-      simp [substF]
-  | _, @Forest.cons _ k' t fo, p, q, d, c, e, g, hc, he, hg, β, δ => by
+      simp only [substF]
+      rfl
+  | _, @Forest.cons _ k' t fo, p, q, d, c, e, g, hc, he, hg, h3, h4, β, δ => by
       subst hc
       subst he
       rw [Tree.arityF_cons] at hg
@@ -75,10 +76,15 @@ lemma substF_comp (f : ∀ k, E k → Q k) :
         rw [← hax, reindex_reindex, reindex_self]
       rw [hkey]
       rw [substF_comp f fo p (q + t.arity) d (p + d + q + t.arity) (p + 1 + q + t.arity) g
-        (by omega) (by omega) (by omega)
+        (by omega) (by omega) (by omega) (by omega) (by omega)
         (comp (R := R) (p + 1 + q) k'
           (reindex R Q (show p + 1 + q + (k' + 1) = p + 1 + q + 1 + k' by omega) β)
           (extend (R := R) f t)) δ]
-      simp [reindex_reindex]
+      set X := substF (R := R) f (p + 1 + q + t.arity)
+        (comp (R := R) (p + 1 + q) k'
+          (reindex R Q (show p + 1 + q + (k' + 1) = p + 1 + q + 1 + k' by omega) β)
+          (extend (R := R) f t)) fo with hX
+      trace_state
+      sorry
 
 end Operad
