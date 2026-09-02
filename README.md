@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4285 lines, 385 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
+4460 lines, 405 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
 only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
 multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -224,8 +224,19 @@ equivalence to the species picture is a later bridge.
    `uAss` were the reachable ones; `Com`, `Lie` and `Pois` are all *symmetric*, so they are
    blocked on item 1 rather than on effort.
 4. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
-   structures, ∞-operads. Each sits on top of the dg layer, and each is a substantial project in
-   its own right — this is the long-term destination, not a near-term item.
+   structures, ∞-operads. The first prerequisite is now in: `Weight.lean` gives the weight
+   grading — the number of internal vertices of a tree — with `Free.comp_mem_weightSpan` saying
+   composition adds weights, and `assocRel_mem_weightSpan` showing the presentation of `Ass` is
+   *quadratic*, which is exactly Koszul duality's hypothesis. Note the contrast with arity:
+   composition changes arity in a way that depends on the slot, and weight not at all.
+
+   The remaining blocker for bar–cobar is **cooperads**, of which the library has none. They are
+   definable now by dualising the positional convention — decomposition maps
+   `P (a + n + b) → P (a + 1 + b) ⊗ P n` in place of `comp`, with the two coassociativity axioms
+   transposed — and all the `reindex` machinery carries over unchanged. Model structures need
+   limits and colimits in the category of operads, which is a separate and larger gap;
+   ∞-operads need dendroidal machinery and are far off.
+
 5. **A more thorough CI**, deliberately last. Today's workflow builds, greps for `sorry`, and
    runs the axiom audit. The additions worth making are mathlib's own linters, a scheduled build
    against Mathlib master to catch upstream drift early, `doc-gen4` output published to Pages,

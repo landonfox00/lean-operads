@@ -194,3 +194,9 @@ noncomputable example (R : Type) [CommRing R] (V : Type) [AddCommGroup V] [Modul
 
 #print axioms Operad.extend_genMap_self
 #print axioms Operad.extendHom_unique
+
+/-! ## The weight grading -/
+
+#print axioms Operad.Tree.weight_graft
+#print axioms Operad.Free.comp_mem_weightSpan
+#print axioms Operad.assocRel_mem_weightSpan

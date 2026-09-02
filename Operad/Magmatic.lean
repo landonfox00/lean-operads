@@ -14,6 +14,7 @@ import Operad.Free
 import Operad.TotalComp
 import Operad.Ideal
 import Operad.FreeUniversal
+import Operad.Weight
 
 universe u v w
 
@@ -118,5 +119,23 @@ noncomputable def assPresToAss (R : Type u) [CommRing R] :
         rw [show y = assocRel R from by simpa [assocRels] using hy]
         exact extendHom_assocRel R
     | (k + 4), y, hy => exact absurd hy (by simp [assocRels])
+
+/-! ### The presentation is quadratic
+
+Koszul duality applies to presentations whose relations sit in weight two. The associator does:
+each of its two terms grafts one corolla into another, and corollas have weight one. -/
+
+/-- The magmatic generator has weight one. -/
+lemma magOp_mem_weightSpan (R : Type u) [CommRing R] :
+    magOp R ∈ Free.weightSpan R MagGen 2 1 := by
+  have h := Free.gen_mem_weightSpan (R := R) ⟨corolla magMul, arity_corolla magMul⟩
+  simpa [magOp, genOf, TreeOfArity.weight] using h
+
+/-- **The presentation of `AssPres` is quadratic**: the associator has weight two. -/
+theorem assocRel_mem_weightSpan (R : Type u) [CommRing R] :
+    assocRel R ∈ Free.weightSpan R MagGen 3 2 :=
+  Submodule.sub_mem _
+    (Free.compFin_mem_weightSpan _ (magOp_mem_weightSpan R) (magOp_mem_weightSpan R))
+    (Free.compFin_mem_weightSpan _ (magOp_mem_weightSpan R) (magOp_mem_weightSpan R))
 
 end Operad
