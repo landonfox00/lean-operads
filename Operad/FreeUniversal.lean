@@ -84,7 +84,12 @@ lemma substF_comp (f : ∀ k, E k → Q k) :
         (comp (R := R) (p + 1 + q) k'
           (reindex R Q (show p + 1 + q + (k' + 1) = p + 1 + q + 1 + k' by omega) β)
           (extend (R := R) f t)) fo with hX
-      trace_state
-      sorry
+      clear_value X
+      clear hX
+      refine (reindex_reindex (R := R) (P := Q) _ _ _).trans ?_
+      congr 1
+      congr 1
+      congr 1
+      exact (reindex_reindex (R := R) (P := Q) _ _ _).symm
 
 end Operad
