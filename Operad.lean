@@ -24,3 +24,4 @@ import Operad.Weight
 import Operad.Cooperad
 import Operad.Presentation
 import Operad.Convolution
+import Operad.Perm
