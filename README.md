@@ -48,9 +48,9 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-4557 lines, 408 declarations, **`sorry`-free**. `Audit.lean` confirms every declaration rests
-only on Lean's three standard axioms — `propext`, `Quot.sound`, and (wherever mathlib's
-multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
+Roughly 5,000 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 105 headline results
+and confirms every one rests only on Lean's three standard axioms — `propext`, `Quot.sound`, and
+(wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
 | Item | Where | Status |
 |---|---|---|
@@ -100,6 +100,15 @@ multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 | **`endSpecies`; its arity `n` is `End`'s** | `Species.lean` | **proved** |
 | `unitSpecies` — the unit for the substitution product | `Species.lean` | defined |
 | `partMap` — partitions transport along bijections, functorially | `Partition.lean` | proved |
+| `NSCooperad`, dualising the positional convention; `Ass` as a cooperad | `Cooperad.lean` | **proved** |
+| **`Presentation`** — operads by generators and relations | `Presentation.lean` | **proved** |
+| `Presentation.lift`, `lift_gen`, `hom_ext` — its universal property | `Presentation.lean` | **proved** |
+| `assPresToAssOfRep_eq` — the API reproduces the hand-built comparison map | `Presentation.lean` | **proved** |
+| **`Conv R C P`** — the convolution algebra of a cooperad into an operad | `Convolution.lean` | defined |
+| `Conv.star` (`⋆c`), bilinearity in both arguments | `Convolution.lean` | **proved** |
+| `Conv.bracket`, antisymmetry, `[f,f] = 0`, biadditivity | `Convolution.lean` | proved |
+| `Conv.convTerm_ass` — the encoding check, in closed form | `Convolution.lean` | **proved** |
+| **the pre-Lie identity for `⋆c`** | `Convolution.lean` | **not yet — see the roadmap** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -220,6 +229,28 @@ equivalence to the species picture is a later bridge.
    half, and it is a genuine theorem rather than plumbing: it amounts to a normal-form result,
    that every planar tree is congruent modulo the associator to a fixed comb, so that
    `AssPres R n` is spanned by one element. Surjectivity is easy; injectivity is that argument.
+
+   **Presentations are now packaged.** `Presentation.lean` turns "generators plus relations" into
+   an operad and, more to the point, makes mapping *out* of one ask for exactly the mathematics:
+   a `Rep` is a choice of image for each generator plus a proof that the relations die, and
+   `lift` turns one into a morphism, with `lift_gen` and `hom_ext` as the two halves of the
+   universal property. `assPresToAssOfRep_eq` checks the API against the map above.
+
+2a. **The convolution algebra.** `Convolution.lean` defines `Conv R C P`, the degreewise linear
+   maps from a cooperad to an operad, with the product that decomposes in `C`, applies the two
+   maps, and recomposes in `P`. Bilinearity in both arguments is proved, as is the encoding check
+   `convTerm_ass`, which computes a term in closed form for `C = P = Ass` — a mis-ordered
+   composite would still typecheck but would fail that.
+
+   **What is missing is the pre-Lie identity for `⋆c`**, and it is a theorem of the size of
+   `star_assoc_symm`, not plumbing. The route is the one `PreLie.lean` already walks: the
+   associator splits into a nested part and a disjoint part, the nested part cancels by
+   `decomp_assoc_seq` against `comp_assoc_seq`, and the disjoint part is symmetric in the last two
+   arguments by `decomp_assoc_par` against `comp_assoc_par`. The one new difficulty is that the
+   cooperad axioms are equalities of *linear maps* rather than of elements, so the bookkeeping
+   cannot be done pointwise, and `swapLast` is what the parallel case will need. With it, the
+   Maurer–Cartan elements of `Conv` are twisting morphisms `C → P`, which is what the whole dg
+   layer of this library was built to say.
 3. **The common operads.** `Ass`, `End`, `Mag` and `AssPres` are in. The magmatic operad and
    `uAss` were the reachable ones; `Com`, `Lie` and `Pois` are all *symmetric*, so they are
    blocked on item 1 rather than on effort.
