@@ -247,3 +247,28 @@ noncomputable example (R : Type) [CommRing R] (E : ℕ → Type) (p : Operad.Pre
 module: this elaborates only if the `Pi` structure on degreewise maps is available. -/
 noncomputable example (R : Type) [CommRing R] :
     Module R (Operad.Conv R (Operad.Ass R) (Operad.Ass R)) := inferInstance
+
+/-! ## The operad `Perm` -/
+
+#print axioms Operad.Perm.sum_split3
+#print axioms Operad.Perm.permComp
+#print axioms Operad.Perm.permComp_apply_lt
+#print axioms Operad.Perm.permComp_apply_mid
+#print axioms Operad.Perm.permComp_apply_ge
+#print axioms Operad.Perm.compL
+#print axioms Operad.Perm.sum_permComp
+#print axioms Operad.Perm.permComp_one_right
+#print axioms Operad.Perm.permComp_one_left
+#print axioms Operad.Perm.permComp_assoc_seq
+#print axioms Operad.Perm.permComp_assoc_par
+#print axioms Operad.instNSOperadPerm
+#print axioms Operad.Perm.evHom
+
+/-- `Perm` really is an instance: this elaborates only if all four operad axioms were
+discharged for it. -/
+example (R : Type) [CommRing R] : Operad.NSOperad R (Operad.Perm R) := inferInstance
+
+/-- And `ev` really is a morphism `Perm → Ass`: the total of a composite is the product
+of the totals. -/
+noncomputable example (R : Type) [CommRing R] :
+    Operad.NSOperadHom R (Operad.Perm R) (Operad.Ass R) := Operad.Perm.evHom R

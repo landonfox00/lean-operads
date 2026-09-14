@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-Roughly 5,000 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 105 headline results
+Roughly 5,500 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 118 headline results
 and confirms every one rests only on Lean's three standard axioms — `propext`, `Quot.sound`, and
 (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -109,6 +109,10 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | `Conv.bracket`, antisymmetry, `[f,f] = 0`, biadditivity | `Convolution.lean` | proved |
 | `Conv.convTerm_ass` — the encoding check, in closed form | `Convolution.lean` | **proved** |
 | **the pre-Lie identity for `⋆c`** | `Convolution.lean` | **not yet — see the roadmap** |
+| **`Perm`**, Chapoton's operad, `Perm R n = Fin n → R` | `Perm.lean` | **all four axioms proved** |
+| `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
+| **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
+| **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -251,9 +255,25 @@ equivalence to the species picture is a later bridge.
    cannot be done pointwise, and `swapLast` is what the parallel case will need. With it, the
    Maurer–Cartan elements of `Conv` are twisting morphisms `C → P`, which is what the whole dg
    layer of this library was built to say.
-3. **The common operads.** `Ass`, `End`, `Mag` and `AssPres` are in. The magmatic operad and
-   `uAss` were the reachable ones; `Com`, `Lie` and `Pois` are all *symmetric*, so they are
-   blocked on item 1 rather than on effort.
+3. **The common operads.** `Ass`, `End`, `Mag`, `AssPres` and now **`Perm`** are in. `Lie` and
+   `Pois` are *symmetric*, so they are blocked on item 1 rather than on effort. `Com` is **not** a
+   gap: non-symmetrically it *is* `Ass`, since one generator per arity is one planar way to combine
+   `n` ordered inputs, and the two separate only once `Σₙ`-actions exist.
+
+   `Perm` is worth a note, because it is the exception to the library's design. Every other operad
+   here keeps index data out of its types; `Perm`'s elements *are* indexed by the inputs, so its
+   composition is a three-way case split on the index and its axioms are genuine `Fin`-sum
+   bookkeeping. Three things make that tractable and are the shape to copy for any future operad
+   of the same kind: `sum_split3` splits a sum over `Fin (a + n + b)` into the three ranges once,
+   so no later proof mentions `Fin.castAdd`; the three value lemmas take the index bounds as
+   explicit arguments rather than rebuilding them; and `sum_permComp` is proved *before* the
+   associativity axioms, because both need it. It is also the statement that `evHom` is a
+   morphism — in the game-theoretic reading, efficiency.
+
+   One trap, recorded because it cost the most time: **`omega` does not know `Fin.isLt`**. Every
+   arithmetic goal in `Perm.lean` is preceded by `have := i.isLt`, and every goal mentioning a
+   `Fin.mk` is preceded by `simp only [val_mk']`; without those `omega` sees an unconstrained
+   natural, or an atom, and fails.
 4. **Derived operadic frameworks and their algebras.** Bar–cobar, Koszul duality, model
    structures, ∞-operads. The first prerequisite is now in: `Weight.lean` gives the weight
    grading — the number of internal vertices of a tree — with `Free.comp_mem_weightSpan` saying
