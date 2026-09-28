@@ -97,6 +97,30 @@ def comp (ψ : SetOperadHom T U) (φ : SetOperadHom S T) : SetOperadHom S U wher
 
 end SetOperadHom
 
+/-- **An isomorphism of set operads**: morphisms both ways, inverse to each other. -/
+structure SetOperadIso (S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v)
+    (T : (A : Type) → [Fintype A] → [DecidableEq A] → Type w) [SetOperad S] [SetOperad T] where
+  /-- The forward morphism. -/
+  hom : SetOperadHom S T
+  /-- The inverse morphism. -/
+  inv : SetOperadHom T S
+  hom_inv_id : inv.comp hom = SetOperadHom.id
+  inv_hom_id : hom.comp inv = SetOperadHom.id
+
+namespace SetOperadIso
+
+variable {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  {T : (A : Type) → [Fintype A] → [DecidableEq A] → Type w} [SetOperad S] [SetOperad T]
+
+/-- The components of an isomorphism are bijections. -/
+def equiv (φ : SetOperadIso S T) (A : Type) [Fintype A] [DecidableEq A] : S A ≃ T A where
+  toFun := φ.hom.app A
+  invFun := φ.inv.app A
+  left_inv x := congrArg (fun ψ : SetOperadHom S S => ψ.app A x) φ.hom_inv_id
+  right_inv y := congrArg (fun ψ : SetOperadHom T T => ψ.app A y) φ.inv_hom_id
+
+end SetOperadIso
+
 namespace SetOperad
 
 variable {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad S]

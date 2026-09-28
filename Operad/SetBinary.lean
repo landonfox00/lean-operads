@@ -18,7 +18,7 @@ This is the calculus in which quadratic presentations are verified:
 The first input of `g` is `0 : Fin 2` and the second is `1`; after filling the first, the second
 is `slotOne : Without (Fin 2) 0`.
 -/
-import Operad.SetOperad
+import Operad.SetPresentation
 
 /-! The input types below are nested sums of subtypes, and deciding equality on them takes more
 instances than the default search allows. -/
@@ -477,6 +477,46 @@ theorem bin_comm_of {g : S (Fin 2)} (h : map (Equiv.swap 0 1) g = g) (x : S A) (
 
 end Subst3
 
+
+/-! ## Morphisms preserve filling -/
+
+section Hom
+
+universe w₁ w₂
+
+lemma _root_.Operad.SetOperadHom.app_bin
+    {T₁ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w₁} [SetOperad T₁]
+    {T₂ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w₂} [SetOperad T₂]
+    {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (φ : SetOperadHom T₁ T₂) (g : T₁ (Fin 2)) (x : T₁ A) (y : T₁ B) :
+    φ.app (A ⊕ B) (bin g x y) = bin (φ.app _ g) (φ.app A x) (φ.app B y) := by
+  unfold bin
+  rw [φ.app_map, φ.app_comp, φ.app_comp]
+
+end Hom
+
 end SetOperad
+
+/-! ## Filling, in the syntax -/
+
+namespace Syn
+
+variable {T : ℕ → Type*} {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+
+/-- Fill the two inputs of a binary expression. -/
+def bin (g : Syn T (Fin 2)) (x : Syn T A) (y : Syn T B) : Syn T (A ⊕ B) :=
+  .map (binEquiv A B) (.comp (Sum.inl slotOne) (.comp (0 : Fin 2) g x) y)
+
+@[simp] lemma eval_bin {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad S]
+    (f : ∀ n, T n → S (Fin n)) (g : Syn T (Fin 2)) (x : Syn T A) (y : Syn T B) :
+    eval f (bin g x y) = SetOperad.bin (eval f g) (eval f x) (eval f y) := rfl
+
+end Syn
+
+lemma Pres.mk_bin {T : ℕ → Type*}
+    {ρ : ∀ {A : Type} [Fintype A] [DecidableEq A], Syn T A → Syn T A → Prop}
+    {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (g : Syn T (Fin 2)) (x : Syn T A) (y : Syn T B) :
+    Pres.mk (ρ := ρ) (Syn.bin g x y) = SetOperad.bin (Pres.mk g) (Pres.mk x) (Pres.mk y) := rfl
 
 end Operad

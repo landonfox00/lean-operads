@@ -367,3 +367,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SetOperad.bin_right_of
 #print axioms Operad.SetOperad.bin_left_of
 #print axioms Operad.SetOperad.bin_comm_of
+
+/-! ## The commutative set operad: generalized associativity and commutativity -/
+
+#print axioms Operad.SetOperadIso.equiv
+#print axioms Operad.SetOperadHom.app_bin
+#print axioms Operad.SetOperad.comb_perm
+#print axioms Operad.SetOperad.map_prod
+#print axioms Operad.SetOperad.bin_prod
+#print axioms Operad.SetOperad.comp_prod
+#print axioms Operad.ComSet.lift
+#print axioms Operad.ComSet.hom_ext
+#print axioms Operad.ComSet.homEquiv
+#print axioms Operad.ComSet.linHomEquiv
+#print axioms Operad.ComSet.comPresIso
