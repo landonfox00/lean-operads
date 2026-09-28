@@ -426,3 +426,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.NSSetOperad.Arr.map_rcomb
 #print axioms Operad.NSSetOperad.Arr.pres_induction
 #print axioms Operad.NSSetOperad.Arr.pres_isRComb
+
+/-! ## Non-symmetric operads in modules and non-symmetric set operads -/
+
+#print axioms Operad.NSOperadIso.trans
+#print axioms Operad.NSOperadIso.bijective
+#print axioms Operad.NSOperadIso.ofBijective
+#print axioms Operad.instNSSetOperadUndNS
+#print axioms Operad.NSOperadHom.und
+#print axioms Operad.linHomEquivNS
+#print axioms Operad.NSOperadHom.ext_single
+#print axioms Operad.NSSetOperadHom.lin
+#print axioms Operad.NSSetOperadIso.lin
+#print axioms Operad.SetOperad.toNSLinIso
