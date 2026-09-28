@@ -511,3 +511,4 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.BTree.OfArity.bl_inj
 #print axioms Operad.BTree.OfArity.rr_ne_rl
 #print axioms Operad.TConv.eval_gbracket12
+#print axioms Operad.TConv.mem_koszulDual_four_iff

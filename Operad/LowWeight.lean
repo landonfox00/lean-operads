@@ -587,6 +587,63 @@ section EvalBracket
 
 variable [Fintype E] [DecidableEq E]
 
+omit [Fintype E] [DecidableEq E] in
+/-- **Membership in the Koszul dual in arity four**, slice by slice: a chain on the three-vertex
+trees lies in the Koszul dual exactly when its three outer slices and its two inner slices at
+every corolla lie in the relation space. -/
+theorem mem_koszulDual_four_iff (Rel : Submodule R (Chain R E 3)) (x : Chain R E 4) :
+    x ∈ koszulDual Rel 4 ↔
+      (∀ (a : Fin 3) (e : E), sliceOut (n := 2) a (cor e) x ∈ Rel) ∧
+        (∀ (a : Fin 2) (e : E), sliceIn (n := 3) a (cor e) x ∈ Rel) := by
+  have K3 := koszulDual_three Rel
+  refine (mem_koszulDual_add_four Rel 0 x).trans ⟨fun h => ⟨fun a e => ?_, fun a e => ?_⟩,
+    fun ⟨ho, hi⟩ a b k hk h2 hab => ?_⟩
+  · rw [← K3]
+    fin_cases a
+    · have h1 := (h 0 2 2 rfl le_rfl (by norm_num)).1 (cor e)
+      change sliceOut (n := 2) (0 : Fin 3) (cor e) x ∈ koszulDual Rel 3 at h1
+      exact h1
+    · have h1 := (h 1 1 2 rfl le_rfl (by norm_num)).1 (cor e)
+      change sliceOut (n := 2) (1 : Fin 3) (cor e) x ∈ koszulDual Rel 3 at h1
+      exact h1
+    · have h1 := (h 2 0 2 rfl le_rfl (by norm_num)).1 (cor e)
+      change sliceOut (n := 2) (2 : Fin 3) (cor e) x ∈ koszulDual Rel 3 at h1
+      exact h1
+  · rw [← K3]
+    fin_cases a
+    · have h1 := (h 0 1 3 rfl (by norm_num) (by norm_num)).2 (cor e)
+      change sliceIn (n := 3) (0 : Fin 2) (cor e) x ∈ koszulDual Rel 3 at h1
+      exact h1
+    · have h1 := (h 1 0 3 rfl (by norm_num) (by norm_num)).2 (cor e)
+      change sliceIn (n := 3) (1 : Fin 2) (cor e) x ∈ koszulDual Rel 3 at h1
+      exact h1
+  · have hk' : k = 2 ∨ k = 3 := by omega
+    rcases hk' with rfl | rfl
+    · have hab' : (a = 0 ∧ b = 2) ∨ (a = 1 ∧ b = 1) ∨ (a = 2 ∧ b = 0) := by omega
+      refine ⟨fun t₂ => ?_, fun t₁ => mem_koszulDual_of_le_two Rel le_rfl _⟩
+      obtain ⟨e, rfl⟩ := eq_cor t₂
+      rcases hab' with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · have h1 := ho 0 e
+        rw [← K3] at h1
+        exact h1
+      · have h1 := ho 1 e
+        rw [← K3] at h1
+        exact h1
+      · have h1 := ho 2 e
+        rw [← K3] at h1
+        exact h1
+    · have hab' : (a = 0 ∧ b = 1) ∨ (a = 1 ∧ b = 0) := by omega
+      refine ⟨fun t₂ => mem_koszulDual_of_le_two Rel (by omega) _, fun t₁ => ?_⟩
+      rcases hab' with ⟨rfl, rfl⟩ | ⟨rfl, rfl⟩
+      · obtain ⟨e, rfl⟩ := eq_cor t₁
+        have h1 := hi 0 e
+        rw [← K3] at h1
+        exact h1
+      · obtain ⟨e, rfl⟩ := eq_cor t₁
+        have h1 := hi 1 e
+        rw [← K3] at h1
+        exact h1
+
 /-- **The bracket of a weight-one and a weight-two cochain, evaluated along slices**: on an
 arity-four chain, `⁅f, θ⁆ₛ` is `f` composed with `θ` evaluated on the two inner slices of each
 corolla, minus `θ` evaluated on the three outer slices composed with `f`, with the sign of the
