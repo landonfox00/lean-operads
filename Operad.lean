@@ -47,3 +47,5 @@ import Operad.Rees
 import Operad.BinaryTree
 import Operad.TreeConv
 import Operad.KoszulDual
+import Operad.LowWeight
+import Operad.PermLow

@@ -494,3 +494,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TConv.eval_comp_inner
 #print axioms Operad.TConv.ann
 #print axioms Operad.TConv.koszulDual_sliceClosed
+#print axioms Operad.BTree.OfArity.cases_four
+#print axioms Operad.TConv.compFin_apply_graft
+#print axioms Operad.TConv.sstar_apply_lc
+#print axioms Operad.TConv.sstar_apply_rc
+#print axioms Operad.TConv.sstar12_apply_ll
+#print axioms Operad.TConv.sstar21_apply_bl
+#print axioms Operad.TConv.gbracket11_apply
+#print axioms Operad.TConv.gbracket12_apply
+#print axioms Operad.Perm.compFin_3_2_two
+#print axioms Operad.Perm.sumZero
