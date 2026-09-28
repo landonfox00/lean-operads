@@ -387,3 +387,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Sym.Perm.app_eq_zero_of_isComm_isAssoc
 #print axioms Operad.SymOperadHom.invOfBijective
 #print axioms Operad.SymOperadHom.precompEquiv
+
+/-! ## Infinitesimal bimodules -/
+
+#print axioms Operad.SymInfBimodule.self
+#print axioms Operad.SymInfBimodule.restrict

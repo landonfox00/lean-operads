@@ -34,3 +34,4 @@ import Operad.SetPresentation
 import Operad.SetBinary
 import Operad.ComSet
 import Operad.PermSet
+import Operad.InfBimodule
