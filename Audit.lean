@@ -392,3 +392,5 @@ example (R : Type) [CommRing R] :
 
 #print axioms Operad.SymInfBimodule.self
 #print axioms Operad.SymInfBimodule.restrict
+#print axioms Operad.SymOperadHom.ker
+#print axioms Operad.Sym.Perm.mem_kerSum
