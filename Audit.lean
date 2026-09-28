@@ -394,3 +394,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymInfBimodule.restrict
 #print axioms Operad.SymOperadHom.ker
 #print axioms Operad.Sym.Perm.mem_kerSum
+
+/-! ## Non-symmetric set operads -/
+
+#print axioms Operad.instNSOperadLinNS
+#print axioms Operad.SetOperad.instNSSetOperadToNSSet

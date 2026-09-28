@@ -36,3 +36,4 @@ import Operad.ComSet
 import Operad.PermSet
 import Operad.InfBimodule
 import Operad.SymIdeal
+import Operad.NSSet
