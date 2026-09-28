@@ -27,3 +27,5 @@ import Operad.Convolution
 import Operad.Perm
 import Operad.PreLieLie
 import Operad.ConvolutionPreLie
+import Operad.Sym
+import Operad.SymNS

@@ -294,3 +294,41 @@ noncomputable example (R : Type) [CommRing R] :
 elaborates only if the pre-Lie identity was proved. -/
 noncomputable example (R : Type) [CommRing R] :
     LieAlgebra R (Operad.ConvAlg R (Operad.Ass R) (Operad.Ass R)) := inferInstance
+
+/-! ## Symmetric operads, by partial composition over finite types -/
+
+#print axioms Operad.Sym.seqEquiv
+#print axioms Operad.Sym.parEquiv
+#print axioms Operad.Sym.compEquiv
+#print axioms Operad.Sym.rightUnitEquiv
+#print axioms Operad.Sym.leftUnitEquiv
+#print axioms Operad.SymOperad.map_symm_map
+#print axioms Operad.SymOperad.comp_one'
+#print axioms Operad.SymOperad.one_comp'
+#print axioms Operad.SymOperadHom.ext
+#print axioms Operad.SymOperadHom.comp
+#print axioms Operad.Sym.instSymOperadCom
+#print axioms Operad.Sym.Perm.sum_compFun
+#print axioms Operad.Sym.instSymOperadPerm
+#print axioms Operad.Sym.Perm.sumHom
+
+/-! ## The underlying non-symmetric operad -/
+
+#print axioms Operad.Sym.insertEquiv
+#print axioms Operad.SymOperad.comp_map_left
+#print axioms Operad.SymOperad.comp_map_right
+#print axioms Operad.SymOperad.comp_slot
+#print axioms Operad.SymOperad.nsComp_one_right
+#print axioms Operad.SymOperad.nsComp_one_left
+#print axioms Operad.SymOperad.nsComp_assoc_seq
+#print axioms Operad.SymOperad.nsComp_assoc_par
+#print axioms Operad.SymOperad.instNSOperadToNS
+#print axioms Operad.SymOperadHom.toNS
+#print axioms Operad.Sym.Perm.toNS_comp_eq_permComp
+#print axioms Operad.Sym.Perm.toNSHom
+
+/-- `Com` and `Perm` really are symmetric operads, summing is a morphism between them, and every
+symmetric operad has an underlying non-symmetric one. -/
+example (R : Type) [CommRing R] : Operad.SymOperad R (Operad.Sym.Perm R) := inferInstance
+example (R : Type) [CommRing R] :
+    Operad.NSOperad R (Operad.SymOperad.toNS (Operad.Sym.Perm R)) := inferInstance

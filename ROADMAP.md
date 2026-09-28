@@ -52,7 +52,7 @@ kernel-checked certificates (explicit kernel vectors, left inverses on complemen
 | | content | status |
 |---|---|---|
 | L1 | Convolution: the pre-Lie identity for `⋆c`, Jacobi, `LieRing` and `LieAlgebra` on `Conv` | **done** (`ConvolutionPreLie.lean`) |
-| L2 | Symmetric operads by partial composition: the class, morphisms, `Com`, `Perm`, `Ass`, `End`; the underlying non-symmetric operad, and its agreement with the existing `Perm` | planned |
+| L2 | Symmetric operads by partial composition: the class, morphisms, `Com`, `Perm`, `Ass`, `End`; the underlying non-symmetric operad, and its agreement with the existing `Perm` | **class, morphisms, `Com`, `Perm`, the underlying non-symmetric operad and the `Perm` comparison done** (`Sym.lean`, `SymNS.lean`); `Ass`, `End` next |
 | L3 | Set operads (symmetric and planar), linearization and its adjunction, free set operads on set species, congruences, presentations and their universal property, a normal-form toolkit | planned |
 | L4 | Suboperads, ideals, quotients and kernels for symmetric operads | planned |
 | L5 | Infinitesimal bimodules over an operad | planned |

@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-Roughly 6,100 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 132 headline results
+Roughly 7,000 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 157 headline results
 and confirms every one rests only on Lean's three standard axioms — `propext`, `Quot.sound`, and
 (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -113,6 +113,14 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | **`ConvAlg`: `RightPreLieRing`, `RightPreLieAlgebra`, `LieRing`, `LieAlgebra R`** | `ConvolutionPreLie.lean` | **proved** |
 | `RightPreLieRing.toLieRing`, `toLieAlgebra` — any right pre-Lie ring is Lie | `PreLieLie.lean` | proved |
 | **`Perm`**, Chapoton's operad, `Perm R n = Fin n → R` | `Perm.lean` | **all four axioms proved** |
+| **`SymOperad`** — symmetric operads by partial composition over finite types | `Sym.lean` | defined |
+| `seqEquiv`, `parEquiv`, `compEquiv`, the unit equivalences | `Sym.lean` | defined |
+| `SymOperadHom`, `ext`, identity, composition | `Sym.lean` | proved |
+| **`Sym.Com`, `Sym.Perm`** as symmetric operads; `Perm.sumHom : Perm → Com` | `Sym.lean` | **all axioms proved** |
+| `insertEquiv` — the positional order of a composite's inputs | `SymNS.lean` | proved |
+| **`instNSOperadToNS`** — the underlying non-symmetric operad `n ↦ P (Fin n)` | `SymNS.lean` | **all four axioms proved** |
+| `SymOperadHom.toNS` — morphisms restrict | `SymNS.lean` | proved |
+| `Sym.Perm.toNSHom` — the restriction of symmetric `Perm` is the planar `Perm` | `SymNS.lean` | **proved** |
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
