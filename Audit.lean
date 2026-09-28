@@ -512,3 +512,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.BTree.OfArity.rr_ne_rl
 #print axioms Operad.TConv.eval_gbracket12
 #print axioms Operad.TConv.mem_koszulDual_four_iff
+
+/-! ## The symmetric associative operad -/
+
+#print axioms Operad.Sym.instSetOperadLinOrd
+#print axioms Operad.Sym.Ass.toCom
+#print axioms Operad.Sym.Ass.toCom_single
+#print axioms Operad.Sym.LinOrd.map_insertEquiv_comp_std
+#print axioms Operad.Sym.Ass.ofNS
+

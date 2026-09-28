@@ -121,6 +121,9 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | **`instNSOperadToNS`** — the underlying non-symmetric operad `n ↦ P (Fin n)` | `SymNS.lean` | **all four axioms proved** |
 | `SymOperadHom.toNS` — morphisms restrict | `SymNS.lean` | proved |
 | `Sym.Perm.toNSHom` — the restriction of symmetric `Perm` is the planar `Perm` | `SymNS.lean` | **proved** |
+| **`Sym.Ass`** — the symmetric associative operad, the linearization of the set operad of linear orders | `SymAss.lean` | **all axioms proved** |
+| `Sym.Ass.toCom` — the augmentation `Ass → Com` | `SymAss.lean` | proved |
+| `Sym.Ass.ofNS` — the planar `Ass` as the standard orders inside the underlying planar operad of `Ass` | `SymAss.lean` | **proved** |
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
