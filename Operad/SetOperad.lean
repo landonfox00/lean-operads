@@ -389,6 +389,59 @@ noncomputable def linHomEquiv : SetOperadHom S (Und R Q) ≃ SymOperadHom R (Lin
       simp
       rfl) x
 
+/-- **Morphisms out of a linearization agree when they agree on the basis.** -/
+lemma SymOperadHom.ext_single {Φ Ψ : SymOperadHom R (Lin R S) Q}
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A] (s : S A),
+      Φ.app A (Finsupp.single s 1) = Ψ.app A (Finsupp.single s 1)) : Φ = Ψ := by
+  ext A _ _ x
+  exact Lin.induction₁ (R := R) _ _ (h A) x
+
 end Adjunction
+
+section LinMap
+
+variable (R : Type u) [CommRing R]
+  {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad S]
+  {T : (A : Type) → [Fintype A] → [DecidableEq A] → Type w} [SetOperad T]
+
+/-- **Linearization of a morphism of set operads.** -/
+noncomputable def SetOperadHom.lin (φ : SetOperadHom S T) : SymOperadHom R (Lin R S) (Lin R T) where
+  app A _ _ := Finsupp.lmapDomain R R (φ.app A)
+  app_map e x := by
+    induction x using Finsupp.induction_linear with
+    | zero => simp
+    | add x x' hx hx' => simp only [map_add, hx, hx']
+    | single s r =>
+      show Finsupp.mapDomain _ (Lin.mapL R e (Finsupp.single s r))
+        = Lin.mapL R e (Finsupp.mapDomain _ (Finsupp.single s r))
+      rw [Lin.mapL_single, Finsupp.mapDomain_single, Finsupp.mapDomain_single, Lin.mapL_single,
+        φ.app_map]
+  app_one := by
+    show Finsupp.mapDomain _ (Finsupp.single _ 1) = _
+    rw [Finsupp.mapDomain_single, φ.app_one]
+    rfl
+  app_comp i x y := by
+    induction x using Finsupp.induction_linear with
+    | zero => simp
+    | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+    | single s r =>
+      induction y using Finsupp.induction_linear with
+      | zero => simp
+      | add y y' hy hy' => simp only [map_add, hy, hy']
+      | single t r' =>
+        show Finsupp.mapDomain _ (Lin.compL R i (Finsupp.single s r) (Finsupp.single t r'))
+          = Lin.compL R i (Finsupp.mapDomain _ (Finsupp.single s r))
+            (Finsupp.mapDomain _ (Finsupp.single t r'))
+        rw [Lin.compL_single, Finsupp.mapDomain_single, Finsupp.mapDomain_single,
+          Finsupp.mapDomain_single, Lin.compL_single, φ.app_comp]
+
+variable {R}
+
+@[simp] lemma SetOperadHom.lin_single (φ : SetOperadHom S T) {A : Type} [Fintype A]
+    [DecidableEq A] (s : S A) (r : R) :
+    (φ.lin R).app A (Finsupp.single s r) = Finsupp.single (φ.app A s) r :=
+  Finsupp.mapDomain_single
+
+end LinMap
 
 end Operad

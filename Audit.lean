@@ -454,3 +454,5 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Sym.SymAlgebra.act_comp
 #print axioms Operad.Sym.SymAlgebra.act_map
 #print axioms Operad.Sym.SymAlgebra.act_one
+#print axioms Operad.SymOperadHom.ext_single
+#print axioms Operad.SetOperadHom.lin
