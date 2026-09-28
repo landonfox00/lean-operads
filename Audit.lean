@@ -399,3 +399,7 @@ example (R : Type) [CommRing R] :
 
 #print axioms Operad.instNSOperadLinNS
 #print axioms Operad.SetOperad.instNSSetOperadToNSSet
+#print axioms Operad.NSSyn.eval_eq_of_rel
+#print axioms Operad.NSPres.instNSSetOperad
+#print axioms Operad.NSPres.hom_ext
+#print axioms Operad.NSPres.homEquiv
