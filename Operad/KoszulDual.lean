@@ -217,6 +217,15 @@ lemma eval_smul {n : ℕ} (c : R) (f : TConv R E Q n) (x : Chain R E n) :
   simp only [eval_apply, Pi.smul_apply, Finset.smul_sum, smul_comm c]
 
 omit [NSOperad R Q] in
+lemma eval_neg {n : ℕ} (f : TConv R E Q n) (x : Chain R E n) : eval (-f) x = -eval f x := by
+  simp only [eval_apply, Pi.neg_apply, smul_neg, Finset.sum_neg_distrib]
+
+omit [NSOperad R Q] in
+lemma eval_sub {n : ℕ} (f g : TConv R E Q n) (x : Chain R E n) :
+    eval (f - g) x = eval f x - eval g x := by
+  simp only [eval_apply, Pi.sub_apply, smul_sub, Finset.sum_sub_distrib]
+
+omit [NSOperad R Q] in
 @[simp] lemma eval_zero {n : ℕ} (x : Chain R E n) : eval (0 : TConv R E Q n) x = 0 := by
   simp [eval_apply]
 

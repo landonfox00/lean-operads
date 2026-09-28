@@ -124,6 +124,82 @@ lemma cases_four (t : OfArity E 4) :
           subst this
           exact Or.inr (Or.inl ⟨e₁, e₂, e₃, rfl⟩)
 
+/-! ### Telling the named trees apart -/
+
+section Distinct
+
+variable {a b c a' b' c' : E}
+
+@[simp] lemma lc_inj : lc a b = lc a' b' ↔ a = a' ∧ b = b' :=
+  ⟨fun h => by simpa [lc] using congrArg Subtype.val h, fun ⟨h, h'⟩ => h ▸ h' ▸ rfl⟩
+
+@[simp] lemma rc_inj : rc a b = rc a' b' ↔ a = a' ∧ b = b' :=
+  ⟨fun h => by simpa [rc] using congrArg Subtype.val h, fun ⟨h, h'⟩ => h ▸ h' ▸ rfl⟩
+
+@[simp] lemma lc_ne_rc : lc a b ≠ rc a' b' := fun h => by
+  simpa [lc, rc] using congrArg Subtype.val h
+
+@[simp] lemma rc_ne_lc : rc a b ≠ lc a' b' := fun h => by
+  simpa [lc, rc] using congrArg Subtype.val h
+
+@[simp] lemma ll_inj : ll a b c = ll a' b' c' ↔ a = a' ∧ b = b' ∧ c = c' :=
+  ⟨fun h => by simpa [ll] using congrArg Subtype.val h, fun ⟨h, h', h''⟩ => h ▸ h' ▸ h'' ▸ rfl⟩
+
+@[simp] lemma lr_inj : lr a b c = lr a' b' c' ↔ a = a' ∧ b = b' ∧ c = c' :=
+  ⟨fun h => by simpa [lr] using congrArg Subtype.val h, fun ⟨h, h', h''⟩ => h ▸ h' ▸ h'' ▸ rfl⟩
+
+@[simp] lemma bl_inj : bl a b c = bl a' b' c' ↔ a = a' ∧ b = b' ∧ c = c' :=
+  ⟨fun h => by simpa [bl] using congrArg Subtype.val h, fun ⟨h, h', h''⟩ => h ▸ h' ▸ h'' ▸ rfl⟩
+
+@[simp] lemma rl_inj : rl a b c = rl a' b' c' ↔ a = a' ∧ b = b' ∧ c = c' :=
+  ⟨fun h => by simpa [rl] using congrArg Subtype.val h, fun ⟨h, h', h''⟩ => h ▸ h' ▸ h'' ▸ rfl⟩
+
+@[simp] lemma rr_inj : rr a b c = rr a' b' c' ↔ a = a' ∧ b = b' ∧ c = c' :=
+  ⟨fun h => by simpa [rr] using congrArg Subtype.val h, fun ⟨h, h', h''⟩ => h ▸ h' ▸ h'' ▸ rfl⟩
+
+@[simp] lemma ll_ne_lr : ll a b c ≠ lr a' b' c' := fun h => by
+  simpa [ll, lr] using congrArg Subtype.val h
+@[simp] lemma ll_ne_bl : ll a b c ≠ bl a' b' c' := fun h => by
+  simpa [ll, bl] using congrArg Subtype.val h
+@[simp] lemma ll_ne_rl : ll a b c ≠ rl a' b' c' := fun h => by
+  simpa [ll, rl] using congrArg Subtype.val h
+@[simp] lemma ll_ne_rr : ll a b c ≠ rr a' b' c' := fun h => by
+  simpa [ll, rr] using congrArg Subtype.val h
+@[simp] lemma lr_ne_ll : lr a b c ≠ ll a' b' c' := fun h => by
+  simpa [ll, lr] using congrArg Subtype.val h
+@[simp] lemma lr_ne_bl : lr a b c ≠ bl a' b' c' := fun h => by
+  simpa [lr, bl] using congrArg Subtype.val h
+@[simp] lemma lr_ne_rl : lr a b c ≠ rl a' b' c' := fun h => by
+  simpa [lr, rl] using congrArg Subtype.val h
+@[simp] lemma lr_ne_rr : lr a b c ≠ rr a' b' c' := fun h => by
+  simpa [lr, rr] using congrArg Subtype.val h
+@[simp] lemma bl_ne_ll : bl a b c ≠ ll a' b' c' := fun h => by
+  simpa [bl, ll] using congrArg Subtype.val h
+@[simp] lemma bl_ne_lr : bl a b c ≠ lr a' b' c' := fun h => by
+  simpa [bl, lr] using congrArg Subtype.val h
+@[simp] lemma bl_ne_rl : bl a b c ≠ rl a' b' c' := fun h => by
+  simpa [bl, rl] using congrArg Subtype.val h
+@[simp] lemma bl_ne_rr : bl a b c ≠ rr a' b' c' := fun h => by
+  simpa [bl, rr] using congrArg Subtype.val h
+@[simp] lemma rl_ne_ll : rl a b c ≠ ll a' b' c' := fun h => by
+  simpa [rl, ll] using congrArg Subtype.val h
+@[simp] lemma rl_ne_lr : rl a b c ≠ lr a' b' c' := fun h => by
+  simpa [rl, lr] using congrArg Subtype.val h
+@[simp] lemma rl_ne_bl : rl a b c ≠ bl a' b' c' := fun h => by
+  simpa [rl, bl] using congrArg Subtype.val h
+@[simp] lemma rl_ne_rr : rl a b c ≠ rr a' b' c' := fun h => by
+  simpa [rl, rr] using congrArg Subtype.val h
+@[simp] lemma rr_ne_ll : rr a b c ≠ ll a' b' c' := fun h => by
+  simpa [rr, ll] using congrArg Subtype.val h
+@[simp] lemma rr_ne_lr : rr a b c ≠ lr a' b' c' := fun h => by
+  simpa [rr, lr] using congrArg Subtype.val h
+@[simp] lemma rr_ne_bl : rr a b c ≠ bl a' b' c' := fun h => by
+  simpa [rr, bl] using congrArg Subtype.val h
+@[simp] lemma rr_ne_rl : rr a b c ≠ rl a' b' c' := fun h => by
+  simpa [rr, rl] using congrArg Subtype.val h
+
+end Distinct
+
 end BTree.OfArity
 
 namespace TConv
@@ -158,7 +234,8 @@ lemma compFin_apply_eq_zero {m n : ℕ} (i : Fin m) (f : TConv R E Q m) (g : TCo
 
 lemma sstar_apply {j k : ℕ} (f : TConv R E Q (j + 1)) (g : TConv R E Q (k + 1))
     (t : OfArity E (j + k + 1)) :
-    sstar (R := R) f g t = ∑ a : Fin (j + 1), ((-1 : R) ^ ((a : ℕ) * k)) • compFin (R := R) a f g t := by
+    sstar (R := R) f g t
+      = ∑ a : Fin (j + 1), ((-1 : R) ^ ((a : ℕ) * k)) • compFin (R := R) a f g t := by
   rw [sstar_def, Finset.sum_apply]
   rfl
 
@@ -207,7 +284,8 @@ def graftPair {m n : ℕ} (i : Fin m) (p : OfArity E m × OfArity E n) : OfArity
     omega⟩
 
 omit [Fintype E] [DecidableEq E] in
-lemma graftPair_injective {m n : ℕ} (i : Fin m) : Function.Injective (graftPair (E := E) (n := n) i) :=
+lemma graftPair_injective {m n : ℕ} (i : Fin m) :
+    Function.Injective (graftPair (E := E) (n := n) i) :=
   fun p q h => by
     have h' := BTree.graft_inj p.1.1 q.1.1 i p.2.1 q.2.1 (by rw [p.1.2]; exact i.isLt)
       (by rw [q.1.2]; exact i.isLt) (by rw [p.2.2, q.2.2]) (congrArg Subtype.val h)
@@ -504,6 +582,38 @@ lemma gbracket12_apply (f : TConv R E Q 2) (θ : TConv R E Q 3) (t : OfArity E 4
       = sstar (R := R) (j := 1) (k := 2) f θ t - sstar (R := R) (j := 2) (k := 1) θ f t := by
   rw [gbracket, Pi.sub_apply, Pi.smul_apply, reindex_apply, reindex_self]
   norm_num
+
+section EvalBracket
+
+variable [Fintype E] [DecidableEq E]
+
+/-- **The bracket of a weight-one and a weight-two cochain, evaluated along slices**: on an
+arity-four chain, `⁅f, θ⁆ₛ` is `f` composed with `θ` evaluated on the two inner slices of each
+corolla, minus `θ` evaluated on the three outer slices composed with `f`, with the sign of the
+middle slot reversed. -/
+theorem eval_gbracket12 (f : TConv R E Q 2) (θ : TConv R E Q 3) (x : Chain R E 4) :
+    eval (gbracket (R := R) (j := 1) (k := 2) f θ) x
+      = ∑ e, (compFin (R := R) (P := Q) (0 : Fin 2) (f (cor e))
+            (eval θ (sliceIn (n := 3) (0 : Fin 2) (cor e) x))
+          + compFin (R := R) (P := Q) (1 : Fin 2) (f (cor e))
+            (eval θ (sliceIn (n := 3) (1 : Fin 2) (cor e) x)))
+        - ∑ e, (compFin (R := R) (P := Q) (0 : Fin 3)
+            (eval θ (sliceOut (n := 2) (0 : Fin 3) (cor e) x)) (f (cor e))
+          - compFin (R := R) (P := Q) (1 : Fin 3)
+            (eval θ (sliceOut (n := 2) (1 : Fin 3) (cor e) x)) (f (cor e))
+          + compFin (R := R) (P := Q) (2 : Fin 3)
+            (eval θ (sliceOut (n := 2) (2 : Fin 3) (cor e) x)) (f (cor e))) := by
+  have hb : gbracket (R := R) (j := 1) (k := 2) f θ
+      = sstar (R := R) (j := 1) (k := 2) f θ - sstar (R := R) (j := 2) (k := 1) θ f :=
+    funext fun t => gbracket12_apply f θ t
+  rw [hb, eval_sub, eval_sstar, eval_sstar, Fin.sum_univ_two, Fin.sum_univ_three,
+    eval_compFin_in, eval_compFin_in, eval_compFin_out, eval_compFin_out, eval_compFin_out,
+    sum_ofArity_two, sum_ofArity_two, sum_ofArity_two, sum_ofArity_two, sum_ofArity_two]
+  rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_sub_distrib]
+  simp only [Fin.val_zero, Fin.val_one, Fin.val_two, zero_mul, one_mul, mul_one, pow_zero,
+    pow_one, neg_one_sq, one_smul, neg_one_smul, sub_eq_add_neg]
+
+end EvalBracket
 
 end TConv
 

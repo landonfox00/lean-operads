@@ -507,3 +507,7 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TConv.eval_compFin_in
 #print axioms Operad.TConv.eval_compFin_out
 #print axioms Operad.TConv.eval_sstar
+#print axioms Operad.TConv.eval_sub
+#print axioms Operad.BTree.OfArity.bl_inj
+#print axioms Operad.BTree.OfArity.rr_ne_rl
+#print axioms Operad.TConv.eval_gbracket12
