@@ -48,7 +48,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-Roughly 5,500 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 118 headline results
+Roughly 6,100 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 132 headline results
 and confirms every one rests only on Lean's three standard axioms — `propext`, `Quot.sound`, and
 (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
 
@@ -108,7 +108,10 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | `Conv.star` (`⋆c`), bilinearity in both arguments | `Convolution.lean` | **proved** |
 | `Conv.bracket`, antisymmetry, `[f,f] = 0`, biadditivity | `Convolution.lean` | proved |
 | `Conv.convTerm_ass` — the encoding check, in closed form | `Convolution.lean` | **proved** |
-| **the pre-Lie identity for `⋆c`** | `Convolution.lean` | **not yet — see the roadmap** |
+| **`Conv.star_assoc_symm` — the pre-Lie identity for `⋆c`** | `ConvolutionPreLie.lean` | **proved** |
+| `nested_term`, `parallel_term` — the two associativities, termwise | `ConvolutionPreLie.lean` | proved |
+| **`ConvAlg`: `RightPreLieRing`, `RightPreLieAlgebra`, `LieRing`, `LieAlgebra R`** | `ConvolutionPreLie.lean` | **proved** |
+| `RightPreLieRing.toLieRing`, `toLieAlgebra` — any right pre-Lie ring is Lie | `PreLieLie.lean` | proved |
 | **`Perm`**, Chapoton's operad, `Perm R n = Fin n → R` | `Perm.lean` | **all four axioms proved** |
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
@@ -250,7 +253,9 @@ are kept as the history of how the library got here.
    `convTerm_ass`, which computes a term in closed form for `C = P = Ass` — a mis-ordered
    composite would still typecheck but would fail that.
 
-   **What is missing is the pre-Lie identity for `⋆c`**, and it is a theorem of the size of
+   **Done 2026-09-28:** `ConvolutionPreLie.lean` proves the pre-Lie identity and makes `ConvAlg`
+   a Lie algebra; the paragraph below is the plan it followed. **What was missing was the pre-Lie
+   identity for `⋆c`**, and it is a theorem of the size of
    `star_assoc_symm`, not plumbing. The route is the one `PreLie.lean` already walks: the
    associator splits into a nested part and a disjoint part, the nested part cancels by
    `decomp_assoc_seq` against `comp_assoc_seq`, and the disjoint part is symmetric in the last two

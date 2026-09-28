@@ -272,3 +272,25 @@ example (R : Type) [CommRing R] : Operad.NSOperad R (Operad.Perm R) := inferInst
 of the totals. -/
 noncomputable example (R : Type) [CommRing R] :
     Operad.NSOperadHom R (Operad.Perm R) (Operad.Ass R) := Operad.Perm.evHom R
+
+/-! ## The convolution algebra is pre-Lie -/
+
+#print axioms RightPreLieRing.jacobi
+#print axioms RightPreLieRing.toLieRing
+#print axioms RightPreLieRing.toLieAlgebra
+#print axioms Operad.Conv.star_eq_sum
+#print axioms Operad.Conv.nested_term
+#print axioms Operad.Conv.parallel_term
+#print axioms Operad.Conv.sum_nested
+#print axioms Operad.Conv.sum_after_eq_sum_before
+#print axioms Operad.Conv.associator_eq
+#print axioms Operad.Conv.star_assoc_symm
+#print axioms Operad.ConvAlg.instRightPreLieRing
+#print axioms Operad.ConvAlg.instRightPreLieAlgebra
+#print axioms Operad.ConvAlg.instLieRing
+#print axioms Operad.ConvAlg.instLieAlgebra
+
+/-- The convolution algebra of any cooperad into any operad is a Lie algebra over `R`: this
+elaborates only if the pre-Lie identity was proved. -/
+noncomputable example (R : Type) [CommRing R] :
+    LieAlgebra R (Operad.ConvAlg R (Operad.Ass R) (Operad.Ass R)) := inferInstance
