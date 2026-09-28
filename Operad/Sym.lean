@@ -428,6 +428,47 @@ def comp (ψ : SymOperadHom R Q S) (φ : SymOperadHom R P Q) : SymOperadHom R P 
     (A : Type) [Fintype A] [DecidableEq A] (x : P A) :
     (ψ.comp φ).app A x = ψ.app A (φ.app A x) := rfl
 
+/-- **The inverse of a morphism with bijective components** is a morphism. -/
+noncomputable def invOfBijective (φ : SymOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A], Function.Bijective (φ.app A)) :
+    SymOperadHom R Q P where
+  app A _ _ := (LinearEquiv.ofBijective (φ.app A) (h A)).symm.toLinearMap
+  app_map e y := by
+    apply (h _).1
+    simp only [LinearEquiv.coe_coe, LinearEquiv.apply_ofBijective_symm_apply, φ.app_map]
+  app_one := by
+    apply (h _).1
+    simp only [LinearEquiv.coe_coe, LinearEquiv.apply_ofBijective_symm_apply, φ.app_one]
+  app_comp i x y := by
+    apply (h _).1
+    simp only [LinearEquiv.coe_coe, LinearEquiv.apply_ofBijective_symm_apply, φ.app_comp]
+
+lemma app_invOfBijective (φ : SymOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A], Function.Bijective (φ.app A))
+    (A : Type) [Fintype A] [DecidableEq A] (y : Q A) :
+    φ.app A ((φ.invOfBijective h).app A y) = y :=
+  LinearEquiv.apply_ofBijective_symm_apply (φ.app A) (h := h A) y
+
+lemma invOfBijective_app (φ : SymOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A], Function.Bijective (φ.app A))
+    (A : Type) [Fintype A] [DecidableEq A] (x : P A) :
+    (φ.invOfBijective h).app A (φ.app A x) = x :=
+  (h A).1 (app_invOfBijective φ h A (φ.app A x))
+
+/-- **Precomposition with a morphism with bijective components** is a bijection on morphisms out
+of the target. -/
+noncomputable def precompEquiv (φ : SymOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A], Function.Bijective (φ.app A)) :
+    SymOperadHom R Q S ≃ SymOperadHom R P S where
+  toFun ψ := ψ.comp φ
+  invFun χ := χ.comp (φ.invOfBijective h)
+  left_inv ψ := by
+    ext A _ _ y
+    simp only [comp_app, app_invOfBijective]
+  right_inv χ := by
+    ext A _ _ x
+    simp only [comp_app, invOfBijective_app]
+
 end SymOperadHom
 
 /-! ## The commutative operad
