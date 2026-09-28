@@ -40,3 +40,4 @@ import Operad.NSSet
 import Operad.NSSetPresentation
 import Operad.NSSetArr
 import Operad.NSLinear
+import Operad.Filtration

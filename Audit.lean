@@ -439,3 +439,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.NSSetOperadHom.lin
 #print axioms Operad.NSSetOperadIso.lin
 #print axioms Operad.SetOperad.toNSLinIso
+
+/-! ## Suboperads and filtered symmetric operads -/
+
+#print axioms Operad.SymOperadHom.range
+#print axioms Operad.SymOperadFiltration.zero
+#print axioms Operad.SymOperadFiltration.map
+#print axioms Operad.weightFiltration
