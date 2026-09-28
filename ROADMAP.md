@@ -53,7 +53,7 @@ kernel-checked certificates (explicit kernel vectors, left inverses on complemen
 |---|---|---|
 | L1 | Convolution: the pre-Lie identity for `⋆c`, Jacobi, `LieRing` and `LieAlgebra` on `Conv` | **done** (`ConvolutionPreLie.lean`) |
 | L2 | Symmetric operads by partial composition: the class, morphisms, `Com`, `Perm`, `Ass`, `End`; the underlying non-symmetric operad, and its agreement with the existing `Perm` | **class, morphisms, `Com`, `Perm`, the underlying non-symmetric operad and the `Perm` comparison done** (`Sym.lean`, `SymNS.lean`); `Ass`, `End` next |
-| L3 | Set operads (symmetric and planar), linearization and its adjunction, free set operads on set species, congruences, presentations and their universal property, a normal-form toolkit | planned |
+| L3 | Set operads (symmetric and planar), linearization and its adjunction, free set operads on set species, congruences, presentations and their universal property, a normal-form toolkit | **symmetric part done**: set operads, `Lin` and the adjunction (`SetOperad.lean`); presented and free set operads with their universal properties, also into operads in modules (`SetPresentation.lean`); the binary calculus and the step from arity-three relators to generic identities (`SetBinary.lean`); generalized associativity and commutativity, `ComSet` presented by one commutative associative generator (`ComSet.lean`); `Perm` has no nonzero commutative associative element (`PermSet.lean`). Planar set operads next |
 | L4 | Suboperads, ideals, quotients and kernels for symmetric operads | planned |
 | L5 | Infinitesimal bimodules over an operad | planned |
 | L6 | Filtered operads, the associated graded, base change and specialization over `R[ħ]` | planned |

@@ -382,3 +382,6 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ComSet.linHomEquiv
 #print axioms Operad.ComSet.comPresIso
 #print axioms Operad.SetOperad.app_prod
+#print axioms Operad.SymOperadHom.und
+#print axioms Operad.Sym.Perm.eq_zero_of_isComm_isAssoc
+#print axioms Operad.Sym.Perm.app_eq_zero_of_isComm_isAssoc

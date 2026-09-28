@@ -295,6 +295,20 @@ lemma Und.comp_eq (i : A) (x : Q A) (y : Q B) :
 
 end Und
 
+/-- **The underlying morphism of set operads** of a morphism of operads in modules. -/
+def SymOperadHom.und {R : Type u} [CommRing R]
+    {P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] [SymOperad R P]
+    {Q : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [SymOperad R Q]
+    (φ : SymOperadHom R P Q) : SetOperadHom (Und R P) (Und R Q) where
+  app A _ _ x := Und.of R Q (φ.app A ((Und.of R P).symm x))
+  app_map e _ := congrArg (Und.of R Q) (φ.app_map e _)
+  app_one := congrArg (Und.of R Q) φ.app_one
+  app_comp i _ _ := congrArg (Und.of R Q) (φ.app_comp i _ _)
+
 section Adjunction
 
 variable (R : Type u) [CommRing R]
