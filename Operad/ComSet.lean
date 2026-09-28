@@ -390,6 +390,37 @@ noncomputable def linHomEquiv (R : Type u) [CommRing R]
 
 end ComSet
 
+/-! ## Morphisms preserve products -/
+
+namespace SetOperad
+
+universe w₁
+
+variable {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad S]
+  {T : (A : Type) → [Fintype A] → [DecidableEq A] → Type w₁} [SetOperad T]
+
+/-- A morphism carries a commutative element to a commutative element. -/
+lemma isComm_app {m : S (Fin 2)} (hc : IsComm m) (φ : SetOperadHom S T) :
+    IsComm (φ.app _ m) := by
+  simpa only [IsComm, SetOperadHom.app_map] using congrArg (φ.app _) hc
+
+/-- A morphism carries an associative element to an associative element. -/
+lemma isAssoc_app {m : S (Fin 2)} (ha : IsAssoc m) (φ : SetOperadHom S T) :
+    IsAssoc (φ.app _ m) := by
+  simpa only [IsAssoc, SetOperadHom.app_map, SetOperadHom.app_bin, SetOperadHom.app_one]
+    using congrArg (φ.app _) ha
+
+/-- **Morphisms preserve products.** -/
+theorem app_prod {m : S (Fin 2)} (hc : IsComm m) (ha : IsAssoc m) (φ : SetOperadHom S T)
+    (A : Type) [Fintype A] [DecidableEq A] (hA : Nonempty A) :
+    φ.app A (prod hc ha A hA) = prod (isComm_app hc φ) (isAssoc_app ha φ) A hA := by
+  have h : φ.comp (ComSet.lift m hc ha) = ComSet.lift (φ.app _ m) (isComm_app hc φ)
+      (isAssoc_app ha φ) :=
+    ComSet.hom_ext (by rw [ComSet.lift_mu]; exact congrArg (φ.app _) (ComSet.lift_mu m hc ha))
+  exact congrArg (fun ψ : SetOperadHom ComSet T => ψ.app A ⟨hA⟩) h
+
+end SetOperad
+
 /-! ## The presentation -/
 
 /-- The generator of `ComSet`: one binary operation. -/

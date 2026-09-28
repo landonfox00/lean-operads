@@ -381,3 +381,4 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ComSet.homEquiv
 #print axioms Operad.ComSet.linHomEquiv
 #print axioms Operad.ComSet.comPresIso
+#print axioms Operad.SetOperad.app_prod
