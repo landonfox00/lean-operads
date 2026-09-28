@@ -29,3 +29,4 @@ import Operad.PreLieLie
 import Operad.ConvolutionPreLie
 import Operad.Sym
 import Operad.SymNS
+import Operad.SetOperad

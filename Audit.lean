@@ -332,3 +332,15 @@ symmetric operad has an underlying non-symmetric one. -/
 example (R : Type) [CommRing R] : Operad.SymOperad R (Operad.Sym.Perm R) := inferInstance
 example (R : Type) [CommRing R] :
     Operad.NSOperad R (Operad.SymOperad.toNS (Operad.Sym.Perm R)) := inferInstance
+
+/-! ## Set operads and linearization -/
+
+#print axioms Operad.SetOperadHom.ext
+#print axioms Operad.SetOperadHom.comp
+#print axioms Operad.SetOperad.map_injective
+#print axioms Operad.Lin.compL_single
+#print axioms Operad.instSymOperadLin
+#print axioms Operad.instSetOperadUnd
+#print axioms Operad.SetOperadHom.linExtend
+#print axioms Operad.SymOperadHom.restrictBasis
+#print axioms Operad.linHomEquiv
