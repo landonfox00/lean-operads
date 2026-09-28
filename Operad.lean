@@ -38,3 +38,4 @@ import Operad.InfBimodule
 import Operad.SymIdeal
 import Operad.NSSet
 import Operad.NSSetPresentation
+import Operad.NSSetArr

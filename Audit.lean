@@ -403,3 +403,26 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.NSPres.instNSSetOperad
 #print axioms Operad.NSPres.hom_ext
 #print axioms Operad.NSPres.homEquiv
+#print axioms Operad.NSSetOperadHom.invOfBijective
+#print axioms Operad.NSSetOperadIso.ofBijective
+
+/-! ## The planar calculus without reindexing; right-comb normal forms -/
+
+#print axioms Operad.NSSetOperad.Arr.mk_comp
+#print axioms Operad.NSSetOperad.Arr.comp_one
+#print axioms Operad.NSSetOperad.Arr.one_comp
+#print axioms Operad.NSSetOperad.Arr.comp_comp_nested
+#print axioms Operad.NSSetOperad.Arr.comp_comp_disjoint
+#print axioms Operad.NSSetOperad.Arr.comp_bin_left
+#print axioms Operad.NSSetOperad.Arr.comp_bin_right
+#print axioms Operad.NSSetOperad.Arr.bin_bin_of_left_right
+#print axioms Operad.NSSetOperad.Arr.bin_right_of
+#print axioms Operad.NSSetOperad.Arr.bin_left_of
+#print axioms Operad.NSSetOperad.Arr.leftComb_eq
+#print axioms Operad.NSSetOperad.Arr.rightComb_eq
+#print axioms Operad.NSSetOperad.Arr.isRComb_bin
+#print axioms Operad.NSSetOperad.Arr.isRComb_comp
+#print axioms Operad.NSSetOperad.Arr.map_comp
+#print axioms Operad.NSSetOperad.Arr.map_rcomb
+#print axioms Operad.NSSetOperad.Arr.pres_induction
+#print axioms Operad.NSSetOperad.Arr.pres_isRComb

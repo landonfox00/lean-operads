@@ -115,6 +115,38 @@ structure NSSetOperadIso (S : ℕ → Type v) (T : ℕ → Type w) [NSSetOperad 
   hom_inv_id : inv.comp hom = NSSetOperadHom.id
   inv_hom_id : hom.comp inv = NSSetOperadHom.id
 
+namespace NSSetOperadHom
+
+variable {S : ℕ → Type v} {T : ℕ → Type w} [NSSetOperad S] [NSSetOperad T]
+
+/-- **The inverse of a bijective morphism** is a morphism. -/
+noncomputable def invOfBijective (φ : NSSetOperadHom S T) (h : ∀ n, Function.Bijective (φ.app n)) :
+    NSSetOperadHom T S where
+  app n := (Equiv.ofBijective _ (h n)).symm
+  app_one := by
+    apply (h 1).1
+    rw [Equiv.ofBijective_apply_symm_apply (φ.app 1) (h 1), φ.app_one]
+  app_comp a b n x y := by
+    apply (h _).1
+    rw [Equiv.ofBijective_apply_symm_apply (φ.app _) (h _), φ.app_comp,
+      Equiv.ofBijective_apply_symm_apply (φ.app _) (h _),
+      Equiv.ofBijective_apply_symm_apply (φ.app _) (h _)]
+
+end NSSetOperadHom
+
+/-- **A bijective morphism is an isomorphism.** -/
+noncomputable def NSSetOperadIso.ofBijective {S : ℕ → Type v} {T : ℕ → Type w} [NSSetOperad S]
+    [NSSetOperad T] (φ : NSSetOperadHom S T) (h : ∀ n, Function.Bijective (φ.app n)) :
+    NSSetOperadIso S T where
+  hom := φ
+  inv := φ.invOfBijective h
+  hom_inv_id := by
+    ext n x
+    exact Equiv.ofBijective_symm_apply_apply _ (h n) x
+  inv_hom_id := by
+    ext n x
+    exact Equiv.ofBijective_apply_symm_apply _ (h n) x
+
 /-! ## Linearization -/
 
 /-- **The linearization of a non-symmetric set operad.** -/
