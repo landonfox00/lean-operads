@@ -446,3 +446,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymOperadFiltration.zero
 #print axioms Operad.SymOperadFiltration.map
 #print axioms Operad.weightFiltration
+
+/-! ## The endomorphism operad and algebras over a symmetric operad -/
+
+#print axioms Operad.Sym.EndOp.compML
+#print axioms Operad.Sym.instSymOperadEndOp
+#print axioms Operad.Sym.SymAlgebra.act_comp
+#print axioms Operad.Sym.SymAlgebra.act_map
+#print axioms Operad.Sym.SymAlgebra.act_one

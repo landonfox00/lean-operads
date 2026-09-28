@@ -41,3 +41,4 @@ import Operad.NSSetPresentation
 import Operad.NSSetArr
 import Operad.NSLinear
 import Operad.Filtration
+import Operad.EndOperad
