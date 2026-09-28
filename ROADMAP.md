@@ -62,8 +62,8 @@ kernel-checked certificates (explicit kernel vectors, left inverses on complemen
 
 | | content | status |
 |---|---|---|
-| L7 | The graded convolution algebra of a weight-graded cooperad: graded pre-Lie, graded Jacobi, twisting, `d_f² = [f ⋆ f, −]`, Maurer–Cartan elements, coefficients in an ideal | planned |
-| L8 | Binary quadratic data; the Koszul dual cooperad (planar), through weight three and then in every weight | planned |
+| L7 | The graded convolution algebra of a weight-graded cooperad: graded pre-Lie, graded Jacobi, twisting, `d_f² = [f ⋆ f, −]`, Maurer–Cartan elements, coefficients in an ideal | **binary case done by reduction to the total space**: planar binary trees with unique factorization (`BinaryTree.lean`), and the cochains on trees with values in any non-symmetric operad form a non-symmetric operad, the convolution operad of the cofree cooperad (`TreeConv.lean`); its signed total space is the convolution graded pre-Lie algebra, so graded Jacobi, twisting and the cohomology of `Cohomology.lean` apply to it; cochains with values in an ideal form an ideal (`TConv.valuedIn`) |
+| L8 | Binary quadratic data; the Koszul dual cooperad (planar), through weight three and then in every weight | **started**: evaluation of cochains on chains, slices, and the annihilator of a slice-closed collection as an operad ideal; the Koszul dual of a binary quadratic presentation in every arity, slice-closed (`KoszulDual.lean`) |
 | L9 | The symmetric version, with equivariant cochains | planned |
 | L10 | The twisted complex of a morphism out of a quadratic operad; `H¹`, `H²` | planned |
 

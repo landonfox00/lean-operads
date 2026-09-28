@@ -481,3 +481,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TwLin.specialize
 #print axioms Operad.TwLin.specializeL_surjective
 #print axioms Operad.TwLin.specializeL_eq_zero_iff
+
+/-! ## Binary trees, the convolution operad of the free binary operad, and Koszul duals -/
+
+#print axioms Operad.BTree.graft_inj
+#print axioms Operad.BTree.graft_graft_seq
+#print axioms Operad.BTree.graft_graft_par
+#print axioms Operad.BTree.mem_ofArityFinset
+#print axioms Operad.instNSOperadTConv
+#print axioms Operad.TConv.valuedIn
+#print axioms Operad.TConv.eval_comp_outer
+#print axioms Operad.TConv.eval_comp_inner
+#print axioms Operad.TConv.ann
+#print axioms Operad.TConv.koszulDual_sliceClosed

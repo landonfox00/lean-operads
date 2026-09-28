@@ -44,3 +44,6 @@ import Operad.Filtration
 import Operad.EndOperad
 import Operad.SymIso
 import Operad.Rees
+import Operad.BinaryTree
+import Operad.TreeConv
+import Operad.KoszulDual
