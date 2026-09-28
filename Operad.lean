@@ -30,3 +30,5 @@ import Operad.ConvolutionPreLie
 import Operad.Sym
 import Operad.SymNS
 import Operad.SetOperad
+import Operad.SetPresentation
+import Operad.SetBinary

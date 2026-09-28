@@ -344,3 +344,26 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SetOperadHom.linExtend
 #print axioms Operad.SymOperadHom.restrictBasis
 #print axioms Operad.linHomEquiv
+
+/-! ## Presented set operads, and the binary calculus -/
+
+#print axioms Operad.Syn.eval_eq_of_rel
+#print axioms Operad.Pres.instSetOperad
+#print axioms Operad.Pres.lift
+#print axioms Operad.Pres.hom_ext
+#print axioms Operad.Pres.homEquiv
+#print axioms Operad.Pres.linHomEquiv
+#print axioms Operad.FreeSet.homEquiv
+#print axioms Operad.SetOperad.comp_map_left_of
+#print axioms Operad.SetOperad.bin_map
+#print axioms Operad.SetOperad.bin_one_one
+#print axioms Operad.SetOperad.bin_swap
+#print axioms Operad.SetOperad.comp_inl_bin
+#print axioms Operad.SetOperad.comp_inr_bin
+#print axioms Operad.SetOperad.subst3_map
+#print axioms Operad.SetOperad.subst3_bin_left
+#print axioms Operad.SetOperad.subst3_bin_right
+#print axioms Operad.SetOperad.bin_assoc_of
+#print axioms Operad.SetOperad.bin_right_of
+#print axioms Operad.SetOperad.bin_left_of
+#print axioms Operad.SetOperad.bin_comm_of

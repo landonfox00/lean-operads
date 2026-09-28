@@ -83,32 +83,6 @@ lemma insertEquiv_inl_val (a b n : ℕ) (k : Without (Fin (a + 1 + b)) ⟨a, by 
 @[simp] lemma insertEquiv_inr_val (a b n : ℕ) (j : Fin n) :
     ((insertEquiv a b n (Sum.inr j) : Fin (a + n + b)) : ℕ) = a + j := rfl
 
-/-- The one-element type as the one-element `Fin`. -/
-def unitFinOne : Unit ≃ Fin 1 where
-  toFun _ := ⟨0, by omega⟩
-  invFun _ := ()
-  left_inv _ := rfl
-  right_inv k := Fin.ext (by have := k.isLt; simp only; omega)
-
-/-- Composing at two equal slots differ by the relabelling the equality induces. -/
-def slotEquiv {A B : Type} [DecidableEq A] {i i' : A} (h : i = i') :
-    Without A i ⊕ B ≃ Without A i' ⊕ B :=
-  Equiv.sumCongr (Equiv.subtypeEquivRight fun a => by rw [h]) (Equiv.refl B)
-
-@[simp] lemma slotEquiv_inl {A B : Type} [DecidableEq A] {i i' : A} (h : i = i')
-    (a : Without A i) : slotEquiv (B := B) h (Sum.inl a) = Sum.inl ⟨a.1, h ▸ a.2⟩ := rfl
-
-@[simp] lemma slotEquiv_inr {A B : Type} [DecidableEq A] {i i' : A} (h : i = i') (b : B) :
-    slotEquiv (A := A) h (Sum.inr b) = Sum.inr b := rfl
-
-lemma rightUnitEquiv_symm_self {A : Type} [DecidableEq A] (i : A) :
-    (rightUnitEquiv i).symm i = Sum.inr () := by
-  simp [rightUnitEquiv]
-
-lemma rightUnitEquiv_symm_of_ne {A : Type} [DecidableEq A] {i x : A} (h : x ≠ i) :
-    (rightUnitEquiv i).symm x = Sum.inl ⟨x, h⟩ := by
-  simp [rightUnitEquiv, h]
-
 end Sym
 
 open Sym
