@@ -212,6 +212,10 @@ equivalence to the species picture is a later bridge.
 
 ## Roadmap
 
+**The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the
+symmetric spine as species-style partial composition and adds a set-operad layer. The items below
+are kept as the history of how the library got here.
+
 1. **The substitution product on species.** Two layers of it are in. The *unit* is
    `unitSpecies`, the free module on the bijections `S ≃ Fin 1`. The *indexing* is `Partition.lean`:
    partitions of a finite type transport along a bijection, functorially — `partMap_refl` and
