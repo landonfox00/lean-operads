@@ -456,3 +456,28 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Sym.SymAlgebra.act_one
 #print axioms Operad.SymOperadHom.ext_single
 #print axioms Operad.SetOperadHom.lin
+
+/-! ## Isomorphisms of symmetric operads -/
+
+#print axioms Operad.SymOperadHom.comp_id
+#print axioms Operad.SymOperadHom.id_comp
+#print axioms Operad.SymOperadHom.comp_assoc
+#print axioms Operad.SymOperadIso.trans
+#print axioms Operad.SymOperadIso.bijective
+#print axioms Operad.SymOperadIso.ofBijective
+
+/-! ## Weighted set operads: the associated graded and the Rees family -/
+
+#print axioms Operad.SetOperadWeight.defect_assoc_seq
+#print axioms Operad.SetOperadWeight.defect_assoc_par
+#print axioms Operad.instSymOperadTwLin
+#print axioms Operad.TwLin.filtration
+#print axioms Operad.TwLin.liftHom
+#print axioms Operad.TwLin.isoLin
+#print axioms Operad.Gr.comp_single
+#print axioms Operad.Gr.sign
+#print axioms Operad.Gr.sign_comp_sign
+#print axioms Operad.Gr.evZero
+#print axioms Operad.TwLin.specialize
+#print axioms Operad.TwLin.specializeL_surjective
+#print axioms Operad.TwLin.specializeL_eq_zero_iff

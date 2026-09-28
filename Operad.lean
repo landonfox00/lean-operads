@@ -42,3 +42,5 @@ import Operad.NSSetArr
 import Operad.NSLinear
 import Operad.Filtration
 import Operad.EndOperad
+import Operad.SymIso
+import Operad.Rees
