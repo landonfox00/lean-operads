@@ -504,3 +504,6 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TConv.gbracket12_apply
 #print axioms Operad.Perm.compFin_3_2_two
 #print axioms Operad.Perm.sumZero
+#print axioms Operad.TConv.eval_compFin_in
+#print axioms Operad.TConv.eval_compFin_out
+#print axioms Operad.TConv.eval_sstar

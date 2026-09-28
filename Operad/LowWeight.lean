@@ -162,6 +162,154 @@ lemma sstar_apply {j k : ℕ} (f : TConv R E Q (j + 1)) (g : TConv R E Q (k + 1)
   rw [sstar_def, Finset.sum_apply]
   rfl
 
+/-! ## Evaluating composites along slices -/
+
+section Slices
+
+variable [Fintype E] [DecidableEq E]
+
+/-- The inner slice of a chain at a `Fin` slot of an outer tree. -/
+def sliceIn {m n : ℕ} (i : Fin m) (t₁ : OfArity E m) (x : Chain R E (m - 1 + n)) : Chain R E n :=
+  fun t₂ => x ⟨t₁.1.graft i t₂.1, by
+    have h := arity_graft t₁.1 i t₂.1 (by rw [t₁.2]; exact i.isLt)
+    rw [t₁.2, t₂.2] at h
+    have := i.isLt
+    omega⟩
+
+/-- The outer slice of a chain at an inner tree, for a `Fin` slot. -/
+def sliceOut {m n : ℕ} (i : Fin m) (t₂ : OfArity E n) (x : Chain R E (m - 1 + n)) : Chain R E m :=
+  fun t₁ => x ⟨t₁.1.graft i t₂.1, by
+    have h := arity_graft t₁.1 i t₂.1 (by rw [t₁.2]; exact i.isLt)
+    rw [t₁.2, t₂.2] at h
+    have := i.isLt
+    omega⟩
+
+lemma compFin_sum_left {m n : ℕ} (i : Fin m) {ι : Type*} (s : Finset ι) (F : ι → Q m) (y : Q n) :
+    compFin (R := R) i (∑ k ∈ s, F k) y = ∑ k ∈ s, compFin (R := R) i (F k) y := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert k s hk ih => rw [Finset.sum_insert hk, Finset.sum_insert hk, compFin_add_left, ih]
+
+lemma compFin_sum_right {m n : ℕ} (i : Fin m) (x : Q m) {ι : Type*} (s : Finset ι) (F : ι → Q n) :
+    compFin (R := R) i x (∑ k ∈ s, F k) = ∑ k ∈ s, compFin (R := R) i x (F k) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert k s hk ih => rw [Finset.sum_insert hk, Finset.sum_insert hk, compFin_add_right, ih]
+
+/-- Grafting a pair of trees at a `Fin` slot. -/
+def graftPair {m n : ℕ} (i : Fin m) (p : OfArity E m × OfArity E n) : OfArity E (m - 1 + n) :=
+  ⟨p.1.1.graft i p.2.1, by
+    have h := arity_graft p.1.1 i p.2.1 (by rw [p.1.2]; exact i.isLt)
+    rw [p.1.2, p.2.2] at h
+    have := i.isLt
+    omega⟩
+
+omit [Fintype E] [DecidableEq E] in
+lemma graftPair_injective {m n : ℕ} (i : Fin m) : Function.Injective (graftPair (E := E) (n := n) i) :=
+  fun p q h => by
+    have h' := BTree.graft_inj p.1.1 q.1.1 i p.2.1 q.2.1 (by rw [p.1.2]; exact i.isLt)
+      (by rw [q.1.2]; exact i.isLt) (by rw [p.2.2, q.2.2]) (congrArg Subtype.val h)
+    exact Prod.ext (Subtype.ext h'.1) (Subtype.ext h'.2)
+
+/-- A `compFin` of cochains, evaluated on a chain, as a sum over the factorizations. -/
+lemma eval_compFin_pairs {m n : ℕ} (i : Fin m) (f : TConv R E Q m) (g : TConv R E Q n)
+    (x : Chain R E (m - 1 + n)) :
+    eval (compFin (R := R) i f g) x = ∑ p : OfArity E m × OfArity E n,
+      sliceOut i p.2 x p.1 • compFin (R := R) (P := Q) i (f p.1) (g p.2) := by
+  rw [eval_apply]
+  refine (Fintype.sum_of_injective (graftPair i) (graftPair_injective i) _ _ (fun t ht => ?_)
+    (fun p => ?_)).symm
+  · rw [compFin_apply_eq_zero i f g t (fun t₁ t₂ h => ht ⟨(t₁, t₂), Subtype.ext h⟩), smul_zero]
+  · rw [compFin_apply_graft i f g p.1 p.2 _ rfl]
+    rfl
+
+/-- **Evaluating a `compFin` of cochains along inner slices.** -/
+theorem eval_compFin_in {m n : ℕ} (i : Fin m) (f : TConv R E Q m) (g : TConv R E Q n)
+    (x : Chain R E (m - 1 + n)) :
+    eval (compFin (R := R) i f g) x
+      = ∑ t₁, compFin (R := R) (P := Q) i (f t₁) (eval g (sliceIn i t₁ x)) := by
+  rw [eval_compFin_pairs, Fintype.sum_prod_type]
+  refine Finset.sum_congr rfl fun t₁ _ => ?_
+  rw [eval_apply, compFin_sum_right]
+  refine Finset.sum_congr rfl fun t₂ _ => ?_
+  rw [compFin_smul_right]
+  rfl
+
+/-- **Evaluating a `compFin` of cochains along outer slices.** -/
+theorem eval_compFin_out {m n : ℕ} (i : Fin m) (f : TConv R E Q m) (g : TConv R E Q n)
+    (x : Chain R E (m - 1 + n)) :
+    eval (compFin (R := R) i f g) x
+      = ∑ t₂, compFin (R := R) (P := Q) i (eval f (sliceOut i t₂ x)) (g t₂) := by
+  rw [eval_compFin_pairs, Fintype.sum_prod_type_right]
+  refine Finset.sum_congr rfl fun t₂ _ => ?_
+  rw [eval_apply, compFin_sum_left]
+  refine Finset.sum_congr rfl fun t₁ _ => ?_
+  rw [compFin_smul_left]
+
+omit [NSOperad R Q] in
+lemma eval_sum {n : ℕ} {ι : Type*} (s : Finset ι) (F : ι → TConv R E Q n) (x : Chain R E n) :
+    eval (∑ k ∈ s, F k) x = ∑ k ∈ s, eval (F k) x := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert k s hk ih => rw [Finset.sum_insert hk, Finset.sum_insert hk, eval_add, ih]
+
+/-- **Evaluating the signed product**: the signed sum of its `compFin` terms. -/
+theorem eval_sstar {j k : ℕ} (f : TConv R E Q (j + 1)) (g : TConv R E Q (k + 1))
+    (x : Chain R E (j + k + 1)) :
+    eval (sstar (R := R) f g) x
+      = ∑ a : Fin (j + 1), ((-1 : R) ^ ((a : ℕ) * k)) • eval (compFin (R := R) a f g) x := by
+  rw [sstar_def]
+  show eval (∑ a : Fin (j + 1), ((-1 : R) ^ ((a : ℕ) * k)) •
+    (compFin (R := R) a f g : TConv R E Q (j + k + 1))) x = _
+  rw [eval_sum]
+  exact Finset.sum_congr rfl fun a _ => eval_smul _ _ _
+
+/-- Summing over the trees of arity two is summing over the generators. -/
+lemma sum_ofArity_two {M : Type*} [AddCommMonoid M] (F : OfArity E 2 → M) :
+    ∑ t, F t = ∑ e, F (cor e) := by
+  refine (Fintype.sum_bijective cor ⟨fun a b h => ?_, fun t => ?_⟩ _ _ fun _ => rfl).symm
+  · have := congrArg Subtype.val h
+    simpa [cor, corolla] using this
+  · obtain ⟨e, rfl⟩ := eq_cor t
+    exact ⟨e, rfl⟩
+
+/-! The slices of an arity-four chain at a corolla, on the named trees. -/
+
+section Named
+
+-- The instances are needed by `sliceIn` and `sliceOut` in the statements, not by the proofs.
+set_option linter.unusedSectionVars false
+
+variable (x : Chain R E 4) (e p q : E)
+
+@[simp] lemma sliceOut_zero_lc : sliceOut (m := 3) (0 : Fin 3) (cor e) x (lc p q) = x (ll p q e) :=
+  rfl
+@[simp] lemma sliceOut_one_lc : sliceOut (m := 3) (1 : Fin 3) (cor e) x (lc p q) = x (lr p q e) :=
+  rfl
+@[simp] lemma sliceOut_two_lc : sliceOut (m := 3) (2 : Fin 3) (cor e) x (lc p q) = x (bl p q e) :=
+  rfl
+@[simp] lemma sliceOut_zero_rc : sliceOut (m := 3) (0 : Fin 3) (cor e) x (rc p q) = x (bl p e q) :=
+  rfl
+@[simp] lemma sliceOut_one_rc : sliceOut (m := 3) (1 : Fin 3) (cor e) x (rc p q) = x (rl p q e) :=
+  rfl
+@[simp] lemma sliceOut_two_rc : sliceOut (m := 3) (2 : Fin 3) (cor e) x (rc p q) = x (rr p q e) :=
+  rfl
+@[simp] lemma sliceIn_zero_lc : sliceIn (n := 3) (0 : Fin 2) (cor e) x (lc p q) = x (ll e p q) :=
+  rfl
+@[simp] lemma sliceIn_zero_rc : sliceIn (n := 3) (0 : Fin 2) (cor e) x (rc p q) = x (lr e p q) :=
+  rfl
+@[simp] lemma sliceIn_one_lc : sliceIn (n := 3) (1 : Fin 2) (cor e) x (lc p q) = x (rl e p q) :=
+  rfl
+@[simp] lemma sliceIn_one_rc : sliceIn (n := 3) (1 : Fin 2) (cor e) x (rc p q) = x (rr e p q) :=
+  rfl
+
+end Named
+
+end Slices
+
 /-! ## Weight one against weight one -/
 
 section Two
