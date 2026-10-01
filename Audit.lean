@@ -578,3 +578,33 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymOperadIdeal.span_le_ker_iff
 #print axioms Operad.SymOperadIdeal.presHomEquiv
 #print axioms Operad.presLinHomEquiv
+
+/-! ## Symmetric cochains on binary trees; twisting; coefficients in an ideal -/
+
+#print axioms Operad.BTree.graft_cutAt_subAt
+#print axioms Operad.BTree.leafPath_graft
+#print axioms Operad.BTree.eq_of_posAt_eq
+#print axioms Operad.BTree.swapAt_swapAt
+#print axioms Operad.BTree.mem_paths_swapAt
+#print axioms Operad.BTree.swapAt_cut_of_not_prefix
+#print axioms Operad.BTree.swapAt_cut_of_prefix
+#print axioms Operad.BTree.swapPos_cut_of_not_prefix
+#print axioms Operad.BTree.swapPos_cut_of_prefix
+#print axioms Operad.BTree.splitAt_cut_of_not_prefix
+#print axioms Operad.BTree.splitAt_cut_of_prefix
+#print axioms Operad.SymOperad.compFin_toNS
+#print axioms Operad.SymOperad.map_comp_map_left
+#print axioms Operad.SymOperad.map_comp_map_right
+#print axioms Operad.TConv.sstar_apply_paths
+#print axioms Operad.TConv.pathTerm_swap
+#print axioms Operad.TConv.isSymm_sstar
+#print axioms Operad.TConv.isSymm_gbracket
+#print axioms Operad.TConv.isSymm_two_iff
+#print axioms Operad.TConv.symmCochains
+#print axioms Operad.brT_brT_eq
+#print axioms Operad.gbracket_gbracket_eq
+#print axioms Operad.OperadIdeal.sstar_mem_left
+#print axioms Operad.OperadIdeal.sstar_mem_right
+#print axioms Operad.OperadIdeal.gbracket_mem_left
+#print axioms Operad.OperadIdeal.gbracket_mem_right
+#print axioms Operad.SymOperadIdeal.toNS
