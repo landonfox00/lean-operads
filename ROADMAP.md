@@ -95,7 +95,11 @@ universal properties as operads in modules. **The presentation of `Perm`** (`Per
 one binary operation and the two permutative relations; **of `Ass`** (`AssPres.lean`), as a
 regular operad; **of `ComTrias`** (`ComTriasPres.lean`), Vallette's. **Algebras**
 (`Algebras.lean`): `Com`-, `Perm`-, `Ass`-, `Dias`-, `Trias`- and `ComTrias`-algebras are what they
-should be. Still to do: `Lie`, `PreLie`, `Pois`, `Dend`, the Koszul dual operad.
+should be. **Binary quadratic operads** (`BinaryQuadratic.lean`): the free operad on binary
+generators, its two-fold monomials and their values in endomorphism operads, the operad presented by
+relators of arity two and three and its algebras; `Lie`, `PreLie`, `Leib`, `Zinb`, `Dend`, `Pois`
+with their algebras. Still to do: bases of the free operad (tree monomials) and the Koszul dual
+operad.
 
 ### Phase 4 — general theory
 

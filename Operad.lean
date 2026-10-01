@@ -65,3 +65,4 @@ import Operad.PermPres
 import Operad.AssPres
 import Operad.ComTriasPres
 import Operad.Algebras
+import Operad.BinaryQuadratic
