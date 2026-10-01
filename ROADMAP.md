@@ -77,8 +77,12 @@ theorems that `Com`-, `Perm`-, `Lie`-algebras are what they should be; the Koszu
 **Started** (`SetHadamard.lean`): Hadamard products of set operads, with their universal property;
 `Perm` as the linearization of the pointed sets; `ComTrias`; `Dias` and `Trias` as linearized
 Hadamard products with the linear orders, with their defining relations, their dimensions
-`n · n!` and `(2ⁿ - 1) · n!`, and the morphism `Dias → Trias`. Still to do: the presentations of
-`Dias` and `Trias` by those relations, and the rest of the list above.
+`n · n!` and `(2ⁿ - 1) · n!`, and the morphism `Dias → Trias`. **Regular operads**
+(`Regular.lean`): the symmetrization of a planar set operad, left adjoint to the underlying planar
+operad, the Hadamard product with the linear orders as a symmetrization, and the transfer of planar
+presentations to symmetric ones. **Presentations of `Dias` and `Trias`** (`DiasTrias.lean`):
+Loday's five relations and Loday–Ronco's eleven, through planar right-comb normal forms; their
+universal properties as operads in modules. Still to do: the rest of the list above.
 
 ### Phase 4 — general theory
 

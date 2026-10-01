@@ -59,3 +59,5 @@ import Operad.SymPresentation
 import Operad.SymTreeConv
 import Operad.ShuffleTree
 import Operad.LeadingTerm
+import Operad.Regular
+import Operad.DiasTrias
