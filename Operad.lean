@@ -67,3 +67,4 @@ import Operad.ComTriasPres
 import Operad.Algebras
 import Operad.BinaryQuadratic
 import Operad.ShuffleSubst
+import Operad.FreeBinary

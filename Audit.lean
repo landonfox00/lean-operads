@@ -752,3 +752,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.LTree.substAt_mem_monomials
 #print axioms Operad.LTree.not_isNormal_iff
 #print axioms Operad.LTree.pathKey_substAt_lt'
+#print axioms Operad.BTree.OfArity.instNSSetOperad
+#print axioms Operad.BTree.OfArity.toArr_node
+#print axioms Operad.BTree.evalArr_graft
+#print axioms Operad.BTree.OfArity.lift
+#print axioms Operad.BTree.OfArity.lift_corolla
+#print axioms Operad.BTree.OfArity.hom_ext
+#print axioms Operad.BTree.OfArity.homEquiv
+#print axioms Operad.FreeBin.regHom_ext
+#print axioms Operad.FreeBin.regIso
+#print axioms Operad.FreeBin.basis
+#print axioms Operad.FreeBin.basis_apply
+#print axioms Operad.FreeBin.card_reg
+#print axioms Operad.FreeBin.finrank_eq
