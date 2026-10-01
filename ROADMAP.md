@@ -83,7 +83,9 @@ operad, the Hadamard product with the linear orders as a symmetrization, and the
 presentations to symmetric ones. **Presentations of `Dias` and `Trias`** (`DiasTrias.lean`):
 Loday's five relations and Loday–Ronco's eleven, through planar right-comb normal forms; their
 universal properties as operads in modules. **The presentation of `Perm`** (`PermPres.lean`), by
-one binary operation and the two permutative relations. Still to do: the rest of the list above.
+one binary operation and the two permutative relations; **of `Ass`** (`AssPres.lean`), as a
+regular operad. **Algebras** (`Algebras.lean`): `Com`-, `Perm`-, `Ass`-, `Dias`- and `Trias`-algebras
+are what they should be. Still to do: `Lie`, `PreLie`, `Pois`, `Dend`, the Koszul dual operad.
 
 ### Phase 4 — general theory
 

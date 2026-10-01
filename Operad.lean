@@ -62,3 +62,5 @@ import Operad.LeadingTerm
 import Operad.Regular
 import Operad.DiasTrias
 import Operad.PermPres
+import Operad.AssPres
+import Operad.Algebras

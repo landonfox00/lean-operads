@@ -678,3 +678,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.PointedSet.homEquiv
 #print axioms Operad.SymOperadIso.precompEquiv
 #print axioms Operad.Perm.homEquiv
+#print axioms Operad.PAss.eq_rcomb
+#print axioms Operad.PAss.presIso
+#print axioms Operad.AssSet.presIso
+#print axioms Operad.Ass.homEquiv
+#print axioms Operad.EndOp.ap_bin
+#print axioms Operad.EndOp.isComm_iff
+#print axioms Operad.EndOp.isAssoc_iff
+#print axioms Operad.EndOp.r2b_iff
+#print axioms Operad.EndOp.leftComb_eq_rightComb_iff
+#print axioms Operad.Com.algebraEquiv
+#print axioms Operad.Perm.algebraEquiv
+#print axioms Operad.Ass.algebraEquiv
+#print axioms Operad.Dias.algebraEquiv
+#print axioms Operad.Trias.algebraEquiv
