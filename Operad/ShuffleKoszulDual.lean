@@ -19,7 +19,11 @@ When `R` is a quadratic Gröbner basis with leading monomials `L`:
 
 This depends only on `L` (`finrank_KD_eq`): **two quadratic Gröbner bases with the same leading
 monomials present Koszul operads whose Koszul dual cooperads have the same dimension in every
-arity.**
+arity.** A bar tree is a monomial with a set of cut edges (`flagBy`, `flagBy_cutKeys`), normal when
+every edge whose window is in `L` is cut, and inclusion and exclusion over the cut edges evaluates
+the alternating sum (`sum_ncard_nrm`): **the dimension of the Koszul dual cooperad in arity `n` is
+the number of monomials of arity `n` all of whose windows are in `L`** (`finrank_KD_eq_ncard`),
+the count of the dual PBW basis.
 -/
 import Operad.ShuffleKoszul
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
@@ -49,6 +53,131 @@ end LTree
 namespace ShuffleBar
 
 open LTree Module
+
+section Flags
+
+variable {E : Type v}
+
+/-- **The bar tree of a monomial with the edges of keys in `C` cut.** -/
+def flagBy (C : Finset (ℕ ×ₗ ℕ)) : LTree E → BarTree E
+  | leaf a => leaf a
+  | node e l r => node (e, decide (key (node e l r) ∈ C)) (flagBy C l) (flagBy C r)
+
+lemma full_flagBy (C : Finset (ℕ ×ₗ ℕ)) : ∀ m : LTree E, (flagBy C m).mapDec Prod.fst = m
+  | leaf _ => rfl
+  | node e l r => by rw [flagBy, mapDec_node, full_flagBy C l, full_flagBy C r]
+
+lemma minLabel_flagBy (C : Finset (ℕ ×ₗ ℕ)) (m : LTree E) :
+    (flagBy C m).minLabel = m.minLabel := by
+  rw [← minLabel_mapDec Prod.fst, full_flagBy]
+
+lemma arity_flagBy (C : Finset (ℕ ×ₗ ℕ)) (m : LTree E) : (flagBy C m).arity = m.arity := by
+  rw [← arity_mapDec Prod.fst, full_flagBy]
+
+lemma labels_flagBy (C : Finset (ℕ ×ₗ ℕ)) (m : LTree E) : (flagBy C m).labels = m.labels := by
+  rw [← labels_mapDec Prod.fst, full_flagBy]
+
+lemma key_flagBy_node (C : Finset (ℕ ×ₗ ℕ)) (b : Bool) (e : E) (l r : LTree E) :
+    key (node (e, b) (flagBy C l) (flagBy C r)) = key (node e l r) := by
+  simp only [key_node, minLabel_flagBy, arity_flagBy]
+
+lemma cutKeys_flagBy (C : Finset (ℕ ×ₗ ℕ)) :
+    ∀ m : LTree E, cutKeys (flagBy C m) = C ∩ m.nodeKeys
+  | leaf _ => by simp [flagBy, cutKeys, nodeKeys]
+  | node e l r => by
+    rw [flagBy, cutKeys, cutKeys_flagBy C l, cutKeys_flagBy C r, nodeKeys, key_flagBy_node]
+    ext k
+    by_cases hk : key (node e l r) ∈ C
+    · simp only [hk, decide_true, if_true, Finset.mem_union, Finset.mem_singleton,
+        Finset.mem_inter, Finset.mem_insert]
+      constructor
+      · rintro (rfl | ⟨h1, h2⟩ | ⟨h1, h2⟩)
+        · exact ⟨hk, Or.inl rfl⟩
+        · exact ⟨h1, Or.inr (Or.inl h2)⟩
+        · exact ⟨h1, Or.inr (Or.inr h2)⟩
+      · rintro ⟨h1, rfl | h2 | h2⟩
+        · exact Or.inl rfl
+        · exact Or.inr (Or.inl ⟨h1, h2⟩)
+        · exact Or.inr (Or.inr ⟨h1, h2⟩)
+    · simp only [hk, decide_false, Bool.false_eq_true, if_false, Finset.empty_union,
+        Finset.mem_union, Finset.mem_inter, Finset.mem_insert]
+      constructor
+      · rintro (⟨h1, h2⟩ | ⟨h1, h2⟩)
+        · exact ⟨h1, Or.inr (Or.inl h2)⟩
+        · exact ⟨h1, Or.inr (Or.inr h2)⟩
+      · rintro ⟨h1, rfl | h2 | h2⟩
+        · exact absurd h1 hk
+        · exact Or.inl ⟨h1, h2⟩
+        · exact Or.inr ⟨h1, h2⟩
+
+lemma edgeKeys_subset_nodeKeys : ∀ m : LTree E, m.edgeKeys ⊆ m.nodeKeys
+  | leaf _ => by simp [edgeKeys, edgeWins]
+  | node e l r => by
+    rw [edgeKeys_node, nodeKeys]
+    exact Finset.subset_insert _ _
+
+lemma key_not_mem_edgeKeys (e : E) (l r : LTree E) : key (node e l r) ∉ (node e l r).edgeKeys := by
+  rw [edgeKeys_node, Finset.mem_union, not_or]
+  exact ⟨key_not_mem_left e l r, key_not_mem_right e l r⟩
+
+lemma rootFlag_flagBy {C : Finset (ℕ ×ₗ ℕ)} :
+    ∀ {m : LTree E}, C ⊆ m.edgeKeys → rootFlag (flagBy C m) = false
+  | leaf _, _ => rfl
+  | node e l r, hC => by
+    simp only [flagBy, rootFlag, decide_eq_false_iff_not]
+    exact fun h => key_not_mem_edgeKeys e l r (hC h)
+
+lemma flagBy_congr {C C' : Finset (ℕ ×ₗ ℕ)} :
+    ∀ m : LTree E, (∀ k ∈ m.nodeKeys, k ∈ C ↔ k ∈ C') → flagBy C m = flagBy C' m
+  | leaf _, _ => rfl
+  | node e l r, h => by
+    have hk := h _ (Finset.mem_insert_self _ _)
+    rw [flagBy, flagBy,
+      flagBy_congr l fun k hk' => h k (Finset.mem_insert_of_mem (Finset.mem_union_left _ hk')),
+      flagBy_congr r fun k hk' => h k (Finset.mem_insert_of_mem (Finset.mem_union_right _ hk')),
+      decide_eq_decide.2 hk]
+
+/-- **A bar tree is its monomial with its cut edges cut.** -/
+lemma flagBy_cutKeys : ∀ x : BarTree E, x.labels.Nodup → flagBy (cutKeys x) (x.mapDec Prod.fst) = x
+  | leaf _, _ => rfl
+  | node d l r, hnd => by
+    have hnd' : (l.labels ++ r.labels).Nodup := by simpa using hnd
+    have hl : l.labels.Nodup := (List.nodup_append.1 hnd').1
+    have hr : r.labels.Nodup := (List.nodup_append.1 hnd').2.1
+    have hdisj := disjoint_nodeKeys hnd
+    have hkey : key (node d.1 (l.mapDec Prod.fst) (r.mapDec Prod.fst)) = key (node d l r) :=
+      key_mapDec Prod.fst (node d l r)
+    rw [mapDec_node, flagBy, hkey,
+      flagBy_congr (l.mapDec Prod.fst) (C' := cutKeys l) ?_, flagBy_cutKeys l hl,
+      flagBy_congr (r.mapDec Prod.fst) (C' := cutKeys r) ?_, flagBy_cutKeys r hr]
+    · refine congrArg (fun b => node b l r) (Prod.ext rfl ?_)
+      cases hd : d.2
+      · rw [decide_eq_false_iff_not]
+        intro h
+        simp only [cutKeys, hd, Bool.false_eq_true, if_false, Finset.empty_union,
+          Finset.mem_union] at h
+        rcases h with h | h
+        · exact key_not_mem_left d l r (cutKeys_subset l h)
+        · exact key_not_mem_right d l r (cutKeys_subset r h)
+      · rw [decide_eq_true_iff]
+        simp [cutKeys, hd]
+    · intro k hk
+      rw [nodeKeys_mapDec] at hk
+      have h1 : k ≠ key (node d l r) := fun h => key_not_mem_right d l r (by rw [← h]; exact hk)
+      have h2 : k ∉ cutKeys l := fun h => Finset.disjoint_left.1 hdisj (cutKeys_subset l h) hk
+      simp only [cutKeys, Finset.mem_union]
+      split_ifs <;> simp [h1, h2]
+    · intro k hk
+      rw [nodeKeys_mapDec] at hk
+      have h1 : k ≠ key (node d l r) := fun h => key_not_mem_left d l r (by rw [← h]; exact hk)
+      have h2 : k ∉ cutKeys r := fun h => Finset.disjoint_left.1 hdisj hk (cutKeys_subset r h)
+      simp only [cutKeys, Finset.mem_union]
+      split_ifs <;> simp [h1, h2]
+
+/-- **A monomial all of whose windows lie in `L`.** -/
+def IsFull (L : Set (LTree E)) (m : LTree E) : Prop := ∀ kw ∈ m.edgeWins, kw.2 ∈ L
+
+end Flags
 
 variable {E : Type v} [Fintype E] [DecidableEq E]
 
@@ -302,6 +431,161 @@ theorem finrank_KD_eq {R' : Submodule K (Mono E 3 → K)} (hG' : IsGroebner K rk
   · have h := finrank_KD K rk hG hn
     rw [← finrank_KD K rk hG' hn] at h
     exact_mod_cast h
+
+/-! ## The dimension as a number of monomials -/
+
+omit [Fintype E] [DecidableEq E] in
+/-- The keys of the edges of a monomial with distinct labels are distinct. -/
+lemma nodup_edgeWins_keys {m : LTree E} (hnd : m.labels.Nodup) :
+    (m.edgeWins.map Prod.fst).Nodup :=
+  (List.nodup_append.1 ((perm_keyList m).nodup_iff.1 (nodup_keyList m hnd))).2.1
+
+open Classical in
+/-- **The normal bar trees of degree `s`**, counted by their monomial and their cut edges. -/
+lemma ncard_nrm (L : Set (LTree E)) (n s : ℕ) :
+    (Nrm L n s).ncard = ∑ m ∈ monomials (E := E) n, (m.edgeKeys.powerset.filter
+      fun C => C.card + 1 = s ∧ ∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L).card := by
+  rw [← Finset.card_sigma]
+  set T := (monomials (E := E) n).sigma fun m => m.edgeKeys.powerset.filter
+    fun C => C.card + 1 = s ∧ ∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L
+  have hT : Nrm L n s = ↑(T.image fun p => flagBy p.2 p.1) := by
+    ext x
+    simp only [T, Finset.coe_image, Set.mem_image, Finset.mem_coe, Finset.mem_sigma,
+      Finset.mem_filter, Finset.mem_powerset]
+    constructor
+    · rintro ⟨hx, hN⟩
+      exact ⟨⟨x.mapDec Prod.fst, cutKeys x⟩, ⟨full_mem_monomials hx,
+        cutKeys_subset_edgeKeys hx.1.root, hx.2.2, hN⟩, flagBy_cutKeys x hx.1.nodup⟩
+    · rintro ⟨⟨m, C⟩, ⟨hm, hC, hs, hg⟩, rfl⟩
+      obtain ⟨hms, hml⟩ := (mem_monomials _ _).1 hm
+      have hcut : cutKeys (flagBy C m) = C :=
+        (cutKeys_flagBy C m).trans (Finset.inter_eq_left.2 (hC.trans (edgeKeys_subset_nodeKeys m)))
+      refine ⟨⟨⟨(isShuffle_mapDec Prod.fst _).1 (by rw [full_flagBy]; exact hms),
+        by rw [labels_flagBy]; exact hml.nodup_iff.2 List.nodup_range, rootFlag_flagBy hC⟩,
+        by rw [labels_flagBy]; exact hml, by rw [hcut]; exact hs⟩, ?_⟩
+      intro kw hkw hk
+      rw [full_flagBy] at hkw
+      rw [hcut] at hk
+      exact hg kw hkw hk
+  rw [hT, Set.ncard_coe_finset, Finset.card_image_of_injOn]
+  rintro ⟨m, C⟩ hp ⟨m', C'⟩ hp' h
+  simp only [T, Finset.coe_sigma, Set.mem_sigma_iff, Finset.mem_coe, Finset.mem_filter,
+    Finset.mem_powerset] at hp hp' h
+  have hm : m = m' := by rw [← full_flagBy C m, h, full_flagBy]
+  subst hm
+  have hC : C = C' := by
+    have h1 := cutKeys_flagBy C m
+    have h2 := cutKeys_flagBy C' m
+    rw [h, h2, Finset.inter_eq_left.2 (hp'.2.1.trans (edgeKeys_subset_nodeKeys m)),
+      Finset.inter_eq_left.2 (hp.2.1.trans (edgeKeys_subset_nodeKeys m))] at h1
+    exact h1.symm
+  rw [hC]
+
+omit [Fintype E] [DecidableEq E] in
+/-- **Inclusion and exclusion over the cut edges** of a monomial whose windows in `L` must be
+cut. -/
+lemma sum_good_sets (L : Set (LTree E)) {m : LTree E} (hnd : m.labels.Nodup) [DecidablePred
+    fun C : Finset (ℕ ×ₗ ℕ) => ∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L] [Decidable (IsFull L m)] :
+    ∑ C ∈ m.edgeKeys.powerset.filter (fun C => ∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L),
+      (-1 : ℤ) ^ (m.edgeKeys \ C).card = if IsFull L m then 1 else 0 := by
+  classical
+  set Ed := m.edgeKeys
+  set G := Ed.filter fun k => ∃ w, (k, w) ∈ m.edgeWins ∧ w ∈ L
+  have hgood : ∀ C ⊆ Ed, (∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L) ↔ G ⊆ C := by
+    intro C _
+    constructor
+    · intro h k hk
+      obtain ⟨-, w, hw, hwL⟩ := Finset.mem_filter.1 hk
+      by_contra hkC
+      exact h (k, w) hw hkC hwL
+    · intro h kw hkw hkC hL
+      exact hkC (h (Finset.mem_filter.2 ⟨mem_edgeKeys.2 ⟨kw.2, hkw⟩, kw.2, hkw, hL⟩))
+  have hGEd : G ⊆ Ed := Finset.filter_subset _ _
+  calc ∑ C ∈ Ed.powerset.filter (fun C => ∀ kw ∈ m.edgeWins, kw.1 ∉ C → kw.2 ∉ L),
+        (-1 : ℤ) ^ (Ed \ C).card
+      = ∑ D ∈ (Ed \ G).powerset, (-1 : ℤ) ^ D.card := by
+        refine Finset.sum_nbij' (fun C => Ed \ C) (fun D => Ed \ D) ?_ ?_ ?_ ?_ ?_
+        · intro C hC
+          rw [Finset.mem_filter, Finset.mem_powerset] at hC
+          rw [Finset.mem_powerset]
+          exact Finset.sdiff_subset_sdiff (subset_refl _) ((hgood C hC.1).1 hC.2)
+        · intro D hD
+          rw [Finset.mem_powerset] at hD
+          rw [Finset.mem_filter, Finset.mem_powerset]
+          refine ⟨Finset.sdiff_subset, (hgood _ Finset.sdiff_subset).2 fun k hk => ?_⟩
+          refine Finset.mem_sdiff.2 ⟨hGEd hk, fun hkD => ?_⟩
+          exact (Finset.mem_sdiff.1 (hD hkD)).2 hk
+        · intro C hC
+          rw [Finset.mem_filter, Finset.mem_powerset] at hC
+          exact Finset.sdiff_sdiff_eq_self hC.1
+        · intro D hD
+          rw [Finset.mem_powerset] at hD
+          exact Finset.sdiff_sdiff_eq_self (hD.trans Finset.sdiff_subset)
+        · intro C _
+          rfl
+    _ = if IsFull L m then 1 else 0 := by
+        rw [Finset.sum_powerset_neg_one_pow_card]
+        congr 1
+        apply propext
+        rw [Finset.sdiff_eq_empty_iff_subset]
+        constructor
+        · intro h kw hkw
+          obtain ⟨-, w, hw, hwL⟩ := Finset.mem_filter.1 (h (mem_edgeKeys.2 ⟨kw.2, hkw⟩))
+          have := List.inj_on_of_nodup_map (nodup_edgeWins_keys hnd) hkw hw rfl
+          rw [this]
+          exact hwL
+        · intro h k hk
+          obtain ⟨w, hw⟩ := mem_edgeKeys.1 hk
+          exact Finset.mem_filter.2 ⟨hk, w, hw, h _ hw⟩
+
+open Classical in
+/-- **The Euler characteristic of the normal bar trees** is the number of monomials all of whose
+windows lie in `L`. -/
+theorem sum_ncard_nrm (L : Set (LTree E)) {n : ℕ} (hn : 2 ≤ n) :
+    ∑ s ∈ Finset.range n, (-1 : ℤ) ^ (n - 1 - s) * ((Nrm L n s).ncard : ℤ) =
+      (((monomials (E := E) n).filter (IsFull L)).card : ℤ) := by
+  simp_rw [ncard_nrm, Nat.cast_sum, Finset.mul_sum]
+  rw [Finset.sum_comm, Finset.card_filter, Nat.cast_sum]
+  refine Finset.sum_congr rfl fun m hm => ?_
+  obtain ⟨-, hml⟩ := (mem_monomials _ _).1 hm
+  have hnd : m.labels.Nodup := hml.nodup_iff.2 List.nodup_range
+  have hEd : m.edgeKeys.card + 2 = n := by
+    cases m with
+    | leaf a =>
+      have := hml.length_eq
+      simp at this
+      omega
+    | node e l r =>
+      rw [card_edgeKeys hnd, ← length_labels, hml.length_eq, List.length_range]
+  rw [Nat.cast_ite, Nat.cast_one, Nat.cast_zero, ← sum_good_sets L hnd]
+  simp_rw [Finset.card_filter, Nat.cast_sum, Finset.mul_sum, Nat.cast_ite, Nat.cast_one,
+    Nat.cast_zero, mul_ite, mul_one, mul_zero]
+  rw [Finset.sum_comm, Finset.sum_filter]
+  refine Finset.sum_congr rfl fun C hC => ?_
+  rw [Finset.mem_powerset] at hC
+  have hcard := Finset.card_le_card hC
+  split_ifs with hg
+  · rw [Finset.sum_congr rfl fun x _ => if_congr (and_iff_left hg) rfl rfl,
+      Finset.sum_ite_eq (Finset.range n) (C.card + 1), if_pos (Finset.mem_range.2 (by omega)),
+      Finset.card_sdiff_of_subset hC]
+    congr 1
+    omega
+  · exact Finset.sum_eq_zero fun x _ => if_neg fun h => hg h.2
+
+include hG in
+/-- **The dimension of the Koszul dual cooperad is the number of monomials all of whose windows
+are leading**, in every arity `n ≥ 2`. -/
+theorem finrank_KD_eq_ncard {n : ℕ} (hn : 2 ≤ n) :
+    finrank K (KD K R n) = {m | m ∈ monomials (E := E) n ∧ IsFull L m}.ncard := by
+  classical
+  have h := finrank_KD K rk hG hn
+  rw [sum_ncard_nrm L hn] at h
+  have hset : {m | m ∈ monomials (E := E) n ∧ IsFull L m} =
+      ↑((monomials (E := E) n).filter (IsFull L)) := by
+    ext m
+    simp
+  rw [hset, Set.ncard_coe_finset]
+  exact_mod_cast h
 
 end ShuffleBar
 

@@ -852,3 +852,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBar.KD_eq
 #print axioms Operad.ShuffleBar.finrank_KD
 #print axioms Operad.ShuffleBar.finrank_KD_eq
+#print axioms Operad.ShuffleBar.full_flagBy
+#print axioms Operad.ShuffleBar.cutKeys_flagBy
+#print axioms Operad.ShuffleBar.rootFlag_flagBy
+#print axioms Operad.ShuffleBar.flagBy_cutKeys
+#print axioms Operad.ShuffleBar.nodup_edgeWins_keys
+#print axioms Operad.ShuffleBar.ncard_nrm
+#print axioms Operad.ShuffleBar.sum_good_sets
+#print axioms Operad.ShuffleBar.sum_ncard_nrm
+#print axioms Operad.ShuffleBar.finrank_KD_eq_ncard
