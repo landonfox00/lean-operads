@@ -6,11 +6,20 @@ operad theory, built so that each layer is usable on its own.
 
 ## Where the library stands
 
-Non-symmetric operads in the positional convention (`NSOperad`, `comp a b`), with `Ass`, `End`,
-`Mag`, `Perm`, free operads on planar trees with their universal property, ideals, quotients,
-presentations, the weight grading, cooperads, the total space as a pre-Lie, Lie and graded Lie
-algebra, `d² = 0` and cohomology, and the convolution algebra `Conv R C P` without its pre-Lie
-identity. Sorry-free, 118 audited declarations.
+Updated 2026-10-01. Non-symmetric operads in the positional convention, with `Ass`, `End`, `Mag`,
+`Perm`, free operads on planar trees, ideals, quotients, presentations, the weight grading,
+cooperads, the total space as a pre-Lie, Lie and graded Lie algebra, cohomology, and the
+convolution algebra with its pre-Lie identity. Symmetric operads by partial composition over finite
+types: morphisms, isomorphisms, ideals, quotients, generated ideals and presentations by relators;
+set operads, their linearization, presented and free set operads; Hadamard products; regular
+operads (the symmetrization of planar set operads, left adjoint to the underlying planar operad,
+with transfer of presentations). Classical operads with their presentations and their algebras:
+`Com`, `Ass`, `Perm`, `Dias`, `Trias`, `ComTrias`. Infinitesimal bimodules; filtered operads and
+Rees families; the endomorphism operad. Convolution operads of cochains on planar binary trees with
+values in any operad, the Koszul dual of a binary quadratic presentation, twisting, and symmetric
+(swap-equivariant) cochains. Shuffle tree monomials, their count, normality for quadratic leading
+terms and right-comb normal forms; leading monomials of kernels. Sorry-free, 476 audited
+declarations.
 
 ## Four design decisions
 
