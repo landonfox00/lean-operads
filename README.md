@@ -128,6 +128,9 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | **`Sym.Ass`** — the symmetric associative operad, the linearization of the set operad of linear orders | `SymAss.lean` | **all axioms proved** |
 | `Sym.Ass.toCom` — the augmentation `Ass → Com` | `SymAss.lean` | proved |
 | `Sym.Ass.ofNS` — the planar `Ass` as the standard orders inside the underlying planar operad of `Ass` | `SymAss.lean` | **proved** |
+| **`SymOperadIdeal.Quot` — the quotient of a symmetric operad by an ideal is a symmetric operad** | `SymQuot.lean` | **proved** |
+| `SymOperadIdeal.liftHom`, `liftHom_unique` — its universal property; `mem_ker_projHom` | `SymQuot.lean` | proved |
+| `SymOperadHom.kerLift`, `kerLift_injective`, `kerLift_bijective` — the first isomorphism theorem | `SymQuot.lean` | proved |
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |

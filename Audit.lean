@@ -532,3 +532,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.BTree.mirror_mirror
 #print axioms Operad.BTree.OfArity.mirrorEquiv
 #print axioms Operad.BTree.OfArity.mirror_bl
+
+/-! ## Quotients of symmetric operads -/
+
+#print axioms Operad.SymOperadIdeal.instSymOperad
+#print axioms Operad.SymOperadIdeal.projHom
+#print axioms Operad.SymOperadIdeal.mem_ker_projHom
+#print axioms Operad.SymOperadIdeal.liftHom
+#print axioms Operad.SymOperadIdeal.liftHom_unique
+#print axioms Operad.SymOperadHom.kerLift_injective
+#print axioms Operad.SymOperadHom.kerLift_bijective

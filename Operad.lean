@@ -53,3 +53,4 @@ import Operad.PermLow
 import Operad.DGHom
 import Operad.KoszulTwist
 import Operad.Mirror
+import Operad.SymQuot
