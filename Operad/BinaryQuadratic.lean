@@ -23,7 +23,10 @@ The classical binary quadratic operads follow, each with its algebras:
 * `Leib`: right Leibniz algebras, `[[x,y],z] = [[x,z],y] + [x,[y,z]]`;
 * `Zinb`: Zinbiel algebras, `(xy)z = x(yz) + x(zy)`;
 * `Dend`: Loday's dendriform algebras;
-* `Pois`: Poisson algebras.
+* `Pois`: Poisson algebras;
+* `BinAss`, `BinPerm`, `BinDias`: associative, permutative (`(xy)z = x(yz) = x(zy)`) and Loday's
+  diassociative algebras, the Koszul duals of `BinAss`, `PreLie` and `Dend`
+  (`Operad.BinaryKoszul`).
 
 Over a ring in which `2` is not invertible, antisymmetry `[x,y] = -[y,x]` is weaker than
 `[x,x] = 0`: the operad `Lie` is the one presented by the antisymmetry relator.
@@ -263,6 +266,29 @@ noncomputable def BinRel.dend₂ : FreeBin R DiOp (Fin 3) :=
 noncomputable def BinRel.dend₃ : FreeBin R DiOp (Fin 3) :=
   binR .right .right 1 - (binL .right .left 1 + binL .right .right 1)
 
+/-- The right permutativity relator `x₀(x₁x₂) - x₀(x₂x₁)`, for the product `g`. -/
+noncomputable def BinRel.perm (g : G) : FreeBin R G (Fin 3) :=
+  binR g g 1 - binR g g (perm3 0 2 1)
+
+/-- The first diassociative relator `(x₀ ⊣ x₁) ⊣ x₂ - x₀ ⊣ (x₁ ⊣ x₂)`. -/
+noncomputable def BinRel.dias₁ : FreeBin R DiOp (Fin 3) := binL .left .left 1 - binR .left .left 1
+
+/-- The second diassociative relator `(x₀ ⊣ x₁) ⊣ x₂ - x₀ ⊣ (x₁ ⊢ x₂)`. -/
+noncomputable def BinRel.dias₂ : FreeBin R DiOp (Fin 3) :=
+  binL .left .left 1 - binR .left .right 1
+
+/-- The third diassociative relator `(x₀ ⊢ x₁) ⊣ x₂ - x₀ ⊢ (x₁ ⊣ x₂)`. -/
+noncomputable def BinRel.dias₃ : FreeBin R DiOp (Fin 3) :=
+  binL .left .right 1 - binR .right .left 1
+
+/-- The fourth diassociative relator `(x₀ ⊣ x₁) ⊢ x₂ - x₀ ⊢ (x₁ ⊢ x₂)`. -/
+noncomputable def BinRel.dias₄ : FreeBin R DiOp (Fin 3) :=
+  binL .right .left 1 - binR .right .right 1
+
+/-- The fifth diassociative relator `(x₀ ⊢ x₁) ⊢ x₂ - x₀ ⊢ (x₁ ⊢ x₂)`. -/
+noncomputable def BinRel.dias₅ : FreeBin R DiOp (Fin 3) :=
+  binL .right .right 1 - binR .right .right 1
+
 end Relators
 
 section Identities
@@ -317,6 +343,12 @@ lemma BinRel.zinb_iff (g : G) : (binHom μ).app _ (BinRel.zinb R g) = 0 ↔
     binHom_binL, binHom_binR, sub_eq_zero]
   rfl
 
+lemma BinRel.perm_iff (g : G) : (binHom μ).app _ (BinRel.perm R g) = 0 ↔
+    ∀ x y z, μ g ![x, μ g ![y, z]] = μ g ![x, μ g ![z, y]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.perm, map_sub, MultilinearMap.sub_apply, binHom_binR, sub_eq_zero]
+  rfl
+
 lemma BinRel.leibnizRule_iff (m b : G) : (binHom μ).app _ (BinRel.leibnizRule R m b) = 0 ↔
     ∀ x y z, μ b ![x, μ m ![y, z]] = μ m ![μ b ![x, y], z] + μ m ![y, μ b ![x, z]] := by
   rw [endOp_eq_zero_iff₃]
@@ -349,6 +381,41 @@ lemma BinRel.dend₃_iff : (binHom μ).app _ (BinRel.dend₃ R) = 0 ↔ ∀ x y 
   rw [endOp_eq_zero_iff₃]
   simp only [BinRel.dend₃, map_add, map_sub, MultilinearMap.add_apply, MultilinearMap.sub_apply,
     binHom_binL, binHom_binR, sub_eq_zero]
+  rfl
+
+lemma BinRel.dias₁_iff : (binHom μ).app _ (BinRel.dias₁ R) = 0 ↔
+    ∀ x y z, μ .left ![μ .left ![x, y], z] = μ .left ![x, μ .left ![y, z]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.dias₁, map_sub, MultilinearMap.sub_apply, binHom_binL, binHom_binR,
+    sub_eq_zero]
+  rfl
+
+lemma BinRel.dias₂_iff : (binHom μ).app _ (BinRel.dias₂ R) = 0 ↔
+    ∀ x y z, μ .left ![μ .left ![x, y], z] = μ .left ![x, μ .right ![y, z]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.dias₂, map_sub, MultilinearMap.sub_apply, binHom_binL, binHom_binR,
+    sub_eq_zero]
+  rfl
+
+lemma BinRel.dias₃_iff : (binHom μ).app _ (BinRel.dias₃ R) = 0 ↔
+    ∀ x y z, μ .left ![μ .right ![x, y], z] = μ .right ![x, μ .left ![y, z]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.dias₃, map_sub, MultilinearMap.sub_apply, binHom_binL, binHom_binR,
+    sub_eq_zero]
+  rfl
+
+lemma BinRel.dias₄_iff : (binHom μ).app _ (BinRel.dias₄ R) = 0 ↔
+    ∀ x y z, μ .right ![μ .left ![x, y], z] = μ .right ![x, μ .right ![y, z]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.dias₄, map_sub, MultilinearMap.sub_apply, binHom_binL, binHom_binR,
+    sub_eq_zero]
+  rfl
+
+lemma BinRel.dias₅_iff : (binHom μ).app _ (BinRel.dias₅ R) = 0 ↔
+    ∀ x y z, μ .right ![μ .right ![x, y], z] = μ .right ![x, μ .right ![y, z]] := by
+  rw [endOp_eq_zero_iff₃]
+  simp only [BinRel.dias₅, map_sub, MultilinearMap.sub_apply, binHom_binL, binHom_binR,
+    sub_eq_zero]
   rfl
 
 end Dend
@@ -388,6 +455,18 @@ Leibniz rule. -/
 abbrev Pois := BinPres R {BinRel.comm R PoisOp.mul, BinRel.antisymm R PoisOp.bracket}
   {BinRel.assoc R PoisOp.mul, BinRel.jacobi R PoisOp.bracket,
     BinRel.leibnizRule R PoisOp.mul PoisOp.bracket}
+
+/-- **The associative operad**, as a binary quadratic operad. -/
+abbrev BinAss := BinPres R (∅ : Set (FreeBin R Unit (Fin 2))) {BinRel.assoc R ()}
+
+/-- **The permutative operad**, as a binary quadratic operad: an associative product with
+`x(yz) = x(zy)`. -/
+abbrev BinPerm :=
+  BinPres R (∅ : Set (FreeBin R Unit (Fin 2))) {BinRel.assoc R (), BinRel.perm R ()}
+
+/-- **Loday's diassociative operad**, generated by `⊣` (`DiOp.left`) and `⊢` (`DiOp.right`). -/
+abbrev BinDias := BinPres R (∅ : Set (FreeBin R DiOp (Fin 2)))
+  {BinRel.dias₁ R, BinRel.dias₂ R, BinRel.dias₃ R, BinRel.dias₄ R, BinRel.dias₅ R}
 
 /-! ## Their algebras -/
 
@@ -529,6 +608,49 @@ noncomputable def Pois.algebraEquiv : SymAlgebra R (Pois R) V ≃ PoisAlg R V :=
           · exact (BinRel.assoc_iff _ _).2 a.assoc
           · exact (BinRel.jacobi_iff _ _).2 a.jacobi
           · exact (BinRel.leibnizRule_iff _ _ _).2 a.leibniz⟩
+      left_inv := fun μ => Subtype.ext (funext fun o => by cases o <;> rfl)
+      right_inv := fun _ => rfl }
+
+/-- **Algebras over the binary quadratic associative operad are associative algebras.** -/
+noncomputable def BinAss.algebraEquiv : SymAlgebra R (BinAss R) V ≃ AssAlg R V :=
+  (BinPres.algebraEquiv _ _).trans
+    { toFun := fun μ => ⟨μ.1 (), (BinRel.assoc_iff μ.1 ()).1 (μ.2.2 _ rfl)⟩
+      invFun := fun a => ⟨fun _ => a.mul, fun _ h => h.elim,
+        fun _ h => h ▸ (BinRel.assoc_iff _ ()).2 a.assoc⟩
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+
+/-- **Algebras over the permutative operad are permutative algebras.** -/
+noncomputable def BinPerm.algebraEquiv : SymAlgebra R (BinPerm R) V ≃ PermAlg R V :=
+  (BinPres.algebraEquiv _ _).trans
+    { toFun := fun μ => ⟨μ.1 (), (BinRel.assoc_iff μ.1 ()).1 (μ.2.2 _ (Or.inl rfl)),
+        (BinRel.perm_iff μ.1 ()).1 (μ.2.2 _ (Or.inr rfl))⟩
+      invFun := fun a => ⟨fun _ => a.mul, fun _ h => h.elim, fun _ h => by
+          rcases h with rfl | rfl
+          · exact (BinRel.assoc_iff _ ()).2 a.assoc
+          · exact (BinRel.perm_iff _ ()).2 a.perm⟩
+      left_inv := fun _ => rfl
+      right_inv := fun _ => rfl }
+
+/-- **Algebras over the diassociative operad are associative dialgebras.** -/
+noncomputable def BinDias.algebraEquiv : SymAlgebra R (BinDias R) V ≃ DiAlg R V :=
+  (BinPres.algebraEquiv _ _).trans
+    { toFun := fun μ =>
+        { left := μ.1 .left
+          right := μ.1 .right
+          d1 := (BinRel.dias₁_iff μ.1).1 (μ.2.2 _ (Or.inl rfl))
+          d2 := (BinRel.dias₂_iff μ.1).1 (μ.2.2 _ (Or.inr (Or.inl rfl)))
+          d3 := (BinRel.dias₃_iff μ.1).1 (μ.2.2 _ (Or.inr (Or.inr (Or.inl rfl))))
+          d4 := (BinRel.dias₄_iff μ.1).1 (μ.2.2 _ (Or.inr (Or.inr (Or.inr (Or.inl rfl)))))
+          d5 := (BinRel.dias₅_iff μ.1).1 (μ.2.2 _ (Or.inr (Or.inr (Or.inr (Or.inr rfl))))) }
+      invFun := fun a => ⟨fun o => match o with | .left => a.left | .right => a.right,
+        fun _ h => h.elim, fun _ h => by
+          rcases h with rfl | rfl | rfl | rfl | rfl
+          · exact (BinRel.dias₁_iff _).2 a.d1
+          · exact (BinRel.dias₂_iff _).2 a.d2
+          · exact (BinRel.dias₃_iff _).2 a.d3
+          · exact (BinRel.dias₄_iff _).2 a.d4
+          · exact (BinRel.dias₅_iff _).2 a.d5⟩
       left_inv := fun μ => Subtype.ext (funext fun o => by cases o <;> rfl)
       right_inv := fun _ => rfl }
 

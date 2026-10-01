@@ -98,15 +98,18 @@ regular operad; **of `ComTrias`** (`ComTriasPres.lean`), Vallette's. **Algebras*
 should be. **Binary quadratic operads** (`BinaryQuadratic.lean`): the free operad on binary
 generators, its two-fold monomials and their values in endomorphism operads, the operad presented by
 relators of arity two and three and its algebras; `Lie`, `PreLie`, `Leib`, `Zinb`, `Dend`, `Pois`
-with their algebras. Still to do: bases of the free operad (tree monomials) and the Koszul dual
-operad.
+with their algebras, and `Ass`, `Perm`, `Dias` as binary quadratic operads. **Bases of the free
+operad** (`FreeBinary.lean`): planar trees, relabelled. **The Koszul dual operad**
+(`BinaryKoszul.lean`): for generators with the regular action of `𝔖₂`, the Koszul pairing in
+arity three, the dual relations, the involution `P^!^! = P`, and the classical dualities
+`Ass^! = Ass`, `PreLie^! = Perm`, `Leib^! = Zinb`, `Dend^! = Dias` (and back).
 
 ### Phase 4 — general theory
 
 | | content |
 |---|---|
 | L11 | Shuffle operads and the forgetful functor from symmetric operads; tree monomials, admissible orders, Gröbner bases; the Dotsenko–Khoroshkin criterion. **Started**: shuffle tree monomials, their count `(2n - 3)!! \|E\|ⁿ⁻¹`, windows and normality for quadratic leading terms, the path-lexicographic key, right-comb normal forms (`ShuffleTree.lean`); leading monomials of the kernel of a linearized map (`LeadingTerm.lean`); substitution at a window and its compatibility with the path-lexicographic key (`ShuffleSubst.lean`); the division algorithm and a Gröbner criterion through a model of the quotient (`LeadingTerm.lean`) |
-| L12 | Differential graded operads, bar and cobar constructions, Koszulness, the deformation complex of a morphism and of an operad |
+| L12 | Differential graded operads, bar and cobar constructions, Koszulness, the deformation complex of a morphism and of an operad. **Started**: the Koszul dual of a binary quadratic operad with free generators, its involutivity and the classical dualities (`BinaryKoszul.lean`) |
 | L13 | `L∞`-algebras and the homotopy transfer theorem |
 | L14 | The general free symmetric operad on a linear species, and its comparison with the set-operad construction. **Started** (`FreeBinary.lean`): on binary generators, the free set operad is the regular operad of planar binary trees, with a basis and the dimension of the free operad in modules |
 
