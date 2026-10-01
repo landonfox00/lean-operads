@@ -166,4 +166,28 @@ noncomputable def presLinHomEquiv :
 
 end Linear
 
+section PresExt
+
+variable {R : Type*} [CommRing R] {T : ℕ → Type*}
+  {ρ : ∀ {A : Type} [Fintype A] [DecidableEq A], Syn T A → Syn T A → Prop}
+  {r : ∀ n : ℕ, Set (Lin R (Pres T ρ) (Fin n))}
+  {Q : (A : Type) → [Fintype A] → [DecidableEq A] → Type*}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [SymOperad R Q]
+
+/-- **Morphisms out of an operad presented by generators and linear relators agree when they
+agree on the generators.** -/
+theorem presLin_hom_ext {φ ψ : SymOperadHom R (SymOperadIdeal.span R r).Quot Q}
+    (h : ∀ (n : ℕ) (g : T n),
+      φ.app _ ((SymOperadIdeal.span R r).proj _ (Finsupp.single (Pres.gen g) 1))
+        = ψ.app _ ((SymOperadIdeal.span R r).proj _ (Finsupp.single (Pres.gen g) 1))) :
+    φ = ψ := by
+  apply SymOperadIdeal.presHomEquiv.injective
+  apply Subtype.ext
+  show φ.comp (SymOperadIdeal.span R r).projHom = ψ.comp (SymOperadIdeal.span R r).projHom
+  apply (Operad.linHomEquiv R).symm.injective
+  exact Pres.hom_ext fun n g => congrArg (Und.of R Q) (h n g)
+
+end PresExt
+
 end Operad
