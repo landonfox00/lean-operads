@@ -902,3 +902,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeBin.asym3_eq
 #print axioms Operad.FreeBin.BinPres.dual23_com_eq
 #print axioms Operad.FreeBin.BinCom.dual
+#print axioms Operad.FreeBin.comRel3_eq_ker
+#print axioms Operad.FreeBin.uDiff_mem_dualRel
+#print axioms Operad.FreeBin.dualRel_lie_le
+#print axioms Operad.FreeBin.four_assoc
+#print axioms Operad.FreeBin.BinPres.dual23_lie_eq
+#print axioms Operad.FreeBin.Lie.dual

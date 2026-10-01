@@ -19,10 +19,13 @@ of `𝔖₂`. Here generators may be commutative or anticommutative: the present
   (`dualRel23`). Without relators of arity two it is the Koszul dual of `Operad.BinaryKoszul`
   (`BinPres.dual23_empty`).
 * **`Com^! = Lie`** (`BinCom.dual`), over a field in which `2 ≠ 0`: the relations of arity three
-  of `Com` are the elements whose coordinates sum to zero (`sumCoord_eq_zero`,
-  `finrank_comRel3`), so the dual relations are spanned by the antisymmetrized associator
-  (`asym3`, `dualRel23_com`), which modulo antisymmetry is four times the Jacobiator
-  (`asym3_eq`).
+  of `Com` are the elements whose coordinates sum to zero (`comRel3_eq_ker`), so the dual
+  relations are spanned by the antisymmetrized associator (`asym3`, `dualRel23_com`), which
+  modulo antisymmetry is four times the Jacobiator (`asym3_eq`).
+* **`Lie^! = Com`** (`Lie.dual`): the dual relations of `Lie` are orthogonal to the
+  antisymmetrized associator, hence relations of `Com` (`dualRel_lie_le`), and contain the
+  difference `uDiff` of the classes of monomials by their outer input (`uDiff_mem_dualRel`), which
+  modulo commutativity is four times the associator (`four_assoc`).
 -/
 import Operad.BinaryKoszul
 
@@ -991,6 +994,219 @@ theorem BinPres.dual23_com_eq (h2 : (2 : K) ≠ 0) :
       rw [show (1 : Equiv.Perm (Fin 3)) = Equiv.refl _ from rfl, SymOperad.map_refl]⟩
     exact (sup_le_sup_left hle _) (jacobi_mem K h2)
 
+lemma twist2_antisymm : twist2 K (BinRel.antisymm K ()) = BinRel.comm K () := by
+  rw [BinRel.comm, BinRel.antisymm, map_add, twist2_bin2, twist2_bin2,
+    Equiv.Perm.sign_swap (by decide : (0 : Fin 2) ≠ 1)]
+  simp [sub_eq_add_neg]
+
+lemma finrank_three : Module.finrank K (FreeBin K Unit (Fin 3)) = 12 := by
+  rw [Module.finrank_eq_card_basis (basis3 K)]
+  simp [Fintype.card_perm, Nat.factorial]
+
+/-- **The relations of `Com` are exactly the elements whose coordinates sum to zero.** -/
+theorem comRel3_eq_ker : comRel3 K = LinearMap.ker (sumCoord K) := by
+  have hle : comRel3 K ≤ LinearMap.ker (sumCoord K) := fun x hx => sumCoord_eq_zero K hx
+  refine Submodule.eq_of_le_of_finrank_le hle ?_
+  have hsurj : LinearMap.range (sumCoord K) = ⊤ := by
+    refine eq_top_iff.2 fun c _ => ⟨c • mono3 K (false, (), (), 1), ?_⟩
+    rw [map_smul, sumCoord_mono3, smul_eq_mul, mul_one]
+  have hrn := LinearMap.finrank_range_add_finrank_ker (sumCoord K)
+  rw [hsurj, finrank_top, Module.finrank_self, finrank_three] at hrn
+  have := finrank_comRel3 K
+  omega
+
+lemma mem_ideal_P (ρ : Equiv.Perm (Fin 3)) :
+    cL K ρ - cR K (ρ * perm3 2 0 1) ∈ ideal3Of K {BinRel.comm K ()} := by
+  have h := ideal3Of_map_mem ρ (Submodule.subset_span (R := K)
+    ⟨0, e0, BinRel.comm K (), bin2 () 1, Or.inl rfl, rfl⟩ :
+      SymOperad.map (R := K) e0 (SymOperad.comp (R := K) 0 (BinRel.comm K ()) (bin2 () 1))
+        ∈ ideal3Of K {BinRel.comm K ()})
+  rw [comp_comm_left0, map_sub, map_binL, map_binR] at h
+  simpa using h
+
+lemma mem_ideal_Q (ρ : Equiv.Perm (Fin 3)) :
+    cL K ρ - cL K (ρ * perm3 1 0 2) ∈ ideal3Of K {BinRel.comm K ()} := by
+  have h := ideal3Of_map_mem ρ (Submodule.subset_span (R := K)
+    ⟨0, e0, bin2 () 1, BinRel.comm K (), Or.inr rfl, rfl⟩ :
+      SymOperad.map (R := K) e0 (SymOperad.comp (R := K) 0 (bin2 () 1) (BinRel.comm K ()))
+        ∈ ideal3Of K {BinRel.comm K ()})
+  rw [comp_comm_right0, if_pos rfl, map_sub, map_binL, map_binL] at h
+  simpa using h
+
+lemma mem_ideal_S : cR K 1 - cR K (perm3 0 2 1) ∈ ideal3Of K {BinRel.comm K ()} := by
+  have h : SymOperad.map (R := K) e1 (SymOperad.comp (R := K) 1 (bin2 () 1) (BinRel.comm K ()))
+      ∈ ideal3Of K {BinRel.comm K ()} :=
+    Submodule.subset_span ⟨1, e1, bin2 () 1, BinRel.comm K (), Or.inr rfl, rfl⟩
+  rw [comp_comm_right1, if_pos rfl] at h
+  exact h
+
+/-- **The class difference** `u₂ - u₀`: the monomials whose outer input is `x₂`, minus those
+whose outer input is `x₀`. -/
+noncomputable def uDiff : FreeBin K Unit (Fin 3) :=
+  (cL K 1 + cL K (perm3 1 0 2) + cR K (perm3 2 0 1) + cR K (perm3 2 1 0))
+    - (cL K (perm3 1 2 0) + cL K (perm3 2 1 0) + cR K 1 + cR K (perm3 0 2 1))
+
+/-- The elements orthogonal to all the relabellings of `uDiff`. -/
+noncomputable def uPerp : Submodule K (FreeBin K Unit (Fin 3)) :=
+  ⨅ τ : Equiv.Perm (Fin 3), LinearMap.ker ((pair3 Unit K).flip (SymOperad.map (R := K) τ (uDiff K)))
+
+lemma mem_uPerp {x : FreeBin K Unit (Fin 3)} :
+    x ∈ uPerp K ↔ ∀ τ : Equiv.Perm (Fin 3),
+      pair3 Unit K x (SymOperad.map (R := K) τ (uDiff K)) = 0 := by
+  simp only [uPerp, Submodule.mem_iInf, LinearMap.mem_ker]
+  rfl
+
+lemma uPerp_map (σ : Equiv.Perm (Fin 3)) {x : FreeBin K Unit (Fin 3)} (hx : x ∈ uPerp K) :
+    SymOperad.map (R := K) σ x ∈ uPerp K := by
+  rw [mem_uPerp] at hx ⊢
+  intro τ
+  have h : SymOperad.map (R := K) τ (uDiff K)
+      = SymOperad.map (R := K) σ (SymOperad.map (R := K) (σ⁻¹ * τ) (uDiff K)) := by
+    rw [SymOperad.map_map]
+    congr 1
+    rw [← Equiv.Perm.mul_def, mul_inv_cancel_left]
+  rw [h, pair3_map, hx, mul_zero]
+
+lemma antisymm_left0_mem (σ : Equiv.Perm (Fin 2)) :
+    SymOperad.map (R := K) e0 (SymOperad.comp (R := K) 0 (BinRel.antisymm K ()) (bin2 () σ))
+      ∈ uPerp K := by
+  simp only [BinRel.antisymm, map_add, LinearMap.add_apply, comp_e0_bin2,
+    mem_uPerp]
+  intro τ
+  rcases perm2_cases σ with rfl | rfl <;>
+    rcases perm3_enum τ with rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp (config := { decide := true }) [uDiff, map_add, map_sub, map_mono3, act3, pair3_mono3,
+      sign3, sign_perm3_201, sign_perm3_102, sign_perm3_210, ← mono3_false, ← mono3_true]
+
+lemma antisymm_left1_mem (σ : Equiv.Perm (Fin 2)) :
+    SymOperad.map (R := K) e1 (SymOperad.comp (R := K) 1 (BinRel.antisymm K ()) (bin2 () σ))
+      ∈ uPerp K := by
+  simp only [BinRel.antisymm, map_add, LinearMap.add_apply, comp_e1_bin2,
+    mem_uPerp]
+  intro τ
+  rcases perm2_cases σ with rfl | rfl <;>
+    rcases perm3_enum τ with rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp (config := { decide := true }) [uDiff, map_add, map_sub, map_mono3, act3, pair3_mono3,
+      sign3, sign_perm3_120, sign_perm3_021, sign_perm3_210, ← mono3_false, ← mono3_true]
+
+lemma antisymm_right0_mem (σ : Equiv.Perm (Fin 2)) :
+    SymOperad.map (R := K) e0 (SymOperad.comp (R := K) 0 (bin2 () σ) (BinRel.antisymm K ()))
+      ∈ uPerp K := by
+  simp only [BinRel.antisymm, map_add, LinearMap.add_apply, comp_e0_bin2,
+    mem_uPerp]
+  intro τ
+  rcases perm2_cases σ with rfl | rfl <;>
+    rcases perm3_enum τ with rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp (config := { decide := true }) [uDiff, map_add, map_sub, map_mono3, act3, pair3_mono3,
+      sign3, sign_perm3_201, sign_perm3_102, sign_perm3_210, ← mono3_false, ← mono3_true]
+
+lemma antisymm_right1_mem (σ : Equiv.Perm (Fin 2)) :
+    SymOperad.map (R := K) e1 (SymOperad.comp (R := K) 1 (bin2 () σ) (BinRel.antisymm K ()))
+      ∈ uPerp K := by
+  simp only [BinRel.antisymm, map_add, LinearMap.add_apply, comp_e1_bin2,
+    mem_uPerp]
+  intro τ
+  rcases perm2_cases σ with rfl | rfl <;>
+    rcases perm3_enum τ with rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp (config := { decide := true }) [uDiff, map_add, map_sub, map_mono3, act3, pair3_mono3,
+      sign3, sign_perm3_120, sign_perm3_021, sign_perm3_210, ← mono3_false, ← mono3_true]
+
+lemma jacobi_mem_uPerp : BinRel.jacobi K () ∈ uPerp K := by
+  rw [mem_uPerp, show BinRel.jacobi K () = cL K 1 + cL K (perm3 1 2 0) + cL K (perm3 2 0 1)
+    from rfl]
+  intro τ
+  rcases perm3_enum τ with rfl | rfl | rfl | rfl | rfl | rfl <;>
+    simp (config := { decide := true }) [uDiff, map_add, map_sub, map_mono3, act3, pair3_mono3,
+      sign3, sign_perm3_201, sign_perm3_120]
+
+lemma lieRel3_le_uPerp : lieRel3 K ≤ uPerp K := by
+  refine sup_le (ideal3Of_le K (fun τ x hx => uPerp_map K τ hx) fun a ha g σ => ?_) ?_
+  · rw [Set.mem_singleton_iff] at ha
+    subst ha
+    cases g
+    exact ⟨antisymm_left0_mem K σ, antisymm_left1_mem K σ, antisymm_right0_mem K σ,
+      antisymm_right1_mem K σ⟩
+  · rw [Submodule.span_le]
+    rintro _ ⟨τ, y, hy, rfl⟩
+    rw [Set.mem_singleton_iff] at hy
+    subst hy
+    exact uPerp_map K τ (jacobi_mem_uPerp K)
+
+/-- **`u₂ - u₀` is a Koszul dual relation of `Lie`.** -/
+lemma uDiff_mem_dualRel : uDiff K ∈ dualRel23 K {BinRel.antisymm K ()} {BinRel.jacobi K ()} := by
+  have hle : Submodule.span K (orbit3 K ((lieRel3 K : Submodule K _) :
+      Set (FreeBin K Unit (Fin 3)))) ≤ uPerp K := by
+    rw [Submodule.span_le]
+    rintro _ ⟨τ, y, hy, rfl⟩
+    exact uPerp_map K τ (lieRel3_le_uPerp K hy)
+  rw [dualRel23, dualRel, LinearMap.BilinForm.mem_orthogonal_iff]
+  intro n hn
+  have := (mem_uPerp K).1 (hle hn) 1
+  rwa [show (1 : Equiv.Perm (Fin 3)) = Equiv.refl _ from rfl, SymOperad.map_refl] at this
+
+/-- **The Koszul dual relations of `Lie` are relations of `Com`**: they are orthogonal to the
+antisymmetrized associator, so their coordinates sum to zero. -/
+lemma dualRel_lie_le : dualRel23 K {BinRel.antisymm K ()} {BinRel.jacobi K ()} ≤ comRel3 K := by
+  intro w hw
+  rw [comRel3_eq_ker, LinearMap.mem_ker, ← pair3_asym3, pair3_comm]
+  rw [dualRel23, dualRel, LinearMap.BilinForm.mem_orthogonal_iff] at hw
+  refine hw _ (Submodule.subset_span ⟨1, _, asym3_mem_lieRel3 K, ?_⟩)
+  rw [show (1 : Equiv.Perm (Fin 3)) = Equiv.refl _ from rfl, SymOperad.map_refl]
+
+/-- **The associator is a quarter of `u₂ - u₀`** modulo commutativity. -/
+lemma four_assoc : (4 : K) • BinRel.assoc K () = uDiff K
+    + ((2 : K) • (cL K 1 - cL K (perm3 1 0 2)) + (cL K 1 - cR K (perm3 2 0 1))
+      + (cL K (perm3 1 0 2) - cR K (perm3 2 1 0)) + (2 : K) • (cL K (perm3 1 2 0) - cR K 1)
+      - (cL K (perm3 1 2 0) - cL K (perm3 2 1 0)) - (cR K 1 - cR K (perm3 0 2 1))) := by
+  rw [show BinRel.assoc K () = cL K 1 - cR K 1 from rfl, uDiff]
+  module
+
+/-- **`Lie^! = Com`**, at the level of the presenting ideals. -/
+theorem BinPres.dual23_lie_eq (h2 : (2 : K) ≠ 0) :
+    SymOperadIdeal.span K (rel23 (twist2 K '' {BinRel.antisymm K ()})
+        (dualRel23 K {BinRel.antisymm K ()} {BinRel.jacobi K ()} :
+          Set (FreeBin K Unit (Fin 3))))
+      = SymOperadIdeal.span K (rel23 {BinRel.comm K ()} {BinRel.assoc K ()}) := by
+  have h2set : twist2 K '' {BinRel.antisymm K ()} = {BinRel.comm K ()} := by
+    rw [Set.image_singleton, twist2_antisymm]
+  rw [h2set]
+  have hself : ∀ x ∈ ({BinRel.comm K ()} : Set (FreeBin K Unit (Fin 2))),
+      x ∈ Submodule.span K (orbit2 K {BinRel.comm K ()}) := fun x hx =>
+    Submodule.subset_span ⟨1, x, hx, by
+      rw [show (1 : Equiv.Perm (Fin 2)) = Equiv.refl _ from rfl, SymOperad.map_refl]⟩
+  apply le_antisymm
+  · exact span_le_23 hself fun x hx => dualRel_lie_le K hx
+  · refine span_le_23 hself fun x hx => ?_
+    rw [Set.mem_singleton_iff] at hx
+    subst hx
+    have h4 : (4 : K) ≠ 0 := by
+      rw [show (4 : K) = 2 * 2 by norm_num]
+      exact mul_ne_zero h2 h2
+    have hc : (2 : K) • (cL K 1 - cL K (perm3 1 0 2)) + (cL K 1 - cR K (perm3 2 0 1))
+        + (cL K (perm3 1 0 2) - cR K (perm3 2 1 0)) + (2 : K) • (cL K (perm3 1 2 0) - cR K 1)
+        - (cL K (perm3 1 2 0) - cL K (perm3 2 1 0)) - (cR K 1 - cR K (perm3 0 2 1))
+          ∈ ideal3Of K {BinRel.comm K ()} := by
+      have hP1 := mem_ideal_P K 1
+      have hPt := mem_ideal_P K (perm3 1 0 2)
+      have hPk := mem_ideal_P K (perm3 1 2 0)
+      have hQ1 := mem_ideal_Q K 1
+      have hQk := mem_ideal_Q K (perm3 1 2 0)
+      rw [one_mul] at hP1 hQ1
+      rw [show perm3 1 0 2 * perm3 2 0 1 = perm3 2 1 0 by decide] at hPt
+      rw [show perm3 1 2 0 * perm3 2 0 1 = 1 by decide] at hPk
+      rw [show perm3 1 2 0 * perm3 1 0 2 = perm3 2 1 0 by decide] at hQk
+      exact sub_mem (sub_mem (add_mem (add_mem (add_mem (Submodule.smul_mem _ _ hQ1) hP1) hPt)
+        (Submodule.smul_mem _ _ hPk)) hQk) (mem_ideal_S K)
+    have hu : uDiff K ∈ Submodule.span K (orbit3 K ((dualRel23 K {BinRel.antisymm K ()}
+        {BinRel.jacobi K ()} : Submodule K _) : Set (FreeBin K Unit (Fin 3)))) :=
+      Submodule.subset_span ⟨1, _, uDiff_mem_dualRel K, by
+        rw [show (1 : Equiv.Perm (Fin 3)) = Equiv.refl _ from rfl, SymOperad.map_refl]⟩
+    have := congrArg (fun x => (4 : K)⁻¹ • x) (four_assoc K)
+    simp only [inv_smul_smul₀ h4] at this
+    rw [this]
+    exact Submodule.smul_mem _ _ (add_mem (Submodule.mem_sup_right hu)
+      (Submodule.mem_sup_left hc))
+
 end ComLie
 
 /-- **The commutative operad**, as a binary quadratic operad: a commutative associative
@@ -1002,6 +1218,12 @@ in which `2 ≠ 0`. -/
 theorem BinCom.dual (K : Type u) [Field K] (h2 : (2 : K) ≠ 0) :
     BinPres.dual23 K {BinRel.comm K ()} {BinRel.assoc K ()} = Lie K :=
   congrArg SymOperadIdeal.Quot (BinPres.dual23_com_eq K h2)
+
+/-- **`Lie^! = Com`: the Koszul dual of the Lie operad is the commutative operad**, over a field
+in which `2 ≠ 0`. -/
+theorem Lie.dual (K : Type u) [Field K] (h2 : (2 : K) ≠ 0) :
+    BinPres.dual23 K {BinRel.antisymm K ()} {BinRel.jacobi K ()} = BinCom K :=
+  congrArg SymOperadIdeal.Quot (BinPres.dual23_lie_eq K h2)
 
 end FreeBin
 
