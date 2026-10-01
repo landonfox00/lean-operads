@@ -692,3 +692,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Ass.algebraEquiv
 #print axioms Operad.Dias.algebraEquiv
 #print axioms Operad.Trias.algebraEquiv
+#print axioms Operad.ComTriasData.psi_eq
+#print axioms Operad.ComTriasData.psi_comp
+#print axioms Operad.ComTriasData.bin_left_psi
+#print axioms Operad.ComTriasData.lift
+#print axioms Operad.NonemptySubset.data_psi
+#print axioms Operad.NonemptySubset.hom_ext
+#print axioms Operad.NonemptySubset.homEquiv
+#print axioms Operad.NonemptySubset.presIso
+#print axioms Operad.ComTrias.homEquiv
+#print axioms Operad.EndOp.assocShape_iff
+#print axioms Operad.EndOp.rightShape_iff
+#print axioms Operad.ComTrias.algebraEquiv

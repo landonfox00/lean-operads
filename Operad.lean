@@ -63,4 +63,5 @@ import Operad.Regular
 import Operad.DiasTrias
 import Operad.PermPres
 import Operad.AssPres
+import Operad.ComTriasPres
 import Operad.Algebras

@@ -84,8 +84,9 @@ presentations to symmetric ones. **Presentations of `Dias` and `Trias`** (`DiasT
 Loday's five relations and Loday–Ronco's eleven, through planar right-comb normal forms; their
 universal properties as operads in modules. **The presentation of `Perm`** (`PermPres.lean`), by
 one binary operation and the two permutative relations; **of `Ass`** (`AssPres.lean`), as a
-regular operad. **Algebras** (`Algebras.lean`): `Com`-, `Perm`-, `Ass`-, `Dias`- and `Trias`-algebras
-are what they should be. Still to do: `Lie`, `PreLie`, `Pois`, `Dend`, the Koszul dual operad.
+regular operad; **of `ComTrias`** (`ComTriasPres.lean`), Vallette's. **Algebras**
+(`Algebras.lean`): `Com`-, `Perm`-, `Ass`-, `Dias`-, `Trias`- and `ComTrias`-algebras are what they
+should be. Still to do: `Lie`, `PreLie`, `Pois`, `Dend`, the Koszul dual operad.
 
 ### Phase 4 — general theory
 

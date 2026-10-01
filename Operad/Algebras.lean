@@ -10,7 +10,8 @@ satisfying identities:
 * `Perm.algebraEquiv`: permutative algebras, `(xy)z = x(yz) = x(zy)`;
 * `Ass.algebraEquiv`: associative algebras (non-unital);
 * `Dias.algebraEquiv`: Loday's associative dialgebras;
-* `Trias.algebraEquiv`: Loday and Ronco's associative trialgebras.
+* `Trias.algebraEquiv`: Loday and Ronco's associative trialgebras;
+* `ComTrias.algebraEquiv`: Vallette's commutative trialgebras.
 
 The computations are those of binary composites in the endomorphism operad
 (`EndOp.ap_bin`, and `EndOp.leftComb_eq_rightComb_iff` for the underlying planar operad), which
@@ -20,6 +21,7 @@ import Operad.EndOperad
 import Operad.PermPres
 import Operad.AssPres
 import Operad.DiasTrias
+import Operad.ComTriasPres
 
 universe u v
 
@@ -109,6 +111,34 @@ theorem r2b_iff (g : Und R (EndOp R V) (Fin 2)) :
     refine ext_ap fun w => ?_
     simp only [ap_bin, ap_one, ap_map, vec_swap]
     exact h _ _ _
+
+/-- **A left comb equals a right comb**, as an identity. -/
+theorem assocShape_iff (g h g' h' : Und R (EndOp R V) (Fin 2)) :
+    map (Equiv.sumAssoc Unit Unit Unit) (bin g (bin h one one) one) = bin g' one (bin h' one one)
+      ↔ ∀ x y z, ap g ![ap h ![x, y], z] = ap g' ![x, ap h' ![y, z]] := by
+  constructor
+  · intro hgh x y z
+    have := congrArg (fun t => ap t (Sum.elim (fun _ => x) (Sum.elim (fun _ => y) fun _ => z)))
+      hgh
+    simpa [ap_bin] using this
+  · intro hgh
+    refine ext_ap fun w => ?_
+    simp only [ap_map, ap_bin, ap_one]
+    exact hgh _ _ _
+
+/-- **Two right combs are equal**, as an identity. -/
+theorem rightShape_iff (g h g' h' : Und R (EndOp R V) (Fin 2)) :
+    bin g one (bin h one one) = bin g' one (bin h' one one)
+      ↔ ∀ x y z, ap g ![x, ap h ![y, z]] = ap g' ![x, ap h' ![y, z]] := by
+  constructor
+  · intro hgh x y z
+    have := congrArg (fun t => ap t (Sum.elim (fun _ => x) (Sum.elim (fun _ => y) fun _ => z)))
+      hgh
+    simpa [ap_bin] using this
+  · intro hgh
+    refine ext_ap fun w => ?_
+    simp only [ap_bin, ap_one]
+    exact hgh _ _ _
 
 /-- **A planar two-fold composite**, `p (q (x, y), z)` and `p (x, q (y, z))`. -/
 theorem leftComb_eq_rightComb_iff (p q p' q' : toNSSet (Und R (EndOp R V)) 2) :
@@ -212,6 +242,21 @@ structure TriAlg where
   t10 : ∀ x y z, right ![middle ![x, y], z] = right ![x, right ![y, z]]
   t11 : ∀ x y z, middle ![middle ![x, y], z] = middle ![x, middle ![y, z]]
 
+/-- **A commutative trialgebra structure** on `V` (Vallette): `⊥` commutative and associative,
+and `⊣` with `(x ⊣ y) ⊣ z = x ⊣ (y ⊣ z) = x ⊣ (z ⊣ y)`, `x ⊣ (y ⊥ z) = x ⊣ (y ⊣ z)`,
+`(x ⊥ y) ⊣ z = x ⊥ (y ⊣ z)`. -/
+structure ComTriAlg where
+  /-- `x ⊥ y`. -/
+  mid : EndOp R V (Fin 2)
+  /-- `x ⊣ y`. -/
+  left : EndOp R V (Fin 2)
+  comm : ∀ x y, mid ![x, y] = mid ![y, x]
+  assoc : ∀ x y z, mid ![mid ![x, y], z] = mid ![x, mid ![y, z]]
+  lassoc : ∀ x y z, left ![left ![x, y], z] = left ![x, left ![y, z]]
+  lperm : ∀ x y z, left ![x, left ![y, z]] = left ![x, left ![z, y]]
+  lmid : ∀ x y z, left ![x, mid ![y, z]] = left ![x, left ![y, z]]
+  midl : ∀ x y z, left ![mid ![x, y], z] = mid ![x, left ![y, z]]
+
 variable {R V}
 
 open EndOp
@@ -304,6 +349,30 @@ noncomputable def Trias.algebraEquiv : SymAlgebra R (Trias R) V ≃ TriAlg R V :
         simp only [TriasData.mk.injEq]
         funext o
         cases o <;> rfl
+      right_inv := fun _ => rfl }
+
+/-- **Algebras over `ComTrias` are Vallette's commutative trialgebras.** -/
+noncomputable def ComTrias.algebraEquiv : SymAlgebra R (ComTrias R) V ≃ ComTriAlg R V :=
+  (ComTrias.homEquiv R).trans
+    { toFun := fun D =>
+        { mid := D.mid
+          left := D.left
+          comm := (isComm_iff _).1 D.comm
+          assoc := (isAssoc_iff _).1 D.assoc
+          lassoc := (isAssoc_iff _).1 D.lassoc
+          lperm := (r2b_iff _).1 D.lperm
+          lmid := (rightShape_iff _ _ _ _).1 D.lmid
+          midl := (assocShape_iff _ _ _ _).1 D.midl }
+      invFun := fun a =>
+        { mid := a.mid
+          left := a.left
+          comm := (isComm_iff _).2 a.comm
+          assoc := (isAssoc_iff _).2 a.assoc
+          lassoc := (isAssoc_iff _).2 a.lassoc
+          lperm := (r2b_iff _).2 a.lperm
+          lmid := (rightShape_iff _ _ _ _).2 a.lmid
+          midl := (assocShape_iff _ _ _ _).2 a.midl }
+      left_inv := fun _ => rfl
       right_inv := fun _ => rfl }
 
 end Operad
