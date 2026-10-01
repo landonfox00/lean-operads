@@ -55,3 +55,4 @@ import Operad.KoszulTwist
 import Operad.Mirror
 import Operad.SymQuot
 import Operad.SetHadamard
+import Operad.SymPresentation

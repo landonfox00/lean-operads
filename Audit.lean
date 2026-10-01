@@ -568,3 +568,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TriasSet.toTrias_left
 #print axioms Operad.TriasSet.toTrias_right
 #print axioms Operad.Dias.toTrias_injective
+
+/-! ## Generated ideals; operads presented by relators -/
+
+#print axioms Operad.SymOperadIdeal.sInf
+#print axioms Operad.SymOperadIdeal.span
+#print axioms Operad.SymOperadIdeal.subset_span
+#print axioms Operad.SymOperadIdeal.span_le
+#print axioms Operad.SymOperadIdeal.span_le_ker_iff
+#print axioms Operad.SymOperadIdeal.presHomEquiv
+#print axioms Operad.presLinHomEquiv
