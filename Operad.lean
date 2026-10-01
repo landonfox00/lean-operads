@@ -50,3 +50,6 @@ import Operad.TreeConv
 import Operad.KoszulDual
 import Operad.LowWeight
 import Operad.PermLow
+import Operad.DGHom
+import Operad.KoszulTwist
+import Operad.Mirror

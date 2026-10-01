@@ -90,6 +90,10 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | `two_smul_associator_odd` — the obstruction at 2 | `TotalSpaceS.lean` | proved |
 | **`dsq_eq_zero` — `d² = 0` (with `2` invertible)** | `TotalSpaceS.lean` | **proved** |
 | `dLin`, cocycles, coboundaries, `cohomology` | `Cohomology.lean` | proved |
+| `NSOperadHom.app_sstar`, `app_gbracket` — morphisms preserve `⋆ₛ` and the bracket | `DGHom.lean` | proved |
+| **`TConv.eval_gbracket_gbracket_eq_zero` — twisting at a Koszul-dual Maurer–Cartan element squares to zero on the Koszul dual** | `KoszulTwist.lean` | **proved** |
+| `TConv.eval_gbracket_congr` — the bracket respects agreement on a slice-closed collection | `KoszulTwist.lean` | proved |
+| `BTree.mirror`, `OfArity.mirrorEquiv` — mirror images of planar trees; the named trees of arity three and four | `Mirror.lean` | proved |
 | `substF`, `extend` — total composition, tree evaluation | `TotalComp.lean` | proved |
 | **`extend_corolla` — evaluation returns the generator** | `TotalComp.lean` | **proved** |
 | `genOf`; **`Mag`, the magmatic operad** | `Magmatic.lean` | **proved** |

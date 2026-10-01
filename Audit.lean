@@ -521,3 +521,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Sym.LinOrd.map_insertEquiv_comp_std
 #print axioms Operad.Sym.Ass.ofNS
 
+/-! ## Morphisms and brackets; twisting on a Koszul dual; mirror images of trees -/
+
+#print axioms Operad.NSOperadHom.app_sstar
+#print axioms Operad.NSOperadHom.app_gbracket
+#print axioms Operad.TConv.projHom_app_eq_iff
+#print axioms Operad.TConv.eval_gbracket_congr
+#print axioms Operad.TConv.eval_gbracket_gbracket_eq_zero
+#print axioms Operad.BTree.arity_mirror
+#print axioms Operad.BTree.mirror_mirror
+#print axioms Operad.BTree.OfArity.mirrorEquiv
+#print axioms Operad.BTree.OfArity.mirror_bl
