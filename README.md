@@ -131,6 +131,10 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | **`SymOperadIdeal.Quot` — the quotient of a symmetric operad by an ideal is a symmetric operad** | `SymQuot.lean` | **proved** |
 | `SymOperadIdeal.liftHom`, `liftHom_unique` — its universal property; `mem_ker_projHom` | `SymQuot.lean` | proved |
 | `SymOperadHom.kerLift`, `kerLift_injective`, `kerLift_bijective` — the first isomorphism theorem | `SymQuot.lean` | proved |
+| **`Hadamard S T`** — the Hadamard product of set operads, componentwise; the projections, `lift`, `lift_unique` (it is the product of set operads), `prodMap`, `commIso` | `SetHadamard.lean` | **proved** |
+| `PointedSet`, `NonemptySubset` — the set operads of pointed inputs and of nonempty sets of inputs; **`PointedSet.linPermIso : Lin R PointedSet ≅ Perm R`**; singletons `PointedSet → NonemptySubset`; `ComTrias R` | `SetHadamard.lean` | **proved** |
+| `LinOrd.equivRank` — a linear order is a ranking; `LinOrd.card` (`n!` orders), `Ass.finrank` | `SetHadamard.lean` | proved |
+| **`Dias R`, `Trias R`** — Loday's dialgebras and Loday–Ronco's trialgebras as linearized Hadamard products with `LinOrd`; the five and eleven relations (`DiasSet.relations`, `TriasSet.relations`); dimensions `n · n!` and `(2ⁿ - 1) · n!` (`Dias.finrank`, `Trias.finrank`); the injective morphism `Dias → Trias` | `SetHadamard.lean` | **proved** |
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |

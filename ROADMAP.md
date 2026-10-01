@@ -74,6 +74,12 @@ kernel-checked certificates (explicit kernel vectors, left inverses on complemen
 theorems that `Com`-, `Perm`-, `Lie`-algebras are what they should be; the Koszul dual operad
 `P^!` of a quadratic operad and the classical pairs (`Com`/`Lie`, `Ass`/`Ass`, `Perm`/`PreLie`).
 
+**Started** (`SetHadamard.lean`): Hadamard products of set operads, with their universal property;
+`Perm` as the linearization of the pointed sets; `ComTrias`; `Dias` and `Trias` as linearized
+Hadamard products with the linear orders, with their defining relations, their dimensions
+`n · n!` and `(2ⁿ - 1) · n!`, and the morphism `Dias → Trias`. Still to do: the presentations of
+`Dias` and `Trias` by those relations, and the rest of the list above.
+
 ### Phase 4 — general theory
 
 | | content |

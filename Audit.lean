@@ -542,3 +542,29 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymOperadIdeal.liftHom_unique
 #print axioms Operad.SymOperadHom.kerLift_injective
 #print axioms Operad.SymOperadHom.kerLift_bijective
+
+/-! ## Hadamard products of set operads; dialgebras and trialgebras -/
+
+#print axioms Operad.Hadamard.instSetOperad
+#print axioms Operad.Hadamard.lift
+#print axioms Operad.Hadamard.lift_unique
+#print axioms Operad.Hadamard.prodMap_injective
+#print axioms Operad.Hadamard.commIso
+#print axioms Operad.PointedSet.instSetOperad
+#print axioms Operad.NonemptySubset.instSetOperad
+#print axioms Operad.Sym.LinOrd.equivRank
+#print axioms Operad.Sym.LinOrd.card
+#print axioms Operad.Sym.LinOrd.nestL_std
+#print axioms Operad.Sym.Ass.finrank
+#print axioms Operad.PointedSet.linPermIso
+#print axioms Operad.PointedSet.toNonemptySubset_injective
+#print axioms Operad.NonemptySubset.card
+#print axioms Operad.DiasSet.relations
+#print axioms Operad.DiasSet.card
+#print axioms Operad.Dias.finrank
+#print axioms Operad.TriasSet.relations
+#print axioms Operad.TriasSet.card
+#print axioms Operad.Trias.finrank
+#print axioms Operad.TriasSet.toTrias_left
+#print axioms Operad.TriasSet.toTrias_right
+#print axioms Operad.Dias.toTrias_injective
