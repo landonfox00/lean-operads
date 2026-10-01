@@ -861,3 +861,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBar.sum_good_sets
 #print axioms Operad.ShuffleBar.sum_ncard_nrm
 #print axioms Operad.ShuffleBar.finrank_KD_eq_ncard
+#print axioms Operad.LTree.joinAt_mem
+#print axioms Operad.LTree.eq_joinAt
+#print axioms Operad.LTree.joinAt_injective
+#print axioms Operad.LTree.rootP_joinAt
+#print axioms Operad.LTree.card_sets_zero
+#print axioms Operad.LTree.card_filter_rootP
+#print axioms Operad.ShuffleBar.edgeWins_map_snd
+#print axioms Operad.ShuffleBar.isFull_iff_windows
+#print axioms Operad.ShuffleBar.isFull_std

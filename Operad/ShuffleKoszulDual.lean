@@ -26,6 +26,7 @@ the number of monomials of arity `n` all of whose windows are in `L`** (`finrank
 the count of the dual PBW basis.
 -/
 import Operad.ShuffleKoszul
+import Operad.ShuffleRoot
 import Mathlib.LinearAlgebra.FiniteDimensional.Lemmas
 import Mathlib.Data.Set.Card
 
@@ -176,6 +177,22 @@ lemma flagBy_cutKeys : ∀ x : BarTree E, x.labels.Nodup → flagBy (cutKeys x) 
 
 /-- **A monomial all of whose windows lie in `L`.** -/
 def IsFull (L : Set (LTree E)) (m : LTree E) : Prop := ∀ kw ∈ m.edgeWins, kw.2 ∈ L
+
+/-- The windows of the edges are the windows. -/
+lemma edgeWins_map_snd : ∀ t : LTree E, t.edgeWins.map Prod.snd = t.windows
+  | leaf _ => rfl
+  | node e l r => by
+    have hl := edgeWins_map_snd l
+    have hr := edgeWins_map_snd r
+    simp only [edgeWins, windows, List.map_append, hl, hr]
+    cases l <;> cases r <;> rfl
+
+lemma isFull_iff_windows {L : Set (LTree E)} {t : LTree E} :
+    IsFull L t ↔ ∀ w ∈ t.windows, w ∈ L := by
+  rw [← edgeWins_map_snd, IsFull, List.forall_mem_map]
+
+lemma isFull_std {L : Set (LTree E)} {t : LTree E} : IsFull L (std t) ↔ IsFull L t := by
+  simp only [isFull_iff_windows, std, mem_windows_relabel (strictOn_count t)]
 
 end Flags
 
