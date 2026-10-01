@@ -182,10 +182,14 @@ lemma card_sets_zero {n i : ℕ} (hn : 1 ≤ n) (hi : 1 ≤ i) :
   have h0T' : 0 ∉ T' := fun h => (Finset.mem_erase.1 (hT'.1 h)).1 rfl
   rw [← Finset.erase_insert h0T, h, Finset.erase_insert h0T']
 
-open Classical in
+noncomputable instance (P : E → LTree E → LTree E → Prop) [∀ e a b, Decidable (P e a b)] :
+    DecidablePred (RootP P) := fun t => by
+  cases t <;> unfold RootP <;> infer_instance
+
 /-- **Counting at the root**: monomials of arity `n` with a property of the root vertex and of
 the standardized subtrees, by the number `i` of labels of the left subtree. -/
-theorem card_filter_rootP (P : E → LTree E → LTree E → Prop) (n : ℕ) :
+theorem card_filter_rootP (P : E → LTree E → LTree E → Prop) [DecidablePred (RootP P)]
+    [∀ e a b, Decidable (P e a b)] (n : ℕ) :
     ((monomials (E := E) n).filter (RootP P)).card = ∑ i ∈ Finset.Ico 1 n,
       (n - 1).choose (i - 1) * ((Finset.univ ×ˢ (monomials (E := E) i ×ˢ monomials (n - i))).filter
         fun p => P p.1 p.2.1 p.2.2).card := by
