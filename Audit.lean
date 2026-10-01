@@ -870,3 +870,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBar.edgeWins_map_snd
 #print axioms Operad.ShuffleBar.isFull_iff_windows
 #print axioms Operad.ShuffleBar.isFull_std
+#print axioms Operad.SetOperad.comp_prod_of_nonempty
+#print axioms Operad.SetOperad.comp_prod_of_isEmpty
+#print axioms Operad.SetOperad.prod_of_unique
+#print axioms Operad.und_map_zero
+#print axioms Operad.und_comp_zero_left
+#print axioms Operad.und_comp_zero_right
+#print axioms Operad.und_bin_zero_left
+#print axioms Operad.und_bin_zero_mid
+#print axioms Operad.PermElt.adj_und_zero
+#print axioms Operad.PermElt.adjN_und_zero
+#print axioms Operad.twLin_bin_single
+#print axioms Operad.gr_bin_single

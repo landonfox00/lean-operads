@@ -29,6 +29,7 @@ Morphisms out of a twisted linearization are built from their values on the basi
 -/
 import Operad.Filtration
 import Operad.SymIso
+import Operad.SetBinary
 import Mathlib.Algebra.Polynomial.Div
 
 universe u v w
@@ -619,5 +620,55 @@ theorem specializeL_eq_zero_iff (x : TwLin R[X] W X A) :
   mapRange_eval_eq_zero_iff c (show S A →₀ R[X] from x)
 
 end TwLin
+
+/-! ## Binary composites in a twisted linearization -/
+
+section TwLinBin
+
+open SetOperad
+
+variable {R : Type u} [CommRing R] (W : SetOperadWeight S) {A B : Type} [Fintype A]
+  [DecidableEq A] [Fintype B] [DecidableEq B]
+
+/-- **A binary composite of basis elements** in a twisted linearization: the composite in `S`,
+scaled by `h` to the weight lost. -/
+lemma twLin_bin_single (h : R) (g : S (Fin 2)) (x : S A) (y : S B) (a b c : R) :
+    bin (Und.of R (TwLin R W h) (TwLin.single W h g a))
+        (Und.of R (TwLin R W h) (TwLin.single W h x b))
+        (Und.of R (TwLin R W h) (TwLin.single W h y c))
+      = Und.of R (TwLin R W h) (TwLin.single W h (bin g x y)
+          (h ^ W.defect (Sum.inl slotOne) (comp 0 g x) y
+            * (h ^ W.defect 0 g x * (a * b) * c))) := by
+  show SymOperad.map (R := R) (P := TwLin R W h) (binEquiv A B)
+      (SymOperad.comp (R := R) (P := TwLin R W h) (Sum.inl slotOne)
+        (SymOperad.comp (R := R) (P := TwLin R W h) (0 : Fin 2) (TwLin.single W h g a)
+          (TwLin.single W h x b)) (TwLin.single W h y c)) = _
+  rw [TwLin.comp_single, TwLin.comp_single, TwLin.map_single]
+  rfl
+
+/-- **A binary composite of basis elements in the associated graded**: the composite in `S` when
+no weight is lost, and zero otherwise. -/
+lemma gr_bin_single (g : S (Fin 2)) (x : S A) (y : S B) :
+    bin (Und.of R (Gr R W) (TwLin.single W 0 g 1)) (Und.of R (Gr R W) (TwLin.single W 0 x 1))
+        (Und.of R (Gr R W) (TwLin.single W 0 y 1))
+      = Und.of R (Gr R W) (TwLin.single W 0 (bin g x y)
+          (if W.w _ (bin g x y) = W.w _ g + W.w _ x + W.w _ y then 1 else 0)) := by
+  rw [twLin_bin_single]
+  have h1 := W.w_comp_add_defect 0 g x
+  have h2 := W.w_comp_add_defect (Sum.inl slotOne) (comp 0 g x) y
+  have h3 : W.w _ (bin g x y) = W.w _ (comp (Sum.inl slotOne) (comp 0 g x) y) := W.w_map _ _
+  congr 2
+  split_ifs with hw
+  · have hd1 : W.defect 0 g x = 0 := by omega
+    have hd2 : W.defect (Sum.inl slotOne) (comp 0 g x) y = 0 := by omega
+    rw [hd1, hd2]
+    ring
+  · by_cases hd1 : W.defect 0 g x = 0
+    · have hd2 : W.defect (Sum.inl slotOne) (comp 0 g x) y ≠ 0 := by omega
+      rw [zero_pow hd2, zero_mul]
+    · rw [zero_pow hd1]
+      ring
+
+end TwLinBin
 
 end Operad

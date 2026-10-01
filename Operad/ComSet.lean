@@ -305,6 +305,44 @@ theorem comp_prod {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [Decidabl
 
 end Prod
 
+/-! ## Products, composed into -/
+
+section ProdComp
+
+variable {m : S (Fin 2)} (hc : IsComm m) (ha : IsAssoc m) {B : Type} [Fintype B] [DecidableEq B]
+
+/-- **Composing into a product with more than one input** multiplies the rest by it. -/
+lemma comp_prod_of_nonempty {W : Type} [Fintype W] [DecidableEq W] (hW : Nonempty W) (j : W)
+    (h : Nonempty (Without W j)) (y : S B) :
+    comp j (prod hc ha W hW) y = bin m (prod hc ha (Without W j) h) y := by
+  rw [← SetOperad.map_prod (h.map Sum.inl) (rightUnitEquiv j), ← bin_prod_one h,
+    comp_map_left_of _ (i := Sum.inr ()) ?h1, comp_inr_bin, one_comp', bin_map_right, map_map,
+    map_map]
+  · exact map_eq_self (fun c => by rcases c with w | b <;> rfl) _
+  · rfl
+
+/-- **Composing into a product with one input** is a relabelling. -/
+lemma comp_prod_of_isEmpty {W : Type} [Fintype W] [DecidableEq W] (hW : Nonempty W) (j : W)
+    [IsEmpty (Without W j)] (y : S B) :
+    comp j (prod hc ha W hW) y = map (Equiv.emptySum (Without W j) B).symm y := by
+  obtain ⟨e, he⟩ : ∃ e : Unit ≃ W, e () = j :=
+    ⟨{ toFun := fun _ => j
+       invFun := fun _ => ()
+       left_inv := fun _ => rfl
+       right_inv := fun w => by
+         by_contra hne
+         exact IsEmpty.false (⟨w, fun h => hne h.symm⟩ : Without W j) }, rfl⟩
+  rw [← SetOperad.map_prod ⟨()⟩ e, prod_unit, comp_map_left_of _ (i := ()) he, one_comp',
+    map_map]
+  exact map_congr (fun b => by rfl) _
+
+/-- **A product on one input** is the unit. -/
+lemma prod_of_unique {W : Type} [Fintype W] [DecidableEq W] (hW : Nonempty W) (e : Unit ≃ W) :
+    prod hc ha W hW = map e one := by
+  rw [← SetOperad.map_prod ⟨()⟩ e, prod_unit]
+
+end ProdComp
+
 end SetOperad
 
 /-! ## The universal property of `ComSet` -/

@@ -545,4 +545,54 @@ noncomputable def homEquiv : SymOperadHom R (Sym.Perm R) Q ≃ PermElt (Und R Q)
 
 end Perm
 
+/-! ## Zero, in the underlying set operad of an operad in modules -/
+
+section Zero
+
+variable {R : Type u} [CommRing R] {Q : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [SymOperad R Q]
+  {A B C : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] [Fintype C]
+  [DecidableEq C]
+
+open SetOperad in
+@[simp] lemma und_map_zero (e : A ≃ B) : map e (Und.of R Q (0 : Q A)) = Und.of R Q 0 := by
+  rw [Und.map_eq, map_zero]
+
+open SetOperad in
+@[simp] lemma und_comp_zero_left (i : A) (y : Und R Q B) :
+    comp i (Und.of R Q (0 : Q A)) y = Und.of R Q 0 := by
+  show Und.of R Q (SymOperad.comp (R := R) i 0 ((Und.of R Q).symm y)) = _
+  rw [map_zero, LinearMap.zero_apply]
+
+open SetOperad in
+@[simp] lemma und_comp_zero_right (i : A) (x : Und R Q A) :
+    comp i x (Und.of R Q (0 : Q B)) = Und.of R Q 0 := by
+  show Und.of R Q (SymOperad.comp (R := R) i ((Und.of R Q).symm x) 0) = _
+  rw [map_zero]
+
+open SetOperad in
+@[simp] lemma und_bin_zero_left (x : Und R Q A) (y : Und R Q B) :
+    bin (Und.of R Q (0 : Q (Fin 2))) x y = Und.of R Q 0 := by
+  unfold bin
+  rw [und_comp_zero_left, und_comp_zero_left, und_map_zero]
+
+open SetOperad in
+@[simp] lemma und_bin_zero_mid (g : Und R Q (Fin 2)) (y : Und R Q B) :
+    bin g (Und.of R Q (0 : Q A)) y = Und.of R Q 0 := by
+  unfold bin
+  rw [und_comp_zero_right, und_comp_zero_left, und_map_zero]
+
+/-- **Adjoining inputs to zero gives zero.** -/
+lemma PermElt.adj_und_zero (P : PermElt (Und R Q)) :
+    ∀ k, P.adj (Und.of R Q (0 : Q C)) k = Und.of R Q 0
+  | 0 => und_map_zero _
+  | k + 1 => by rw [PermElt.adj_succ, PermElt.adj_und_zero P k, und_bin_zero_mid, und_map_zero]
+
+lemma PermElt.adjN_und_zero (P : PermElt (Und R Q)) (N : Type) [Fintype N] [DecidableEq N] :
+    P.adjN (Und.of R Q (0 : Q C)) N = Und.of R Q 0 := by
+  rw [P.adjN_eq _ (Fintype.equivFin N), P.adj_und_zero, und_map_zero]
+
+end Zero
+
 end Operad
