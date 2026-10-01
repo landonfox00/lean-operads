@@ -69,3 +69,4 @@ import Operad.BinaryQuadratic
 import Operad.ShuffleSubst
 import Operad.FreeBinary
 import Operad.BinaryKoszul
+import Operad.Deformation

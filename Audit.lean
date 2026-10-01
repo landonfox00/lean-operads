@@ -794,3 +794,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Zinb.dual
 #print axioms Operad.Dend.dual
 #print axioms Operad.BinDias.dual
+#print axioms Operad.SymCochain.isCocycle_zero
+#print axioms Operad.SymCochain.IsCocycle.add_smul
+#print axioms Operad.Deformed.instSymOperad
+#print axioms Operad.Deformed.isCocycle_of_symOperad
+#print axioms Operad.SymEndo.isCocycle_coboundary
+#print axioms Operad.isCoboundary_iff_exists_lift
+#print axioms Operad.SymDerivation.liftEquiv
+#print axioms Operad.SymDerivation.ad_one
+#print axioms Operad.SymDerivation.smul_euler_eq_ad
+#print axioms Operad.SymOperadIso.forall_isCoboundary
+#print axioms Operad.SymOperadIso.forall_eq_smul_euler
