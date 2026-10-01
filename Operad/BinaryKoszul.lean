@@ -30,8 +30,8 @@ The classical dualities follow: `Ass^! = Ass` (`BinAss.dual`), `PreLie^! = Perm`
 of operads: the dual relations generate the same operad ideal as the classical relators
 (`BinPres.dual_eq`).
 
-The generators here carry the regular action of `𝔖₂` (no relators of arity two), so the duality
-`Com^! = Lie`, which involves relators of arity two, is outside this setting.
+The generators here carry the regular action of `𝔖₂` (no relators of arity two); commutative and
+anticommutative generators, and `Com^! = Lie`, are in `Operad.BinaryKoszulSym`.
 -/
 import Operad.FreeBinary
 import Operad.ShuffleTree
