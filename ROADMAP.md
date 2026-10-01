@@ -84,7 +84,7 @@ Hadamard products with the linear orders, with their defining relations, their d
 
 | | content |
 |---|---|
-| L11 | Shuffle operads and the forgetful functor from symmetric operads; tree monomials, admissible orders, Gröbner bases; the Dotsenko–Khoroshkin criterion |
+| L11 | Shuffle operads and the forgetful functor from symmetric operads; tree monomials, admissible orders, Gröbner bases; the Dotsenko–Khoroshkin criterion. **Started**: shuffle tree monomials, their count `(2n - 3)!! \|E\|ⁿ⁻¹`, windows and normality for quadratic leading terms, the path-lexicographic key, right-comb normal forms (`ShuffleTree.lean`); leading monomials of the kernel of a linearized map (`LeadingTerm.lean`) |
 | L12 | Differential graded operads, bar and cobar constructions, Koszulness, the deformation complex of a morphism and of an operad |
 | L13 | `L∞`-algebras and the homotopy transfer theorem |
 | L14 | The general free symmetric operad on a linear species, and its comparison with the set-operad construction |

@@ -57,3 +57,5 @@ import Operad.SymQuot
 import Operad.SetHadamard
 import Operad.SymPresentation
 import Operad.SymTreeConv
+import Operad.ShuffleTree
+import Operad.LeadingTerm
