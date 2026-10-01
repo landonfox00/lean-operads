@@ -73,3 +73,4 @@ import Operad.Deformation
 import Operad.ShuffleNormal
 import Operad.ShuffleBar
 import Operad.ShuffleKoszul
+import Operad.ShuffleKoszulDual
