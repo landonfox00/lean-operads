@@ -908,3 +908,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeBin.four_assoc
 #print axioms Operad.FreeBin.BinPres.dual23_lie_eq
 #print axioms Operad.FreeBin.Lie.dual
+#print axioms Operad.Pres.lin_hom_ext
+#print axioms Operad.SymDerivationAlong.app_one
+#print axioms Operad.SymDerivation.compHom
+#print axioms Operad.SymDerivationAlong.ofLifts
+#print axioms Operad.Deformed.liftAdd
+#print axioms Operad.SymDerivationAlong.liftEquiv
+#print axioms Operad.FreeSet.linHom_gen
+#print axioms Operad.SymDerivationAlong.freeEquiv
+#print axioms Operad.SymDerivationAlong.freeEquiv_symm_gen
+#print axioms Operad.SymDerivationAlong.free_ext
+#print axioms Operad.Deformed.fst_freeLift
+#print axioms Operad.Deformed.snd_freeLift_gen

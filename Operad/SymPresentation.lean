@@ -13,7 +13,8 @@ exactly when the ideal lies in its kernel (`span_le_ker_iff`). Taking for `P` th
 a set operad presented by generators and relations, `Lin R (Pres T ρ)` (for instance the free one,
 `FreeSet T`, or the one in which some generators are symmetric), this is the operad in `R`-modules
 presented by generators, by set-theoretic relations, and by linear relators, and its morphisms are
-the generator values satisfying both kinds of relation (`presLinHomEquiv`).
+the generator values satisfying both kinds of relation (`presLinHomEquiv`); in particular they are
+determined by the generators (`Pres.lin_hom_ext`, `presLin_hom_ext`).
 -/
 import Operad.SymQuot
 import Operad.SetPresentation
@@ -175,6 +176,15 @@ variable {R : Type*} [CommRing R] {T : ℕ → Type*}
   [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [SymOperad R Q]
 
+/-- **Morphisms out of the linearization of a presented set operad agree when they agree on the
+generators.** -/
+theorem Pres.lin_hom_ext {φ ψ : SymOperadHom R (Lin R (Pres T ρ)) Q}
+    (h : ∀ (n : ℕ) (g : T n),
+      φ.app _ (Finsupp.single (Pres.gen g) 1) = ψ.app _ (Finsupp.single (Pres.gen g) 1)) :
+    φ = ψ := by
+  apply (Operad.linHomEquiv R).symm.injective
+  exact Pres.hom_ext fun n g => congrArg (Und.of R Q) (h n g)
+
 /-- **Morphisms out of an operad presented by generators and linear relators agree when they
 agree on the generators.** -/
 theorem presLin_hom_ext {φ ψ : SymOperadHom R (SymOperadIdeal.span R r).Quot Q}
@@ -184,9 +194,7 @@ theorem presLin_hom_ext {φ ψ : SymOperadHom R (SymOperadIdeal.span R r).Quot Q
     φ = ψ := by
   apply SymOperadIdeal.presHomEquiv.injective
   apply Subtype.ext
-  show φ.comp (SymOperadIdeal.span R r).projHom = ψ.comp (SymOperadIdeal.span R r).projHom
-  apply (Operad.linHomEquiv R).symm.injective
-  exact Pres.hom_ext fun n g => congrArg (Und.of R Q) (h n g)
+  exact Pres.lin_hom_ext h
 
 end PresExt
 
