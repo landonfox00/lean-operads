@@ -968,3 +968,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBar.map_scaleBar_KD
 #print axioms Operad.ShuffleBar.finrank_KD_rescale
 #print axioms Operad.ShuffleBar.isKoszul_rescale
+#print axioms Operad.Graded.finrank_grW
+#print axioms Operad.LTree.wdeg_substAt
+#print axioms Operad.ShuffleBar.wdegB_mergeK
+#print axioms Operad.ShuffleBar.wdegB_substBar
+#print axioms Operad.ShuffleBar.d_wproj
+#print axioms Operad.ShuffleBar.adm_substBar_iff
+#print axioms Operad.ShuffleBar.J_inf_C_le
+#print axioms Operad.ShuffleBar.substRel_wproj
+#print axioms Operad.ShuffleBar.Jgen_le_grW
+#print axioms Operad.ShuffleBar.J_inf_C_eq_grW
+#print axioms Operad.ShuffleBar.grW_KD_le
+#print axioms Operad.ShuffleBar.KD_eq_grW
+#print axioms Operad.ShuffleBar.finrank_J_inf_C_add
+#print axioms Operad.ShuffleBar.KD_eq_grW_of_isGroebner
