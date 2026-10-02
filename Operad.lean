@@ -88,3 +88,5 @@ import Operad.ShuffleVData
 import Operad.ShuffleBarEdge
 import Operad.ShuffleKoszulOperad
 import Operad.ShuffleGradedDual
+import Operad.DayUnits
+import Operad.DayMonoid
