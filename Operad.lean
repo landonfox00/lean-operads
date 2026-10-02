@@ -88,5 +88,7 @@ import Operad.ShuffleVData
 import Operad.ShuffleBarEdge
 import Operad.ShuffleKoszulOperad
 import Operad.ShuffleGradedDual
+import Operad.ReesModule
+import Operad.ShuffleReesKD
 import Operad.DayUnits
 import Operad.DayMonoid
