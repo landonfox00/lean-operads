@@ -13,7 +13,8 @@ original one; at the level of the bar construction:
   monomial (`wt_substBar`), so the rescaling carries the relator subcomplex of `R` onto that of
   the rescaled relators (`map_scaleBar_J`);
 * hence **the Koszul dual cooperads of `R` and of its rescaling are isomorphic in every arity**
-  (`map_scaleBar_KD`, `finrank_KD_rescale`).
+  (`map_scaleBar_KD`, `finrank_KD_rescale`), and **`R` is Koszul exactly when its rescaling is**
+  (`isKoszul_rescale`).
 -/
 import Operad.ShuffleKoszulDual
 
@@ -166,6 +167,18 @@ theorem d_scaleBar (l : E → K) (v : BarTree E →₀ K) :
     refine Finset.sum_congr rfl fun k _ => ?_
     ring_nf
 
+variable {K} in
+lemma scaleBar_inv (l : E → K) (hl : ∀ e, l e ≠ 0) (v : BarTree E →₀ K) :
+    scaleBar K l (scaleBar K l⁻¹ v) = v := by
+  rw [scaleBar_scaleBar, show l * l⁻¹ = 1 from funext fun e => mul_inv_cancel₀ (hl e),
+    scaleBar_one]
+
+variable {K} in
+lemma scaleBar_inv' (l : E → K) (hl : ∀ e, l e ≠ 0) (v : BarTree E →₀ K) :
+    scaleBar K l⁻¹ (scaleBar K l v) = v := by
+  rw [scaleBar_scaleBar, show l⁻¹ * l = 1 from funext fun e => inv_mul_cancel₀ (hl e),
+    scaleBar_one]
+
 variable [Fintype E] [DecidableEq E]
 
 /-- **The rescaling of the relators of arity three**: the coefficient of a monomial multiplied by
@@ -225,11 +238,20 @@ theorem map_scaleBar_J_le (l : E → K) (R : Submodule K (Mono E 3 → K)) :
   exact Submodule.smul_mem _ _ (Submodule.subset_span
     ⟨x, p, s, rescale K l r, hx, h, Submodule.mem_map_of_mem hr, rfl⟩)
 
+variable {K} in
+lemma map_rescale_inv (l : E → K) (hl : ∀ e, l e ≠ 0) (R : Submodule K (Mono E 3 → K)) :
+    (R.map (rescale K l)).map (rescale K l⁻¹) = R := by
+  rw [← Submodule.map_comp, show (rescale K l⁻¹).comp (rescale K l) = LinearMap.id from
+    LinearMap.ext fun r => by
+      rw [LinearMap.comp_apply, rescale_rescale,
+        show l⁻¹ * l = 1 from funext fun e => inv_mul_cancel₀ (hl e), rescale_one,
+        LinearMap.id_apply],
+    Submodule.map_id]
+
 /-- **The rescaling carries the Koszul dual cooperad of `R` onto that of the rescaled
 relators**, for nonzero scalars. -/
 theorem map_scaleBar_KD (l : E → K) (hl : ∀ e, l e ≠ 0) (R : Submodule K (Mono E 3 → K))
     (n : ℕ) : (KD K R n).map (scaleBar K l) = KD K (R.map (rescale K l)) n := by
-  have hinv : l⁻¹ * l = 1 := funext fun e => inv_mul_cancel₀ (hl e)
   apply le_antisymm
   · rw [Submodule.map_le_iff_le_comap]
     intro v hv
@@ -239,27 +261,31 @@ theorem map_scaleBar_KD (l : E → K) (hl : ∀ e, l e ≠ 0) (R : Submodule K (
     exact map_scaleBar_J_le K l R (Submodule.mem_map_of_mem hv.2)
   · intro w hw
     rw [KD, Submodule.mem_inf, Submodule.mem_comap] at hw
-    refine ⟨scaleBar K l⁻¹ w, ?_, by
-      rw [scaleBar_scaleBar, show l * l⁻¹ = 1 from funext fun e => mul_inv_cancel₀ (hl e),
-        scaleBar_one]⟩
-    refine Submodule.mem_inf.2 ⟨scaleBar_mem_C K _ hw.1, ?_⟩
-    rw [Submodule.mem_comap, d_scaleBar]
-    have := map_scaleBar_J_le K l⁻¹ _ (Submodule.mem_map_of_mem hw.2)
-    rwa [← Submodule.map_comp, show (rescale K l⁻¹).comp (rescale K l) = LinearMap.id from
-      LinearMap.ext fun r => by
-        rw [LinearMap.comp_apply, rescale_rescale, hinv, rescale_one, LinearMap.id_apply],
-      Submodule.map_id] at this
+    refine ⟨scaleBar K l⁻¹ w, Submodule.mem_inf.2 ⟨scaleBar_mem_C K _ hw.1, ?_⟩,
+      scaleBar_inv l hl w⟩
+    rw [Submodule.mem_comap, d_scaleBar, ← map_rescale_inv l hl R]
+    exact map_scaleBar_J_le K l⁻¹ _ (Submodule.mem_map_of_mem hw.2)
 
 /-- **The Koszul dual cooperads of `R` and of its rescaling have the same dimension** in every
 arity. -/
 theorem finrank_KD_rescale (l : E → K) (hl : ∀ e, l e ≠ 0) (R : Submodule K (Mono E 3 → K))
     (n : ℕ) : Module.finrank K (KD K (R.map (rescale K l)) n) = Module.finrank K (KD K R n) := by
-  have hinv : l⁻¹ * l = 1 := funext fun e => inv_mul_cancel₀ (hl e)
   have hinj : Function.Injective (scaleBar K l) := fun v w h => by
-    have := congrArg (scaleBar K l⁻¹) h
-    rwa [scaleBar_scaleBar, scaleBar_scaleBar, hinv, scaleBar_one, scaleBar_one] at this
+    rw [← scaleBar_inv' l hl v, h, scaleBar_inv' l hl w]
   rw [← map_scaleBar_KD K l hl R n]
   exact LinearEquiv.finrank_eq (Submodule.equivMapOfInjective _ hinj _).symm
+
+/-- **Koszulness is invariant under rescaling the generators** by nonzero scalars. -/
+theorem isKoszul_rescale (l : E → K) (hl : ∀ e, l e ≠ 0) {R : Submodule K (Mono E 3 → K)}
+    (hR : IsKoszul K R) : IsKoszul K (R.map (rescale K l)) := by
+  intro n s hs x hx hdx
+  have hdx' : d K (scaleBar K l⁻¹ x) ∈ J K R := by
+    rw [d_scaleBar, ← map_rescale_inv l hl R]
+    exact map_scaleBar_J_le K l⁻¹ _ (Submodule.mem_map_of_mem hdx)
+  obtain ⟨y, hy, hxy⟩ := hR n s hs _ (scaleBar_mem_C K l⁻¹ hx) hdx'
+  refine ⟨scaleBar K l y, scaleBar_mem_C K l hy, ?_⟩
+  have := map_scaleBar_J_le K l R (Submodule.mem_map_of_mem hxy)
+  rwa [map_sub, scaleBar_inv l hl, ← d_scaleBar] at this
 
 end ShuffleBar
 

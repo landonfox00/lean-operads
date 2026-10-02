@@ -967,3 +967,4 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBar.map_scaleBar_J_le
 #print axioms Operad.ShuffleBar.map_scaleBar_KD
 #print axioms Operad.ShuffleBar.finrank_KD_rescale
+#print axioms Operad.ShuffleBar.isKoszul_rescale
