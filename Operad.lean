@@ -83,3 +83,8 @@ import Operad.ShuffleRoot
 import Operad.ShuffleKoszulDual
 import Operad.ShuffleRescale
 import Operad.ShuffleGraded
+import Operad.ListInv
+import Operad.ShuffleVData
+import Operad.ShuffleBarEdge
+import Operad.ShuffleKoszulOperad
+import Operad.ShuffleGradedDual
