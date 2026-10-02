@@ -72,6 +72,7 @@ import Operad.BinaryKoszul
 import Operad.BinaryKoszulSym
 import Operad.Deformation
 import Operad.DerivationAlong
+import Operad.FormalDeformation
 import Operad.ShuffleNormal
 import Operad.ShuffleBar
 import Operad.ShuffleKoszul

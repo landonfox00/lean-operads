@@ -920,3 +920,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymDerivationAlong.free_ext
 #print axioms Operad.Deformed.fst_freeLift
 #print axioms Operad.Deformed.snd_freeLift_gen
+#print axioms Operad.FormalDeformation.instSymOperad
+#print axioms Operad.FormalDeformation.truncIdeal
+#print axioms Operad.FormalDeformation.isMorAt_iff
+#print axioms Operad.SymCochain.isCocycle_of_injective
+#print axioms Operad.FormalDeformation.isCocycle_obstruction
+#print axioms Operad.FormalDeformation.exists_step
+#print axioms Operad.FormalDeformation.exists_trivialization
+#print axioms Operad.FormalDeformation.trivHom
+#print axioms Operad.FormalDeformation.trivHomApp_bijective
+#print axioms Operad.FormalDeformation.exists_iso_trivial
