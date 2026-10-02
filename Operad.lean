@@ -81,3 +81,4 @@ import Operad.ShuffleBar
 import Operad.ShuffleKoszul
 import Operad.ShuffleRoot
 import Operad.ShuffleKoszulDual
+import Operad.ShuffleRescale

@@ -956,3 +956,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.BinComTrias.dataOfKills
 #print axioms Operad.BinComTrias.kills_of_data
 #print axioms Operad.BinComTrias.isoComTrias
+#print axioms Operad.LTree.wt_plug
+#print axioms Operad.LTree.wt_substAt
+#print axioms Operad.ShuffleBar.wt_mergeK
+#print axioms Operad.ShuffleBar.wt_substBar
+#print axioms Operad.ShuffleBar.scaleBar_scaleBar
+#print axioms Operad.ShuffleBar.d_scaleBar
+#print axioms Operad.ShuffleBar.scaleBar_mem_C
+#print axioms Operad.ShuffleBar.scaleBar_substRel
+#print axioms Operad.ShuffleBar.map_scaleBar_J_le
+#print axioms Operad.ShuffleBar.map_scaleBar_KD
+#print axioms Operad.ShuffleBar.finrank_KD_rescale
