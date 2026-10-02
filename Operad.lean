@@ -98,3 +98,5 @@ import Operad.DayUnits
 import Operad.DayMonoid
 import Operad.MayOperad
 import Operad.MayClass
+import Operad.SpeciesOp
+import Operad.FreeSpecies

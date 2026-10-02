@@ -1132,3 +1132,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.MaySetOperad.comp_assoc_par
 #print axioms Operad.MaySetOperad.toSetOperad_toMaySetOperad
 #print axioms Operad.MaySetOperad.toMaySetOperad_toSetOperad
+#print axioms Operad.SetSpeciesHom.skeletonEquiv
+#print axioms Operad.SymSpeciesHom.undEquiv
+#print axioms Operad.FreeSp.homEquiv
+#print axioms Operad.FreeSp.homEquiv_symm_ι
+#print axioms Operad.FreeSp.hom_ext
+#print axioms Operad.FreeL.homEquiv
+#print axioms Operad.FreeL.homEquiv_symm_ι
+#print axioms Operad.FreeL.hom_ext
