@@ -70,6 +70,8 @@ import Operad.ShuffleSubst
 import Operad.FreeBinary
 import Operad.BinaryKoszul
 import Operad.BinaryKoszulSym
+import Operad.BinaryCert
+import Operad.PostLie
 import Operad.Deformation
 import Operad.DerivationAlong
 import Operad.FormalDeformation
