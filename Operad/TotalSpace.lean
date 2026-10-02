@@ -31,6 +31,7 @@ open NSOperad DirectSum
 
 /-- The degree-`k` piece of the total space: operations of arity `k + 1`. Arity `0` is excluded,
 since it carries no degree and the deformation complex does not use it. -/
+@[nolint unusedArguments]
 def Piece (R : Type u) [CommRing R] (P : ℕ → Type v) (k : ℕ) : Type v := P (k + 1)
 
 section
@@ -57,6 +58,7 @@ instance : DirectSum.GNonUnitalNonAssocSemiring (Piece R P) where
   add_mul a b c := star_add_left (R := R) a b c
 
 /-- The total space of an operad, graded by arity minus one. -/
+@[nolint unusedArguments]
 abbrev Tot (R : Type u) [CommRing R] (P : ℕ → Type v)
     [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] : Type v :=
   ⨁ k : ℕ, Piece R P k

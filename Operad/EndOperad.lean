@@ -73,6 +73,7 @@ section EndOp
 variable (R : Type u) [CommRing R] (V : Type v) [AddCommGroup V] [Module R V]
 
 /-- **The endomorphism operad** of an `R`-module `V`: the multilinear maps `V^A → V`. -/
+@[nolint unusedArguments]
 abbrev EndOp (A : Type) [Fintype A] [DecidableEq A] : Type v :=
   MultilinearMap R (fun _ : A => V) V
 

@@ -48,6 +48,7 @@ open Finset
 
 /-- **The operad `Perm`**: `R`-valued functions on the inputs.  An `abbrev`, so the `Pi` module
 structure transfers without an instance mismatch. -/
+@[nolint unusedArguments]
 abbrev Perm (R : Type u) [CommRing R] : ℕ → Type u := fun n => Fin n → R
 
 namespace Perm
@@ -67,7 +68,7 @@ lemma sum_split3 {M : Type u} [AddCommMonoid M] {a n b : ℕ} (f : Fin (a + n + 
 
 /-- The coordinate of an explicit `Fin`.  `omega` treats `↑⟨x, h⟩` as an atom unless this fires
 first, which is why it appears in front of almost every arithmetic goal below. -/
-@[simp] lemma val_mk' {n : ℕ} (x : ℕ) (h : x < n) : ((⟨x, h⟩ : Fin n) : ℕ) = x := rfl
+lemma val_mk' {n : ℕ} (x : ℕ) (h : x < n) : ((⟨x, h⟩ : Fin n) : ℕ) = x := rfl
 
 /-- Reindexing `Perm` along an equality of arities is reindexing the argument. -/
 @[simp] lemma reindex_apply {m n : ℕ} (h : m = n) (x : Perm R m) (j : Fin n) :
@@ -251,7 +252,7 @@ in each range both sides reduce to a product of the same three values of `α`, `
 /-- The identity of `Perm`: the unique operation of arity one, with value `1`. -/
 def permOne : Perm R 1 := fun _ => 1
 
-@[simp] lemma sum_permOne : (∑ t, (permOne : Perm R 1) t) = 1 := by simp [permOne]
+lemma sum_permOne : (∑ t, (permOne : Perm R 1) t) = 1 := by simp [permOne]
 
 theorem permComp_one_right (a b : ℕ) (α : Perm R (a + 1 + b)) :
     permComp a b α permOne = α := by

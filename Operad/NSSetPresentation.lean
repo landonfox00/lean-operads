@@ -51,7 +51,8 @@ inductive Rel (ρ : ∀ n : ℕ, NSSyn T n → NSSyn T n → Prop) : {n : ℕ} �
         (comp a (b + p + c) (reindexS (NSSyn T) (by omega) (comp (a + 1 + b) c x z)) y)
 
 lemma Rel.reindexS {ρ : ∀ n : ℕ, NSSyn T n → NSSyn T n → Prop} {m n : ℕ} (h : m = n)
-    {x y : NSSyn T m} (hxy : Rel ρ x y) : Rel ρ (reindexS (NSSyn T) h x) (reindexS (NSSyn T) h y) := by
+    {x y : NSSyn T m} (hxy : Rel ρ x y) :
+    Rel ρ (reindexS (NSSyn T) h x) (reindexS (NSSyn T) h y) := by
   subst h
   exact hxy
 

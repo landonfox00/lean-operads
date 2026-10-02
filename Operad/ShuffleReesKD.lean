@@ -125,7 +125,7 @@ theorem fiber_rees_KDmono_zero (hn : 2 ≤ n) (h : KD K R₀ n = grW K (wdegB w)
 /-- **The rank of the Rees module of the Koszul dual cooperad** is its dimension. -/
 theorem finrank_rees_KDmono (hn : 2 ≤ n) :
     Module.finrank K[X] (rees K (wMono w n) (KDmono K R n)) = Module.finrank K (KD K R n) := by
-  rw [finrank_rees _ 1, evalAt_rees_one, (KD_equiv_KDmono R hn).finrank_eq]
+  rw [finrank_rees _ 1, evalAt_rees_one, (kdEquivKDmono R hn).finrank_eq]
 
 /-- **The Rees module of the Koszul dual cooperad of `R` is the module of polynomial sections of
 the family of Koszul dual cooperads of the relators `R_c`**, equal to `R₀` at `c = 0` and to `R`

@@ -122,6 +122,7 @@ variable (μ : FormalDeformation R P)
 /-! ### The deformed operad on power series -/
 
 /-- The power series `P(A)[[t]]`, with the deformed composition of `μ`. -/
+@[nolint unusedArguments]
 def Series (_μ : FormalDeformation R P) (A : Type) [Fintype A] [DecidableEq A] : Type v :=
   ℕ → P A
 

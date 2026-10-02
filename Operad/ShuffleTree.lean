@@ -307,7 +307,8 @@ theorem windows_rightComb : ∀ (w : List E) (k : ℕ),
   | [e], _ => rfl
   | e :: f :: w, k => by
     have hs :
-        (node e (leaf k) (node f (leaf (k + 1)) (rightComb w (k + 1 + 1))) : LTree E).IsShuffle := by
+        (node e (leaf k) (node f (leaf (k + 1)) (rightComb w (k + 1 + 1))) :
+          LTree E).IsShuffle := by
       refine ⟨?_, trivial, ?_, trivial, isShuffle_rightComb w _⟩
       · simp only [minLabel_leaf, minLabel_node, minLabel_rightComb]
         omega

@@ -123,7 +123,6 @@ lemma comp_add_right (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β β' : P n) :
     comp (R := R) a b α (β + β') = comp (R := R) a b α β + comp (R := R) a b α β' :=
   map_add _ _ _
 
-@[simp]
 lemma comp_zero_left (a b : ℕ) {n : ℕ} (β : P n) :
     comp (R := R) a b (0 : P (a + 1 + b)) β = 0 := by
   rw [map_zero]; rfl
@@ -156,6 +155,7 @@ present (`Ass` carries the regular representation of `Σ n`, `Com` the trivial o
 has no symmetric structure. -/
 
 /-- `Ass R n = R` for every arity `n`. An `abbrev` so that all of `R`'s instances transfer. -/
+@[nolint unusedArguments]
 abbrev Ass (R : Type u) [CommRing R] : ℕ → Type u := fun _ => R
 
 section Ass

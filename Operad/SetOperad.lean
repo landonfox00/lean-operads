@@ -256,6 +256,7 @@ noncomputable instance instSymOperadLin (R : Type u) [CommRing R]
 
 /-- **The underlying set operad** of a symmetric operad in `R`-modules: the same components and
 operations, forgetting linearity. A type synonym, so that the ring is recorded. -/
+@[nolint unusedArguments]
 def Und (R : Type u) [CommRing R] (Q : (A : Type) → [Fintype A] → [DecidableEq A] → Type w) :
     (A : Type) → [Fintype A] → [DecidableEq A] → Type w :=
   fun A _ _ => Q A

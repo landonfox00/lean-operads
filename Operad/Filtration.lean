@@ -37,7 +37,8 @@ structure SymSuboperad where
     {x : P A} : x ∈ sub A → SymOperad.map (R := R) e x ∈ sub B
   one_mem : SymOperad.one R ∈ sub Unit
   comp_mem {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
-    {x : P A} {y : P B} : x ∈ sub A → y ∈ sub B → SymOperad.comp (R := R) i x y ∈ sub (Without A i ⊕ B)
+    {x : P A} {y : P B} :
+    x ∈ sub A → y ∈ sub B → SymOperad.comp (R := R) i x y ∈ sub (Without A i ⊕ B)
 
 /-- **The image of a morphism is a suboperad.** -/
 def SymOperadHom.range (f : SymOperadHom R P Q) : SymSuboperad R Q where

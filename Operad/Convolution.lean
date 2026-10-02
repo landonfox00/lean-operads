@@ -161,6 +161,7 @@ theorem star_add_right (f g₁ g₂ : Conv R C P) : f ⋆c (g₁ + g₂) = f ⋆
   simp only [star_apply, convTerm_add_right, Finset.sum_add_distrib]
   rfl
 
+omit [NSCooperad R C] [NSOperad R P] in
 /-- Pulling a scalar out of a sum of degreewise maps.  `Finset.smul_sum` is stated for
 `DistribSMul` and will not match a `Module` action here, so the library's standing idiom is to go
 through `LinearMap.lsmul`. -/

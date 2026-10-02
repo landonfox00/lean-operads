@@ -152,6 +152,7 @@ variable (N : ℕ → Type v)
 
 /-- **The symmetrization of a planar set operad**: an operation with inputs `A` is a linear order
 on `A` and an operation of `N` of arity `|A|`. -/
+@[nolint unusedArguments]
 def Reg (A : Type) [Fintype A] [DecidableEq A] : Type v :=
   LinOrd A × {X : Arr N // X.1 = Fintype.card A}
 

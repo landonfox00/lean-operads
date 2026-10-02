@@ -181,7 +181,7 @@ lemma sum_before_eq_s {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P (l
     have hmin : min (i' : ℕ) j = (i' : ℕ) := by omega
     dsimp only
     congr 1
-    · simp only [Fin.val_mk, hmin]
+    · simp only [hmin]
       refine (neg_one_pow_eq (R := R) (k * l) ?_).symm
       ring
     · have key : compFin (R := R) (⟨(i : ℕ) + l, by omega⟩ : Fin (j + l + 1))

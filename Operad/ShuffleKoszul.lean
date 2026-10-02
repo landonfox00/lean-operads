@@ -931,6 +931,7 @@ gives a monomial of lower level (`lead`). A quadratic Gröbner basis gives such 
 of the path-lexicographic key (`LTree.IsGroebner.data`). -/
 structure GroebnerData (R : Submodule K (Mono E 3 → K)) where
   compl : ∀ n, IsCompl (idealOf K R n) (supportedOn K (normalSet L n))
+  /-- The level of a monomial of each arity. -/
   lv : ℕ → LTree E → ℕ
   lv_pos : ∀ {n : ℕ} {t : LTree E}, t ∈ monomials n → 0 < lv n t
   lv_le : ∀ (n : ℕ) (t : LTree E), lv n t ≤ (monomials (E := E) n).card

@@ -191,7 +191,8 @@ noncomputable instance instNSOperadLinNS (R : Type u) [CommRing R] (S : ℕ → 
     induction x using Finsupp.induction_linear with
     | zero => simp
     | add x x' hx hx' => simp only [map_add, hx, hx']
-    | single s r => rw [LinNS.compL_single, LinNS.reindex_single, NSSetOperad.comp_one_left, one_mul]
+    | single s r =>
+      rw [LinNS.compL_single, LinNS.reindex_single, NSSetOperad.comp_one_left, one_mul]
   comp_assoc_seq a b c d p x y z := by
     induction x using Finsupp.induction_linear with
     | zero => simp

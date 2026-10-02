@@ -114,6 +114,40 @@ arity three, the dual relations, the involution `P^!^! = P`, and the classical d
 | L14 | The general free symmetric operad on a linear species, and its comparison with the set-operad construction. **Started** (`FreeBinary.lean`): on binary generators, the free set operad is the regular operad of planar binary trees, with a basis and the dimension of the free operad in modules |
 | L15 | Day convolution: monoids for Day convolution on `C ⥤ V` and lax monoidal functors, commutative monoids and lax braided functors. **Done** (`DayUnits.lean`, `DayMonoid.lean`), on Mathlib's `DayFunctor`: the units of the Day convolution with their whiskerings, associator and unitors; the bijection between monoid structures and lax monoidal structures, monoid morphisms as monoidal natural transformations, and for symmetric `C` commutativity as braidedness |
 
+### Phase 5 — a complete library (plan of record from 2026-10-02)
+
+The goal: everything a user of an operad library expects, in the generality of Loday–Vallette.
+Six packages, in dependency order: infrastructure first, then the structural layer, the
+symmetric–shuffle bridge, the dg layer, general Koszul duality and Gröbner bases, and the variants.
+
+**Design decisions.**
+
+* **Species in the operad style.** Linear species are families over finite types with relabelling,
+  exactly the data of `SymOperad` without composition (`SymSpecies`), so operads, cooperads,
+  algebras and modules share one indexing; the categorical `Species` of `Species.lean` is bridged.
+* **Free objects by presentation, normal forms by shuffle trees.** The free operad on any linear
+  species exists by presentation, with its universal property; its normal forms are shuffle trees
+  (Dotsenko–Khoroshkin), which identify it in every arity with the free shuffle operad.
+* **Graded and dg objects by internal gradings.** A graded module is a module with a `ℤ`-indexed
+  direct sum decomposition into submodules; Koszul signs appear only where the symmetric monoidal
+  structure introduces them (parallel associativity, braidings, suspensions). Complexes are bridged
+  to Mathlib's `HomologicalComplex`.
+* **Homological arguments by filtrations and contracting homotopies.** Operadic complexes are
+  finite in each arity and weight, so comparison arguments run by induction on finite filtrations
+  (extensions of acyclic complexes are acyclic) instead of spectral sequences.
+* **Fields, and characteristic zero, only where needed**: coinvariants and Künneth formulas for
+  composite products, and homotopy transfer.
+
+| | content | status |
+|---|---|---|
+| P6a | CI: Mathlib-style linting of the library, a scheduled build against Mathlib master, `doc-gen4` documentation | |
+| P2 | Structure: linear species and their morphisms; the free symmetric operad on any species, with its universal property; symmetric cooperads, conilpotency and the cofree conilpotent cooperad; total (May) composition and the equivalence with partial composition; the composition product of species and operads as its monoids; Schur functors, free algebras and the category of algebras (free `Com`-, `Ass`-, `Lie`-algebras identified) | |
+| P1 | Shuffle operads on ordered finite types and the forgetful functor; free shuffle operads on generators of any arity (shuffle trees); **the free symmetric operad is the free shuffle operad on the same generators** (shuffle-tree bases); generated ideals and presentations transported; the binary shuffle machinery identified with `FreeBin` and its ideals | |
+| P3 | dg layer: graded modules, Koszul signs, complexes, homology, quasi-isomorphisms, contractions; graded and dg operads and cooperads, the homology operad, `End_V` for graded `V`; the convolution dg Lie algebra and twisting morphisms; free graded operads, the bar and cobar constructions and the bar–cobar adjunction; twisted composite products, the fundamental theorem of twisting morphisms and the bar–cobar resolution `ΩBP → P`; quadratic data with generators of any arity, the Koszul dual cooperad and operad, the Koszul criteria; homotopy algebras (`P∞`, `A∞`, `L∞`, `C∞`), ∞-morphisms and the homotopy transfer theorem | |
+| P4 | Gröbner bases for shuffle operads with generators of any arity: monomial orders, reduction, the Buchberger (diamond) criterion; PBW bases imply Koszulness for any quadratic data; inhomogeneous (quadratic-linear) Koszul duality | |
+| P5 | Colored operads and their algebras; cyclic operads, with the equivalence to operads with an extended symmetric action; `Ger`, `BV` and `HyperCom` with presentations, algebras and dimensions | |
+| P6b | The whole library lint-clean, documentation published, and an upstreaming guide for the foundations | |
+
 ### Continuing
 
 Mathlib's linters, a scheduled build against Mathlib master, `doc-gen4` documentation, and the

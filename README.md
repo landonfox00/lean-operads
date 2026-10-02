@@ -18,6 +18,12 @@ lake build
 
 `Audit.lean` is not part of the library target; run it separately to reproduce the axiom audit.
 
+Continuous integration (`.github/workflows`): every push to `main` and every pull request builds
+with warnings as errors, runs Mathlib's environment linters (`lake exe runLinter Operad`), checks
+line lengths and the absence of `sorry`, and runs the axiom audit; `mathlib-master.yml` builds
+weekly against Mathlib master; `docs.yml` builds the API documentation with doc-gen4 and publishes
+it on GitHub Pages (enable Pages with "GitHub Actions" as its source).
+
 ## The design decision that makes this tractable
 
 The textbook partial composition is

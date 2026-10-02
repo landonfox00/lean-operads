@@ -5,10 +5,11 @@ The quotient of a symmetric operad by an ideal is a symmetric operad (`SymOperad
 component is the quotient module, and relabelling and partial composition descend because the
 ideal is stable under both. Every axiom is the corresponding axiom upstairs, pushed through the
 quotient map. The quotient map is a morphism whose kernel is the ideal
-(`SymOperadIdeal.mem_ker_projHom`), and a morphism vanishing on the ideal factors through it, uniquely
-(`SymOperadIdeal.liftHom`, `liftHom_proj`, `liftHom_unique`). In particular a morphism factors
-injectively through the quotient by its kernel (`SymOperadHom.kerLift`, `kerLift_injective`), and
-bijectively when it is surjective: the first isomorphism theorem (`kerLift_bijective`).
+(`SymOperadIdeal.mem_ker_projHom`), and a morphism vanishing on the ideal factors through it,
+uniquely (`SymOperadIdeal.liftHom`, `liftHom_proj`, `liftHom_unique`). In particular a morphism
+factors injectively through the quotient by its kernel (`SymOperadHom.kerLift`,
+`kerLift_injective`), and bijectively when it is surjective: the first isomorphism theorem
+(`kerLift_bijective`).
 -/
 import Operad.SymIdeal
 import Mathlib.LinearAlgebra.Quotient.Basic
@@ -54,15 +55,23 @@ lemma proj_eq_zero_iff (x : P A) : I.proj A x = 0 ↔ x ∈ I.sub A :=
 def mapQ (e : A ≃ B) : I.Quot A →ₗ[R] I.Quot B :=
   Submodule.mapQ _ _ (SymOperad.map (R := R) e) fun _ hx => I.map_mem e hx
 
-@[simp] lemma mapQ_proj (e : A ≃ B) (x : P A) :
+lemma mapQ_proj (e : A ≃ B) (x : P A) :
     I.mapQ e (I.proj A x) = I.proj B (SymOperad.map (R := R) e x) := rfl
+
+@[simp] lemma mapQ_mk (e : A ≃ B) (x : P A) :
+    I.mapQ e (Submodule.Quotient.mk x) = Submodule.Quotient.mk (SymOperad.map (R := R) e x) :=
+  rfl
 
 /-- Composition with a fixed outer operation, descended to the quotient. -/
 def compRight (i : A) (x : P A) : I.Quot B →ₗ[R] I.Quot (Without A i ⊕ B) :=
   Submodule.mapQ _ _ (SymOperad.comp (R := R) i x) fun _ hy => I.comp_mem_right i x hy
 
-@[simp] lemma compRight_proj (i : A) (x : P A) (y : P B) :
+lemma compRight_proj (i : A) (x : P A) (y : P B) :
     I.compRight i x (I.proj B y) = I.proj _ (SymOperad.comp (R := R) i x y) := rfl
+
+@[simp] lemma compRight_mk (i : A) (x : P A) (y : P B) :
+    I.compRight i x (Submodule.Quotient.mk y) =
+      Submodule.Quotient.mk (SymOperad.comp (R := R) i x y) := rfl
 
 /-- Partial composition on the quotient. -/
 def compQ (i : A) : I.Quot A →ₗ[R] I.Quot B →ₗ[R] I.Quot (Without A i ⊕ B) :=
@@ -83,8 +92,12 @@ def compQ (i : A) : I.Quot A →ₗ[R] I.Quot B →ₗ[R] I.Quot (Without A i �
       show I.proj _ (SymOperad.comp (R := R) i x y) = 0
       exact (I.proj_eq_zero_iff _).2 (I.comp_mem_left i y hx))
 
-@[simp] lemma compQ_proj (i : A) (x : P A) (y : P B) :
+lemma compQ_proj (i : A) (x : P A) (y : P B) :
     I.compQ i (I.proj A x) (I.proj B y) = I.proj _ (SymOperad.comp (R := R) i x y) := rfl
+
+@[simp] lemma compQ_mk (i : A) (x : P A) (y : P B) :
+    I.compQ i (Submodule.Quotient.mk x) (Submodule.Quotient.mk y) =
+      Submodule.Quotient.mk (SymOperad.comp (R := R) i x y) := rfl
 
 /-- **The quotient of a symmetric operad by an ideal is a symmetric operad.** -/
 instance instSymOperad : SymOperad R I.Quot where
@@ -152,9 +165,13 @@ def liftHom (φ : SymOperadHom R P Q)
     obtain ⟨y, rfl⟩ := I.proj_surjective _ y
     exact φ.app_comp i x y
 
-@[simp] lemma liftHom_proj (φ : SymOperadHom R P Q)
+lemma liftHom_proj (φ : SymOperadHom R P Q)
     (h : ∀ (A : Type) [Fintype A] [DecidableEq A], ∀ x ∈ I.sub A, φ.app A x = 0) (x : P A) :
     (I.liftHom φ h).app A (I.proj A x) = φ.app A x := rfl
+
+@[simp] lemma liftHom_mk (φ : SymOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A], ∀ x ∈ I.sub A, φ.app A x = 0) (x : P A) :
+    (I.liftHom φ h).app A (Submodule.Quotient.mk x) = φ.app A x := rfl
 
 /-- The factorization through the quotient composes back to the morphism. -/
 lemma liftHom_comp_projHom (φ : SymOperadHom R P Q)
@@ -189,8 +206,11 @@ variable {R : Type u} [CommRing R]
 def kerLift (φ : SymOperadHom R P Q) : SymOperadHom R φ.ker.Quot Q :=
   φ.ker.liftHom φ fun _ _ _ _ hx => hx
 
-@[simp] lemma kerLift_proj (φ : SymOperadHom R P Q) {A : Type} [Fintype A] [DecidableEq A]
+lemma kerLift_proj (φ : SymOperadHom R P Q) {A : Type} [Fintype A] [DecidableEq A]
     (x : P A) : φ.kerLift.app A (φ.ker.proj A x) = φ.app A x := rfl
+
+@[simp] lemma kerLift_mk (φ : SymOperadHom R P Q) {A : Type} [Fintype A] [DecidableEq A]
+    (x : P A) : φ.kerLift.app A (Submodule.Quotient.mk x) = φ.app A x := rfl
 
 /-- **The factorization through the kernel is injective.** -/
 lemma kerLift_injective (φ : SymOperadHom R P Q) (A : Type) [Fintype A] [DecidableEq A] :

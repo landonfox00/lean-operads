@@ -176,6 +176,7 @@ end Hadamard
 /-! ## The pointed sets -/
 
 /-- **The set operad of pointed inputs**: an operation on `A` is an input of `A`. -/
+@[nolint unusedArguments]
 abbrev PointedSet : (A : Type) → [Fintype A] → [DecidableEq A] → Type := fun A _ _ => A
 
 namespace PointedSet
@@ -248,6 +249,7 @@ end PointedSet
 
 /-- **The set operad of nonempty subsets**: an operation on `A` is a nonempty set of inputs, as its
 indicator function. -/
+@[nolint unusedArguments]
 abbrev NonemptySubset : (A : Type) → [Fintype A] → [DecidableEq A] → Type :=
   fun A _ _ => {s : A → Bool // ∃ a, s a = true}
 

@@ -69,6 +69,7 @@ protected def SymCochain.zero : SymCochain R P := fun _ => 0
     SymCochain.zero (R := R) (P := P) i x y = 0 := rfl
 
 /-- **The deformed operad** `P_ω`, as a family of modules: pairs `(x, x') = x + εx'`. -/
+@[nolint unusedArguments]
 def Deformed (_ω : SymCochain R P) : (A : Type) → [Fintype A] → [DecidableEq A] → Type v :=
   fun A _ _ => P A × P A
 

@@ -106,6 +106,7 @@ noncomputable def NSOperadIso.ofBijective (φ : NSOperadHom R P Q)
 
 /-- **The underlying non-symmetric set operad** of a non-symmetric operad in `R`-modules: the same
 components and operations, forgetting linearity. A type synonym, so that the ring is recorded. -/
+@[nolint unusedArguments]
 def UndNS (R : Type u) [CommRing R] (Q : ℕ → Type w) : ℕ → Type w := Q
 
 section UndNS
@@ -218,7 +219,8 @@ noncomputable def linHomEquivNS : NSSetOperadHom S (UndNS R Q) ≃ NSOperadHom R
 variable {R}
 
 @[simp] lemma linExtend_single (φ : NSSetOperadHom S (UndNS R Q)) {n : ℕ} (s : S n) :
-    (NSSetOperadHom.linExtend R φ).app n (Finsupp.single s 1) = (UndNS.of R Q).symm (φ.app n s) := by
+    (NSSetOperadHom.linExtend R φ).app n (Finsupp.single s 1) =
+      (UndNS.of R Q).symm (φ.app n s) := by
   show Finsupp.lift (Q n) R (S n) _ (Finsupp.single s 1) = _
   simp
 

@@ -31,6 +31,7 @@ open NSOperad BTree
 
 /-- **Cochains on binary trees** with values in `Q`: the convolution operad of the cofree
 cooperad on `E`. -/
+@[nolint unusedArguments]
 abbrev TConv (R : Type u) [CommRing R] (E : Type v) (Q : ℕ → Type w) (n : ℕ) : Type (max v w) :=
   OfArity E n → Q n
 

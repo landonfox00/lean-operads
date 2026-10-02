@@ -246,10 +246,10 @@ lemma KDmono_eq_map (R : Submodule K (Mono E 3 → K)) {n : ℕ} (hn : 2 ≤ n) 
   ext x
   constructor
   · intro hx
-    exact ⟨((KD_equiv_KDmono R hn).symm ⟨x, hx⟩).1, ((KD_equiv_KDmono R hn).symm ⟨x, hx⟩).2,
-      congrArg Subtype.val ((KD_equiv_KDmono R hn).apply_symm_apply ⟨x, hx⟩)⟩
+    exact ⟨((kdEquivKDmono R hn).symm ⟨x, hx⟩).1, ((kdEquivKDmono R hn).symm ⟨x, hx⟩).2,
+      congrArg Subtype.val ((kdEquivKDmono R hn).apply_symm_apply ⟨x, hx⟩)⟩
   · rintro ⟨v, hv, rfl⟩
-    exact ((KD_equiv_KDmono R hn) ⟨v, hv⟩).2
+    exact ((kdEquivKDmono R hn) ⟨v, hv⟩).2
 
 /-- **If the Koszul dual cooperad of `R₀` is the associated graded of that of `R`, so are they on
 the monomials.** -/

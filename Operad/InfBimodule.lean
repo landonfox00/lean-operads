@@ -121,7 +121,8 @@ variable {P' : (A : Type) → [Fintype A] → [DecidableEq A] → Type v'}
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (M A)]
 
 /-- **Restriction along a morphism of operads.** -/
-@[reducible] def restrict [SymInfBimodule R P M] (f : SymOperadHom R P' P) : SymInfBimodule R P' M where
+@[reducible] def restrict [SymInfBimodule R P M] (f : SymOperadHom R P' P) :
+    SymInfBimodule R P' M where
   map e := map (P := P) e
   map_refl := map_refl (P := P)
   map_trans := map_trans (P := P)

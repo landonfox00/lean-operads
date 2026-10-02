@@ -95,7 +95,8 @@ theorem comp_comp_nested {X Y : Arr S} (Z : Arr S) {a c : ℕ} (ha : a < X.1) (h
   obtain ⟨p, z⟩ := Z
   rw [mk_comp, mk_comp, mk_comp]
   have e1 : a + (c + 1 + d) + b = a + c + 1 + (d + b) := by omega
-  rw [← mk_reindexS e1, mk_comp, ← mk_reindexS (show a + c + p + (d + b) = a + (c + p + d) + b by omega),
+  rw [← mk_reindexS e1, mk_comp,
+    ← mk_reindexS (show a + c + p + (d + b) = a + (c + p + d) + b by omega),
     NSSetOperad.comp_assoc_seq]
 
 /-- **Disjoint associativity**: composing into two different inputs of `X`, in either order. -/

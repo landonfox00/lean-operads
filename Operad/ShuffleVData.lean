@@ -493,7 +493,7 @@ lemma sgn_swap_rl (r0 : ℕ) {O : List VD} {K : ℕ ×ₗ ℕ} (hK : ∀ y ∈ O
 end Signs
 
 /-- Two lists with the same counts are permutations of each other. -/
-macro "perm_by_count" : tactic => `(tactic| (
+macro (name := permByCount) "perm_by_count" : tactic => `(tactic| (
     rw [List.perm_iff_count]
     intro _
     simp only [List.count_append, List.count_cons, List.count_nil]

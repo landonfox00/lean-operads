@@ -42,6 +42,7 @@ universe u v w
 namespace Operad
 
 /-- The inputs of `A` other than `i`. -/
+@[nolint unusedArguments]
 abbrev Without (A : Type*) [DecidableEq A] (i : A) := {a : A // a ≠ i}
 
 namespace Sym
@@ -480,6 +481,7 @@ and the target of every "evaluation". -/
 namespace Sym
 
 /-- `Com R A = R`. -/
+@[nolint unusedArguments]
 abbrev Com (R : Type u) [CommRing R] : (A : Type) → [Fintype A] → [DecidableEq A] → Type u :=
   fun _ _ _ => R
 
@@ -515,6 +517,7 @@ surviving outer inputs `x a · Σ y` and the inserted inputs `x i · y b`. This 
 the non-symmetric `Operad.Perm` is its restriction to `Fin n`, as `Operad.SymNS` shows. -/
 
 /-- `Perm R A = A → R`. -/
+@[nolint unusedArguments]
 abbrev Perm (R : Type u) [CommRing R] : (A : Type) → [Fintype A] → [DecidableEq A] → Type u :=
   fun A _ _ => A → R
 
@@ -535,7 +538,8 @@ def compFun [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) : Wi
   | Sum.inl a => x a.1 * ∑ b, y b
   | Sum.inr b => x i * y b
 
-@[simp] lemma compFun_inl [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) (a : Without A i) :
+@[simp] lemma compFun_inl [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R)
+    (a : Without A i) :
     compFun i x y (Sum.inl a) = x a.1 * ∑ b, y b := rfl
 
 @[simp] lemma compFun_inr [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) (b : B) :
@@ -551,7 +555,8 @@ def compL [DecidableEq A] [Fintype B] (i : A) :
     (fun t x y => by
       funext c; rcases c with a | b <;> simp [Finset.mul_sum, mul_left_comm])
 
-@[simp] lemma compL_apply [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) : compL i x y = compFun i x y := rfl
+@[simp] lemma compL_apply [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) :
+    compL i x y = compFun i x y := rfl
 
 /-- **The sum of a composite is the product of the sums.** -/
 theorem sum_compFun [Fintype A] [DecidableEq A] [Fintype B] (i : A) (x : A → R) (y : B → R) :

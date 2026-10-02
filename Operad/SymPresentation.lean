@@ -133,9 +133,13 @@ noncomputable def presHomEquiv :
   left_inv ψ := ((span R r).liftHom_unique _ _ ψ rfl).symm
   right_inv φ := Subtype.ext ((span R r).liftHom_comp_projHom _ _)
 
-@[simp] lemma presHomEquiv_symm_proj (φ : {φ : SymOperadHom R P Q // ∀ n, ∀ x ∈ r n,
+lemma presHomEquiv_symm_proj (φ : {φ : SymOperadHom R P Q // ∀ n, ∀ x ∈ r n,
     φ.app (Fin n) x = 0}) {A : Type} [Fintype A] [DecidableEq A] (x : P A) :
     (presHomEquiv.symm φ).app A ((span R r).proj A x) = φ.1.app A x := rfl
+
+@[simp] lemma presHomEquiv_symm_mk (φ : {φ : SymOperadHom R P Q // ∀ n, ∀ x ∈ r n,
+    φ.app (Fin n) x = 0}) {A : Type} [Fintype A] [DecidableEq A] (x : P A) :
+    (presHomEquiv.symm φ).app A (Submodule.Quotient.mk x) = φ.1.app A x := rfl
 
 end SymOperadIdeal
 

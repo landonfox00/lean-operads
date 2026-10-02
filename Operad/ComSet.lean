@@ -33,6 +33,7 @@ namespace Operad
 open Sym
 
 /-- **The commutative set operad**: one operation on each nonempty finite set of inputs. -/
+@[nolint unusedArguments]
 def ComSet : (A : Type) → [Fintype A] → [DecidableEq A] → Type :=
   fun A _ _ => PLift (Nonempty A)
 
@@ -146,7 +147,8 @@ theorem comb_perm (hc : IsComm m) (ha : IsAssoc m) :
       · -- a transposition among the first `n + 1` inputs
         have e : ∀ c, (Equiv.swap i.castSucc i.succ) (snocEquiv (n + 1) c)
             = snocEquiv (n + 1) (Equiv.sumCongr
-              (Equiv.swap (⟨i, by omega⟩ : Fin (n + 1)) ⟨i + 1, by omega⟩) (Equiv.refl Unit) c) := by
+              (Equiv.swap (⟨i, by omega⟩ : Fin (n + 1)) ⟨i + 1, by omega⟩)
+              (Equiv.refl Unit) c) := by
           have h1 : i.castSucc = (⟨i, by omega⟩ : Fin (n + 1)).castSucc := Fin.ext rfl
           have h2 : i.succ = (⟨i + 1, by omega⟩ : Fin (n + 1)).castSucc := Fin.ext rfl
           rintro (k | ⟨⟩)
@@ -468,7 +470,9 @@ inductive ComGen : ℕ → Type
 /-- The relations of `ComSet`: commutativity and associativity. -/
 inductive ComRel : ∀ {A : Type} [Fintype A] [DecidableEq A], Syn ComGen A → Syn ComGen A → Prop
   | comm : ComRel (.map (Equiv.swap 0 1) (.gen .mu)) (.gen .mu)
-  | assoc : ComRel (.map (Equiv.sumAssoc Unit Unit Unit) (Syn.bin (.gen .mu) (Syn.bin (.gen .mu) .one .one) .one))
+  | assoc : ComRel
+      (.map (Equiv.sumAssoc Unit Unit Unit)
+        (Syn.bin (.gen .mu) (Syn.bin (.gen .mu) .one .one) .one))
       (Syn.bin (.gen .mu) .one (Syn.bin (.gen .mu) .one .one))
 
 namespace ComSet

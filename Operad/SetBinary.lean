@@ -166,7 +166,8 @@ def subst3Equiv (ℓ : Fin 3 ≃ L) (A B C : Type) [DecidableEq A] [DecidableEq 
 
 /-- The leaves of a left comb, in order. -/
 def fin3Left : Fin 3 ≃ (Unit ⊕ Unit) ⊕ Unit where
-  toFun k := if k = 0 then Sum.inl (Sum.inl ()) else if k = 1 then Sum.inl (Sum.inr ()) else Sum.inr ()
+  toFun k :=
+    if k = 0 then Sum.inl (Sum.inl ()) else if k = 1 then Sum.inl (Sum.inr ()) else Sum.inr ()
   invFun x :=
     match x with
     | Sum.inl (Sum.inl _) => 0
@@ -177,7 +178,8 @@ def fin3Left : Fin 3 ≃ (Unit ⊕ Unit) ⊕ Unit where
 
 /-- The leaves of a right comb, in order. -/
 def fin3Right : Fin 3 ≃ Unit ⊕ (Unit ⊕ Unit) where
-  toFun k := if k = 0 then Sum.inl () else if k = 1 then Sum.inr (Sum.inl ()) else Sum.inr (Sum.inr ())
+  toFun k :=
+    if k = 0 then Sum.inl () else if k = 1 then Sum.inr (Sum.inl ()) else Sum.inr (Sum.inr ())
   invFun x :=
     match x with
     | Sum.inl _ => 0
@@ -206,7 +208,7 @@ variable {A A' B B' C : Type} [Fintype A] [DecidableEq A] [Fintype A'] [Decidabl
   [Fintype B] [DecidableEq B] [Fintype B'] [DecidableEq B'] [Fintype C] [DecidableEq C]
 
 omit [Fintype A'] [DecidableEq A'] [Fintype B'] [DecidableEq B'] in
-@[simp] lemma map_map (e : A ≃ B) (f : B ≃ C) (x : S A) : map f (map e x) = map (e.trans f) x :=
+lemma map_map (e : A ≃ B) (f : B ≃ C) (x : S A) : map f (map e x) = map (e.trans f) x :=
   (map_trans e f x).symm
 
 omit [Fintype A'] [DecidableEq A'] [Fintype B'] [DecidableEq B'] [Fintype C] [DecidableEq C] in

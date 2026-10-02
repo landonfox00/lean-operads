@@ -34,7 +34,7 @@ the induction hypothesis can be instantiated at `c + t.arity` without its syntac
 to match what `substF`'s own recursion produces. -/
 lemma substF_comp (f : ∀ k, E k → Q k) :
     ∀ {k : ℕ} (fo : Forest E k) (p q d c e g : ℕ) (hc : c = p + d + q) (he : e = p + 1 + q)
-      (hg : g = q + fo.arityF)
+      (_hg : g = q + fo.arityF)
       (h3 : p + d + g = c + fo.arityF) (h4 : e + fo.arityF = p + 1 + g)
       (β : Q (e + k)) (δ : Q d),
       substF (R := R) f c
@@ -131,8 +131,8 @@ theorem extend_graft (f : ∀ k, E k → Q k) :
 /-- The forest half of `extend_graft`. -/
 theorem substF_graftF (f : ∀ k, E k → Q k) :
     ∀ {k : ℕ} (fo : Forest E k) (c a b w : ℕ) (s : Tree E) (α : Q (c + k))
-      (fo' : Forest E k) (hfo' : fo' = fo.graftF a s)
-      (hab : fo.arityF = a + 1 + b) (hw : w = c + a)
+      (fo' : Forest E k) (_hfo' : fo' = fo.graftF a s)
+      (_hab : fo.arityF = a + 1 + b) (_hw : w = c + a)
       (h1 : c + fo.arityF = w + 1 + b)
       (h2 : w + (Tree.arity s) + b = c + fo'.arityF),
       substF (R := R) f c α fo'
@@ -217,7 +217,7 @@ noncomputable def extendHom (f : ∀ k, E k → Q k) : NSOperadHom R (Free R E) 
     | single t r =>
       induction β using Finsupp.induction_linear with
       | zero => simp
-      | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+      | add x y hx hy => simp only [map_add, hx, hy]
       | single s r' =>
         show extendApp (R := R) f (a + n + b) (Free.compL a b _ _) = _
         rw [Free.compL_single, extendApp_single, extendApp_single, extendApp_single]
