@@ -951,3 +951,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeBin.BinPres.renameIso
 #print axioms Operad.BinComTrias.dualIso
 #print axioms Operad.BinComTriasLead.dualIso
+#print axioms Operad.FreeBin.linHom_binL
+#print axioms Operad.FreeBin.linHom_binR
+#print axioms Operad.BinComTrias.dataOfKills
+#print axioms Operad.BinComTrias.kills_of_data
+#print axioms Operad.BinComTrias.isoComTrias

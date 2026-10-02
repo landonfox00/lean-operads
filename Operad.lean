@@ -72,6 +72,7 @@ import Operad.BinaryKoszul
 import Operad.BinaryKoszulSym
 import Operad.BinaryCert
 import Operad.PostLie
+import Operad.ComTriasBin
 import Operad.Deformation
 import Operad.DerivationAlong
 import Operad.FormalDeformation
