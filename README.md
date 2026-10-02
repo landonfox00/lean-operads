@@ -281,6 +281,14 @@ The `ℕ`-indexed non-symmetric spine in `Operad/Basic.lean` is **kept**, not re
 computational layer (it is the one that evaluates on concrete small cases), and the skeletal
 equivalence to the species picture is a later bridge.
 
+**Total composition.** May's definition of an operad by total composition
+`γ x y : P (Σ a, B a)` is equivalent to the partial-composition definition used here.
+`Operad/MayOperad.lean` builds total composition from partial composition and proves May's axioms
+(equivariance, the unit laws, and associativity along `Equiv.sigmaAssoc`); in modules it is
+multilinear (`SymOperad.totalL`). `Operad/MayClass.lean` builds partial composition from total
+composition and proves that the two constructions are inverse to each other
+(`MaySetOperad.toSetOperad_toMaySetOperad`, `MaySetOperad.toMaySetOperad_toSetOperad`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

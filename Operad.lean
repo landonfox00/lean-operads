@@ -96,3 +96,5 @@ import Operad.ShuffleContext
 import Operad.ShuffleSyzygy
 import Operad.DayUnits
 import Operad.DayMonoid
+import Operad.MayOperad
+import Operad.MayClass
