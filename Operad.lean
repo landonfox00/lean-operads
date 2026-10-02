@@ -90,5 +90,7 @@ import Operad.ShuffleKoszulOperad
 import Operad.ShuffleGradedDual
 import Operad.ReesModule
 import Operad.ShuffleReesKD
+import Operad.ShuffleDualKoszul
+import Operad.ShuffleCobar
 import Operad.DayUnits
 import Operad.DayMonoid

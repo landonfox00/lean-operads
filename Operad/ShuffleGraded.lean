@@ -562,14 +562,14 @@ theorem finrank_J_inf_C_add (hG : IsGroebner K rk L R) (n s : ℕ) :
     finrank K (J K R ⊓ C K n s : Submodule K _) + (Nrm L n s).ncard =
       finrank K (C (E := E) K n s) := by
   haveI := finiteDimensional_C (K := K) (E := E) n s
-  have h := finrank_eq_map_add K (ΦL K hG) (C K n s)
-  have hmap : (C K n s).map (ΦL K hG) = Finsupp.supported K K (Nrm L n s) := by
+  have h := finrank_eq_map_add K (ΦL K hG.data) (C K n s)
+  have hmap : (C K n s).map (ΦL K hG.data) = Finsupp.supported K K (Nrm L n s) := by
     apply le_antisymm
     · rintro _ ⟨v, hv, rfl⟩
       exact (normalized_eq K rk hG hv).1
     · intro v hv
-      exact ⟨v, C_of_nrm K hv, ΦL_normal K rk hG hv⟩
-  have hker : C K n s ⊓ LinearMap.ker (ΦL K hG) = J K R ⊓ C K n s := by
+      exact ⟨v, C_of_nrm K hv, ΦL_normal K hG.data hv⟩
+  have hker : C K n s ⊓ LinearMap.ker (ΦL K hG.data) = J K R ⊓ C K n s := by
     ext v
     simp only [Submodule.mem_inf, LinearMap.mem_ker]
     exact ⟨fun ⟨hv, h0⟩ => ⟨(mem_J_iff K rk hG hv).2 h0, hv⟩,

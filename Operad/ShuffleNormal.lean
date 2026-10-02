@@ -11,10 +11,11 @@ supported on the monomials with no window in `L` (the normal monomials). Then:
 * every non-normal monomial leads a vector of the ideal, and the normal monomials span a
   complement of the ideal in every arity (`IsGroebner.isCompl`): they are a basis of the operad
   presented by the relators (`Operad.isCompl_supportedOn`);
-* **the normal form** (`IsGroebner.nf`) of a shuffle monomial with distinct labels, on any set of
+* **the normal form** (`LTree.nfOf`) of a shuffle monomial with distinct labels, on any set of
   labels, is the combination of normal monomials on the same labels congruent to it: the normal
-  form of a normal monomial is itself (`IsGroebner.nf_of_isNormal`), and the normal forms of the
-  substitutions of a relator at an edge cancel (`IsGroebner.sum_nf_substAt`).
+  form of a normal monomial is itself (`LTree.nfOf_of_isNormal`), and the normal forms of the
+  substitutions of a relator at an edge cancel (`LTree.sum_nfOf_substAt`). Normal forms only use
+  that the normal monomials span a complement of the ideal in every arity.
 
 Monomials on any set of labels are compared with those on `0, …, k - 1` by relabelling the leaves
 in increasing order (`LTree.relabel`, `LTree.std`, `LTree.destd`), which keeps the shuffle
@@ -434,29 +435,32 @@ theorem IsGroebner.isCompl (hG : IsGroebner K rk L R) (n : ℕ) :
   letI := keyOrder rk n
   exact isCompl_supportedOn _ _ (fun x hx => hG.isLeading x hx) (hG.indep n)
 
-/-! ### Normal forms -/
+/-! ### Normal forms
 
-variable (hG : IsGroebner K rk L R)
+Normal forms only need the normal monomials to span a complement of the ideal in every arity
+(`hc`), which a quadratic Gröbner basis provides (`IsGroebner.isCompl`). -/
+
+variable (hc : ∀ n, IsCompl (idealOf K R n) (supportedOn K (normalSet L n)))
 
 /-- **The normal form in arity `n`**: the projection onto the vectors on the normal monomials,
 along the ideal. -/
-noncomputable def IsGroebner.proj (n : ℕ) : (Mono E n → K) →ₗ[K] (Mono E n → K) :=
+noncomputable def nfProj (n : ℕ) : (Mono E n → K) →ₗ[K] (Mono E n → K) :=
   (supportedOn K (normalSet L n)).subtype ∘ₗ
-    (supportedOn K (normalSet L n)).projectionOnto (idealOf K R n) (hG.isCompl n).symm
+    (supportedOn K (normalSet L n)).projectionOnto (idealOf K R n) (hc n).symm
 
-include hG in
-lemma IsGroebner.proj_eq_zero {n : ℕ} {v : Mono E n → K} (hv : v ∈ idealOf K R n) :
-    hG.proj n v = 0 := by
-  simp [IsGroebner.proj, Submodule.projectionOnto_apply_right (hG.isCompl n).symm ⟨v, hv⟩]
+include hc in
+lemma nfProj_eq_zero {n : ℕ} {v : Mono E n → K} (hv : v ∈ idealOf K R n) :
+    nfProj hc n v = 0 := by
+  simp [nfProj, Submodule.projectionOnto_apply_right (hc n).symm ⟨v, hv⟩]
 
-include hG in
-lemma IsGroebner.proj_eq_self {n : ℕ} {v : Mono E n → K} (hv : v ∈ supportedOn K (normalSet L n)) :
-    hG.proj n v = v := by
-  simp [IsGroebner.proj, Submodule.projectionOnto_apply_left (hG.isCompl n).symm ⟨v, hv⟩]
+include hc in
+lemma nfProj_eq_self {n : ℕ} {v : Mono E n → K} (hv : v ∈ supportedOn K (normalSet L n)) :
+    nfProj hc n v = v := by
+  simp [nfProj, Submodule.projectionOnto_apply_left (hc n).symm ⟨v, hv⟩]
 
-lemma IsGroebner.proj_mem (n : ℕ) (v : Mono E n → K) :
-    hG.proj n v ∈ supportedOn K (normalSet L n) := by
-  simp [IsGroebner.proj]
+lemma nfProj_mem (n : ℕ) (v : Mono E n → K) :
+    nfProj hc n v ∈ supportedOn K (normalSet L n) := by
+  simp [nfProj]
 
 lemma std_mem_monomials {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup) :
     std c ∈ monomials c.arity :=
@@ -464,19 +468,19 @@ lemma std_mem_monomials {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup) 
 
 /-- **The normal form of a monomial** with distinct labels, on any set of labels: its
 standardization reduced along the ideal, the labels put back. -/
-noncomputable def IsGroebner.nf (c : LTree E) : LTree E →₀ K :=
+noncomputable def nfOf (c : LTree E) : LTree E →₀ K :=
   ∑ m : Mono E c.arity,
-    hG.proj c.arity (vecOf K c.arity (std c)) m • Finsupp.single (destd c.labelSet m.1) (1 : K)
+    nfProj hc c.arity (vecOf K c.arity (std c)) m • Finsupp.single (destd c.labelSet m.1) (1 : K)
 
-lemma IsGroebner.nf_eq {c : LTree E} {k : ℕ} (hk : c.arity = k) :
-    hG.nf c = ∑ m : Mono E k,
-      hG.proj k (vecOf K k (std c)) m • Finsupp.single (destd c.labelSet m.1) (1 : K) := by
+lemma nfOf_eq {c : LTree E} {k : ℕ} (hk : c.arity = k) :
+    nfOf hc c = ∑ m : Mono E k,
+      nfProj hc k (vecOf K k (std c)) m • Finsupp.single (destd c.labelSet m.1) (1 : K) := by
   subst hk
   rfl
 
 /-- **The normal form of a normal monomial** is itself. -/
-theorem IsGroebner.nf_of_isNormal {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup)
-    (hc : IsNormal L c) : hG.nf c = Finsupp.single c (1 : K) := by
+theorem nfOf_of_isNormal {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup)
+    (hcn : IsNormal L c) : nfOf hc c = Finsupp.single c (1 : K) := by
   have hmem := std_mem_monomials hs hnd
   have hv : vecOf K c.arity (std c) ∈ supportedOn K (normalSet L c.arity) := by
     rw [mem_supportedOn]
@@ -484,8 +488,8 @@ theorem IsGroebner.nf_of_isNormal {c : LTree E} (hs : c.IsShuffle) (hnd : c.labe
     simp only [vecOf]
     rw [if_neg]
     intro h
-    exact hy (by rw [normalSet, Set.mem_setOf_eq, h]; exact (isNormal_std L).2 hc)
-  rw [IsGroebner.nf, hG.proj_eq_self hv, Finset.sum_eq_single ⟨std c, hmem⟩]
+    exact hy (by rw [normalSet, Set.mem_setOf_eq, h]; exact (isNormal_std L).2 hcn)
+  rw [nfOf, nfProj_eq_self hc hv, Finset.sum_eq_single ⟨std c, hmem⟩]
   · simp [vecOf, destd_std]
   · intro m _ hm
     simp only [vecOf]
@@ -493,9 +497,9 @@ theorem IsGroebner.nf_of_isNormal {c : LTree E} (hs : c.IsShuffle) (hnd : c.labe
   · simp
 
 /-- **The normal forms of the substitutions of a relator at an edge cancel.** -/
-theorem IsGroebner.sum_nf_substAt {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup)
+theorem sum_nfOf_substAt {c : LTree E} (hs : c.IsShuffle) (hnd : c.labels.Nodup)
     {p : List Bool} {s : Bool} (he : c.IsEdge p s) {r : Mono E 3 → K} (hr : r ∈ R) :
-    ∑ σ : Mono E 3, r σ • hG.nf (c.substAt p s σ.1) = 0 := by
+    ∑ σ : Mono E 3, r σ • nfOf hc (c.substAt p s σ.1) = 0 := by
   have hperm : ∀ σ : Mono E 3, (c.substAt p s σ.1).labels.Perm c.labels := fun σ =>
     perm_labels_substAt he hs hnd ((mem_monomials 3 σ.1).1 σ.2).2
   have harity : ∀ σ : Mono E 3, (c.substAt p s σ.1).arity = c.arity := fun σ => by
@@ -504,21 +508,21 @@ theorem IsGroebner.sum_nf_substAt {c : LTree E} (hs : c.IsShuffle) (hnd : c.labe
     labelSet_eq_of_perm (hperm σ)
   have hstd : ∀ σ : Mono E 3, std (c.substAt p s σ.1) = (std c).substAt p s σ.1 := fun σ =>
     std_substAt he hs hnd ((mem_monomials 3 σ.1).1 σ.2).2
-  simp_rw [fun σ => hG.nf_eq (harity σ), hset, hstd, Finset.smul_sum, smul_smul]
+  simp_rw [fun σ => nfOf_eq hc (harity σ), hset, hstd, Finset.smul_sum, smul_smul]
   rw [Finset.sum_comm]
   refine Finset.sum_eq_zero fun m _ => ?_
   rw [← Finset.sum_smul]
-  have : ∑ σ : Mono E 3, r σ * hG.proj c.arity (vecOf K c.arity ((std c).substAt p s σ.1)) m =
-      hG.proj c.arity (substVec K c.arity (std c) p s r) m := by
+  have : ∑ σ : Mono E 3, r σ * nfProj hc c.arity (vecOf K c.arity ((std c).substAt p s σ.1)) m =
+      nfProj hc c.arity (substVec K c.arity (std c) p s r) m := by
     simp only [substVec, map_sum, map_smul, Finset.sum_apply, Pi.smul_apply, smul_eq_mul]
-  rw [this, hG.proj_eq_zero (substVec_mem_idealOf K R ⟨std c, std_mem_monomials hs hnd⟩
+  rw [this, nfProj_eq_zero hc (substVec_mem_idealOf K R ⟨std c, std_mem_monomials hs hnd⟩
     (isEdge_std.2 he) hr), Pi.zero_apply, zero_smul]
 
 /-- **The normal form is a combination of normal monomials on the same labels.** -/
-theorem IsGroebner.mem_support_nf {c : LTree E} (hnd : c.labels.Nodup)
-    {y : LTree E} (hy : y ∈ (hG.nf c).support) :
+theorem mem_support_nfOf {c : LTree E} (hnd : c.labels.Nodup)
+    {y : LTree E} (hy : y ∈ (nfOf hc c).support) :
     y.IsShuffle ∧ y.labels.Perm c.labels ∧ IsNormal L y := by
-  rw [IsGroebner.nf, Finsupp.mem_support_iff, Finsupp.finsetSum_apply] at hy
+  rw [nfOf, Finsupp.mem_support_iff, Finsupp.finsetSum_apply] at hy
   obtain ⟨m, -, hm⟩ := Finset.exists_ne_zero_of_sum_ne_zero hy
   simp only [Finsupp.smul_apply, Finsupp.single_apply, smul_eq_mul, mul_ite, mul_one,
     mul_zero] at hm
@@ -529,7 +533,7 @@ theorem IsGroebner.mem_support_nf {c : LTree E} (hnd : c.labels.Nodup)
   subst hmy
   have hmn : IsNormal L m.1 := by
     by_contra hn
-    exact hm ((mem_supportedOn.1 (hG.proj_mem c.arity _)) m hn)
+    exact hm ((mem_supportedOn.1 (nfProj_mem hc c.arity _)) m hn)
   have hmm := (mem_monomials _ _).1 m.2
   have hlt : ∀ i ∈ m.1.labels, i < c.labelSet.card := fun i hi => by
     rw [card_labelSet hnd]

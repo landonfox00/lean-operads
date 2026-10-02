@@ -921,8 +921,24 @@ end NormalComponents
 
 section Normalize
 
-variable {L} [Fintype E] [DecidableEq E] {rk : E → ℕ} {R : Submodule K (Mono E 3 → K)}
-  (hG : IsGroebner K rk L R)
+variable [Fintype E] [DecidableEq E]
+
+/-- **Gröbner data** for relators `R` with leading monomials `L`: the normal monomials span a
+complement of the ideal in every arity (`compl`), which gives the normal forms, and a level on
+the monomials of each arity, positive and bounded by their number, which the relator led by a
+leading window lowers: substituting at that window any other monomial of the relator's support
+gives a monomial of lower level (`lead`). A quadratic Gröbner basis gives such data, with the rank
+of the path-lexicographic key (`LTree.IsGroebner.data`). -/
+structure GroebnerData (R : Submodule K (Mono E 3 → K)) where
+  compl : ∀ n, IsCompl (idealOf K R n) (supportedOn K (normalSet L n))
+  lv : ℕ → LTree E → ℕ
+  lv_pos : ∀ {n : ℕ} {t : LTree E}, t ∈ monomials n → 0 < lv n t
+  lv_le : ∀ (n : ℕ) (t : LTree E), lv n t ≤ (monomials (E := E) n).card
+  lead : ∀ {n : ℕ} {t : LTree E}, t ∈ monomials n → ∀ {p : List Bool} {s : Bool},
+    t.IsEdge p s → t.windowAt p s ∈ L → ∃ r ∈ R, ∃ w : Mono E 3, w.1 = t.windowAt p s ∧
+      r w ≠ 0 ∧ ∀ σ : Mono E 3, σ ≠ w → r σ ≠ 0 → lv n (t.substAt p s σ.1) < lv n t
+
+variable {L} {R : Submodule K (Mono E 3 → K)} (G : GroebnerData K L R)
 
 /-- **The normalization of the components** of a bar tree: each component replaced by its normal
 form, from the top down. -/
@@ -930,29 +946,29 @@ noncomputable def Φ : BarTree E → (BarTree E →₀ K)
   | leaf a => Finsupp.single (leaf a) 1
   | node d l r => Finsupp.linearCombination K
       (fun m => graftL K (fun a => Φ (hang (node d l r) a)) (liftW d.2 m))
-      (hG.nf (top (node d l r)))
+      (nfOf G.compl (top (node d l r)))
 termination_by x => x.size
 decreasing_by exact size_hang_lt d l r _
 
 /-- **The normalization**, as a linear map. -/
 noncomputable def ΦL : (BarTree E →₀ K) →ₗ[K] (BarTree E →₀ K) :=
-  Finsupp.linearCombination K (Φ K hG)
+  Finsupp.linearCombination K (Φ K G)
 
 lemma Φ_node (d : E × Bool) (l r : BarTree E) :
-    Φ K hG (node d l r) = Finsupp.linearCombination K
-      (fun m => graftL K (fun a => Φ K hG (hang (node d l r) a)) (liftW d.2 m))
-      (hG.nf (top (node d l r))) := by
+    Φ K G (node d l r) = Finsupp.linearCombination K
+      (fun m => graftL K (fun a => Φ K G (hang (node d l r) a)) (liftW d.2 m))
+      (nfOf G.compl (top (node d l r))) := by
   rw [Φ]
 
 /-- **The normalization of a normal bar tree** is itself. -/
 theorem Φ_of_normal : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuffle → y.labels.Nodup →
-    NormalBar L y → Φ K hG y = Finsupp.single y 1
+    NormalBar L y → Φ K G y = Finsupp.single y 1
   | 0, y, hy, _, _, _ => absurd hy (by cases y <;> simp)
   | _ + 1, leaf a, _, _, _, _ => by rw [Φ]
   | n + 1, node d l r, hy, hs, hnd, h => by
-    rw [Φ_node, hG.nf_of_isNormal (isShuffle_top hs) (nodup_top hnd)
+    rw [Φ_node, nfOf_of_isNormal G.compl (isShuffle_top hs) (nodup_top hnd)
       (isNormal_top L _ hnd h), Finsupp.linearCombination_single, one_smul]
-    have hsub : ∀ a, Φ K hG (hang (node d l r) a) = Finsupp.single (hang (node d l r) a) 1 :=
+    have hsub : ∀ a, Φ K G (hang (node d l r) a) = Finsupp.single (hang (node d l r) a) 1 :=
       fun a => by
         obtain ⟨h1, h2, h3⟩ := hang_props L (node d l r) a hs hnd h
         exact Φ_of_normal n _ (by have := size_hang_lt d l r a; omega) h1 h2 h3
@@ -963,7 +979,7 @@ theorem Φ_of_normal : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuff
 /-- **The normalization kills the substituted relators.** -/
 theorem Φ_substRel : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuffle → y.labels.Nodup →
     ∀ {p : List Bool} {s : Bool}, IsUncut y p s → ∀ {r : Mono E 3 → K}, r ∈ R →
-      ΦL K hG (substRel K y p s r) = 0
+      ΦL K G (substRel K y p s r) = 0
   | 0, y, hy, _, _, _, _, _, _, _ => absurd hy (by cases y <;> simp)
   | n + 1, y, hy, hs, hnd, p, s, h, r, hr => by
     obtain ⟨d, l', r', hy'⟩ : ∃ d l r, y = node d l r := by
@@ -985,9 +1001,9 @@ theorem Φ_substRel : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuffl
         have := arity_pos r'
         omega
       | node d' l'' r'' => exact ⟨d', l'', r'', rfl⟩
-    have hΦ : ∀ σ : Mono E 3, Φ K hG (substBar y p s σ.1) = Finsupp.linearCombination K
-        (fun m => graftL K (fun a => Φ K hG (hang (substBar y p s σ.1) a)) (liftW (rootFlag y) m))
-        (hG.nf (top (substBar y p s σ.1))) := fun σ => by
+    have hΦ : ∀ σ : Mono E 3, Φ K G (substBar y p s σ.1) = Finsupp.linearCombination K
+        (fun m => graftL K (fun a => Φ K G (hang (substBar y p s σ.1) a)) (liftW (rootFlag y) m))
+        (nfOf G.compl (top (substBar y p s σ.1))) := fun σ => by
       obtain ⟨d', l'', r'', hz⟩ := hnode σ
       have hroot := rootFlag_substBar hs hnd h (mono_shape σ).2.2
       rw [← hroot, hz, Φ_node]
@@ -997,27 +1013,27 @@ theorem Φ_substRel : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuffl
     · -- the substitution happens in the top component
       simp only [fun σ => (hσ σ).1, fun σ => (hσ σ).2]
       set lc := Finsupp.linearCombination K
-        (fun m => graftL K (fun a => Φ K hG (hang y a)) (liftW (rootFlag y) m)) with hlc
-      have : ∑ σ : Mono E 3, r σ • lc (hG.nf ((top y).substAt p s σ.1)) =
-          lc (∑ σ : Mono E 3, r σ • hG.nf ((top y).substAt p s σ.1)) := by
+        (fun m => graftL K (fun a => Φ K G (hang y a)) (liftW (rootFlag y) m)) with hlc
+      have : ∑ σ : Mono E 3, r σ • lc (nfOf G.compl ((top y).substAt p s σ.1)) =
+          lc (∑ σ : Mono E 3, r σ • nfOf G.compl ((top y).substAt p s σ.1)) := by
         rw [map_sum]
         simp [map_smul]
-      rw [this, hG.sum_nf_substAt (isShuffle_top hs) (nodup_top hnd) hte hr, map_zero]
+      rw [this, sum_nfOf_substAt G.compl (isShuffle_top hs) (nodup_top hnd) hte hr, map_zero]
     · -- the substitution happens in a hanging subtree
       simp only [fun σ => (hσ σ).1, fun σ => (hσ σ).2, Finsupp.linearCombination_apply,
         Finsupp.sum, Finset.smul_sum]
       rw [Finset.sum_comm]
       refine Finset.sum_eq_zero fun m hm => ?_
-      obtain ⟨-, hml, -⟩ := hG.mem_support_nf (nodup_top hnd) hm
+      obtain ⟨-, hml, -⟩ := mem_support_nfOf G.compl (nodup_top hnd) hm
       have hmnd : (liftW (rootFlag y) m).labels.Nodup := by
         rw [labels_liftW]
         exact hml.nodup_iff.2 (nodup_top hnd)
       have hma : a ∈ (liftW (rootFlag y) m).labels := by
         rw [labels_liftW]
         exact hml.symm.subset ha
-      have hcomp : ∀ σ : Mono E 3, (fun b => Φ K hG (Function.update (hang y) a
+      have hcomp : ∀ σ : Mono E 3, (fun b => Φ K G (Function.update (hang y) a
           (substBar (hang y a) q s σ.1) b)) =
-          Function.update (fun b => Φ K hG (hang y b)) a (Φ K hG (substBar (hang y a) q s σ.1)) :=
+          Function.update (fun b => Φ K G (hang y b)) a (Φ K G (substBar (hang y a) q s σ.1)) :=
         fun σ => by
           funext b
           by_cases hb : b = a
@@ -1025,11 +1041,11 @@ theorem Φ_substRel : ∀ (n : ℕ) (y : BarTree E), y.size ≤ n → y.IsShuffl
             simp
           · simp [hb]
       simp only [hcomp]
-      simp only [smul_comm (r _) ((hG.nf (top y)) m)]
+      simp only [smul_comm (r _) ((nfOf G.compl (top y)) m)]
       rw [← Finset.smul_sum]
-      rw [← graftL_update_sum K _ a Finset.univ r (fun σ => Φ K hG (substBar (hang y a) q s σ.1))
+      rw [← graftL_update_sum K _ a Finset.univ r (fun σ => Φ K G (substBar (hang y a) q s σ.1))
         _ hmnd hma]
-      have h0 : ∑ σ : Mono E 3, r σ • Φ K hG (substBar (hang y a) q s σ.1) = 0 := by
+      have h0 : ∑ σ : Mono E 3, r σ • Φ K G (substBar (hang y a) q s σ.1) = 0 := by
         have := Φ_substRel n (hang y a) (by omega) hhs hhnd hq hr
         simpa [ΦL, substRel, map_sum, map_smul] using this
       rw [h0, graftL_update_zero K _ a _ hmnd hma, smul_zero]
@@ -1097,38 +1113,51 @@ lemma full_mem_monomials {n s : ℕ} {x : BarTree E} (hx : Adm n s x) :
     x.mapDec Prod.fst ∈ monomials n :=
   (mem_monomials _ _).2 ⟨(isShuffle_mapDec _ x).2 hx.1.shuffle, by simpa using hx.2.1⟩
 
-variable (rk : E → ℕ)
+variable {L} {R : Submodule K (Mono E 3 → K)} (G : GroebnerData K L R)
 
-/-- **The level of a bar tree**: the rank of the key of its underlying monomial. -/
-noncomputable def lev (n : ℕ) (x : BarTree E) : ℕ :=
-  ((monomials n).filter fun t => pathKey rk n t ≤ pathKey rk n (x.mapDec Prod.fst)).card
+variable {K} in
+/-- **The level of a bar tree**: that of its underlying monomial. -/
+def GroebnerData.lev (n : ℕ) (x : BarTree E) : ℕ := G.lv n (x.mapDec Prod.fst)
 
-lemma lev_lt {n : ℕ} {x y : BarTree E} (hy : y.mapDec Prod.fst ∈ monomials n)
-    (h : pathKey rk n (x.mapDec Prod.fst) < pathKey rk n (y.mapDec Prod.fst)) :
-    lev rk n x < lev rk n y := by
-  refine Finset.card_lt_card ⟨fun t ht => ?_, fun hsub => ?_⟩
-  · simp only [Finset.mem_filter] at ht ⊢
-    exact ⟨ht.1, ht.2.trans h.le⟩
-  · have := hsub (Finset.mem_filter.2 ⟨hy, le_rfl⟩)
-    simp only [Finset.mem_filter] at this
-    exact absurd this.2 (not_le.2 h)
+lemma lev_pos {n s : ℕ} {x : BarTree E} (hx : Adm n s x) : 0 < G.lev n x :=
+  G.lv_pos (full_mem_monomials hx)
 
-lemma lev_pos {n s : ℕ} {x : BarTree E} (hx : Adm n s x) : 0 < lev rk n x :=
-  Finset.card_pos.2 ⟨_, Finset.mem_filter.2 ⟨full_mem_monomials hx, le_rfl⟩⟩
-
-variable {L} {R : Submodule K (Mono E 3 → K)} (hG : IsGroebner K rk L R)
+variable {K} in
+/-- **The Gröbner data of a quadratic Gröbner basis**: the level of a monomial is the rank of its
+path-lexicographic key. -/
+noncomputable def _root_.Operad.LTree.IsGroebner.data {rk : E → ℕ}
+    (hG : IsGroebner K rk L R) : GroebnerData K L R where
+  compl := hG.isCompl
+  lv n t := ((monomials n).filter fun t' => pathKey rk n t' ≤ pathKey rk n t).card
+  lv_pos {n t} ht := Finset.card_pos.2 ⟨t, Finset.mem_filter.2 ⟨ht, le_rfl⟩⟩
+  lv_le n t := Finset.card_filter_le _ _
+  lead {n t} ht {p s} he hw := by
+    obtain ⟨r, hr, hrw, hlt⟩ := hG.lead _ hw
+    refine ⟨r, hr, ⟨_, hG.mem _ hw⟩, rfl, hrw, fun σ hσ hrσ => ?_⟩
+    have hm := (mem_monomials n t).1 ht
+    have hself : t.substAt p s (t.windowAt p s) = t :=
+      substAt_windowAt he hm.1 (hm.2.nodup_iff.2 List.nodup_range)
+    have hkey := pathKey_substAt_lt' rk ht he σ.2 (hG.mem _ hw)
+      (hlt σ (fun h => hσ (Subtype.ext h)) hrσ)
+    rw [hself] at hkey
+    refine Finset.card_lt_card ⟨fun t' ht' => ?_, fun hsub => ?_⟩
+    · simp only [Finset.mem_filter] at ht' ⊢
+      exact ⟨ht'.1, ht'.2.trans hkey.le⟩
+    · have := hsub (Finset.mem_filter.2 ⟨ht, le_rfl⟩)
+      simp only [Finset.mem_filter] at this
+      exact absurd this.2 (not_le.2 hkey)
 
 /-- The normal bar trees of arity `n` and degree `s`. -/
 def Nrm (L : Set (LTree E)) (n s : ℕ) : Set (BarTree E) := {x | Adm n s x ∧ NormalBar L x}
 
-include hG in
+include G in
 /-- **Reduction modulo the relators**: a bar tree which is not normal is congruent to normal bar
 trees of lower level, by substituting at an uncut edge with a leading window the relator which
 that window leads. -/
-theorem reduce (n s : ℕ) : ∀ (N : ℕ) (y : BarTree E), lev rk n y ≤ N → Adm n s y →
+theorem reduce (n s : ℕ) : ∀ (N : ℕ) (y : BarTree E), G.lev n y ≤ N → Adm n s y →
     ¬ NormalBar L y → Finsupp.single y (1 : K) ∈
-      Finsupp.supported K K {z | z ∈ Nrm L n s ∧ lev rk n z < lev rk n y} ⊔ J K R
-  | 0, y, hN, hy, _ => absurd (lev_pos rk hy) (by omega)
+      Finsupp.supported K K {z | z ∈ Nrm L n s ∧ G.lev n z < G.lev n y} ⊔ J K R
+  | 0, y, hN, hy, _ => absurd (lev_pos K G hy) (by omega)
   | N + 1, y, hN, hy, hn => by
     obtain ⟨⟨k, w⟩, hkw, hkc, hwL⟩ : ∃ kw ∈ (y.mapDec Prod.fst).edgeWins, kw.1 ∉ cutKeys y ∧
         kw.2 ∈ L := by
@@ -1164,36 +1193,31 @@ theorem reduce (n s : ℕ) : ∀ (N : ℕ) (y : BarTree E), lev rk n y ≤ N →
       have := key_mem_cutKeys y (p ++ [s']) d' a b hab hflag
       rw [← hab, ← key_mapDec Prod.fst, ← subtreeAt_mapDec, hk] at this
       exact hkc this
-    obtain ⟨r, hr, hrw, hlt⟩ := hG.lead w hwL
-    set w' : Mono E 3 := ⟨w, hG.mem w hwL⟩ with hw'
-    have hself : substBar y p s' w = y := by
-      rw [substBar, ← hw, ← windowAt_of_uncut hu]
+    obtain ⟨r, hr, w', hw'w, hrw, hlt⟩ := G.lead hfull he (by rw [hw]; exact hwL)
+    rw [hw] at hw'w
+    have hself : substBar y p s' w'.1 = y := by
+      rw [hw'w, substBar, ← hw, ← windowAt_of_uncut hu]
       exact substAt_windowAt hu.1 hs hnd
-    have hfself : (y.mapDec Prod.fst).substAt p s' w = y.mapDec Prod.fst := by
-      rw [← hw]
-      exact substAt_windowAt he ((isShuffle_mapDec _ y).2 hs) (by simpa using hnd)
     have hJ : substRel K y p s' r ∈ J K R := Submodule.subset_span ⟨y, p, s', r, hy.1, hu, hr, rfl⟩
     have hsplit : substRel K y p s' r = r w' • Finsupp.single y 1 +
         ∑ σ ∈ Finset.univ.erase w', r σ • Finsupp.single (substBar y p s' σ.1) 1 := by
-      rw [substRel, ← Finset.add_sum_erase _ _ (Finset.mem_univ w'), hw', hself]
+      rw [substRel, ← Finset.add_sum_erase _ _ (Finset.mem_univ w'), hself]
     -- each other term is of lower level
     have hlow : ∀ σ ∈ Finset.univ.erase w', r σ • Finsupp.single (substBar y p s' σ.1) (1 : K) ∈
-        Finsupp.supported K K {z | z ∈ Nrm L n s ∧ lev rk n z < lev rk n y} ⊔ J K R := by
+        Finsupp.supported K K {z | z ∈ Nrm L n s ∧ G.lev n z < G.lev n y} ⊔ J K R := by
       intro σ hσ
       by_cases hrσ : r σ = 0
       · simp [hrσ]
       refine Submodule.smul_mem _ _ ?_
-      have hσne : σ.1 ≠ w := fun h => (Finset.mem_erase.1 hσ).1 (Subtype.ext h)
+      have hσne : σ ≠ w' := (Finset.mem_erase.1 hσ).1
       obtain ⟨-, hσp, hσn⟩ := mono_shape σ
       have hadm : Adm n s (substBar y p s' σ.1) :=
         ⟨hy.1.substBar hu σ, (perm_labels_substBar hs hnd hu hσp).trans hy.2.1,
           by rw [cutKeys_substBar hs hnd hu hσp hσn]; exact hy.2.2⟩
-      have hkey : pathKey rk n ((substBar y p s' σ.1).mapDec Prod.fst) <
-          pathKey rk n (y.mapDec Prod.fst) := by
+      have hlev : G.lev n (substBar y p s' σ.1) < G.lev n y := by
+        show G.lv n ((substBar y p s' σ.1).mapDec Prod.fst) < G.lv n (y.mapDec Prod.fst)
         rw [full_substBar hu.1]
-        have := pathKey_substAt_lt' rk hfull he σ.2 (hG.mem w hwL) (hlt σ hσne hrσ)
-        rwa [hfself] at this
-      have hlev := lev_lt rk hfull hkey
+        exact hlt σ hσne hrσ
       by_cases hσN : NormalBar L (substBar y p s' σ.1)
       · exact Submodule.mem_sup_left (Finsupp.single_mem_supported K _ ⟨⟨hadm, hσN⟩, hlev⟩)
       · have := reduce n s N _ (by omega) hadm hσN
@@ -1206,77 +1230,77 @@ theorem reduce (n s : ℕ) : ∀ (N : ℕ) (y : BarTree E), lev rk n y ≤ N →
     refine Submodule.sub_mem _ (Submodule.mem_sup_right (Submodule.smul_mem _ _ hJ))
       (Submodule.smul_mem _ _ (Submodule.sum_mem _ hlow))
 
-include hG in
+include G in
 /-- **Every bar tree is congruent to normal bar trees** of the same arity and degree. -/
 theorem single_mem_sup {n s : ℕ} {y : BarTree E} (hy : Adm n s y) :
     Finsupp.single y (1 : K) ∈ Finsupp.supported K K (Nrm L n s) ⊔ J K R := by
   by_cases hN : NormalBar L y
   · exact Submodule.mem_sup_left (Finsupp.single_mem_supported K _ ⟨hy, hN⟩)
   · exact (sup_le_sup_right (Finsupp.supported_mono fun z hz => hz.1) _)
-      (reduce K rk hG n s _ y le_rfl hy hN)
+      (reduce K G n s _ y le_rfl hy hN)
 
-include hG in
+include G in
 lemma mem_sup_of_C {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ C K n s) :
     v ∈ Finsupp.supported K K (Nrm L n s) ⊔ J K R :=
-  mem_of_supported K (fun _ hy => single_mem_sup K rk hG hy) hv
+  mem_of_supported K (fun _ hy => single_mem_sup K G hy) hv
 
 /-- The normalization vanishes on the relator subcomplex. -/
-lemma ΦL_J {v : BarTree E →₀ K} (hv : v ∈ J K R) : ΦL K hG v = 0 := by
+lemma ΦL_J {v : BarTree E →₀ K} (hv : v ∈ J K R) : ΦL K G v = 0 := by
   induction hv using Submodule.span_induction with
   | mem v hv =>
     obtain ⟨x, p, s, r, hx, h, hr, rfl⟩ := hv
-    exact Φ_substRel K hG x.size x le_rfl hx.shuffle hx.nodup h hr
+    exact Φ_substRel K G x.size x le_rfl hx.shuffle hx.nodup h hr
   | zero => simp
   | add x y _ _ hx hy => rw [map_add, hx, hy, add_zero]
   | smul c x _ hx => rw [map_smul, hx, smul_zero]
 
 lemma ΦL_normal {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ Finsupp.supported K K (Nrm L n s)) :
-    ΦL K hG v = v := by
-  have : ∀ v ∈ Finsupp.supported K K (Nrm L n s), ΦL K hG v - v ∈ (⊥ : Submodule K _) :=
+    ΦL K G v = v := by
+  have : ∀ v ∈ Finsupp.supported K K (Nrm L n s), ΦL K G v - v ∈ (⊥ : Submodule K _) :=
     fun v hv => by
-      have := map_mem_of_supported K (P := ⊥) (ΦL K hG - LinearMap.id) (fun y hy => by
+      have := map_mem_of_supported K (P := ⊥) (ΦL K G - LinearMap.id) (fun y hy => by
         simp only [LinearMap.sub_apply, LinearMap.id_apply, Submodule.mem_bot, ΦL,
           Finsupp.linearCombination_single, one_smul]
-        rw [Φ_of_normal K hG y.size y le_rfl hy.1.1.shuffle hy.1.1.nodup hy.2, sub_self]) hv
+        rw [Φ_of_normal K G y.size y le_rfl hy.1.1.shuffle hy.1.1.nodup hy.2, sub_self]) hv
       simpa using this
   simpa [sub_eq_zero] using this v hv
 
-include hG in
+include G in
 /-- **The normalization of a chain is normal and congruent to it.** -/
 lemma ΦL_spec {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ C K n s) :
-    ΦL K hG v ∈ Finsupp.supported K K (Nrm L n s) ∧ v - ΦL K hG v ∈ J K R := by
-  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 (mem_sup_of_C K rk hG hv)
-  rw [map_add, ΦL_normal K rk hG ha, ΦL_J K rk hG hb, add_zero, add_sub_cancel_left]
+    ΦL K G v ∈ Finsupp.supported K K (Nrm L n s) ∧ v - ΦL K G v ∈ J K R := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 (mem_sup_of_C K G hv)
+  rw [map_add, ΦL_normal K G ha, ΦL_J K G hb, add_zero, add_sub_cancel_left]
   exact ⟨ha, hb⟩
 
 /-! ### The filtration by levels -/
 
-lemma lev_mergeK (n : ℕ) (x : BarTree E) (k : ℕ ×ₗ ℕ) : lev rk n (mergeK x k) = lev rk n x := by
-  simp [lev]
+lemma lev_mergeK (n : ℕ) (x : BarTree E) (k : ℕ ×ₗ ℕ) : G.lev n (mergeK x k) = G.lev n x := by
+  simp [GroebnerData.lev]
 
-lemma lev_cutK (n : ℕ) (x : BarTree E) (k : ℕ ×ₗ ℕ) : lev rk n (cutK x k) = lev rk n x := by
-  simp [lev]
+lemma lev_cutK (n : ℕ) (x : BarTree E) (k : ℕ ×ₗ ℕ) : G.lev n (cutK x k) = G.lev n x := by
+  simp [GroebnerData.lev]
 
 /-- **The leading part**: the merges along mergeable edges, normal of the same level. -/
 lemma d₀Tree_mem {n s : ℕ} {y : BarTree E} (hy : y ∈ Nrm L n (s + 1)) :
-    d₀Tree K L y ∈ Finsupp.supported K K {z | z ∈ Nrm L n s ∧ lev rk n z = lev rk n y} := by
+    d₀Tree K L y ∈ Finsupp.supported K K {z | z ∈ Nrm L n s ∧ G.lev n z = G.lev n y} := by
   refine Submodule.sum_mem _ fun k hk =>
     Submodule.smul_mem _ _ (Finsupp.single_mem_supported K _ ?_)
   obtain ⟨hkc, hkN⟩ := Finset.mem_filter.1 hk
-  refine ⟨⟨hy.1.mergeK hkc, ?_⟩, lev_mergeK rk n y k⟩
+  refine ⟨⟨hy.1.mergeK hkc, ?_⟩, lev_mergeK K G n y k⟩
   exact (normalBar_mergeK_iff L hy.1.1.nodup hy.2 hkc).2 (Finset.mem_sdiff.1 hkN).2
 
-include hG in
+include G in
 /-- **The differential is its leading part plus terms of lower level.** -/
 lemma ΦL_dTree_sub {n s : ℕ} {y : BarTree E} (hy : y ∈ Nrm L n (s + 1)) :
-    ΦL K hG (dTree K y) - d₀Tree K L y ∈
-      Finsupp.supported K K {z | z ∈ Nrm L n s ∧ lev rk n z < lev rk n y} := by
+    ΦL K G (dTree K y) - d₀Tree K L y ∈
+      Finsupp.supported K K {z | z ∈ Nrm L n s ∧ G.lev n z < G.lev n y} := by
   classical
   have hsplit : dTree K y = d₀Tree K L y + ∑ k ∈ (cutKeys y).filter
       (fun k => k ∉ Nkeys L (y.mapDec Prod.fst)), sgn K y k • Finsupp.single (mergeK y k) 1 := by
     rw [dTree, d₀Tree, Finset.sum_filter_add_sum_filter_not]
-  have hd₀ : ΦL K hG (d₀Tree K L y) = d₀Tree K L y :=
-    ΦL_normal K rk hG (Finsupp.supported_mono (fun z hz => hz.1) (d₀Tree_mem K rk hy))
+  have hd₀ : ΦL K G (d₀Tree K L y) = d₀Tree K L y :=
+    ΦL_normal K G (Finsupp.supported_mono (fun z hz => hz.1) (d₀Tree_mem K G hy))
   rw [hsplit, map_add, hd₀, add_sub_cancel_left, map_sum]
   refine Submodule.sum_mem _ fun k hk => ?_
   obtain ⟨hkc, hkN⟩ := Finset.mem_filter.1 hk
@@ -1288,15 +1312,15 @@ lemma ΦL_dTree_sub {n s : ℕ} {y : BarTree E} (hy : y ∈ Nrm L n (s + 1)) :
     exact hkN (Finset.mem_sdiff.2 ⟨cutKeys_subset_edgeKeys hy.1.1.root hkc, h⟩)
   have hn : ¬ NormalBar L (mergeK y k) := fun h =>
     ((normalBar_mergeK_iff L hy.1.1.nodup hy.2 hkc).1 h) hkL
-  obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.1 (reduce K rk hG n s _ _ le_rfl hadm hn)
-  rw [← hab, map_add, ΦL_normal K rk hG (Finsupp.supported_mono (fun z hz => hz.1) ha),
-    ΦL_J K rk hG hb, add_zero]
+  obtain ⟨a, ha, b, hb, hab⟩ := Submodule.mem_sup.1 (reduce K G n s _ _ le_rfl hadm hn)
+  rw [← hab, map_add, ΦL_normal K G (Finsupp.supported_mono (fun z hz => hz.1) ha),
+    ΦL_J K G hb, add_zero]
   rw [lev_mergeK] at ha
   exact ha
 
 /-- **The homotopy cuts an edge**, keeping the level. -/
 lemma hTree_mem {n s : ℕ} {y : BarTree E} (hy : y ∈ Nrm L n (s + 1)) :
-    hTree K L y ∈ Finsupp.supported K K {z | z ∈ Nrm L n (s + 2) ∧ lev rk n z = lev rk n y} := by
+    hTree K L y ∈ Finsupp.supported K K {z | z ∈ Nrm L n (s + 2) ∧ G.lev n z = G.lev n y} := by
   unfold hTree
   split_ifs with hne hc
   · exact Submodule.zero_mem _
@@ -1306,7 +1330,7 @@ lemma hTree_mem {n s : ℕ} {y : BarTree E} (hy : y ∈ Nrm L n (s + 1)) :
       (Finset.mem_sdiff.1 (Finset.min'_mem _ hne)).1
     refine ⟨⟨⟨⟨(isShuffle_cutK _ _).2 hy.1.1.shuffle, by simpa using hy.1.1.nodup,
       (rootFlag_cutK _ _).trans hy.1.1.root⟩, by simpa using hy.1.2.1, ?_⟩,
-      normalBar_cutK hy.1.1.nodup hk₀E hy.2⟩, lev_cutK rk n y k₀⟩
+      normalBar_cutK hy.1.1.nodup hk₀E hy.2⟩, lev_cutK K G n y k₀⟩
     rw [cutKeys_cutK hy.1.1.nodup hk₀E, Finset.card_insert_of_notMem hc, hy.1.2.2]
   · exact Submodule.zero_mem _
 
@@ -1344,45 +1368,45 @@ lemma homotopy_supported {n s : ℕ} (hs : s + 2 < n) {v : BarTree E →₀ K}
       rw [d₀_hTree_add K L hy.1.1.nodup hy.1.1.root (nkeys_nonempty hy hs), sub_self]) hv
   simpa [sub_eq_zero] using this
 
-include hG in
+include G in
 lemma ΦL_d_ΦL_d {n s : ℕ} {w : BarTree E →₀ K} (hw : w ∈ C K n (s + 2)) :
-    ΦL K hG (d K (ΦL K hG (d K w))) = 0 := by
+    ΦL K G (d K (ΦL K G (d K w))) = 0 := by
   have hdw := d_mem_C K hw
-  obtain ⟨-, hj⟩ := ΦL_spec K rk hG hdw
+  obtain ⟨-, hj⟩ := ΦL_spec K G hdw
   have hdd : d K (d K w) = 0 := by
     have := map_mem_of_supported K (P := ⊥) (d K ∘ₗ d K) (fun y hy => by
       simp only [LinearMap.comp_apply, d_single, one_smul, Submodule.mem_bot]
       exact d_dTree K y hy.1.nodup) hw
     simpa using this
-  have : ΦL K hG (d K (ΦL K hG (d K w))) =
-      ΦL K hG (d K (d K w)) - ΦL K hG (d K (d K w - ΦL K hG (d K w))) := by
+  have : ΦL K G (d K (ΦL K G (d K w))) =
+      ΦL K G (d K (d K w)) - ΦL K G (d K (d K w - ΦL K G (d K w))) := by
     rw [map_sub (d K), map_sub, sub_sub_cancel]
-  rw [this, hdd, map_zero, zero_sub, ΦL_J K rk hG (d_mem_J K R hj), neg_zero]
+  rw [this, hdd, map_zero, zero_sub, ΦL_J K G (d_mem_J K R hj), neg_zero]
 
-include hG in
+include G in
 /-- **Acyclicity below the diagonal**, by induction on the level. -/
 theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →₀ K),
-    z ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y ≤ N} →
-    ΦL K hG (d K z) = 0 → ∃ w ∈ Finsupp.supported K K (Nrm L n (s + 2)), ΦL K hG (d K w) = z
+    z ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y ≤ N} →
+    ΦL K G (d K z) = 0 → ∃ w ∈ Finsupp.supported K K (Nrm L n (s + 2)), ΦL K G (d K w) = z
   | 0, z, hz, _ => by
     refine ⟨0, Submodule.zero_mem _, ?_⟩
     rw [map_zero, map_zero]
     ext y
     by_contra h
     obtain ⟨hy1, hy2⟩ := (Finsupp.mem_supported K z).1 hz (Finsupp.mem_support_iff.2 (Ne.symm h))
-    have := lev_pos rk hy1.1
+    have := lev_pos K G hy1.1
     omega
   | N + 1, z, hz, hdz => by
     classical
-    set zt := z.filter fun y => lev rk n y = N + 1 with hzt
-    set zl := z.filter fun y => ¬ lev rk n y = N + 1 with hzl
+    set zt := z.filter fun y => G.lev n y = N + 1 with hzt
+    set zl := z.filter fun y => ¬ G.lev n y = N + 1 with hzl
     have hz' : zt + zl = z := Finsupp.filter_add_filter_not _ _
-    have hztm : zt ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y = N + 1} := by
+    have hztm : zt ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y = N + 1} := by
       rw [Finsupp.mem_supported, hzt, Finsupp.support_filter]
       intro y hy
       simp only [Finset.coe_filter, Set.mem_setOf_eq] at hy
       exact ⟨((Finsupp.mem_supported K z).1 hz hy.1).1, hy.2⟩
-    have hzlm : zl ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y ≤ N} := by
+    have hzlm : zl ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y ≤ N} := by
       rw [Finsupp.mem_supported, hzl, Finsupp.support_filter]
       intro y hy
       simp only [Finset.coe_filter, Set.mem_setOf_eq] at hy
@@ -1391,20 +1415,20 @@ theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →�
       exact ⟨h1, by omega⟩
     -- the lower part of the differential of a chain of levels at most `M`
     have hlow : ∀ (M : ℕ) (v : BarTree E →₀ K),
-        v ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y ≤ M} →
-        ΦL K hG (d K v) - d₀ K L v ∈
-          Finsupp.supported K K {y | y ∈ Nrm L n s ∧ lev rk n y < M} := fun M v hv =>
-      map_mem_of_supported K (ΦL K hG ∘ₗ d K - d₀ K L) (fun y hy => by
+        v ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y ≤ M} →
+        ΦL K G (d K v) - d₀ K L v ∈
+          Finsupp.supported K K {y | y ∈ Nrm L n s ∧ G.lev n y < M} := fun M v hv =>
+      map_mem_of_supported K (ΦL K G ∘ₗ d K - d₀ K L) (fun y hy => by
         simp only [LinearMap.sub_apply, LinearMap.comp_apply, d_single, d₀_single, one_smul]
-        refine Finsupp.supported_mono ?_ (ΦL_dTree_sub K rk hG hy.1)
+        refine Finsupp.supported_mono ?_ (ΦL_dTree_sub K G hy.1)
         intro z hz
         exact ⟨hz.1, lt_of_lt_of_le hz.2 hy.2⟩) hv
     have hd₀ : ∀ (P : ℕ → Prop) (v : BarTree E →₀ K),
-        v ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ P (lev rk n y)} →
-        d₀ K L v ∈ Finsupp.supported K K {y | y ∈ Nrm L n s ∧ P (lev rk n y)} := fun P v hv =>
+        v ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ P (G.lev n y)} →
+        d₀ K L v ∈ Finsupp.supported K K {y | y ∈ Nrm L n s ∧ P (G.lev n y)} := fun P v hv =>
       map_mem_of_supported K (d₀ K L) (fun y hy => by
         rw [d₀_single, one_smul]
-        refine Finsupp.supported_mono ?_ (d₀Tree_mem K rk hy.1)
+        refine Finsupp.supported_mono ?_ (d₀Tree_mem K G hy.1)
         intro z hz
         exact ⟨hz.1, hz.2 ▸ hy.2⟩) hv
     -- the leading part of `zt` is a cycle
@@ -1416,13 +1440,13 @@ theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →�
       have e2 := hlow N zl hzlm
       have e3 := hd₀ (· ≤ N) zl hzlm
       have e4 := hd₀ (· = N + 1) zt hztm
-      have hsum : d₀ K L zt = -((ΦL K hG (d K zt) - d₀ K L zt) +
-          (ΦL K hG (d K zl) - d₀ K L zl) + d₀ K L zl) := by
+      have hsum : d₀ K L zt = -((ΦL K G (d K zt) - d₀ K L zt) +
+          (ΦL K G (d K zl) - d₀ K L zl) + d₀ K L zl) := by
         rw [← hz', map_add, map_add] at hdz
         rw [eq_neg_iff_add_eq_zero, ← hdz]
         abel
       ext y
-      by_cases hy : lev rk n y = N + 1
+      by_cases hy : G.lev n y = N + 1
       · rw [hsum, Finsupp.neg_apply, Finsupp.add_apply, Finsupp.add_apply]
         have h1 := (Finsupp.mem_supported' K _).1 e1 y (fun h => by have := h.2; omega)
         have h2 := (Finsupp.mem_supported' K _).1 e2 y (fun h => by have := h.2; omega)
@@ -1437,10 +1461,10 @@ theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →�
     have hhom := homotopy_supported K hs hztN
     rw [hcyc, map_zero, add_zero] at hhom
     set w₁ := hL K L zt with hw₁
-    have hw₁m : w₁ ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 2) ∧ lev rk n y = N + 1} :=
+    have hw₁m : w₁ ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 2) ∧ G.lev n y = N + 1} :=
       map_mem_of_supported K (hL K L) (fun y hy => by
         rw [hL_single, one_smul]
-        refine Finsupp.supported_mono ?_ (hTree_mem K rk hy.1)
+        refine Finsupp.supported_mono ?_ (hTree_mem K G hy.1)
         intro z hz
         exact ⟨hz.1, hz.2.trans hy.2⟩) hztm
     have hw₁C : w₁ ∈ C K n (s + 2) := by
@@ -1448,24 +1472,24 @@ theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →�
       intro y hy
       exact hy.1.1
     -- what remains is of lower level
-    have hlow₁ : ΦL K hG (d K w₁) - d₀ K L w₁ ∈
-        Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y < N + 1} :=
-      map_mem_of_supported K (ΦL K hG ∘ₗ d K - d₀ K L) (fun y hy => by
+    have hlow₁ : ΦL K G (d K w₁) - d₀ K L w₁ ∈
+        Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y < N + 1} :=
+      map_mem_of_supported K (ΦL K G ∘ₗ d K - d₀ K L) (fun y hy => by
         simp only [LinearMap.sub_apply, LinearMap.comp_apply, d_single, d₀_single, one_smul]
-        refine Finsupp.supported_mono ?_ (ΦL_dTree_sub K rk hG hy.1)
+        refine Finsupp.supported_mono ?_ (ΦL_dTree_sub K G hy.1)
         intro z hz
         exact ⟨hz.1, lt_of_lt_of_le hz.2 hy.2.le⟩) hw₁m
-    set z' := z - ΦL K hG (d K w₁) with hz'def
-    have hz'm : z' ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y ≤ N} := by
-      have : z' = zl - (ΦL K hG (d K w₁) - d₀ K L w₁) := by
+    set z' := z - ΦL K G (d K w₁) with hz'def
+    have hz'm : z' ∈ Finsupp.supported K K {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y ≤ N} := by
+      have : z' = zl - (ΦL K G (d K w₁) - d₀ K L w₁) := by
         rw [hz'def, ← hz', ← hhom]
         abel
       rw [this]
       refine Submodule.sub_mem _ hzlm (Finsupp.supported_mono ?_ hlow₁)
       intro y hy
       exact ⟨hy.1, Nat.lt_succ_iff.1 hy.2⟩
-    have hdz' : ΦL K hG (d K z') = 0 := by
-      rw [hz'def, map_sub, map_sub, hdz, ΦL_d_ΦL_d K rk hG hw₁C, sub_zero]
+    have hdz' : ΦL K G (d K z') = 0 := by
+      rw [hz'def, map_sub, map_sub, hdz, ΦL_d_ΦL_d K G hw₁C, sub_zero]
     obtain ⟨w₂, hw₂, hw₂z⟩ := acyclic n s hs N z' hz'm hdz'
     have hw₁N : w₁ ∈ Finsupp.supported K K (Nrm L n (s + 2)) := by
       refine Finsupp.supported_mono ?_ hw₁m
@@ -1475,10 +1499,9 @@ theorem acyclic (n s : ℕ) (hs : s + 2 < n) : ∀ (N : ℕ) (z : BarTree E →�
     rw [map_add, map_add, hw₂z, hz'def]
     abel
 
-include hG in
-/-- **The criterion of Dotsenko and Khoroshkin**: a shuffle operad presented by relators of arity
-three which are a quadratic Gröbner basis is Koszul. -/
-theorem isKoszul : IsKoszul K R := by
+include G in
+/-- **Gröbner data make the operad Koszul.** -/
+theorem isKoszul_of_data : IsKoszul K R := by
   intro n s hs x hx hdx
   cases s with
   | zero =>
@@ -1491,27 +1514,33 @@ theorem isKoszul : IsKoszul K R := by
     rw [this, map_zero, sub_zero]
     exact Submodule.zero_mem _
   | succ s =>
-    obtain ⟨hzN, hxz⟩ := ΦL_spec K rk hG hx
-    have hdz : ΦL K hG (d K (ΦL K hG x)) = 0 := by
-      have : ΦL K hG x = x - (x - ΦL K hG x) := by abel
-      rw [this, map_sub, map_sub, ΦL_J K rk hG hdx, ΦL_J K rk hG (d_mem_J K R hxz), sub_zero]
-    have hlev : ΦL K hG x ∈ Finsupp.supported K K
-        {y | y ∈ Nrm L n (s + 1) ∧ lev rk n y ≤ (monomials (E := E) n).card} := by
+    obtain ⟨hzN, hxz⟩ := ΦL_spec K G hx
+    have hdz : ΦL K G (d K (ΦL K G x)) = 0 := by
+      have : ΦL K G x = x - (x - ΦL K G x) := by abel
+      rw [this, map_sub, map_sub, ΦL_J K G hdx, ΦL_J K G (d_mem_J K R hxz), sub_zero]
+    have hlev : ΦL K G x ∈ Finsupp.supported K K
+        {y | y ∈ Nrm L n (s + 1) ∧ G.lev n y ≤ (monomials (E := E) n).card} := by
       refine Finsupp.supported_mono ?_ hzN
       intro y hy
-      exact ⟨hy, Finset.card_filter_le _ _⟩
-    obtain ⟨w, hw, hwz⟩ := acyclic K rk hG n s (by omega) _ _ hlev hdz
+      exact ⟨hy, G.lv_le n _⟩
+    obtain ⟨w, hw, hwz⟩ := acyclic K G n s (by omega) _ _ hlev hdz
     have hwC : w ∈ C K n (s + 2) := by
       refine Finsupp.supported_mono ?_ hw
       intro y hy
       exact hy.1
     refine ⟨w, hwC, ?_⟩
-    obtain ⟨-, hj⟩ := ΦL_spec K rk hG (d_mem_C K hwC)
-    have : x - d K w = (x - ΦL K hG x) - (d K w - ΦL K hG (d K w)) := by
+    obtain ⟨-, hj⟩ := ΦL_spec K G (d_mem_C K hwC)
+    have : x - d K w = (x - ΦL K G x) - (d K w - ΦL K G (d K w)) := by
       rw [hwz]
       abel
     rw [this]
     exact Submodule.sub_mem _ hxz hj
+
+/-- **The criterion of Dotsenko and Khoroshkin**: a shuffle operad presented by relators of arity
+three which are a quadratic Gröbner basis is Koszul. -/
+theorem isKoszul (rk : E → ℕ) {L : Set (LTree E)} {R : Submodule K (Mono E 3 → K)}
+    (hG : IsGroebner K rk L R) : IsKoszul K R :=
+  isKoszul_of_data K hG.data
 
 end Koszul
 

@@ -321,14 +321,14 @@ variable (rk : E → ℕ) {L : Set (LTree E)} {R : Submodule K (Mono E 3 → K)}
   (hG : IsGroebner K rk L R)
 
 /-- **The differential on the normal bar trees**: the differential followed by normalization. -/
-noncomputable def dN : (BarTree E →₀ K) →ₗ[K] (BarTree E →₀ K) := ΦL K hG ∘ₗ d K
+noncomputable def dN : (BarTree E →₀ K) →ₗ[K] (BarTree E →₀ K) := ΦL K hG.data ∘ₗ d K
 
 include hG in
 /-- A chain lies in the relator subcomplex exactly when its normalization vanishes. -/
 lemma mem_J_iff {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ C K n s) :
-    v ∈ J K R ↔ ΦL K hG v = 0 := by
-  refine ⟨ΦL_J K rk hG, fun h => ?_⟩
-  have := (ΦL_spec K rk hG hv).2
+    v ∈ J K R ↔ ΦL K hG.data v = 0 := by
+  refine ⟨ΦL_J K hG.data, fun h => ?_⟩
+  have := (ΦL_spec K hG.data hv).2
   rwa [h, sub_zero] at this
 
 omit [Fintype E] [DecidableEq E] in
@@ -340,25 +340,25 @@ include hG in
 /-- **The normalization is a projection onto the normal bar trees with kernel `J R`**: a chain is
 congruent to its normalization, which is normal. -/
 lemma normalized_eq {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ C K n s) :
-    ΦL K hG v ∈ Finsupp.supported K K (Nrm L n s) ∧ v - ΦL K hG v ∈ J K R :=
-  ΦL_spec K rk hG hv
+    ΦL K hG.data v ∈ Finsupp.supported K K (Nrm L n s) ∧ v - ΦL K hG.data v ∈ J K R :=
+  ΦL_spec K hG.data hv
 
 include hG in
 /-- **No nonzero normal chain lies in `J R`.** -/
 lemma normalized_injective {n s : ℕ} {v : BarTree E →₀ K}
     (hv : v ∈ Finsupp.supported K K (Nrm L n s)) (hJ : v ∈ J K R) : v = 0 := by
-  rw [← ΦL_normal K rk hG hv, ΦL_J K rk hG hJ]
+  rw [← ΦL_normal K hG.data hv, ΦL_J K hG.data hJ]
 
 include hG in
 lemma dN_mem {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ Finsupp.supported K K (Nrm L n (s + 1))) :
     dN K rk hG v ∈ Finsupp.supported K K (Nrm L n s) :=
-  (ΦL_spec K rk hG (d_mem_C K (C_of_nrm K hv))).1
+  (ΦL_spec K hG.data (d_mem_C K (C_of_nrm K hv))).1
 
 include hG in
 /-- **`dN` is a differential.** -/
 lemma dN_dN {n s : ℕ} {v : BarTree E →₀ K} (hv : v ∈ Finsupp.supported K K (Nrm L n (s + 2))) :
     dN K rk hG (dN K rk hG v) = 0 :=
-  ΦL_d_ΦL_d K rk hG (C_of_nrm K hv)
+  ΦL_d_ΦL_d K hG.data (C_of_nrm K hv)
 
 include hG in
 /-- **Exactness below the diagonal**: a normal cycle of degree `s + 1 < n - 1` is the boundary of
@@ -369,13 +369,13 @@ lemma exact_dN {n s : ℕ} (hs : s + 2 < n) {v : BarTree E →₀ K}
   have hvC := C_of_nrm K hv
   have hdv : d K v ∈ J K R := (mem_J_iff K rk hG (d_mem_C K hvC)).2 h
   obtain ⟨y, hy, hvy⟩ := isKoszul K rk hG n (s + 1) (by omega) v hvC hdv
-  obtain ⟨hyN, hyJ⟩ := ΦL_spec K rk hG hy
-  refine ⟨ΦL K hG y, hyN, ?_⟩
-  have h1 : ΦL K hG (d K y) = v := by
-    have := ΦL_J K rk hG hvy
-    rw [map_sub, ΦL_normal K rk hG hv, sub_eq_zero] at this
+  obtain ⟨hyN, hyJ⟩ := ΦL_spec K hG.data hy
+  refine ⟨ΦL K hG.data y, hyN, ?_⟩
+  have h1 : ΦL K hG.data (d K y) = v := by
+    have := ΦL_J K hG.data hvy
+    rw [map_sub, ΦL_normal K hG.data hv, sub_eq_zero] at this
     exact this.symm
-  have h2 : ΦL K hG (d K (y - ΦL K hG y)) = 0 := ΦL_J K rk hG (d_mem_J K R hyJ)
+  have h2 : ΦL K hG.data (d K (y - ΦL K hG.data y)) = 0 := ΦL_J K hG.data (d_mem_J K R hyJ)
   rw [map_sub, map_sub, h1, sub_eq_zero] at h2
   exact h2.symm
 
