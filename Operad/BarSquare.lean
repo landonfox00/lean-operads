@@ -339,6 +339,222 @@ theorem dF_gF (hμ : MergeFn.Odd gp μ) (a : ℕ) {n l : ℕ} (m : ℕ) (x : Pl 
 
 end Compat
 
+/-! ## The laws of merge-grafting with grafting, at positions -/
+
+section PlanarLaws
+
+variable {μ}
+
+lemma isLeaf_of_lt {n : ℕ} (s : TreeOfArity T n) (h : 1 < n) : s.1.isLeaf = false := by
+  by_contra h'
+  have hl : s.1.isLeaf = true := by simpa using h'
+  have := s.2
+  rw [Tree.eq_leaf_of_isLeaf hl, Tree.arity_leaf] at this
+  omega
+
+lemma pt_eq {n : ℕ} {s t : TreeOfArity T n} (h : s.1 = t.1) : (pt s : Pl (T := T) R n) = pt t := by
+  rw [Subtype.ext h]
+
+/-- **Merging before a graft point.** -/
+theorem mF_gF_after {p q q' n lu lv m₁ m₂ m : ℕ} (hpq : p < q) (hq : q < n)
+    (hq' : q' + 1 = q + lv) (h₁ : m₁ + 1 = n + lu) (h₂ : m₂ + 1 = n + lv) (hm : m + 1 = m₁ + lv)
+    (x : Pl (T := T) R n) (u : TreeOfArity T lu) (v : TreeOfArity T lv) :
+    mF μ gp R p m (gF gp R q m₁ x (pt u)) (pt v)
+      = σ R (Tree.tpar gp u.1 && Tree.tpar gp v.1) •
+          gF gp R q' m (mF μ gp R p m₂ x (pt v)) (pt u) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy, smul_add]
+  | single s c =>
+    rw [← Finsupp.smul_single_one s c,
+      show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl]
+    simp only [map_smul, LinearMap.smul_apply]
+    rw [smul_comm]
+    congr 1
+    have hs := isLeaf_of_lt s (by omega)
+    have ha : q < s.1.arity := by rw [s.2]; exact hq
+    by_cases hv : v.1.isLeaf = true
+    · rw [gF_pt_of ⟨hq, h₁⟩, map_smul, LinearMap.smul_apply, mF_pt_leaf_right _ _ hv,
+        mF_pt_leaf_right _ _ hv, map_zero, LinearMap.zero_apply, smul_zero, smul_zero]
+    · have hv' : v.1.isLeaf = false := by simpa using hv
+      have hG : (graftT s q u ⟨hq, h₁⟩).1.isLeaf = false := Tree.isLeaf_graft_left hs _ _
+      have hM : q' < m₂ ∧ m + 1 = m₂ + lu := by omega
+      rw [gF_pt_of ⟨hq, h₁⟩, map_smul, LinearMap.smul_apply,
+        mF_pt_of (μ := μ) ⟨by omega, hm⟩ hG hv', mF_pt_of (μ := μ) ⟨by omega, h₂⟩ hs hv',
+        map_smul, LinearMap.smul_apply, gF_pt_of hM, smul_smul, smul_smul, smul_smul]
+      have htree : (mgraftT μ (graftT s q u ⟨hq, h₁⟩) p v ⟨by omega, hm⟩).1
+          = (graftT (mgraftT μ s p v ⟨by omega, h₂⟩) q' u hM).1 := by
+        simp only [mgraftT_val, graftT_val]
+        rw [Tree.graft_mgraft_after μ s.1 p v.1 q u.1 hpq ha, v.2]
+        congr 1
+        omega
+      rw [pt_eq htree]
+      congr 1
+      simp only [graftT_val, mgraftT_val, ← σ_xor]
+      congr 1
+      have e := Tree.mSgn_graft_after μ gp (s := s.1) (b := u.1) (u := v.1) hpq ha
+      rw [v.2, show q - 1 + lv = q' by omega] at e
+      rw [e, Bool.xor_assoc]
+
+/-- **Merging after a graft point.** -/
+theorem mF_gF_before (hμ : MergeFn.Odd gp μ) {p p' q n lu lv m₁ m₂ m : ℕ} (hqp : q < p)
+    (hp : p < n) (hp' : p' + 1 = p + lu) (h₁ : m₁ + 1 = n + lu) (h₂ : m₂ + 1 = n + lv)
+    (hm : m + 1 = m₁ + lv) (x : Pl (T := T) R n) (u : TreeOfArity T lu) (v : TreeOfArity T lv) :
+    mF μ gp R p' m (gF gp R q m₁ x (pt u)) (pt v)
+      = σ R (Tree.tpar gp u.1 && Tree.tpar gp v.1) •
+          gF gp R q m (mF μ gp R p m₂ x (pt v)) (pt u) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy, smul_add]
+  | single s c =>
+    rw [← Finsupp.smul_single_one s c,
+      show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl]
+    simp only [map_smul, LinearMap.smul_apply]
+    rw [smul_comm]
+    congr 1
+    have hs := isLeaf_of_lt s (by omega)
+    have ha : p < s.1.arity := by rw [s.2]; exact hp
+    by_cases hv : v.1.isLeaf = true
+    · rw [gF_pt_of ⟨by omega, h₁⟩, map_smul, LinearMap.smul_apply, mF_pt_leaf_right _ _ hv,
+        mF_pt_leaf_right _ _ hv, map_zero, LinearMap.zero_apply, smul_zero, smul_zero]
+    · have hv' : v.1.isLeaf = false := by simpa using hv
+      have hG : (graftT s q u ⟨by omega, h₁⟩).1.isLeaf = false := Tree.isLeaf_graft_left hs _ _
+      have hM : q < m₂ ∧ m + 1 = m₂ + lu := by omega
+      rw [gF_pt_of ⟨by omega, h₁⟩, map_smul, LinearMap.smul_apply,
+        mF_pt_of (μ := μ) ⟨by omega, hm⟩ hG hv', mF_pt_of (μ := μ) ⟨hp, h₂⟩ hs hv',
+        map_smul, LinearMap.smul_apply, gF_pt_of hM, smul_smul, smul_smul, smul_smul]
+      have htree : (mgraftT μ (graftT s q u ⟨by omega, h₁⟩) p' v ⟨by omega, hm⟩).1
+          = (graftT (mgraftT μ s p v ⟨hp, h₂⟩) q u hM).1 := by
+        simp only [mgraftT_val, graftT_val]
+        rw [← Tree.graft_mgraft_before μ s.1 q u.1 p v.1 hqp ha, u.2]
+        congr 1
+        omega
+      rw [pt_eq htree]
+      congr 1
+      simp only [graftT_val, mgraftT_val, ← σ_xor]
+      congr 1
+      have e := Tree.mSgn_graft_before μ gp hμ (s := s.1) (b := u.1) (u := v.1) hqp ha hv'
+      rw [u.2, show p - 1 + lu = p' by omega] at e
+      rw [e, Bool.xor_assoc]
+
+/-- **Merging into a grafted tree.** -/
+theorem mF_gF_inner (hμ : MergeFn.Odd gp μ) {p q r n lu lv m₁ m₂ m : ℕ} (hq : q < n)
+    (hr : r < lu) (hp : p = q + r) (h₁ : m₁ + 1 = n + lu) (h₂ : m₂ + 1 = lu + lv)
+    (hm : m + 1 = m₁ + lv) (x : Pl (T := T) R n) {u : TreeOfArity T lu} (hu : u.1.isLeaf = false)
+    (v : TreeOfArity T lv) :
+    mF μ gp R p m (gF gp R q m₁ x (pt u)) (pt v)
+      = gF gp R q m (twF gp R n x) (mF μ gp R r m₂ (pt u) (pt v)) := by
+  subst hp
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+  | single s c =>
+    rw [← Finsupp.smul_single_one s c,
+      show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl]
+    simp only [map_smul, LinearMap.smul_apply]
+    congr 1
+    have ha : q < s.1.arity := by rw [s.2]; exact hq
+    by_cases hv : v.1.isLeaf = true
+    · rw [gF_pt_of ⟨hq, h₁⟩, map_smul, LinearMap.smul_apply, mF_pt_leaf_right _ _ hv,
+        mF_pt_leaf_right _ _ hv, map_zero, smul_zero]
+    · have hv' : v.1.isLeaf = false := by simpa using hv
+      have hG : (graftT s q u ⟨hq, h₁⟩).1.isLeaf = false := Tree.isLeaf_graft hu
+      have hM : q < n ∧ m + 1 = n + m₂ := by omega
+      rw [gF_pt_of ⟨hq, h₁⟩, map_smul, LinearMap.smul_apply,
+        mF_pt_of (μ := μ) ⟨by omega, hm⟩ hG hv', mF_pt_of (μ := μ) ⟨hr, h₂⟩ hu hv', twF_pt,
+        map_smul, map_smul, LinearMap.smul_apply, gF_pt_of hM, smul_smul, smul_smul, smul_smul]
+      have htree : (mgraftT μ (graftT s q u ⟨hq, h₁⟩) (q + r) v ⟨by omega, hm⟩).1
+          = (graftT s q (mgraftT μ u r v ⟨hr, h₂⟩) hM).1 := by
+        simp only [mgraftT_val, graftT_val]
+        exact Tree.mgraft_graft_inner μ s.1 q u.1 r v.1 ha (by rw [u.2]; exact hr) hu
+      rw [pt_eq htree]
+      congr 1
+      simp only [graftT_val, mgraftT_val, ← σ_xor]
+      congr 1
+      rw [Tree.mSgn_graft_inner μ gp hμ ha (by rw [u.2]; exact hr) hu hv']
+      cases Tree.tpar gp s.1 <;> cases Tree.mSgn gp u.1 r v.1 <;>
+        cases Tree.tpar gp (Tree.mgraft μ u.1 r v.1) && Tree.apar gp s.1 q <;> rfl
+
+/-- **Merging corollas.** -/
+theorem mF_corolla {a k l m : ℕ} (h : a < k ∧ m + 1 = k + l) (g : T k) (c : T l) :
+    mF μ gp R a m (pt (corolla g)) (pt (corolla c)) = pt (corolla (μ k l g a c m)) := by
+  rw [mF_pt_of (μ := μ) h rfl rfl]
+  have hs : Tree.mSgn gp (corolla g).1 a (corolla c).1 = false := mSgn_corolla gp g c h.1
+  rw [hs, σ_false, one_smul]
+  refine pt_eq ?_
+  show (Tree.node g (TreeOfArity.leaves k)).mgraft μ a (Tree.node c (TreeOfArity.leaves l))
+    = Tree.node (μ k l g a c m) (TreeOfArity.leaves m)
+  rw [corolla_mgraft μ g c h.1]
+  have : Forest.spliceLen k a l = m := by have := spliceLen_eq (k := k) (j := a) l h.1; omega
+  rw [this]
+
+lemma dF_corolla {k : ℕ} (g : T k) : dF μ gp R k (pt (corolla g)) = 0 := by
+  rw [dF_pt]
+  have : (corolla g).1.weight = 1 := by
+    show (Tree.node g (TreeOfArity.leaves k)).weight = 1
+    rw [Tree.weight_node, weightF_leaves]
+  rw [this, Finset.Ico_self, Finset.sum_empty]
+
+lemma twF_twF {n : ℕ} (x : Pl (T := T) R n) : twF gp R n (twF gp R n x) = x := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => rw [map_add, map_add, hx, hy]
+  | single s c =>
+    rw [← Finsupp.smul_single_one s c,
+      show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl, map_smul, map_smul,
+      twF_pt, map_smul, twF_pt, smul_smul, smul_smul, mul_assoc, σ_mul_self, mul_one]
+
+lemma dF_twF (hμ : MergeFn.Odd gp μ) {n : ℕ} (x : Pl (T := T) R n) :
+    dF μ gp R n (twF gp R n x) = -twF gp R n (dF μ gp R n x) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x y hx hy => rw [map_add, map_add, hx, hy, map_add, map_add, neg_add]
+  | single s c =>
+    rw [← Finsupp.smul_single_one s c,
+      show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl, map_smul, map_smul,
+      map_smul, map_smul, ← smul_neg]
+    congr 1
+    rw [twF_pt, map_smul, dF_pt, map_sum, Finset.smul_sum, ← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    rw [Finset.mem_Ico] at hk
+    rw [map_smul, twF_pt, contrT_val, Tree.tpar_contr μ gp hμ hk.1 hk.2, smul_smul, smul_smul,
+      ← neg_smul]
+    congr 1
+    cases Tree.tpar gp s.1 <;> simp [mul_comm]
+
+lemma twF_mF_pt (hμ : MergeFn.Odd gp μ) (a : ℕ) {n l m : ℕ} (s : TreeOfArity T n)
+    (u : TreeOfArity T l) :
+    twF gp R m (mF μ gp R a m (pt s) (pt u))
+      = -(σ R (Tree.tpar gp s.1) * σ R (Tree.tpar gp u.1)) • mF μ gp R a m (pt s) (pt u) := by
+  rw [mF_pt]
+  split_ifs with h1 h2
+  · rw [map_smul, twF_pt, mgraftT_val, Tree.tpar_mgraft μ gp hμ _ _ _
+      (by rw [s.2]; exact h1.1) h2.1 h2.2, smul_smul, smul_smul]
+    congr 1
+    cases Tree.tpar gp s.1 <;> cases Tree.tpar gp u.1 <;> simp
+  · simp
+  · simp
+
+lemma twF_mF (hμ : MergeFn.Odd gp μ) (a : ℕ) {n l m : ℕ} (x : Pl (T := T) R n)
+    (y : Pl (T := T) R l) :
+    twF gp R m (mF μ gp R a m x y) = -mF μ gp R a m (twF gp R n x) (twF gp R l y) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx', neg_add]
+  | single s c =>
+    induction y using Finsupp.induction_linear with
+    | zero => simp
+    | add y y' hy hy' => simp only [map_add, hy, hy', neg_add]
+    | single u d =>
+      rw [← Finsupp.smul_single_one s c, ← Finsupp.smul_single_one u d,
+        show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl,
+        show (Finsupp.single u (1 : R) : Pl (T := T) R l) = pt u from rfl]
+      simp only [map_smul, LinearMap.smul_apply, twF_pt]
+      rw [twF_mF_pt hμ]
+      module
+
+end PlanarLaws
+
 end FreeGr
 
 end Operad
