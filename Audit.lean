@@ -1259,6 +1259,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GrEnd.kcomp_assoc_par
 #print axioms Operad.EndGr.compFam_eq
 #print axioms Operad.EndGr.instGrOperad
+#print axioms Operad.EndGr.sv_nsc
+#print axioms Operad.EndGr.sv_map_apply
+#print axioms Operad.Ger.relOf_eq_zero_iff
+#print axioms Operad.Ger.algebraEquiv
+#print axioms Operad.Ger.IsGer.brk_antisymm
+#print axioms Operad.Ger.IsGer.brk_mul
+#print axioms Operad.Ger.IsGer.brk_jacobi
+#print axioms Operad.BV.relOf_eq_zero_iff
+#print axioms Operad.BV.algebraEquiv
 #print axioms Operad.Rewriting.resolvable_iff
 #print axioms Operad.Rewriting.Resolvable.basis_apply
 #print axioms Operad.Rewriting.Resolvable.nf_eq_zero_iff

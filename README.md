@@ -454,6 +454,17 @@ twists by signs depending on them; the Koszul composite is natural in the orders
 parallel associative up to the Koszul sign (`GrEnd.kcomp_assoc_seq`, `GrEnd.kcomp_assoc_par`). An
 algebra over a graded operad is a morphism into it (`GrAlgebra`).
 
+**The Gerstenhaber and BV operads.** `Operad/GerOperad.lean` presents `Ger` by an even product and
+an odd bracket subject to commutativity, symmetry, associativity, the Leibniz rule and the Jacobi
+identity, and `BV` by an even product and an odd operator `Δ` with `Δ² = 0` whose deviation is a
+derivation (`GerOp`, `BVOp`). **Their algebras are the Gerstenhaber and the BV algebras**
+(`Ger.algebraEquiv`, `BV.algebraEquiv`): the relators vanish in the graded endomorphism operad
+exactly on these structures (`Ger.relOf_eq_zero_iff`, `BV.relOf_eq_zero_iff`), computed through
+planar composition at the standard orders (`EndGr.sv_nsc`) and the Koszul signs of permutations
+(`EndGr.sv_map_apply`). The usual bracket `[x, y] = σ|x| l(x, y)` of a Gerstenhaber algebra satisfies
+graded antisymmetry, the Poisson rule and the graded Jacobi identity in the conventions of
+`Operad/GerBV.lean` (`Ger.IsGer.brk_jacobi`).
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable

@@ -1041,7 +1041,73 @@ lemma parE_ofFam (b : Bool) (L : LinOrd A) (f : EndOp R V A) :
 
 end EndGr
 
-variable {R} in
+namespace GrEnd
+
+/-! ## Evaluation on homogeneous inputs -/
+
+variable {R V}
+variable {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+
+/-- Inputs `x` homogeneous of parities `c`. -/
+def IsHom (c : A → Bool) (x : A → V) : Prop := ∀ a, SuperMod.pr (R := R) (c a) (x a) = x a
+
+lemma inp_apply_hom {c : A → Bool} {x : A → V} (hx : IsHom (R := R) c x) (c' : A → Bool)
+    (f : EndOp R V A) : inp R V c' f x = if c' = c then f x else 0 := by
+  rw [inp_apply]
+  split_ifs with h
+  · subst h
+    exact congrArg f (funext hx)
+  · obtain ⟨a, ha⟩ := Function.ne_iff.1 h
+    refine f.map_coord_zero a ?_
+    show SuperMod.pr (R := R) (c' a) (x a) = 0
+    rw [← hx a]
+    exact pr_ne ha _
+
+lemma twist_apply_hom {c : A → Bool} {x : A → V} (hx : IsHom (R := R) c x)
+    (φ : (A → Bool) → R) (f : EndOp R V A) : twist R V φ f x = φ c • f x := by
+  rw [show twist R V φ f x = inp R V c (twist R V φ f) x by rw [inp_apply_hom hx, if_pos rfl],
+    inp_twist, MultilinearMap.smul_apply, inp_apply_hom hx, if_pos rfl]
+
+lemma parML_apply_hom {c : A → Bool} {x : A → V} (hx : IsHom (R := R) c x) (b : Bool)
+    (f : EndOp R V A) : parML R V b f x = SuperMod.pr (R := R) (xor b (tot c)) (f x) := by
+  rw [show parML R V b f x = inp R V c (parML R V b f) x by rw [inp_apply_hom hx, if_pos rfl],
+    inp_parML, out_apply, inp_apply_hom hx, if_pos rfl]
+
+/-- **A homogeneous operation of parity `q`** sends homogeneous inputs of parities `c` to the
+parity `q + |c|`. -/
+lemma pr_apply_hom {c : A → Bool} {x : A → V} (hx : IsHom (R := R) c x) {q : Bool}
+    {g : EndOp R V A} (hg : parML R V q g = g) :
+    SuperMod.pr (R := R) (xor q (tot c)) (g x) = g x := by
+  rw [← hg, parML_apply_hom hx, pr_self]
+
+/-- **Multilinear maps agree when they agree on homogeneous inputs.** -/
+lemma ext_hom {f g : EndOp R V A}
+    (h : ∀ (c : A → Bool) (x : A → V), IsHom (R := R) c x → f x = g x) : f = g :=
+  ext_inp fun c => MultilinearMap.ext fun x => by
+    rw [inp_apply, inp_apply]
+    exact h c _ fun a => pr_self _ _
+
+omit [Fintype A] in
+lemma isHom_feed (i : A) {e : Without A i ⊕ B → Bool} {x : Without A i ⊕ B → V}
+    (hx : IsHom (R := R) e x) {q : Bool} {g : EndOp R V B} (hg : parML R V q g = g) :
+    IsHom (R := R) (slot i q e) (feed i x (g fun b => x (Sum.inr b))) := by
+  intro a
+  by_cases h : a = i
+  · subst h
+    rw [slot, feed_self, feed_self]
+    exact pr_apply_hom (fun b => hx (Sum.inr b)) hg
+  · rw [slot, feed_of_ne h, feed_of_ne h]
+    exact hx _
+
+/-- **The Koszul composite on homogeneous inputs.** -/
+lemma kcomp_apply_hom (L : LinOrd A) (i : A) (f : EndOp R V A) {q : Bool} {g : EndOp R V B}
+    (hg : parML R V q g = g) {e : Without A i ⊕ B → Bool} {x : Without A i ⊕ B → V}
+    (hx : IsHom (R := R) e x) :
+    kcomp R V L i f g x = bsg R L i q (slot i q e) • f (feed i x (g fun b => x (Sum.inr b))) := by
+  rw [← hg, kcomp_parML, compL_apply, hg, twist_apply_hom (isHom_feed i hx hg)]
+
+end GrEnd
+
 /-- **An algebra over a graded operad** `P` on a super module `V`: a morphism of graded operads
 into the graded endomorphism operad. -/
 abbrev GrAlgebra (P : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
