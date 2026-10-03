@@ -177,3 +177,6 @@ import Operad.DGCooperad
 import Operad.Bar
 import Operad.TwistingDG
 import Operad.BarCobar
+import Operad.CutStar
+import Operad.MergeSp
+import Operad.CobarMerge
