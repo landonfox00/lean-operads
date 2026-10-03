@@ -1038,6 +1038,110 @@ theorem PF_gF_inner_after (hμ : MergeFn.Odd gp μ)
     cases gp lc c <;> cases gp l₁ a₁ <;> cases gp l₂ a₂ <;> simp
   linear_combination key
 
+variable (J : GrOperadIdeal R (FreeGr R gp))
+
+lemma weight_corolla_le {k w : ℕ} (c : T k) (hw : 1 ≤ w) : (corolla c).1.weight ≤ w := by
+  show (Tree.node c (TreeOfArity.leaves k)).weight ≤ w
+  rw [Tree.weight_node, weightF_leaves]
+  omega
+
+/-- **Merging two corollas in parallel into a planar tree lands in the ideal.** -/
+theorem PF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : ℕ)
+    (s : TreeOfArity T n), s.1.weight ≤ w → ∀ {l₁ l₂ : ℕ} (a₁ : T l₁) (a₂ : T l₂)
+    (p₁ p₂ p₂' m₁ m₂ m : ℕ), p₁ < p₂ → p₂ < n → p₂' + 1 = p₂ + l₁ → m₁ + 1 = n + l₁ →
+      m₂ + 1 = n + l₂ → m + 1 = m₁ + l₂ →
+      PF μ gp R p₁ p₂ p₂' m₁ m₂ m (pt s) (corolla a₁) (corolla a₂) ∈ JF J m := by
+  intro w
+  induction w with
+  | zero =>
+    intro n s hw l₁ l₂ a₁ a₂ p₁ p₂ p₂' m₁ m₂ m h12 h2 _ _ _ _
+    have hl : s.1 = Tree.leaf := by
+      cases hs : s.1 with
+      | leaf => rfl
+      | node e f => rw [hs] at hw; simp at hw
+    have := s.2
+    rw [hl, Tree.arity_leaf] at this
+    omega
+  | succ w ih =>
+    intro n s hw l₁ l₂ a₁ a₂ p₁ p₂ p₂' m₁ m₂ m h12 h2 hp₂' hm₁ hm₂ hm
+    rcases Nat.lt_or_ge s.1.weight 2 with hw2 | hw2
+    · by_cases hw0 : s.1.weight = 0
+      · exact ih n s (by omega) a₁ a₂ p₁ p₂ p₂' m₁ m₂ m h12 h2 hp₂' hm₁ hm₂ hm
+      · obtain ⟨k, x, hx⟩ := eq_corolla_of_weight (t := s.1) (by omega)
+        have hk : k = n := by
+          have := s.2
+          rw [hx, Tree.arity_node, arityF_leaves] at this
+          exact this
+        subst hk
+        have hs : s = corolla x := Subtype.ext hx
+        subst hs
+        unfold PF
+        rw [mF_corolla (μ := μ) ⟨by omega, hm₁⟩, mF_corolla (μ := μ) ⟨by omega, hm⟩,
+          mF_corolla (μ := μ) ⟨h2, hm₂⟩, mF_corolla (μ := μ) ⟨by omega, by omega⟩,
+          tpar_corolla', tpar_corolla']
+        show ιP gp R m _ ∈ J.sub (Fin m)
+        rw [map_add, map_smul, ιP_corolla, ιP_corolla]
+        exact hA.parallel _ _ _ x a₁ a₂ p₁ p₂ p₂' m₁ m₂ m h12 h2 hp₂' hm₁ hm₂ hm
+    · obtain ⟨n₁, r, lc, s₁, c, hr, hn, hw₁, hs⟩ := pt_eq_gF (R := R) (gp := gp) s hw2
+      rw [hs, PF_smul]
+      refine Submodule.smul_mem _ _ ?_
+      have hn₁ : 1 ≤ n₁ := by omega
+      obtain ⟨mA, hmA⟩ : ∃ mA, mA + 1 = n₁ + l₁ := ⟨n₁ + l₁ - 1, by omega⟩
+      obtain ⟨mB, hmB⟩ : ∃ mB, mB + 1 = n₁ + l₂ := ⟨n₁ + l₂ - 1, by omega⟩
+      rcases Nat.lt_or_ge p₂ r with h2r | h2r
+      · -- both before
+        obtain ⟨mC, hmC⟩ : ∃ mC, mC + 1 = mA + l₂ := ⟨mA + l₂ - 1, by omega⟩
+        obtain ⟨r₁, hr₁⟩ : ∃ r₁, r₁ + 1 = r + l₁ := ⟨r + l₁ - 1, by omega⟩
+        obtain ⟨r₂, hr₂⟩ : ∃ r₂, r₂ + 1 = r + l₂ := ⟨r + l₂ - 1, by omega⟩
+        obtain ⟨r₁₂, hr₁₂⟩ : ∃ r₁₂, r₁₂ + 1 = r₁ + l₂ := ⟨r₁ + l₂ - 1, by omega⟩
+        rw [PF_gF_before_before (μ := μ) h12 h2r hr hn hp₂' hm₁ hm₂ hm hr₁ hr₂ hr₁₂ hmA hmB hmC]
+        exact Submodule.smul_mem _ _ (gF_mem_left
+          (ih n₁ s₁ (by omega) a₁ a₂ p₁ p₂ p₂' mA mB mC h12 (by omega) hp₂' hmA hmB hmC) _)
+      rcases Nat.lt_or_ge p₁ r with h1r | h1r
+      · obtain ⟨r₁, hr₁⟩ : ∃ r₁, r₁ + 1 = r + l₁ := ⟨r + l₁ - 1, by omega⟩
+        rcases Nat.lt_or_ge p₂ (r + lc) with h2c | h2c
+        · -- before and inside
+          obtain ⟨mD, hmD⟩ : ∃ mD, mD + 1 = lc + l₂ := ⟨lc + l₂ - 1, by omega⟩
+          rw [PF_gF_before_inner (μ := μ) hμ h1r hr (show p₂ - r < lc by omega) hn
+            (show p₂ = r + (p₂ - r) by omega) hp₂' hr₁ hm₁ hm₂ hm hmA hmD]
+          exact zero_mem _
+        · -- before and after
+          obtain ⟨mC, hmC⟩ : ∃ mC, mC + 1 = mA + l₂ := ⟨mA + l₂ - 1, by omega⟩
+          obtain ⟨q₂', hq₂'⟩ : ∃ q₂', q₂' + 1 = (p₂ + 1 - lc) + l₁ := ⟨p₂ - lc + l₁, by omega⟩
+          rw [PF_gF_before_after (μ := μ) hμ h1r (show r < p₂ + 1 - lc by omega)
+            (show p₂ + 1 - lc < n₁ by omega) hn (show p₂ + 1 = (p₂ + 1 - lc) + lc by omega)
+            hp₂' hq₂' hr₁ hm₁ hm₂ hm hmA hmB hmC]
+          exact Submodule.smul_mem _ _ (gF_mem_left (ih n₁ s₁ (by omega) a₁ a₂ p₁ (p₂ + 1 - lc)
+            q₂' mA mB mC (by omega) (by omega) hq₂' hmA hmB hmC) _)
+      · rcases Nat.lt_or_ge p₂ (r + lc) with h2c | h2c
+        · -- both inside
+          obtain ⟨mD, hmD⟩ : ∃ mD, mD + 1 = lc + l₁ := ⟨lc + l₁ - 1, by omega⟩
+          obtain ⟨mD', hmD'⟩ : ∃ mD', mD' + 1 = lc + l₂ := ⟨lc + l₂ - 1, by omega⟩
+          obtain ⟨mE, hmE⟩ : ∃ mE, mE + 1 = mD + l₂ := ⟨mD + l₂ - 1, by omega⟩
+          obtain ⟨j₂', hj₂'⟩ : ∃ j₂', j₂' + 1 = (p₂ - r) + l₁ := ⟨p₂ - r + l₁ - 1, by omega⟩
+          rw [PF_gF_inner_inner (μ := μ) hμ (show p₁ - r < p₂ - r by omega)
+            (show p₂ - r < lc by omega) hr hn (show p₁ = r + (p₁ - r) by omega)
+            (show p₂ = r + (p₂ - r) by omega) hp₂' hj₂' hm₁ hm₂ hm hmD hmD' hmE]
+          exact gF_mem_right _ (ih lc (corolla c) (weight_corolla_le c (by omega)) a₁ a₂
+            (p₁ - r) (p₂ - r) j₂' mD mD' mE (by omega) (by omega) hj₂' hmD hmD' hmE)
+        · rcases Nat.lt_or_ge p₁ (r + lc) with h1c | h1c
+          · -- inside and after
+            obtain ⟨mD, hmD⟩ : ∃ mD, mD + 1 = lc + l₁ := ⟨lc + l₁ - 1, by omega⟩
+            rw [PF_gF_inner_after (μ := μ) hμ (show p₁ - r < lc by omega)
+              (show r < p₂ + 1 - lc by omega) (show p₂ + 1 - lc < n₁ by omega) hn
+              (show p₁ = r + (p₁ - r) by omega) (show p₂ + 1 = (p₂ + 1 - lc) + lc by omega) hp₂'
+              hm₁ hm₂ hm hmB hmD]
+            exact zero_mem _
+          · -- both after
+            obtain ⟨mC, hmC⟩ : ∃ mC, mC + 1 = mA + l₂ := ⟨mA + l₂ - 1, by omega⟩
+            obtain ⟨q₂', hq₂'⟩ : ∃ q₂', q₂' + 1 = (p₂ + 1 - lc) + l₁ := ⟨p₂ - lc + l₁, by omega⟩
+            rw [PF_gF_after_after (μ := μ) hμ (show p₁ + 1 - lc < p₂ + 1 - lc by omega)
+              (show r < p₁ + 1 - lc by omega) (show p₂ + 1 - lc < n₁ by omega) hn
+              (show p₁ + 1 = (p₁ + 1 - lc) + lc by omega)
+              (show p₂ + 1 = (p₂ + 1 - lc) + lc by omega) hp₂' hq₂' hm₁ hm₂ hm hmA hmB hmC]
+            exact Submodule.smul_mem _ _ (gF_mem_left (ih n₁ s₁ (by omega) a₁ a₂ (p₁ + 1 - lc)
+              (p₂ + 1 - lc) q₂' mA mB mC (by omega) (by omega) hq₂' hmA hmB hmC) _)
+
 end Parallel
 
 end FreeGr
