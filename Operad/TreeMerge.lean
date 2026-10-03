@@ -1993,7 +1993,7 @@ section CutGraft
 variable {y y₁ y₂ z : Tree E} {p p' k : ℕ}
 
 lemma cutV_graft_inside (hk : k < y.weight) (hc : y.cutV k = (y₁, y₂, p'))
-    (hz : z.isLeaf = false) (h1 : p' ≤ p) (h2 : p < p' + y₂.arity) :
+    (_hz : z.isLeaf = false) (h1 : p' ≤ p) (h2 : p < p' + y₂.arity) :
     (y.graft p z).cutV k = (y₁, y₂.graft (p - p') z, p') := by
   obtain ⟨hy, hp', hv, hy₂⟩ := cutV_spec hk hc
   have e : y.graft p z = y₁.graft p' (y₂.graft (p - p') z) := by
@@ -2065,7 +2065,7 @@ variable {y z : Tree E} {p k : ℕ}
 
 /-- **Contracting an edge of the outer tree commutes with grafting.** The vertex `k` of `y` is
 the vertex `k` of the grafted tree, or `k + z.weight` when it comes after the graft point. -/
-theorem contr_graft_outer (hp : p < y.arity) (hz : z.isLeaf = false) (hk1 : 1 ≤ k)
+theorem contr_graft_outer (hp : p < y.arity) (hz : z.isLeaf = false) (_hk1 : 1 ≤ k)
     (hk : k < y.weight) :
     (y.graft p z).contr μ (k + if y.vb p ≤ k then z.weight else 0) = (y.contr μ k).graft p z := by
   rcases hc : y.cutV k with ⟨y₁, y₂, p'⟩
@@ -2223,7 +2223,7 @@ variable {y z : Tree E} {p k : ℕ}
 
 /-- **The sign of contracting an edge of the outer tree of a graft.** -/
 theorem contrSgn_graft_outer (hμ : MergeFn.Odd gp μ) (hp : p < y.arity) (hz : z.isLeaf = false)
-    (hk1 : 1 ≤ k) (hk : k < y.weight) :
+    (_hk1 : 1 ≤ k) (hk : k < y.weight) :
     xor (tpar gp z && apar gp y p)
         (contrSgn gp (y.graft p z) (k + if y.vb p ≤ k then z.weight else 0))
       = xor (contrSgn gp y k) (tpar gp z && apar gp (y.contr μ k) p) := by

@@ -2,23 +2,24 @@
 # The bar construction of a graded operad
 
 Let `P` be a graded operad and `I` an ideal of `P`, for instance the augmentation ideal of an
-augmented operad. **The bar construction** `B(P, I)` is the cut cooperad of the free graded operad
-on the suspension `s I` (`BarGen`, `BarCoop`) with the bar differential, which contracts the
+augmented operad. **The bar construction** `B(P, I)` (`BarCoop`) is the cut cooperad of the free
+graded operad on the suspension `s I` (`BarGen`) with the bar differential, which contracts the
 edges of trees, merging the decorations of their ends by the composition of `P`:
 `s a ⊛ᵢ s b = (-1)^{|s a|} s (a ∘ᵢ b)`, relabelled to the positions of the merged vertex
 (`barMerge`).
 
 * The merge is compatible with the linearity relations of the free graded operad on `s I`
   (`barMerge_relHyp`), so **the bar differential descends** to the quotient (`Bar.d`).
-* The merge is associative up to the linearity relations, by the associativity of `P`, in series
-  and in parallel (`barMerge_assocHyp`), so **the bar differential squares to zero**
-  (`Bar.d_d`).
-* It is odd, commutes with relabellings, kills the counit and the coaugmentation, and is a
-  **coderivation** of the cut cooperad (`Bar.decomp_d`): **the bar construction is a dg
-  cooperad** (`Bar.instDGCooperad`).
+* The merge is associative up to the linearity relations, by the associativity of `P` in the
+  positions of the merged vertices (`assoc_seq_pos`, `assoc_par_pos`), in series and in parallel
+  (`barMerge_assocHyp`), so **the bar differential squares to zero** (`Bar.d_d`).
+* It is odd, commutes with relabellings, kills the counit and the coaugmentation (`Bar.d_one`),
+  and is a coderivation of the cut cooperad: **the bar construction is a dg cooperad**
+  (`Bar.instDGCooperad`).
 -/
 import Operad.BarSquare
 import Operad.CofreeGrL
+import Operad.DGCooperad
 
 universe u v
 
@@ -717,5 +718,109 @@ theorem barMerge_assocHyp : AssocHyp (barMerge I) (grGenPar R (BarGen I)) R (�
     exact e
 
 end BarRel
+
+/-! ## The bar construction -/
+
+section BarCoop
+
+variable {R : Type u} [CommRing R] {P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] [GrOperad R P]
+  (I : GrOperadIdeal R P)
+
+local notation "𝒥" => GrOperadIdeal.span R (grLinRel R (BarGen I))
+
+/-- **The bar construction** of a graded operad relative to an ideal: the cut cooperad on the
+suspension of the ideal, with the bar differential. -/
+def BarCoop (A : Type) [Fintype A] [DecidableEq A] : Type (max u v) := FreeGrL R (BarGen I) A
+
+noncomputable instance (A : Type) [Fintype A] [DecidableEq A] : AddCommGroup (BarCoop I A) :=
+  inferInstanceAs (AddCommGroup (FreeGrL R (BarGen I) A))
+
+noncomputable instance (A : Type) [Fintype A] [DecidableEq A] : Module R (BarCoop I A) :=
+  inferInstanceAs (Module R (FreeGrL R (BarGen I) A))
+
+namespace Bar
+
+/-- **The bar differential**, descended to the quotient by the linearity relations. -/
+noncomputable def d (A : Type) [Fintype A] [DecidableEq A] :
+    FreeGrL R (BarGen I) A →ₗ[R] FreeGrL R (BarGen I) A :=
+  Submodule.mapQ _ _ (barD (barMerge I) (grGenPar R (BarGen I)) R A)
+    fun _ hz => barD_mem (barMerge I) barMerge_odd (barMerge_relHyp I) hz
+
+variable {I}
+
+lemma d_proj {A : Type} [Fintype A] [DecidableEq A] (x : FreeGr R (grGenPar R (BarGen I)) A) :
+    d I A ((𝒥).proj A x) = (𝒥).proj A (barD (barMerge I) (grGenPar R (BarGen I)) R A x) :=
+  rfl
+
+/-- **The bar differential squares to zero.** -/
+theorem d_d {A : Type} [Fintype A] [DecidableEq A] (X : FreeGrL R (BarGen I) A) :
+    d I A (d I A X) = 0 := by
+  obtain ⟨x, rfl⟩ := (𝒥).proj_surjective A X
+  rw [d_proj, d_proj, GrOperadIdeal.proj_eq_zero_iff]
+  exact barD_barD_mem (𝒥) barMerge_odd (barMerge_assocHyp I) x
+
+lemma tw_proj {A : Type} [Fintype A] [DecidableEq A] (x : FreeGr R (grGenPar R (BarGen I)) A) :
+    GrOperad.par (R := R) false ((𝒥).proj A x) - GrOperad.par (R := R) true ((𝒥).proj A x)
+      = (𝒥).proj A (GrSpecies.tw (R := R) (V := FreeGr R (grGenPar R (BarGen I))) true x) := by
+  rw [GrSpecies.tw_apply, σ_true, neg_one_smul, ← sub_eq_add_neg, map_sub]
+  rfl
+
+variable (I) in
+/-- **The bar construction is a dg cooperad.** -/
+noncomputable instance instDGCooperad : DGCooperad R (BarCoop I) :=
+  { (inferInstance : GrCooperad R (FreeGrL R (BarGen I))) with
+    d := fun {A} _ _ => d I A
+    d_d := fun {A} _ _ X => d_d X
+    d_par := fun {A} _ _ b X => by
+      obtain ⟨x, rfl⟩ := (𝒥).proj_surjective A X
+      show (𝒥).proj A (barD (barMerge I) (grGenPar R (BarGen I)) R A (GrOperad.par (R := R) b x))
+        = (𝒥).proj A (GrOperad.par (R := R) (!b) (barD (barMerge I) _ R A x))
+      rw [par_barD barMerge_odd (!b) x, Bool.not_not]
+    map_d := fun {A B} _ _ _ _ e X => by
+      obtain ⟨x, rfl⟩ := (𝒥).proj_surjective A X
+      show (𝒥).proj B (GrOperad.map (R := R) e (barD (barMerge I) (grGenPar R (BarGen I)) R A x))
+        = (𝒥).proj B (barD (barMerge I) _ R B (GrOperad.map (R := R) e x))
+      rw [map_barD]
+    counit_d := fun X => by
+      obtain ⟨x, rfl⟩ := (𝒥).proj_surjective Unit X
+      exact counit_barD x
+    decomp_d := fun {A B} _ _ _ _ i X => by
+      obtain ⟨x, rfl⟩ := (𝒥).proj_surjective _ X
+      have key : TensorProduct.map ((𝒥).proj A) ((𝒥).proj B) (GrCooperad.decomp (R := R) i
+            (barD (barMerge I) (grGenPar R (BarGen I)) R _ x))
+          = TensorProduct.map (d I A) (LinearMap.id (R := R) (M := FreeGrL R (BarGen I) B))
+              (TensorProduct.map ((𝒥).proj A) ((𝒥).proj B) (GrCooperad.decomp (R := R) i x))
+            + TensorProduct.map
+                (GrOperad.par (R := R) (P := FreeGrL R (BarGen I)) (A := A) false
+                  - GrOperad.par (R := R) (P := FreeGrL R (BarGen I)) (A := A) true) (d I B)
+              (TensorProduct.map ((𝒥).proj A) ((𝒥).proj B) (GrCooperad.decomp (R := R) i x)) := by
+        rw [decomp_barD barMerge_odd i x]
+        generalize GrCooperad.decomp (R := R) (C := FreeGr R (grGenPar R (BarGen I))) i x = z
+        induction z using TensorProduct.induction_on with
+        | zero => simp
+        | tmul a b =>
+          simp only [TensorProduct.map_tmul, map_add, LinearMap.id_apply]
+          rw [LinearMap.sub_apply, tw_proj]
+          rfl
+        | add a b ha hb =>
+          simp only [map_add] at ha hb ⊢
+          rw [add_add_add_comm, ha, hb, add_add_add_comm]
+      exact key }
+
+/-- **The bar construction is coaugmented** by the trivial tree. -/
+noncomputable instance instCoaug : GrCooperad.Coaug R (BarCoop I) :=
+  inferInstanceAs (GrCooperad.Coaug R (FreeGrL R (BarGen I)))
+
+/-- **The bar differential kills the coaugmentation.** -/
+theorem d_one : DGCooperad.d (R := R) (C := BarCoop I) (GrCooperad.Coaug.one (R := R)) = 0 := by
+  show (𝒥).proj Unit (barD (barMerge I) (grGenPar R (BarGen I)) R Unit
+    (GrCooperad.Coaug.one (R := R) (C := FreeGr R (grGenPar R (BarGen I))))) = 0
+  rw [barD_one, map_zero]
+
+end Bar
+
+end BarCoop
 
 end Operad

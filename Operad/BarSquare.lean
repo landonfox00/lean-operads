@@ -12,8 +12,9 @@ laws of merge-grafting with grafting, with positions instead of relabellings. Ev
 least two vertices is a tree grafted with the corolla of its last vertex. By induction on the
 number of vertices:
 
-* the square of the bar differential of a graft with a corolla is the graft of the square, plus
-  `N = d (x ⊛ₚ c) + (d x) ⊛ₚ c` (`FreeGr.dF_dF_gF`);
+* the bar differential of a graft with a corolla is the graft of the differential plus the merge
+  (`FreeGr.dF_gF_corolla`), so its square is the graft of the square, plus
+  `N = d (x ⊛ₚ c) + (d x) ⊛ₚ c` (`FreeGr.NF`);
 * `N` reduces to merging two corollas into a tree in the two orders, at two leaves of one vertex
   (`P`) or at a leaf of a vertex and a leaf of the merged corolla (`S`), which reduce in turn to
   merging into a corolla, where the relations apply.

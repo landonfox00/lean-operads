@@ -10,10 +10,10 @@ composition of degree one with the compositions of the free graded operad:
 * **parallel**: `(x ∘ᵢ y) ⊛ₖ z = (-1)^{|y||z|} (x ⊛ₖ z) ∘ᵢ y` for `i ≠ k` (`FreeGr.mcomp_comp_par`);
 * **inner**: `(x ∘ᵢ y) ⊛ⱼ z = (-1)^{|x|} x ∘ᵢ (y ⊛ⱼ z)` for `j` an input of `y`, when `y` is not
   the unit (`FreeGr.mcomp_comp_inner`);
-* **outer**: `x ⊛ᵢ (y ∘ⱼ z) = (x ⊛ᵢ y) ∘ⱼ z`, when `y` is not the unit
-  (`FreeGr.mcomp_comp_outer`);
-* **generators**: merge-composing two corollas is the corolla of the merged label
-  (`FreeGr.mcompR_corolla`).
+* **outer**: `(x ⊛ᵢ y) ∘ⱼ z = x ⊛ᵢ (y ∘ⱼ z)`, when `y` has no unit component
+  (`FreeGr.comp_mcomp_outer`);
+* **corollas**: merge-grafting two corollas gives the corolla of the merged label
+  (`FreeGr.corolla_mgraft`).
 
 The coefficient of the unit tree (`FreeGr.unitCoeff`) is multiplicative, so the operations without
 unit component form an ideal (`FreeGr.noUnitIdeal`).
