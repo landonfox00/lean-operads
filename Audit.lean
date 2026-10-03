@@ -1210,6 +1210,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.AInf.tstar_tstar_odd
 #print axioms Operad.AInf.hoch_hoch
 #print axioms Operad.AInf.isAInf_dga_iff
+#print axioms Operad.MSer.comp_assoc
+#print axioms Operad.MSer.comp_id
+#print axioms Operad.MSer.id_comp
+#print axioms Operad.MSer.hat_comp
+#print axioms Operad.AInf.IsInfMorph.id
+#print axioms Operad.AInf.IsInfMorph.comp
+#print axioms Operad.AInf.IsInfMorph.chain
+#print axioms Operad.AInf.IsInfMorph.mul
+#print axioms Operad.AInf.isInfMorph_lin_iff
 #print axioms Operad.GerBV.dev_jacobi
 #print axioms Operad.GerBV.IsBV.bracket_antisymm
 #print axioms Operad.GerBV.IsBV.bracket_mul_right

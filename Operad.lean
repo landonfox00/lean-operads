@@ -122,6 +122,7 @@ import Operad.CyclicExt
 import Operad.Perturbation
 import Operad.KoszulSign
 import Operad.AInfinity
+import Operad.AInfMorphism
 import Operad.GerBV
 import Operad.HyperCom
 import Operad.DGOperad

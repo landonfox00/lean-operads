@@ -388,6 +388,15 @@ operation cancelling against itself without division by two (`End.kstar_kstar_od
 `b ⋆ b = 0` (`AInf.IsAInf`), proves that **the Hochschild differential of an A∞-structure squares
 to zero** (`AInf.hoch_hoch`), and identifies dg algebras with the A∞-structures concentrated in
 arities one and two (`AInf.isAInf_dga_iff`).
+`Operad/AInfMorphism.lean` has **∞-morphisms of A∞-algebras**. Multilinear series `V ⇝ W` compose
+along compositions of the arity, associatively and unitally (`MSer.comp_assoc`, `MSer.comp_id`,
+`MSer.id_comp`). Writing `V̂ = V ⊕ θV` for the extension by an odd parameter, an even series `f`
+extends to `f̂ : V̂ ⇝ Ŵ`, functorially (`MSer.hat_comp`), and an A∞-structure `b` becomes the series
+`β_b = 1 + θ b : V ⇝ V̂` (`AInf.bser`). An ∞-morphism is an even series with `f̂ ∘ β_b = β_{b'} ∘ f`
+(`AInf.IsInfMorph`): in arity one `f₁` is a chain map, in arity two it is multiplicative up to the
+homotopy `f₂` (`IsInfMorph.chain`, `IsInfMorph.mul`). **∞-morphisms compose and the identity is
+one** (`IsInfMorph.comp`, `IsInfMorph.id`), and a linear map is an ∞-morphism exactly when it is a
+strict morphism (`AInf.isInfMorph_lin_iff`).
 
 **Gerstenhaber and BV algebras.** `Operad/GerBV.lean` proves **Koszul's theorem**: for a graded
 commutative product and an odd operator `Δ` with `Δ² = 0` of order at most two (a BV algebra,
