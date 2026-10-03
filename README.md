@@ -547,6 +547,19 @@ factorizations is a morphism of the graded decomposition cooperads** (`SgnBasMor
 builds such morphisms out of free graded operads from signed basis values on the generators,
 through the set operad of signed basis elements (`SgnBas`, `FreeGr.SBVal.sbm`).
 
+**The cut cooperad of a free graded operad on a graded linear species.** `Operad/CofreeGrL.lean`
+shows that **the linearity relations generate a coideal** of the graded decomposition cooperad
+(`FreeGrL.linCoideal`), so the free graded operad `FreeGrL R V` on a graded linear species is a
+coaugmented graded cooperad (`FreeGrL.instGrCooperad`, `FreeGrL.instCoaug`), decomposing a tree with
+vertices decorated by `V` by cutting it. Each relation is a combination `∑ₖ λₖ σₖ·gₖ` of
+relabelled generators (`RelComb`); substituting it for a marked vertex of a tree with one mark is
+the combination of the substitutions of its terms (`RelComb.subst_bas`), each a morphism of
+decomposition cooperads, since it relabels the vertices after an automorphism relabelling the inputs
+of the mark (`RelComb.term_decomp`). In every cut the mark lies in exactly one part, so these
+substitutions decompose into `I ⊗ C + C ⊗ I` (`RelComb.decomp_subst_mem`) and are killed by the
+counit (`RelComb.counit_subst`); and they span an ideal containing the relations
+(`substIdeal`, `FreeGrL.span_le_substIdeal`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

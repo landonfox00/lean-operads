@@ -102,7 +102,8 @@ theorem _root_.Operad.Forest.relabelF_relabelF (g : ∀ k, E' k → E'' k) :
     ∀ {k : ℕ} (fo : Forest E k),
     Forest.relabelF g (Forest.relabelF f fo) = Forest.relabelF (fun k e => g k (f k e)) fo
   | _, .nil => rfl
-  | _, .cons t fo => by simp only [relabelF_cons, relabel_relabel g t, Forest.relabelF_relabelF g fo]
+  | _, .cons t fo => by
+    simp only [relabelF_cons, relabel_relabel g t, Forest.relabelF_relabelF g fo]
 
 end
 
@@ -212,6 +213,65 @@ theorem _root_.Operad.Forest.exists_graftF_of_relabelF_graftF : ∀ {k : ℕ} (f
       rw [graftF_cons_of_ge _ (by omega), ha, h₀]
 
 end
+
+section Count
+
+variable (w : ∀ k, E k → ℕ)
+
+mutual
+
+/-- **The weighted number of vertices** of a tree, a vertex labelled `e` counting `w e`. -/
+def cnt : Tree E → ℕ
+  | .leaf => 0
+  | .node e fo => w _ e + Forest.cntF fo
+
+/-- The weighted number of vertices of a forest. -/
+def _root_.Operad.Forest.cntF : ∀ {k : ℕ}, Forest E k → ℕ
+  | _, .nil => 0
+  | _, .cons t fo => cnt t + Forest.cntF fo
+
+end
+
+@[simp] lemma cnt_leaf : cnt w (.leaf : Tree E) = 0 := rfl
+
+@[simp] lemma cnt_node {k : ℕ} (e : E k) (fo : Forest E k) :
+    cnt w (.node e fo) = w _ e + Forest.cntF w fo := rfl
+
+@[simp] lemma cntF_nil : Forest.cntF w (.nil : Forest E 0) = 0 := rfl
+
+@[simp] lemma cntF_cons {k : ℕ} (t : Tree E) (fo : Forest E k) :
+    Forest.cntF w (.cons t fo) = cnt w t + Forest.cntF w fo := rfl
+
+mutual
+
+/-- **Grafting adds weighted numbers of vertices.** -/
+theorem cnt_graft : ∀ (t : Tree E) (i : ℕ) (s : Tree E), i < t.arity →
+    cnt w (t.graft i s) = cnt w t + cnt w s
+  | .leaf, _, s, _ => by simp
+  | .node _ fo, i, s, h => by
+    simp only [graft_node, cnt_node]
+    rw [Forest.cntF_graftF fo i s h]
+    omega
+
+/-- The forest half of `cnt_graft`. -/
+theorem _root_.Operad.Forest.cntF_graftF : ∀ {k : ℕ} (fo : Forest E k) (i : ℕ) (s : Tree E),
+    i < fo.arityF → Forest.cntF w (fo.graftF i s) = Forest.cntF w fo + cnt w s
+  | _, .nil, _, _, h => by simp at h
+  | _, .cons t fo, i, s, h => by
+    simp only [arityF_cons] at h
+    by_cases hlt : i < t.arity
+    · rw [graftF_cons_of_lt s hlt]
+      simp only [cntF_cons]
+      rw [cnt_graft t i s hlt]
+      omega
+    · rw [graftF_cons_of_ge s (by omega)]
+      simp only [cntF_cons]
+      rw [Forest.cntF_graftF fo (i - t.arity) s (by omega)]
+      omega
+
+end
+
+end Count
 
 section Parity
 
@@ -347,6 +407,34 @@ lemma treeSgn_relabel {gp : ∀ k, T k → Bool} {gp' : ∀ k, T' k → Bool}
     (treeSgn gp').app A (relabelR f x) = (treeSgn gp).app A x :=
   SgnData.ext rfl (funext fun _ => Tree.apar_relabel f hgp _ _) (Tree.tpar_relabel f hgp _)
 
+/-! ## Weighted numbers of vertices -/
+
+lemma cntF_leaves (w : ∀ k, T k → ℕ) : ∀ k : ℕ, Forest.cntF w (leaves (E := T) k) = 0
+  | 0 => rfl
+  | k + 1 => by
+    show Tree.cnt w .leaf + Forest.cntF w (leaves k) = 0
+    rw [cntF_leaves w k]
+    rfl
+
+/-- **The weighted number of vertices** of an operation of the regular operad of trees. -/
+def cntR (w : ∀ k, T k → ℕ) (x : Reg (TreeOfArity T) A) : ℕ := Tree.cnt w (treeOf x)
+
+lemma cntR_comp (w : ∀ k, T k → ℕ) (i : A) (x : Reg (TreeOfArity T) A)
+    (y : Reg (TreeOfArity T) B) :
+    cntR w (SetOperad.comp i x y) = cntR w x + cntR w y := by
+  unfold cntR
+  rw [treeOf_comp, Tree.cnt_graft _ _ _ _ (rank_lt_arity x i)]
+
+lemma cntR_map (w : ∀ k, T k → ℕ) (e : A ≃ B) (x : Reg (TreeOfArity T) A) :
+    cntR w (SetOperad.map e x) = cntR w x := rfl
+
+lemma cntR_one (w : ∀ k, T k → ℕ) : cntR w (SetOperad.one : Reg (TreeOfArity T) Unit) = 0 :=
+  rfl
+
+lemma cntR_std (w : ∀ k, T k → ℕ) {k : ℕ} (e : T k) : cntR w (Reg.std (corolla e)) = w k e := by
+  show Tree.cnt w (.node e (leaves k)) = w k e
+  rw [Tree.cnt_node, cntF_leaves, add_zero]
+
 /-! ## Induction on the regular operad of trees -/
 
 section Induction
@@ -398,6 +486,47 @@ theorem induction (hgen : ∀ k (e : T k), P (Fin k) (Reg.std (corolla e)))
   exact (L.app A x).2
 
 end Induction
+
+/-- **Morphisms preserving the weights of the corollas preserve the weighted numbers of
+vertices.** -/
+lemma cntR_hom (w : ∀ k, T k → ℕ) (w' : ∀ k, T' k → ℕ)
+    (ψ : SetOperadHom (Reg (TreeOfArity T)) (Reg (TreeOfArity T')))
+    (h : ∀ k (e : T k), cntR w' (ψ.app (Fin k) (Reg.std (corolla e))) = w k e)
+    (x : Reg (TreeOfArity T) A) : cntR w' (ψ.app A x) = cntR w x := by
+  refine induction (P := fun A _ _ x => cntR w' (ψ.app A x) = cntR w x) ?_ ?_ ?_ ?_ x
+  · intro A B _ _ _ _ e x hx
+    rw [ψ.app_map, cntR_map, cntR_map, hx]
+  · beta_reduce
+    rw [ψ.app_one, cntR_one, cntR_one]
+  · intro A B _ _ _ _ i x y hx hy
+    rw [ψ.app_comp, cntR_comp, cntR_comp, hx, hy]
+  · intro k e
+    rw [h, cntR_std]
+
+lemma cntR_zero (x : Reg (TreeOfArity T) A) : cntR (fun _ _ => 0) x = 0 := by
+  refine induction (P := fun A _ _ x => cntR (fun _ _ => 0) x = 0) ?_ ?_ ?_ ?_ x
+  · intro A B _ _ _ _ e x hx
+    rwa [cntR_map]
+  · exact cntR_one _
+  · intro A B _ _ _ _ i x y hx hy
+    rw [cntR_comp, hx, hy]
+  · intro k e
+    exact cntR_std _ e
+
+/-- The weighted number of vertices is monotone in the weights. -/
+lemma cntR_mono {w w' : ∀ k, T k → ℕ} (h : ∀ k e, w k e ≤ w' k e) (x : Reg (TreeOfArity T) A) :
+    cntR w x ≤ cntR w' x := by
+  refine induction (P := fun A _ _ x => cntR w x ≤ cntR w' x) ?_ ?_ ?_ ?_ x
+  · intro A B _ _ _ _ e x hx
+    rwa [cntR_map, cntR_map]
+  · beta_reduce
+    rw [cntR_one, cntR_one]
+  · intro A B _ _ _ _ i x y hx hy
+    rw [cntR_comp, cntR_comp]
+    exact Nat.add_le_add hx hy
+  · intro k e
+    rw [cntR_std, cntR_std]
+    exact h k e
 
 end FreeReg
 
