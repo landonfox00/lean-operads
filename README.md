@@ -487,6 +487,16 @@ even derivation, it vanishes as soon as it vanishes on the generators, where it 
 of `ι` with itself: **`d² = 0`** (`Cobar.d_d`), and the cobar construction is a dg operad
 (`Cobar.instDGOperad`).
 
+**Twisting morphisms and the cobar adjunction.** `Operad/Twisting.lean` defines the twisting
+morphisms from a coaugmented graded cooperad to a dg operad (`Twisting`): the odd equivariant maps
+vanishing on the coaugmentation and satisfying the Maurer–Cartan equation `∂α + α ⋆ α = 0`.
+**Morphisms of graded operads out of the cobar construction commuting with the differentials are
+the twisting morphisms** (`Cobar.homEquiv`), by composition with the universal twisting morphism:
+an odd map on the generators extends to a morphism `φ`, and `d ∘ φ` and `φ ∘ d`, two derivations
+along `φ`, agree on the generators exactly when the Maurer–Cartan equation holds (`Cobar.mc_iff`,
+`Cobar.homOf_comm`). The universal twisting morphism satisfies the Maurer–Cartan equation
+(`Cobar.ι_mc`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

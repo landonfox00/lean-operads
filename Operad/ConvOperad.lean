@@ -19,7 +19,7 @@ that of `C`, the Koszul signs of the parallel axioms matching. Its invariant fam
 -/
 import Operad.GrCooperad
 
-universe u v w
+universe u v w x
 
 namespace Operad
 
@@ -646,7 +646,7 @@ lemma tw_apply (e : Bool) (f : ConvOp R C P A) (y : C A) :
 
 /-! ### Composing with morphisms and derivations -/
 
-variable {P' : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+variable {P' : (A : Type) → [Fintype A] → [DecidableEq A] → Type x}
   [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P' A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P' A)] [GrOperad R P']
 

@@ -1286,6 +1286,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Cobar.d_ι
 #print axioms Operad.Cobar.d_d
 #print axioms Operad.Cobar.instDGOperad
+#print axioms Operad.Cobar.ι_mc
+#print axioms Operad.Cobar.mc_iff
+#print axioms Operad.Cobar.homOf_comm
+#print axioms Operad.Cobar.homEquiv
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left
