@@ -20,7 +20,8 @@ determine their factors (`Sym.LinOrd.comp_cancel`).
 
 So `π` is a twisting morphism out of the dg cooperad `B(P, I)` (`Bar.twisting`), and the cobar
 adjunction gives **the counit of the bar–cobar adjunction**, the morphism of dg operads
-`ΩB(P, I) → P` (`Bar.counit`).
+`ΩB(P, I) → P` (`Bar.counit`). Conversely, **a morphism of coaugmented dg cooperads `C → B(P, I)`
+gives the twisting morphism `π ∘ f`** (`Bar.twistingOfHom`).
 -/
 import Operad.Bar
 import Operad.TwistingDG
@@ -820,5 +821,90 @@ lemma counit_ιL (hI0 : ∀ x ∈ I.sub (Fin 0), x = 0) {A : Type} [Fintype A] [
 end Bar
 
 end MC
+
+/-! ## Morphisms into the bar construction -/
+
+section ToBar
+
+variable {R : Type u} [CommRing R] {P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] [GrOperad R P]
+  {I : GrOperadIdeal R P}
+  {C : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [DGCooperad R C]
+  [GrCooperad.Coaug R C]
+
+namespace Bar
+
+/-- The composite `π ∘ f` of a morphism into the bar construction with the universal twisting
+morphism. -/
+noncomputable def twOfHom (f : DGCooperadHom R C (BarCoop I)) :
+    GrOperad.Inv R (ConvOp R C (ZeroDG R P)) :=
+  GrOperad.Inv.appHom (ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom) (pi I)
+
+omit [GrCooperad.Coaug R C] in
+lemma twOfHom_apply (f : DGCooperadHom R C (BarCoop I)) {A : Type} [Fintype A] [DecidableEq A]
+    (x : C A) : ConvOp.toLin ((twOfHom f).1 A) x = piL I A (f.app A x) := rfl
+
+variable (I) in
+/-- **Morphisms of dg cooperads into the bar construction preserving the coaugmentations are
+twisting morphisms after the universal twisting morphism**: `π ∘ f` satisfies the Maurer–Cartan
+equation, `f` commuting with the decompositions and the differentials. -/
+noncomputable def twistingOfHom (hI0 : ∀ x ∈ I.sub (Fin 0), x = 0)
+    (f : DGCooperadHom R C (BarCoop I))
+    (hf : f.app Unit (GrCooperad.Coaug.one (R := R)) = GrCooperad.Coaug.one (R := R)) :
+    TwistingDG R C (ZeroDG R P) := by
+  refine ⟨twOfHom f, fun A _ _ => ?_, fun A _ _ x hx => ?_, ?_⟩
+  · show ConvOp.parC true ((ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom).app A
+      ((pi I).1 A)) = _
+    rw [← ConvOp.par_def, ← (ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom).app_par,
+      isPar_pi (I := I) A]
+    rfl
+  · rw [twOfHom_apply]
+    refine killsUnit_pi (I := I) A (f.app A x) ?_
+    refine Submodule.span_induction
+      (p := fun x _ => f.app A x ∈ GrCooperad.unitSpan R (BarCoop I) A) ?_ ?_ ?_ ?_ hx
+    · rintro _ ⟨e, rfl⟩
+      beta_reduce
+      rw [f.app_map, hf]
+      exact GrCooperad.map_one_mem e
+    · beta_reduce
+      rw [map_zero]
+      exact Submodule.zero_mem _
+    · intro x y _ _ hx hy
+      beta_reduce at hx hy ⊢
+      rw [map_add]
+      exact Submodule.add_mem _ hx hy
+    · intro a x _ hx
+      beta_reduce at hx ⊢
+      rw [map_smul]
+      exact Submodule.smul_mem _ a hx
+  · refine Subtype.ext (funext fun A => funext fun _ => funext fun _ => ConvOp.ext fun x => ?_)
+    have hmc := congrArg (fun q : GrOperad.Inv R (ConvOp R (BarCoop I) (ZeroDG R P)) =>
+      ConvOp.toLin (q.1 A) (f.app A x)) (mc_pi I hI0)
+    have h2 : GrOperad.tw (R := R) true ((twOfHom f).1 A)
+        = (ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom).app A
+            (GrOperad.tw (R := R) true ((pi I).1 A)) :=
+      ((ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom).app_tw true _).symm
+    have h3 : GrOperad.Inv.star R _ (twOfHom f) (twOfHom f)
+        = GrOperad.Inv.appHom (ConvOp.preHom (P := ZeroDG R P) f.toGrCooperadHom)
+            (GrOperad.Inv.star R _ (pi I) (pi I)) :=
+      (GrOperad.Inv.appHom_star _ _ _).symm
+    show ConvOp.toLin ((GrOperad.Inv.appDer (ConvOp.postDer (C := C)
+          (DGOperad.toDer (R := R) (P := ZeroDG R P))) (twOfHom f)).1 A) x
+        - ConvOp.toLin (GrOperad.tw (R := R) true ((twOfHom f).1 A))
+            (DGCooperad.d (R := R) (C := C) x)
+        + ConvOp.toLin ((GrOperad.Inv.star R _ (twOfHom f) (twOfHom f)).1 A) x = 0
+    rw [h2, h3, ConvOp.appDer_postDer_apply]
+    show (0 : ZeroDG R P A) - ConvOp.toLin (GrOperad.tw (R := R) true ((pi I).1 A))
+        (f.app A (DGCooperad.d (R := R) (C := C) x))
+      + ConvOp.toLin ((GrOperad.Inv.star R _ (pi I) (pi I)).1 A) (f.app A x) = 0
+    rw [f.app_d]
+    exact hmc
+
+end Bar
+
+end ToBar
 
 end Operad

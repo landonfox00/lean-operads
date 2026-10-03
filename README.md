@@ -612,6 +612,8 @@ only the composites of two corollas, merged by the bar differential and composed
 convolution square at the unique splitting by the inputs of the inner corolla
 (`Bar.piL_barD_corollas`, `Bar.star_piF_corollas`). By the cobar adjunction it gives **the
 counit of the bar–cobar adjunction**, the morphism of dg operads `ΩB(P, I) → P` (`Bar.counit`).
+Conversely, a morphism of coaugmented dg cooperads `f : C → B(P, I)` gives the twisting morphism
+`π ∘ f` (`Bar.twistingOfHom`).
 
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`

@@ -1599,3 +1599,4 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Bar.mc_pi
 #print axioms Operad.Bar.twisting
 #print axioms Operad.Bar.counit
+#print axioms Operad.Bar.twistingOfHom
