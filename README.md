@@ -442,6 +442,18 @@ through homogeneous representatives) with their universal property, kernels, and
 graded operads**: a morphism out of a free graded operad modulo relators is a choice of generator
 values of the right parities killing the relators (`FreeGr.presHomEquiv`).
 
+**The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
+with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
+(`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every
+order of `A`, the maps for two orders differing by the Koszul sign of the reordering (one sign for
+each pair of odd inputs in opposite positions, a cocycle: `GrEnd.rsg_trans`). At a composite
+order the composite is the Koszul composite (`GrEnd.kcomp`), the inner operation moving across the
+inputs before the slot. The calculus restricts the inputs of a multilinear map to parities and
+twists by signs depending on them; the Koszul composite is natural in the orders
+(`GrEnd.kcomp_twist_left`, `GrEnd.kcomp_twist_right`), sequentially associative on the nose and
+parallel associative up to the Koszul sign (`GrEnd.kcomp_assoc_seq`, `GrEnd.kcomp_assoc_par`). An
+algebra over a graded operad is a morphism into it (`GrAlgebra`).
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable
