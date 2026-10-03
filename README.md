@@ -322,7 +322,23 @@ composition (`SymOperad.toSymMonoid`), a monoid composes partially through May's
 (`SymOperad.toSymMonoid_toSymOperad`, `SymMonoid.toSymOperad_toSymMonoid`). `Operad/SymCooperad.lean` has symmetric
 cooperads with infinitesimal decompositions `C (Without A i ⊕ B) → C A ⊗ C B`, their morphisms, the operad
 structure on the linear dual of a cooperad (`SymCooperad.instSymOperadDual`), and the commutative
-cooperad, whose dual is `Com`.
+cooperad, whose dual is `Com`. `Operad/DecCooperad.lean` makes the linearization of a set operad
+with finitely many factorizations of each operation into a cooperad, **the decomposition
+cooperad** `Δᵢ x = ∑_{p ∘ᵢ q = x} p ⊗ q` (`Lin.instSymCooperad`), whose axioms are those of the
+set operad read on coefficients (`Lin.decompL_apply`), and shows that **cooperad morphisms into it
+are transposed operad morphisms**: a morphism `C → R[S]` is a locally finite morphism of set operads
+from `S` to the dual operad of `C` (`Lin.coHomEquiv`). `Operad/Conilpotent.lean` has
+coaugmentations, **the coradical filtration** (`SymCooperad.filt`, increasing by
+`SymCooperad.filt_mono`) and **conilpotent cooperads**, those whose filtration is exhaustive; the
+decomposition cooperad of a set operad with a connected weight is coaugmented and conilpotent
+(`Lin.conilpotent`). `Operad/CofreeCooperad.lean` cuts planar trees in all possible ways
+(`Tree.cuts`, `Tree.mem_cuts`), so the free set operad has finite factorizations
+(`FreeReg.instFiniteFactFreeSet`) and every tree is trivial, a corolla, or a composite of two trees
+with vertices (`FreeSet.shape`); its decomposition cooperad is **the cofree conilpotent cooperad**
+on generators of any arity: for a conilpotent cooperad `C`, a morphism of coaugmented cooperads into
+it is the same as a family of maps `C (Fin k) → R[T k]` killing the coaugmentation
+(`Cofree.homEquiv`, `Cofree.existsUnique_lift`), the point being that over a conilpotent cooperad
+every such family is locally finite (`Cofree.locallyFinite`).
 
 **Shuffle operads.** `Operad/ShuffleOperad.lean` defines shuffle operads on ordered species, with
 partial compositions along shuffles (`IsShuffle`), their morphisms, ideals and quotients, and the

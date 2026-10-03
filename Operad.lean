@@ -109,6 +109,9 @@ import Operad.LieFree
 import Operad.Composite
 import Operad.CompositeAssoc
 import Operad.OperadMonoid
+import Operad.DecCooperad
+import Operad.Conilpotent
+import Operad.CofreeCooperad
 import Operad.SymCooperad
 import Operad.ShuffleOperad
 import Operad.ShuffleIdeal
