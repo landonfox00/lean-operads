@@ -530,6 +530,13 @@ the unit is a coaugmentation (`SgnLin.instCoaug`); so **the free graded operad o
 any arity is a coaugmented graded cooperad** (`FreeGr.instUnitFact`), decomposing a planar tree as
 the signed sum of its cuts.
 
+**Coideals and quotients of graded cooperads.** `Operad/GrCoideal.lean` defines morphisms of graded
+cooperads (`GrCooperadHom`) and coideals (`GrCoideal`): submodules stable under the parity
+projections and the relabellings, killed by the counit, whose decompositions lie in
+`J ⊗ C + C ⊗ J`, the kernel of the tensor square of the projection by right exactness. **The
+quotient by a coideal is a graded cooperad** (`GrCoideal.instGrCooperad`), the projection a morphism
+(`GrCoideal.projHom`), and a coaugmentation descends (`GrCoideal.instCoaug`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

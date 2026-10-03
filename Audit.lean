@@ -1319,6 +1319,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SgnLin.instGrCooperad
 #print axioms Operad.SgnLin.instCoaug
 #print axioms Operad.FreeGr.instUnitFact
+#print axioms Operad.GrCoideal.decompQ_assoc_seq
+#print axioms Operad.GrCoideal.decompQ_assoc_par
+#print axioms Operad.GrCoideal.instGrCooperad
+#print axioms Operad.GrCoideal.projHom
+#print axioms Operad.GrCoideal.instCoaug
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left
