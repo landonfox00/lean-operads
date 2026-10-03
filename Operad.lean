@@ -123,3 +123,4 @@ import Operad.ShuffleAnyGroebner
 import Operad.ShuffleAnyOrder
 import Operad.DiamondWords
 import Operad.PBW
+import Operad.HTT

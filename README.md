@@ -405,6 +405,16 @@ through the action of the Lie algebra on the quotient by left multiplication. In
 canonical map `g → U g` is injective for every Lie algebra which is free as a module
 (`UniversalEnvelopingAlgebra.ι_injective_of_free`).
 
+**The homotopy transfer theorem.** `Operad/HTT.lean` proves Kadeishvili's theorem in the form of
+Kontsevich–Soibelman and Merkulov: for a dg algebra `(V, d, μ)` in the bar convention and a
+retraction onto the image of an even idempotent `e` with an odd homotopy `h` (`h d + d h = e - 1`),
+the operations `b'₁ = e d e`, `b'ₙ = e ∘ ∑ μ (f, f)` over planar binary trees with `e` on the leaves
+and `h` on the internal edges form an **A∞-structure** (`HTT.isAInf_transfer`,
+`HTT.isAInf_transfer_of_dga`). The trees themselves satisfy the ∞-morphism equation
+`d ∘ f + μ (f, f) = f ⋆ b'` (`HTT.morphism_eq`). The proof is an induction on the arity through the
+Leibniz rule, associativity and the insertion law for binary composites of families
+(`HTT.comp_BIN`, `HTT.BIN_assoc`, `HTT.tstar_BIN`); the side conditions on `h` are not needed.
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

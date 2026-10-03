@@ -1238,3 +1238,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.PBW.quotEquiv
 #print axioms Operad.PBW.basis_apply
 #print axioms Operad.UniversalEnvelopingAlgebra.ι_injective_of_free
+#print axioms Operad.HTT.tstar_BIN
+#print axioms Operad.HTT.BIN_assoc
+#print axioms Operad.HTT.morphism_eq
+#print axioms Operad.HTT.isAInf_transfer
+#print axioms Operad.HTT.isAInf_transfer_of_dga
