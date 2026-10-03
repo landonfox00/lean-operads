@@ -104,6 +104,7 @@ import Operad.MultilinearQuot
 import Operad.Schur
 import Operad.FreeAlgebra
 import Operad.ComAlgebra
+import Operad.AssFree
 import Operad.SymCooperad
 import Operad.ShuffleOperad
 import Operad.ShuffleIdeal

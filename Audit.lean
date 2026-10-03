@@ -1329,6 +1329,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeBin.shuffleBasis
 #print axioms Operad.FreeBin.finrank_eq_doubleFactorial
 #print axioms Operad.BinPres.presBasis
+#print axioms Operad.Sym.LinOrd.toList_comp
+#print axioms Operad.Sym.LinOrd.oprod_comp
+#print axioms Operad.Sym.AssAlg.toRing
+#print axioms Operad.Sym.AssAlg.act_eq
+#print axioms Operad.Sym.AssAlg.ofAlgebra
+#print axioms Operad.Sym.AssAlg.ofAlgebra_toRing
+#print axioms Operad.Sym.AssAlg.toAlgebra_ofAlgebra
+#print axioms Operad.Sym.AssAlg.homEquiv
+#print axioms Operad.Schur.tensorAlgebraEquiv
+#print axioms Operad.Schur.tensorAlgebraEquiv_ι
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable
