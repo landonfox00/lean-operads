@@ -480,6 +480,14 @@ sorted by their least leaves, the vertex recording the permutation (`PTree.sortT
 commutes with strictly increasing relabellings and with substitutions increasing with the least
 leaves (`PTree.sortTree_map`, `PTree.sortTree_bind`), so it is a morphism of shuffle operads
 (`LT.sortHom`).
+For rules on the positions `0, …, n - 1`, **the ideal of the rules is the shuffle ideal generated
+by their relations** (`Rules.shuffleIdeal_eq_span`): the presented shuffle operad is presented by
+generators and relations. `Operad/ShuffleSymPres.lean` transports presentations: **the underlying
+shuffle operad of the symmetric operad presented by relators is the free shuffle operad on the
+relabelled generators modulo the sorted relabellings of the relators** (`FreeSet.shuffleRel`,
+`FreeSet.presToSh`, `FreeSet.presEquiv`), so that when these generate the ideal of a resolvable
+set of rules, **the normal monomials are a basis of the symmetric operad** (`FreeSet.presBasis`,
+Dotsenko–Khoroshkin).
 
 **Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
 most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift

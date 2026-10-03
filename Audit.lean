@@ -1317,6 +1317,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeSet.shuffleEquiv
 #print axioms Operad.FreeSet.shuffleBasis
 #print axioms Operad.FreeSet.shuffleBasis_apply
+#print axioms Operad.Rules.shuffleIdeal_eq_span
+#print axioms Operad.ShuffleOperadIdeal.comap
+#print axioms Operad.ShuffleOperadIdeal.quotHom
+#print axioms Operad.FreeSet.presToSh
+#print axioms Operad.FreeSet.presEquiv
+#print axioms Operad.FreeSet.presEquiv_apply
+#print axioms Operad.FreeSet.presBasis
+#print axioms Operad.FreeSet.presBasis_apply
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable

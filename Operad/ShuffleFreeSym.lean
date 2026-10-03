@@ -677,6 +677,16 @@ theorem fromSh_comp_toSh : (fromSh R T).comp (toSh R T) = ShuffleOperadHom.id :=
     rw [toSh_gen R (pos_of_node g), fromSh_gen, Equiv.symm_symm]
     rfl
 
+lemma toSh_fromSh (A : Type) [Fintype A] [LinearOrder A] (x : FreeSh R (SGen T) A) :
+    (toSh R T).app A ((fromSh R T).app A x) = x :=
+  congrArg (fun φ : ShuffleOperadHom R (FreeSh R (SGen T)) (FreeSh R (SGen T)) => φ.app A x)
+    (toSh_comp_fromSh R)
+
+lemma fromSh_toSh (A : Type) [Fintype A] [LinearOrder A] (x : Lin R (FreeSet T) A) :
+    (fromSh R T).app A ((toSh R T).app A x) = x :=
+  congrArg (fun φ : ShuffleOperadHom R (Shuf (Lin R (FreeSet T))) (Shuf (Lin R (FreeSet T))) =>
+    φ.app A x) (fromSh_comp_toSh R)
+
 /-- **The free symmetric operad is the free shuffle operad on the relabelled generators**, on
 every finite linear order. -/
 noncomputable def shuffleEquiv (A : Type) [Fintype A] [LinearOrder A] :
