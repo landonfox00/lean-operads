@@ -1324,6 +1324,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GrCoideal.instGrCooperad
 #print axioms Operad.GrCoideal.projHom
 #print axioms Operad.GrCoideal.instCoaug
+#print axioms Operad.Tree.graft_cancel
+#print axioms Operad.Tree.exists_graft_of_relabel_graft
+#print axioms Operad.FreeReg.relabel_fact
+#print axioms Operad.FreeReg.relabel_fact_unique
+#print axioms Operad.FreeReg.induction
+#print axioms Operad.FreeReg.relabel_factBij
+#print axioms Operad.SetOperadIso.factBij
+#print axioms Operad.SgnBasMor.decomp_app
+#print axioms Operad.SgnBas.instSetOperad
+#print axioms Operad.FreeGr.SBVal.sbm
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left

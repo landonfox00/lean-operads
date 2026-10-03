@@ -141,6 +141,8 @@ import Operad.InvLie
 import Operad.InnerDer
 import Operad.GrDecCooperad
 import Operad.GrCoideal
+import Operad.TreeRelabel
+import Operad.GrSubst
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny

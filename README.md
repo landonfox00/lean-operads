@@ -537,6 +537,16 @@ projections and the relabellings, killed by the counit, whose decompositions lie
 quotient by a coideal is a graded cooperad** (`GrCoideal.instGrCooperad`), the projection a morphism
 (`GrCoideal.projHom`), and a coaugmentation descends (`GrCoideal.instCoaug`).
 
+**Relabelling trees and signed-basis morphisms.** `Operad/TreeRelabel.lean` relabels the vertices
+of planar trees (`Tree.relabel`): cuts lift along relabelling and are determined by the relabelling
+of their outer parts, so relabelling the regular operad of trees is **bijective on factorizations**
+(`FreeReg.relabel_fact`, `FreeReg.relabel_fact_unique`); and the regular operad of trees is generated
+by its corollas (`FreeReg.induction`). `Operad/GrSubst.lean` shows that **a morphism of graded
+operads sending basis elements to signed basis elements along a morphism bijective on
+factorizations is a morphism of the graded decomposition cooperads** (`SgnBasMor.decomp_app`), and
+builds such morphisms out of free graded operads from signed basis values on the generators,
+through the set operad of signed basis elements (`SgnBas`, `FreeGr.SBVal.sbm`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every
