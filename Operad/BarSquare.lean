@@ -553,7 +553,219 @@ lemma twF_mF (hμ : MergeFn.Odd gp μ) (a : ℕ) {n l m : ℕ} (x : Pl (T := T) 
       rw [twF_mF_pt hμ]
       module
 
+lemma twF_gF (a : ℕ) {n l m : ℕ} (x : Pl (T := T) R n) (y : Pl (T := T) R l) :
+    twF gp R m (gF gp R a m x y) = gF gp R a m (twF gp R n x) (twF gp R l y) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+  | single s c =>
+    induction y using Finsupp.induction_linear with
+    | zero => simp
+    | add y y' hy hy' => simp only [map_add, hy, hy']
+    | single u d =>
+      rw [← Finsupp.smul_single_one s c, ← Finsupp.smul_single_one u d,
+        show (Finsupp.single s (1 : R) : Pl (T := T) R n) = pt s from rfl,
+        show (Finsupp.single u (1 : R) : Pl (T := T) R l) = pt u from rfl]
+      simp only [map_smul, LinearMap.smul_apply, twF_pt]
+      rw [gF_pt]
+      split_ifs with h
+      · rw [map_smul, twF_pt, graftT_val, Tree.tpar_graft gp _ _ _ (by rw [s.2]; exact h.1),
+          σ_xor]
+        module
+      · simp
+
 end PlanarLaws
+
+/-! ## The last vertex of a tree -/
+
+section LastVertex
+
+lemma eq_leaves_of_weightF : ∀ {k : ℕ} (f : Forest T k), f.weightF = 0 →
+    f = TreeOfArity.leaves k
+  | 0, .nil, _ => rfl
+  | _, .cons t f, h => by
+    simp only [Tree.weightF_cons] at h
+    have ht : t.weight = 0 := by omega
+    have hf := eq_leaves_of_weightF f (by omega)
+    cases t with
+    | leaf =>
+      rw [hf]
+      rfl
+    | node e g => simp at ht
+
+/-- A tree with one vertex is a corolla. -/
+lemma eq_corolla_of_weight {t : Tree T} (h : t.weight = 1) :
+    ∃ (k : ℕ) (g : T k), t = Tree.node g (TreeOfArity.leaves k) := by
+  cases t with
+  | leaf => simp at h
+  | node g f =>
+    simp only [Tree.weight_node] at h
+    exact ⟨_, g, by rw [eq_leaves_of_weightF f (by omega)]⟩
+
+/-- **A tree with at least two vertices is a tree with one vertex less, grafted with the corolla
+of its last vertex.** -/
+lemma exists_graft_corolla {t : Tree T} (h : 2 ≤ t.weight) :
+    ∃ (s : Tree T) (p k : ℕ) (g : T k), p < s.arity ∧ s.weight + 1 = t.weight ∧
+      t = s.graft p (Tree.node g (TreeOfArity.leaves k)) := by
+  obtain ⟨h1, h2, h3, h4⟩ := Tree.cutV_spec (t := t) (k := t.weight - 1) (by omega) rfl
+  set s := (t.cutV (t.weight - 1)).1
+  set u := (t.cutV (t.weight - 1)).2.1
+  set p := (t.cutV (t.weight - 1)).2.2
+  have hw := Tree.weight_graft s p u h2
+  rw [h1] at hw
+  have hv := Tree.vb_le_weight s p
+  have hu := Tree.weight_pos h4
+  obtain ⟨k, g, hg⟩ := eq_corolla_of_weight (t := u) (by omega)
+  exact ⟨s, p, k, g, h2, by omega, by rw [← hg, h1]⟩
+
+end LastVertex
+
+/-! ## Membership in an ideal -/
+
+section Ideal
+
+variable {μ} (J : GrOperadIdeal R (FreeGr R gp))
+
+/-- The planar combinations landing in an ideal. -/
+noncomputable def JF (n : ℕ) : Submodule R (Pl (T := T) R n) := (J.sub (Fin n)).comap (ιP gp R n)
+
+variable {J}
+
+lemma gF_mem_left {a n l m : ℕ} {x : Pl (T := T) R n} (hx : x ∈ JF J n) (y : Pl (T := T) R l) :
+    gF gp R a m x y ∈ JF J m := by
+  by_cases h : a < n ∧ m + 1 = n + l
+  · show ιP gp R m (gF gp R a m x y) ∈ J.sub (Fin m)
+    rw [ιP_gF h]
+    exact J.map_mem _ (J.comp_mem_left _ _ hx)
+  · rw [gF_of_not h]
+    exact zero_mem _
+
+lemma gF_mem_right {a n l m : ℕ} (x : Pl (T := T) R n) {y : Pl (T := T) R l} (hy : y ∈ JF J l) :
+    gF gp R a m x y ∈ JF J m := by
+  by_cases h : a < n ∧ m + 1 = n + l
+  · show ιP gp R m (gF gp R a m x y) ∈ J.sub (Fin m)
+    rw [ιP_gF h]
+    exact J.map_mem _ (J.comp_mem_right _ _ hy)
+  · rw [gF_of_not h]
+    exact zero_mem _
+
+lemma ιP_corolla {k : ℕ} (g : T k) :
+    ιP gp R k (pt (corolla g)) = gen (R := R) (gp := gp) g := ιP_pt _
+
+variable (μ gp R) in
+/-- **Associativity of the merge function modulo an ideal**, for merges in series and in
+parallel. -/
+structure AssocHyp (J : GrOperadIdeal R (FreeGr R gp)) : Prop where
+  series : ∀ (kx lg lh : ℕ) (x : T kx) (g : T lg) (h : T lh) (p j m₁ m₂ m : ℕ), p < kx →
+    j < lg → m₁ + 1 = lg + lh → m₂ + 1 = kx + lg → m + 1 = kx + m₁ →
+    σ R (gp kx x) • gen (R := R) (gp := gp) (μ kx m₁ x p (μ lg lh g j h m₁) m)
+      + gen (R := R) (gp := gp) (μ m₂ lh (μ kx lg x p g m₂) (p + j) h m) ∈ J.sub (Fin m)
+  parallel : ∀ (kx l₁ l₂ : ℕ) (x : T kx) (a₁ : T l₁) (a₂ : T l₂) (p₁ p₂ m₁ m₂ m : ℕ),
+    p₁ < p₂ → p₂ < kx → m₁ + 1 = kx + l₁ → m₂ + 1 = kx + l₂ → m + 1 = m₁ + l₂ →
+    σ R (gp l₁ a₁ && gp l₂ a₂) •
+        gen (R := R) (gp := gp) (μ m₁ l₂ (μ kx l₁ x p₁ a₁ m₁) (p₂ + l₁ - 1) a₂ m)
+      + gen (R := R) (gp := gp) (μ m₂ l₁ (μ kx l₂ x p₂ a₂ m₂) p₁ a₁ m) ∈ J.sub (Fin m)
+
+end Ideal
+
+/-! ## Merging two corollas in series -/
+
+section Series
+
+variable {μ}
+
+variable (μ gp R) in
+/-- **Merging two corollas in series**, in the two orders. -/
+noncomputable def SF (p j m₁ m₂ m : ℕ) {n lg lh : ℕ} (x : Pl (T := T) R n) (g : TreeOfArity T lg)
+    (h : TreeOfArity T lh) : Pl (T := T) R m :=
+  mF μ gp R p m (twF gp R n x) (mF μ gp R j m₁ (pt g) (pt h))
+    + mF μ gp R (p + j) m (mF μ gp R p m₂ x (pt g)) (pt h)
+
+lemma SF_smul (p j m₁ m₂ m : ℕ) {n lg lh : ℕ} (c : R) (x : Pl (T := T) R n)
+    (g : TreeOfArity T lg) (h : TreeOfArity T lh) :
+    SF μ gp R p j m₁ m₂ m (c • x) g h = c • SF μ gp R p j m₁ m₂ m x g h := by
+  simp only [SF, map_smul, LinearMap.smul_apply, smul_add]
+
+lemma twF_gF_pt (a : ℕ) {n l m : ℕ} (x : Pl (T := T) R n) (c : TreeOfArity T l) :
+    twF gp R m (gF gp R a m x (pt c)) = σ R (Tree.tpar gp c.1) • gF gp R a m (twF gp R n x) (pt c) := by
+  rw [twF_gF, twF_pt, map_smul]
+
+lemma tpar_corolla' {k : ℕ} (g : T k) : Tree.tpar gp (corolla g).1 = gp k g :=
+  Tree.tpar_corolla gp g
+
+lemma isLeaf_corolla {k : ℕ} (g : T k) : (corolla g).1.isLeaf = false := rfl
+
+lemma σ_and_not_xor (a b c : Bool) :
+    σ R a * σ R (a && !(xor b c)) = σ R (a && xor b c) := by
+  cases a <;> cases b <;> cases c <;> simp
+
+lemma σ_and_and (a b c : Bool) :
+    σ R (a && b) * σ R (a && c) = σ R (a && xor b c) := by
+  cases a <;> cases b <;> cases c <;> simp
+
+/-- Merging in series at a leaf before a graft point. -/
+theorem SF_gF_after (hμ : MergeFn.Odd gp μ) {p j r r' n n₁ lc lg lh m₁ m₂ m mA mB : ℕ}
+    (hpr : p < r) (hr : r < n₁) (hn : n + 1 = n₁ + lc) (hj : j < lg) (hm₁ : m₁ + 1 = lg + lh)
+    (hm₂ : m₂ + 1 = n + lg) (hm : m + 1 = n + m₁) (hr' : r' + 1 = r + m₁)
+    (hmA : mA + 1 = n₁ + m₁) (hmB : mB + 1 = n₁ + lg) (X : Pl (T := T) R n₁) (c : T lc)
+    (g : T lg) (h : T lh) :
+    SF μ gp R p j m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla g) (corolla h)
+      = σ R (gp lc c && xor (gp lg g) (gp lh h)) •
+          gF gp R r' m (SF μ gp R p j m₁ mB mA X (corolla g) (corolla h)) (pt (corolla c)) := by
+  have hY := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj, hm₁⟩ g h
+  obtain ⟨rB, hrB⟩ : ∃ rB, rB + 1 = r + lg := ⟨r + lg - 1, by omega⟩
+  unfold SF
+  rw [twF_gF_pt, hY, map_smul, LinearMap.smul_apply,
+    mF_gF_after (μ := μ) hpr hr hr' hn hmA hm _ (corolla c) (corolla (μ lg lh g j h m₁)),
+    mF_gF_after (μ := μ) hpr hr hrB hn hmB hm₂ X (corolla c) (corolla g), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_after (μ := μ) (show p + j < rB by omega) (show rB < mB by omega)
+      (show r' + 1 = rB + lh by omega) (show m₂ + 1 = mB + lc by omega)
+      (show mA + 1 = mB + lh by omega) (show m + 1 = m₂ + lh by omega) _ (corolla c) (corolla h),
+    map_add, LinearMap.add_apply, smul_add]
+  simp only [tpar_corolla', hμ, smul_smul, σ_and_not_xor, σ_and_and]
+
+/-- Merging in series at a leaf of the grafted corolla. -/
+theorem SF_gF_inner (hμ : MergeFn.Odd gp μ) {p p' j r n n₁ lc lg lh m₁ m₂ m mD mE : ℕ}
+    (hr : r < n₁) (hp : p = r + p') (hp' : p' < lc) (hn : n + 1 = n₁ + lc) (hj : j < lg)
+    (hm₁ : m₁ + 1 = lg + lh) (hm₂ : m₂ + 1 = n + lg) (hm : m + 1 = n + m₁)
+    (hmD : mD + 1 = lc + lg) (hmE : mE + 1 = lc + m₁) (X : Pl (T := T) R n₁) (c : T lc)
+    (g : T lg) (h : T lh) :
+    SF μ gp R p j m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla g) (corolla h)
+      = gF gp R r m X (SF μ gp R p' j m₁ mD mE (pt (corolla c)) (corolla g) (corolla h)) := by
+  have hY := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj, hm₁⟩ g h
+  have hW := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hp', hmD⟩ c g
+  unfold SF
+  rw [twF_gF_pt, hY, map_smul, LinearMap.smul_apply,
+    mF_gF_inner (μ := μ) hμ hr hp' hp hn hmE hm _ (isLeaf_corolla c) (corolla (μ lg lh g j h m₁)),
+    twF_twF, mF_gF_inner (μ := μ) hμ hr hp' hp hn hmD hm₂ X (isLeaf_corolla c) (corolla g), hW,
+    mF_gF_inner (μ := μ) hμ hr (show p' + j < mD by omega) (show p + j = r + (p' + j) by omega)
+      (show m₂ + 1 = n₁ + mD by omega) (show mE + 1 = mD + lh by omega)
+      (show m + 1 = m₂ + lh by omega) _ (isLeaf_corolla _) (corolla h),
+    twF_twF, twF_pt, map_smul, LinearMap.smul_apply, map_add, map_smul]
+
+/-- Merging in series at a leaf after a graft point. -/
+theorem SF_gF_before (hμ : MergeFn.Odd gp μ) {p p₁ j r n n₁ lc lg lh m₁ m₂ m mA mB : ℕ}
+    (hrp : r < p₁) (hp₁ : p₁ < n₁) (hp : p + 1 = p₁ + lc) (hn : n + 1 = n₁ + lc) (hj : j < lg)
+    (hm₁ : m₁ + 1 = lg + lh) (hm₂ : m₂ + 1 = n + lg) (hm : m + 1 = n + m₁)
+    (hmA : mA + 1 = n₁ + m₁) (hmB : mB + 1 = n₁ + lg) (X : Pl (T := T) R n₁) (c : T lc)
+    (g : T lg) (h : T lh) :
+    SF μ gp R p j m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla g) (corolla h)
+      = σ R (gp lc c && xor (gp lg g) (gp lh h)) •
+          gF gp R r m (SF μ gp R p₁ j m₁ mB mA X (corolla g) (corolla h)) (pt (corolla c)) := by
+  have hY := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj, hm₁⟩ g h
+  unfold SF
+  rw [twF_gF_pt, hY, map_smul, LinearMap.smul_apply,
+    mF_gF_before (μ := μ) hμ hrp hp₁ hp hn hmA hm _ (corolla c) (corolla (μ lg lh g j h m₁)),
+    mF_gF_before (μ := μ) hμ hrp hp₁ hp hn hmB hm₂ X (corolla c) (corolla g), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_before (μ := μ) hμ (show r < p₁ + j by omega) (show p₁ + j < mB by omega)
+      (show p + j + 1 = p₁ + j + lc by omega) (show m₂ + 1 = mB + lc by omega)
+      (show mA + 1 = mB + lh by omega) (show m + 1 = m₂ + lh by omega) _ (corolla c) (corolla h),
+    map_add, LinearMap.add_apply, smul_add]
+  simp only [tpar_corolla', hμ, smul_smul, σ_and_not_xor, σ_and_and]
+
+end Series
 
 end FreeGr
 
