@@ -361,6 +361,14 @@ identity, with `Δ` a derivation of it (`GerBV.IsBV.bracket_antisymm`, `bracket_
 `bracket_jacobi`, `GerBV.Δ_bracket`). The Jacobi identity needs only `Δ² = 0` and the order
 condition (`GerBV.dev_jacobi`).
 
+**Graded and dg operads.** `Operad/DGOperad.lean` defines graded operads in super modules, with a
+parity decomposition preserved by relabellings and compositions and parallel associativity up to
+the Koszul sign (`GrOperad`), and dg operads, with an odd differential satisfying the Leibniz rule
+`d (x ∘ᵢ y) = d x ∘ᵢ y + ε x ∘ᵢ d y` (`DGOperad`). **The homology of a dg operad is a graded
+operad** (`DGOperad.instGrOperadHomology`): composites of cycles are cycles, composites with a
+boundary are boundaries, and the axioms descend to homology, through homogeneous representatives
+for parallel associativity.
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the
