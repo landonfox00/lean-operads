@@ -11,6 +11,15 @@ A morphism of shuffle operads out of the free shuffle operad on generators of an
   associativity, equivariance under strictly increasing relabellings — follow from the axioms,
   relabelling along order isomorphisms depending only on the input sets, order isomorphisms of
   finite linear orders being unique (`Operad.map_eq_castN`).
+* **Total composition** one input at a time (`Operad.stg`), with grafting into one of the
+  operations (`Operad.stg_insert_gt`) and relabelling (`Operad.stg_image`).
+* **The evaluation of a tree** in a shuffle operad, given the values of the generators
+  (`Operad.ev`): it respects grafting at a leaf (`Operad.ev_subst`) and strictly increasing
+  relabellings (`Operad.ev_relabel`).
+* **The lift** (`Operad.FreeSh.lift`): the morphism of shuffle operads out of the free shuffle
+  operad sending a monomial to its evaluation, a graft along a shuffle being a canonical graft of
+  relabelled monomials (`Operad.STree.subst_graftFam_canon`, `Operad.FreeSh.liftApp_graft`); it
+  sends the generators to their values (`Operad.FreeSh.lift_gen`).
 -/
 import Operad.ShuffleFreeAny
 import Operad.ShuffleIdeal
@@ -171,6 +180,11 @@ variable (R P) in
 /-- **The unit** on a single natural number. -/
 noncomputable def oneN (a : ℕ) : P (NS {a}) :=
   ShuffleOperad.map (R := R) (unitIso a) (ShuffleOperad.one R)
+
+lemma castN_oneN_congr {a b : ℕ} (h : a = b) {S : Finset ℕ} (h₁ : {a} = S) (h₂ : {b} = S) :
+    castN R P h₁ (oneN R P a) = castN R P h₂ (oneN R P b) := by
+  subst h
+  rfl
 
 /-- **The left unit law of canonical grafting.** -/
 lemma compN_one_left {T : Finset ℕ} {a : ℕ} (ha : a ∈ T) (hle : ∀ b ∈ T, a ≤ b)
@@ -1006,6 +1020,411 @@ theorem ev_relabel : ∀ {t : STree E} (_ht : Valid t) {f : ℕ → ℕ} (hf : S
         le_rfl, ev_node φ hv, map_relIso_castN, castN_castN, castN_castN, castN_castN]
     exact castN_eq_castN_castN _ _ _ _
 
+omit [ShuffleOperad R P] in
+lemma stage_units {M : Finset ℕ} {m : ℕ → ℕ} {L : ℕ → Finset ℕ} {k : ℕ}
+    (hL : ∀ j < k, L j = {m j}) (hm : ∀ j < k, m j ∈ M) : ∀ j ≤ k, stage M m L j = M
+  | 0, _ => rfl
+  | j + 1, hj => by
+    rw [stage, stage_units hL hm j (by omega), hL j (by omega)]
+    exact (erase_union_singleton (hm j (by omega))).symm
+
+/-- **Grafting units** at every input of an operation leaves it unchanged. -/
+lemma stg_units {M : Finset ℕ} {m : ℕ → ℕ} {L : ℕ → Finset ℕ} {k : ℕ}
+    (hL : ∀ j < k, L j = {m j}) (hm : ∀ j < k, m j ∈ M) (x₀ : P (NS M)) (y : ∀ j, P (NS (L j)))
+    (hy : ∀ j (hj : j < k), y j = castN R P (hL j hj).symm (oneN R P (m j))) :
+    ∀ j (hj : j ≤ k), stg R P M m L x₀ y j = castN R P (stage_units hL hm j hj).symm x₀
+  | 0, _ => rfl
+  | j + 1, hj => by
+    rw [stg, stg_units hL hm x₀ y hy j (by omega), hy j (by omega), compN_castN]
+    erw [compN_one_right (hm j (by omega))]
+    rw [castN_castN]
+    rfl
+
 end Eval
+
+/-! ## The universal property -/
+
+section Univ
+
+variable {R : Type u} [CommRing R]
+  {P : (A : Type) → [Fintype A] → [LinearOrder A] → Type w}
+  [∀ (A : Type) [Fintype A] [LinearOrder A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [LinearOrder A], Module R (P A)] [ShuffleOperad R P]
+
+/-- **Equivariance with the slot given up to equality.** -/
+lemma map_comp_of_eq {A A' B B' C C' : Type} [Fintype A] [LinearOrder A] [Fintype A']
+    [LinearOrder A'] [Fintype B] [LinearOrder B] [Fintype B'] [LinearOrder B'] [Fintype C]
+    [LinearOrder C] [Fintype C'] [LinearOrder C'] (σ : A ≃o A') (τ : B ≃o B') (ρ : C ≃o C')
+    (i : A) {e : Without A i ⊕ B ≃ C} (he : IsShuffle i e) {i' : A'} (hi : σ i = i')
+    {e' : Without A' i' ⊕ B' ≃ C'} (he' : IsShuffle i' e')
+    (hL : ∀ (a : A) (ha : a ≠ i), ρ (e (Sum.inl ⟨a, ha⟩)) =
+      e' (Sum.inl ⟨σ a, fun h => ha (σ.injective (h.trans hi.symm))⟩))
+    (hR : ∀ b, ρ (e (Sum.inr b)) = e' (Sum.inr (τ b))) (x : P A) (y : P B) :
+    ShuffleOperad.map (R := R) ρ (ShuffleOperad.comp (R := R) i e he x y) =
+      ShuffleOperad.comp (R := R) i' e' he' (ShuffleOperad.map (R := R) σ x)
+        (ShuffleOperad.map (R := R) τ y) := by
+  subst hi
+  exact ShuffleOperad.map_comp σ τ ρ i e he e' he' (fun c => by
+    rcases c with ⟨a, ha⟩ | b
+    · exact hL a ha
+    · exact hR b) x y
+
+/-- **Positions in a set of consecutive natural numbers** are the numbers. -/
+lemma opos_ns_range {S : Finset ℕ} {N : ℕ} (hS : S = Finset.range N) (x : NS S) :
+    opos x = x.1 := by
+  subst hS
+  rw [opos]
+  have : (Finset.univ.filter (· < x)) =
+      (Finset.range x.1).attach.map ⟨fun n => ⟨n.1, Finset.mem_range.2 ((Finset.mem_range.1
+        n.2).trans (Finset.mem_range.1 x.2))⟩, fun n n' h => Subtype.ext
+          (by simpa using congrArg Subtype.val h)⟩ := by
+    ext y
+    simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_map, Finset.mem_attach,
+      Function.Embedding.coeFn_mk]
+    constructor
+    · intro hy
+      exact ⟨⟨y.1, Finset.mem_range.2 hy⟩, Subtype.ext rfl⟩
+    · rintro ⟨n, rfl⟩
+      exact Finset.mem_range.1 n.2
+  rw [this, Finset.card_map, Finset.card_attach, Finset.card_range]
+
+/-- **The positions of a finite linear order.** -/
+noncomputable def rangeIso (A : Type) [Fintype A] [LinearOrder A] :
+    NS (Finset.range (Fintype.card A)) ≃o A :=
+  StrictMono.orderIsoOfSurjective (fun x => oelt x.1 (Finset.mem_range.1 x.2))
+    (fun x y hxy => by
+      rw [← opos_lt_opos, opos_oelt, opos_oelt]
+      exact hxy)
+    fun a => ⟨⟨opos a, Finset.mem_range.2 (opos_lt_card a)⟩, oelt_opos a⟩
+
+lemma opos_rangeIso (A : Type) [Fintype A] [LinearOrder A] (x : NS (Finset.range
+    (Fintype.card A))) : opos (rangeIso A x) = x.1 := opos_oelt _ _
+
+lemma opos_image_range {S : Finset ℕ} {N : ℕ} {f : ℕ → ℕ}
+    (hf : StrictMonoOn f ↑(Finset.range N)) (hS : S = (Finset.range N).image f) (x : NS S)
+    {m : ℕ} (hm : m < N) (hx : x.1 = f m) : opos x = m := by
+  subst hS
+  have : x = relIso f hf ⟨m, Finset.mem_range.2 hm⟩ := Subtype.ext hx
+  rw [this, opos_orderIso, opos_ns_range rfl]
+
+/-- **Canonical grafting is composition along any shuffle with the same positions.** -/
+lemma map_compN_eq_comp {A B C : Type} [Fintype A] [LinearOrder A] [Fintype B] [LinearOrder B]
+    [Fintype C] [LinearOrder C] {L₁ L₂ : Finset ℕ} {a : ℕ} (h : GraftOK L₁ L₂ a)
+    (σ : NS L₁ ≃o A) (τ : NS L₂ ≃o B) (ρ : NS (L₁.erase a ∪ L₂) ≃o C) {i : A}
+    (hi : σ ⟨a, h.mem⟩ = i) {e : Without A i ⊕ B ≃ C} (he : IsShuffle i e)
+    (hL : ∀ (n : NS L₁) (hn : n ≠ ⟨a, h.mem⟩), ρ (canon h (Sum.inl ⟨n, hn⟩)) =
+      e (Sum.inl ⟨σ n, fun h' => hn (σ.injective (h'.trans hi.symm))⟩))
+    (hR : ∀ y, ρ (canon h (Sum.inr y)) = e (Sum.inr (τ y))) (X : P (NS L₁)) (Y : P (NS L₂)) :
+    ShuffleOperad.map (R := R) ρ (compN R P L₁ L₂ a X Y) =
+      ShuffleOperad.comp (R := R) i e he (ShuffleOperad.map (R := R) σ X)
+        (ShuffleOperad.map (R := R) τ Y) := by
+  rw [compN_of h]
+  exact map_comp_of_eq σ τ ρ _ (isShuffle_canon h) hi he hL hR X Y
+
+end Univ
+
+/-! ## Grafting along a shuffle is canonical grafting of relabelled monomials -/
+
+namespace STree
+
+section GraftCanon
+
+variable {E : ℕ → Type v} {A B C : Type} [Fintype A] [LinearOrder A] [Fintype B]
+  [LinearOrder B] [Fintype C] [LinearOrder C] {i : A} {e : Without A i ⊕ B ≃ C}
+
+variable (i e) in
+/-- The relabelling of the outer monomial of a graft: the input `i` goes to the least position
+of the inner inputs. -/
+def fL (n : ℕ) : ℕ := if n = opos i then posR i e 0 else posL i e n
+
+omit [LinearOrder B] in
+lemma first_eq_zero {t : STree E} (ht : t.IsShuffle)
+    (htl : t.labels = (Finset.range (Fintype.card B)).val) : t.first = 0 ∧ 0 < Fintype.card B := by
+  have h1 := first_mem ht
+  have h2 : ∀ a ∈ t.labels, t.first ≤ a := first_le ht
+  rw [htl] at h1 h2
+  have hB := Nat.zero_lt_of_lt (Finset.mem_range.1 h1)
+  exact ⟨Nat.le_zero.1 (h2 0 (Finset.mem_range.2 hB)), hB⟩
+
+lemma first_graftFam_eq {t : STree E} (ht : t.IsShuffle)
+    (htl : t.labels = (Finset.range (Fintype.card B)).val) (n : ℕ) :
+    (graftFam i e t n).first = fL i e n := by
+  unfold graftFam fL
+  split_ifs
+  · rw [first_relabel _ ht, (first_eq_zero ht htl).1]
+  · rfl
+
+lemma strictMonoOn_fL (he : Operad.IsShuffle i e) {t : STree E} (ht : t.IsShuffle)
+    (htl : t.labels = (Finset.range (Fintype.card B)).val) :
+    StrictMonoOn (fL i e) {n | n < Fintype.card A} := fun n hn n' hn' h => by
+  rw [← first_graftFam_eq ht htl, ← first_graftFam_eq ht htl]
+  exact strictMonoOn_graftFam he ht htl hn hn' h
+
+lemma posL_ne_posR {n : ℕ} (hn : n < Fintype.card A) (hni : n ≠ opos i) (hB : 0 < Fintype.card B) :
+    posL i e n ≠ posR i e 0 := by
+  rw [posL, dif_pos hn, dif_neg (fun h => hni ((oelt_eq_iff hn).1 h)), posR, dif_pos hB]
+  intro h
+  exact Sum.inl_ne_inr (e.injective (opos_injective h))
+
+/-- **A graft along a shuffle is the canonical graft of the relabelled monomials.** -/
+lemma subst_graftFam_canon {s t : STree E} (hs : s.labels = (Finset.range (Fintype.card A)).val)
+    (ht : t.IsShuffle) (htl : t.labels = (Finset.range (Fintype.card B)).val) :
+    s.subst (graftFam i e t) =
+      (s.relabel (fL i e)).subst (Function.update leaf (posR i e 0) (t.relabel (posR i e))) := by
+  rw [relabel_subst]
+  refine subst_congr_range hs fun a => ?_
+  by_cases ha : a = i
+  · subst ha
+    rw [graftFam_opos, fL, if_pos rfl, Function.update_self]
+  · have hne : opos a ≠ opos i := fun h => ha (opos_injective h)
+    rw [graftFam_ne t a ha, fL, if_neg hne,
+      Function.update_of_ne (posL_ne_posR (opos_lt_card a) hne (first_eq_zero ht htl).2),
+      posL_opos i e ⟨a, ha⟩]
+
+end GraftCanon
+
+variable {E : ℕ → Type v}
+
+lemma lset_smono {S : Finset ℕ} (x : SMono E S) : lset x.1 = S :=
+  Finset.ext fun _ => by rw [mem_lset, x.mem_labels]
+
+lemma SMono.valid {S : Finset ℕ} (x : SMono E S) : Valid x.1 := ⟨x.isShuffle, x.nodup⟩
+
+end STree
+
+open STree
+
+/-! ## The lift -/
+
+namespace FreeSh
+
+variable {R : Type u} [CommRing R]
+  {P : (A : Type) → [Fintype A] → [LinearOrder A] → Type w}
+  [∀ (A : Type) [Fintype A] [LinearOrder A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [LinearOrder A], Module R (P A)] [ShuffleOperad R P]
+  {E : ℕ → Type v} (φ : ∀ k, E k → P (Fin k))
+
+variable (R P) in
+/-- **The lift** on the finite linear order `A`: a monomial goes to its evaluation. -/
+noncomputable def liftApp (A : Type) [Fintype A] [LinearOrder A] : FreeSh R E A →ₗ[R] P A :=
+  Finsupp.linearCombination R fun x => ShuffleOperad.map (R := R) (rangeIso A)
+    (castN R P (lset_smono x) (ev R P φ x.1))
+
+lemma liftApp_single {A : Type} [Fintype A] [LinearOrder A]
+    (x : SMono E (Finset.range (Fintype.card A))) :
+    liftApp R P φ A (Finsupp.single x 1) =
+      ShuffleOperad.map (R := R) (rangeIso A) (castN R P (lset_smono x) (ev R P φ x.1)) := by
+  rw [liftApp, Finsupp.linearCombination_single, one_smul]
+
+/-- **The lift respects grafting along a shuffle.** -/
+theorem liftApp_graft {A B C : Type} [Fintype A] [LinearOrder A] [Fintype B] [LinearOrder B]
+    [Fintype C] [LinearOrder C] (i : A) {e : Without A i ⊕ B ≃ C} (he : IsShuffle i e)
+    (s : SMono E (Finset.range (Fintype.card A))) (t : SMono E (Finset.range (Fintype.card B))) :
+    liftApp R P φ C (Finsupp.single (graft he s t) 1) =
+      ShuffleOperad.comp (R := R) i e he (liftApp R P φ A (Finsupp.single s 1))
+        (liftApp R P φ B (Finsupp.single t 1)) := by
+  rw [liftApp_single, liftApp_single, liftApp_single]
+  obtain ⟨hft, hB⟩ := first_eq_zero t.isShuffle t.labels_eq
+  have hsA := lset_smono s
+  have htB := lset_smono t
+  have hfL : StrictMonoOn (fL i e) ↑(lset s.1) := fun n hn n' hn' h => by
+    rw [hsA, Finset.mem_coe, Finset.mem_range] at hn hn'
+    exact strictMonoOn_fL he t.isShuffle t.labels_eq hn hn' h
+  have hpR : StrictMonoOn (posR i e) ↑(lset t.1) := fun n hn n' hn' h => by
+    rw [htB, Finset.mem_coe, Finset.mem_range] at hn hn'
+    exact strictMonoOn_posR he hn hn' h
+  set a := posR i e 0 with ha_def
+  have hfLi : fL i e (opos i) = a := if_pos rfl
+  have hL₁ : lset (s.1.relabel (fL i e)) = (Finset.range (Fintype.card A)).image (fL i e) := by
+    rw [lset_relabel, hsA]
+  have hL₂ : lset (t.1.relabel (posR i e)) = (Finset.range (Fintype.card B)).image (posR i e) := by
+    rw [lset_relabel, htB]
+  have ha : a ∈ lset (s.1.relabel (fL i e)) := by
+    rw [hL₁, ← hfLi]
+    exact Finset.mem_image_of_mem _ (Finset.mem_range.2 (opos_lt_card i))
+  have hta : (t.1.relabel (posR i e)).first = a := by rw [first_relabel _ t.isShuffle, hft]
+  have hd : Disjoint ((lset (s.1.relabel (fL i e))).erase a) (lset (t.1.relabel (posR i e))) := by
+    rw [hL₁, hL₂]
+    refine Finset.disjoint_left.2 fun n hn hn' => ?_
+    obtain ⟨hna, hn⟩ := Finset.mem_erase.1 hn
+    obtain ⟨m, hm, rfl⟩ := Finset.mem_image.1 hn
+    obtain ⟨m', hm', hmm'⟩ := Finset.mem_image.1 hn'
+    have hmi : m ≠ opos i := fun h => hna (by rw [h, hfLi])
+    rw [Finset.mem_range] at hm hm'
+    rw [fL, if_neg hmi, posL, dif_pos hm, dif_neg (fun h => hmi ((oelt_eq_iff hm).1 h)), posR,
+      dif_pos hm'] at hmm'
+    exact Sum.inr_ne_inl (e.injective (opos_injective hmm'))
+  have hvs := (SMono.valid s).relabel hfL
+  have hvt := (SMono.valid t).relabel hpR
+  have hcanon := subst_graftFam_canon (i := i) (e := e) s.labels_eq t.isShuffle t.labels_eq
+  have hC : (lset (s.1.relabel (fL i e))).erase a ∪ lset (t.1.relabel (posR i e)) =
+      Finset.range (Fintype.card C) := by
+    rw [← lset_subst_update ha, ← hcanon, ← lset_smono (graft he s t)]
+    rfl
+  have hOK : GraftOK (lset (s.1.relabel (fL i e))) (lset (t.1.relabel (posR i e))) a :=
+    ⟨ha, mem_lset.2 (hta ▸ first_mem hvt.shuffle),
+      fun n hn => hta ▸ first_le hvt.shuffle n (mem_lset.1 hn), hd⟩
+  rw [ev_congr φ (show (graft he s t).1 = _ from hcanon), ev_subst φ hvs hvt ha hta hd,
+    ev_relabel φ (SMono.valid s) hfL, ev_relabel φ (SMono.valid t) hpR, castN_castN,
+    castN_castN, castN_eq_map, ← ShuffleOperad.map_trans]
+  -- the isomorphisms
+  set σ : NS (lset (s.1.relabel (fL i e))) ≃o A :=
+    (eqIso (lset_relabel (fL i e) s.1)).trans ((relIso (fL i e) hfL).symm.trans
+      ((eqIso hsA).trans (rangeIso A))) with hσ
+  set τ : NS (lset (t.1.relabel (posR i e))) ≃o B :=
+    (eqIso (lset_relabel (posR i e) t.1)).trans ((relIso (posR i e) hpR).symm.trans
+      ((eqIso htB).trans (rangeIso B))) with hτ
+  have hX : ShuffleOperad.map (R := R) (rangeIso A) (castN R P hsA (ev R P φ s.1)) =
+      ShuffleOperad.map (R := R) σ (castN R P (lset_relabel (fL i e) s.1).symm
+        (ShuffleOperad.map (R := R) (relIso (fL i e) hfL) (ev R P φ s.1))) := by
+    simp only [castN_eq_map, ← ShuffleOperad.map_trans]
+    exact map_eq_map _ _ _
+  have hY : ShuffleOperad.map (R := R) (rangeIso B) (castN R P htB (ev R P φ t.1)) =
+      ShuffleOperad.map (R := R) τ (castN R P (lset_relabel (posR i e) t.1).symm
+        (ShuffleOperad.map (R := R) (relIso (posR i e) hpR) (ev R P φ t.1))) := by
+    simp only [castN_eq_map, ← ShuffleOperad.map_trans]
+    exact map_eq_map _ _ _
+  rw [hX, hY]
+  -- positions
+  have hfL' : StrictMonoOn (fL i e) ↑(Finset.range (Fintype.card A)) := hsA ▸ hfL
+  have hpR' : StrictMonoOn (posR i e) ↑(Finset.range (Fintype.card B)) := htB ▸ hpR
+  have hposσ : ∀ (n : NS (lset (s.1.relabel (fL i e)))) (m : ℕ) (hm : m < Fintype.card A),
+      n.1 = fL i e m → σ n = oelt m hm := fun n m hm hnm => by
+    refine opos_injective ?_
+    rw [opos_orderIso, opos_oelt, opos_image_range hfL' hL₁ n hm hnm]
+  have hposτ : ∀ (y : NS (lset (t.1.relabel (posR i e)))) (m : ℕ) (hm : m < Fintype.card B),
+      y.1 = posR i e m → τ y = oelt m hm := fun y m hm hym => by
+    refine opos_injective ?_
+    rw [opos_orderIso, opos_oelt, opos_image_range hpR' hL₂ y hm hym]
+  have hi : σ ⟨a, hOK.mem⟩ = i := by
+    rw [hposσ ⟨a, hOK.mem⟩ (opos i) (opos_lt_card i) hfLi.symm, oelt_opos]
+  refine map_compN_eq_comp hOK σ τ _ hi he (fun n hn => ?_) (fun y => ?_) _ _
+  · have hn2 : n.1 ∈ (Finset.range (Fintype.card A)).image (fL i e) := by
+      rw [← hL₁]
+      exact n.2
+    obtain ⟨m, hm, hmn⟩ := Finset.mem_image.1 hn2
+    rw [Finset.mem_range] at hm
+    have hmi : m ≠ opos i := fun h => hn (Subtype.ext (by rw [← hmn, h, hfLi]))
+    have hne : oelt m hm ≠ i := fun h => hmi ((oelt_eq_iff hm).1 h)
+    have hσn : (⟨σ n, fun h' => hn (σ.injective (h'.trans hi.symm))⟩ : Without A i) =
+        ⟨oelt m hm, hne⟩ := Subtype.ext (hposσ n m hm hmn.symm)
+    rw [hσn]
+    refine opos_injective ?_
+    rw [opos_orderIso, opos_ns_range hC]
+    show n.1 = _
+    rw [← hmn, fL, if_neg hmi, posL, dif_pos hm, dif_neg hne]
+  · have hy2 : y.1 ∈ (Finset.range (Fintype.card B)).image (posR i e) := by
+      rw [← hL₂]
+      exact y.2
+    obtain ⟨m, hm, hmy⟩ := Finset.mem_image.1 hy2
+    rw [Finset.mem_range] at hm
+    rw [hposτ y m hm hmy.symm]
+    refine opos_injective ?_
+    rw [opos_orderIso, opos_ns_range hC]
+    show y.1 = _
+    rw [← hmy, posR, dif_pos hm]
+
+lemma liftApp_map {A B : Type} [Fintype A] [LinearOrder A] [Fintype B] [LinearOrder B]
+    (σ : A ≃o B) (x : FreeSh R E A) :
+    liftApp R P φ B (mapM σ x) = ShuffleOperad.map (R := R) σ (liftApp R P φ A x) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x x' hx hx' => rw [map_add, map_add, hx, hx', map_add, map_add]
+  | single y r =>
+    rw [← mul_one r, ← smul_eq_mul, ← Finsupp.smul_single, map_smul, map_smul, map_smul, map_smul,
+      mapM_single, liftApp_single, liftApp_single]
+    congr 1
+    simp only [castN_eq_map, ← ShuffleOperad.map_trans]
+    exact map_eq_map _ _ _
+
+lemma liftApp_one : liftApp R P φ Unit (Finsupp.single oneM 1) = ShuffleOperad.one R := by
+  rw [liftApp_single]
+  show ShuffleOperad.map (R := R) (rangeIso Unit) (castN R P _ (castN R P (lset_leaf 0).symm
+    (oneN R P 0))) = _
+  rw [oneN]
+  simp only [castN_eq_map, ← ShuffleOperad.map_trans]
+  rw [map_eq_map _ (OrderIso.refl Unit), ShuffleOperad.map_refl]
+
+lemma liftApp_comp {A B C : Type} [Fintype A] [LinearOrder A] [Fintype B] [LinearOrder B]
+    [Fintype C] [LinearOrder C] (i : A) {e : Without A i ⊕ B ≃ C} (he : IsShuffle i e)
+    (x : FreeSh R E A) (y : FreeSh R E B) :
+    liftApp R P φ C (bil (graft he) x y) =
+      ShuffleOperad.comp (R := R) i e he (liftApp R P φ A x) (liftApp R P φ B y) := by
+  induction x using Finsupp.induction_linear with
+  | zero => simp
+  | add x x' hx hx' => simp only [map_add, LinearMap.add_apply, hx, hx']
+  | single s a =>
+    induction y using Finsupp.induction_linear with
+    | zero => simp
+    | add y y' hy hy' => simp only [map_add, hy, hy']
+    | single t b =>
+      have h₁ : Finsupp.single s a = a • Finsupp.single s (1 : R) := by
+        rw [Finsupp.smul_single, smul_eq_mul, mul_one]
+      have h₂ : Finsupp.single t b = b • Finsupp.single t (1 : R) := by
+        rw [Finsupp.smul_single, smul_eq_mul, mul_one]
+      rw [h₁, h₂]
+      simp only [map_smul, LinearMap.smul_apply, bil_single, mul_one, liftApp_graft]
+
+variable (R P) in
+/-- **The universal property of the free shuffle operad**, existence: the morphism of shuffle
+operads extending the values `φ` of the generators, a monomial going to its evaluation. -/
+noncomputable def lift : ShuffleOperadHom R (FreeSh R E) P where
+  app A _ _ := liftApp R P φ A
+  app_map σ x := liftApp_map φ σ x
+  app_one := liftApp_one φ
+  app_comp i _ he x y := liftApp_comp φ i he x y
+
+/-! ## The generators -/
+
+lemma labels_corolla {k : ℕ} (g : E k) :
+    (node g fun j : Fin k => (leaf j.1 : STree E)).labels = (Finset.range k).val := by
+  rw [labels_node]
+  simp only [labels_leaf]
+  rw [Finset.range_val]
+  have h : (∑ x : Fin k, ({(x : ℕ)} : Multiset ℕ)) =
+      (Finset.univ : Finset (Fin k)).val.map Fin.val := by
+    rw [Finset.sum_eq_multiset_sum, show (fun x : Fin k => ({(x : ℕ)} : Multiset ℕ)) =
+      (fun a => {a}) ∘ Fin.val from rfl, ← Multiset.map_map, Multiset.sum_map_singleton]
+  rw [h]
+  refine (Multiset.Nodup.ext (Multiset.Nodup.map Fin.val_injective Finset.univ.nodup)
+    (Multiset.nodup_range k)).2 fun n => ?_
+  simp only [Multiset.mem_map, Finset.mem_val, Finset.mem_univ, true_and, Multiset.mem_range]
+  exact ⟨fun ⟨i, hi⟩ => hi ▸ i.2, fun h => ⟨⟨n, h⟩, rfl⟩⟩
+
+/-- **A generator** of arity `k > 0`, as a monomial on `Fin k`: the corolla with leaves
+`0, …, k - 1`. -/
+def genM {k : ℕ} (hk : 0 < k) (g : E k) : SMono E (Finset.range (Fintype.card (Fin k))) :=
+  ⟨node g fun j => leaf j.1, ⟨hk, fun _ => trivial, fun _ _ h => h⟩, by
+    rw [Fintype.card_fin]
+    exact labels_corolla g⟩
+
+/-- **The lift sends the generators to their values.** -/
+theorem lift_gen {k : ℕ} (hk : 0 < k) (g : E k) :
+    (lift R P φ).app (Fin k) (Finsupp.single (genM hk g) 1) = φ k g := by
+  show liftApp R P φ (Fin k) _ = _
+  rw [liftApp_single]
+  have hv : Valid (node g fun j : Fin k => (leaf j.1 : STree E)) := (genM hk g).valid
+  set c : Fin k → STree E := fun j => leaf j.1 with hc
+  have hcm : ∀ j < k, cm c j = j := fun j hj => by rw [cm_of c hj]; rfl
+  have hcL : ∀ j < k, cL c j = {cm c j} := fun j hj => by
+    rw [cL_of c hj, hcm j hj]
+    exact lset_leaf j
+  have hcM : ∀ j < k, cm c j ∈ cM c := fun j hj =>
+    Finset.mem_image.2 ⟨⟨j, hj⟩, Finset.mem_univ _, (cm_of c hj).symm⟩
+  have hy : ∀ j (hj : j < k), evc R P φ c j = castN R P (hcL j hj).symm (oneN R P (cm c j)) :=
+    fun j hj => by
+      rw [evc, dif_pos hj, ev_congr φ (show c ⟨j, hj⟩ = leaf j from rfl), ev_leaf, castN_castN,
+        castN_castN]
+      exact castN_oneN_congr (hcm j hj).symm _ _
+  have hcard : Fintype.card (NS (cM c)) = k := by
+    rw [Fintype.card_coe, cM, Finset.card_image_of_injective (f := fun j : Fin k => (c j).first) _
+        (fun i j h => Fin.ext h),
+      Finset.card_univ, Fintype.card_fin]
+  show ShuffleOperad.map (R := R) (rangeIso (Fin k)) (castN R P _ (ev R P φ (node g c))) = _
+  rw [ev_node φ hv, stg_units hcL hcM _ _ hy k le_rfl, corVal, dif_pos hcard]
+  simp only [castN_eq_map, ← ShuffleOperad.map_trans]
+  rw [map_eq_map _ (OrderIso.refl _), ShuffleOperad.map_refl]
+
+end FreeSh
 
 end Operad

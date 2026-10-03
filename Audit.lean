@@ -1287,6 +1287,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.STree.isSCtx_graft_right
 #print axioms Operad.Rules.shuffleIdeal
 #print axioms Operad.Rules.presentedBasis
+#print axioms Operad.compN_seq
+#print axioms Operad.compN_par
+#print axioms Operad.map_relIso_compN
+#print axioms Operad.stg_insert_gt
+#print axioms Operad.ev_subst
+#print axioms Operad.ev_relabel
+#print axioms Operad.FreeSh.liftApp_graft
+#print axioms Operad.FreeSh.lift
+#print axioms Operad.FreeSh.lift_gen
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable
