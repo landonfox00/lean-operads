@@ -20,6 +20,10 @@ operad is Koszul. The proof is Hoffbeck's:
   contracted by cutting along an edge with a window which is not leading
   (`Operad.CutComplex.dL_hL_add`), and below the diagonal such an edge exists.
 * **Hoffbeck's filtration argument** (`Operad.Hoffbeck.exact_of_leading`) concludes.
+
+The exactness holds over any down-closed set of underlying monomials
+(`Operad.Rules.bar_exact_down`), which gives the basis of the Koszul dual cooperad in
+`Operad.ShuffleAnyKoszulDual`.
 -/
 import Operad.ShuffleAnyBarNormal
 
@@ -477,10 +481,37 @@ namespace STree.Bar
 
 variable (K)
 
+/-- **The bar trees** on the leaves `A` with `w` vertices and `s` components (`s - 1` cut
+edges). -/
+def P (A : Finset ℕ) (w s : ℕ) : Set (SMono (BE E) A) :=
+  {X | rootF X.1 = false ∧ X.1.weight = w ∧ (cuts X).card + 1 = s}
+
 /-- **The bar construction of the free shuffle operad** on the leaves `A`, with `w` vertices,
-in degree `s`: the combinations of bar trees with `s` components (`s - 1` cut edges). -/
+in degree `s`: the combinations of bar trees with `s` components. -/
 def C (A : Finset ℕ) (w s : ℕ) : Submodule K (SMono (BE E) A →₀ K) :=
-  Finsupp.supported K K {X | rootF X.1 = false ∧ X.1.weight = w ∧ (cuts X).card + 1 = s}
+  Finsupp.supported K K (P A w s)
+
+variable {K}
+
+/-- **The differential lowers the degree.** -/
+lemma d_mem_P {A : Finset ℕ} {w n : ℕ} {X : SMono (BE E) A} (hX : X ∈ P A w (n + 1)) :
+    d K (Finsupp.single X 1) ∈ Finsupp.supported K K (P A w n) := by
+  rw [d, CutComplex.d_single, one_smul, CutComplex.dX]
+  refine Submodule.sum_mem _ fun k hk => Submodule.smul_mem _ _
+    (Finsupp.single_mem_supported K _ ⟨rootF_setF_false k hX.1, ?_, ?_⟩)
+  · rw [setM_val, weight_setF]
+    exact hX.2.1
+  · have hc : cuts (setM k false X) = (cuts X).erase k := cutKeys_setF_false k X.1
+    have h2 := hX.2.2
+    have hpos := Finset.card_pos.2 ⟨k, hk⟩
+    rw [hc, Finset.card_erase_of_mem hk]
+    omega
+
+variable (K) in
+/-- **Cutting along an edge**, with the sign of its position among the cut edges. -/
+noncomputable def cut {A : Finset ℕ} (k₀ : ℕ ×ₗ ℕ) :
+    (SMono (BE E) A →₀ K) →ₗ[K] (SMono (BE E) A →₀ K) :=
+  CutComplex.hL cuts (fun x => setM x true) k₀
 
 end STree.Bar
 
@@ -491,6 +522,41 @@ vertices is a boundary. -/
 def Rules.IsKoszul : Prop :=
   ∀ (A : Finset ℕ) (w s : ℕ), s < w → ∀ v ∈ Bar.C K A w s, Bar.d K v ∈ (G.bar.rw A).ideal →
     ∃ u ∈ Bar.C K A w (s + 1), v - Bar.d K u ∈ (G.bar.rw A).ideal
+
+/-! ## The leading part of the differential -/
+
+/-- **The leading part of the differential** of the bar construction: merge only along the cut
+edges which are not leading. -/
+noncomputable def Rules.dL (A : Finset ℕ) : (SMono (BE E) A →₀ K) →ₗ[K] (SMono (BE E) A →₀ K) :=
+  CutComplex.dL cuts (fun x => setM x false) forgetM G.leadKeys
+
+/-- **The leading part preserves the underlying monomial.** -/
+lemma Rules.dL_mem_fib {A : Finset ℕ} (X : SMono (BE E) A) :
+    G.dL A (Finsupp.single X 1) ∈ Finsupp.supported K K {Y | forgetM Y = forgetM X} := by
+  rw [Rules.dL, CutComplex.dL_single, one_smul, CutComplex.dLX]
+  exact Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _
+    (Finsupp.single_mem_supported K _ (forgetM_setM k false X))
+
+/-- **Cutting along an edge which is not leading is a contracting homotopy** of the leading part
+of the differential, over a fixed monomial: the complex of the subsets of a finite set. -/
+theorem Rules.dL_cut_add {A : Finset ℕ} {t : SMono E A} {k₀ : ℕ ×ₗ ℕ}
+    (hk₀e : k₀ ∈ t.1.edgeKeys) (hk₀L : k₀ ∉ G.leadKeys t) {Y : SMono (BE E) A}
+    (hY : forgetM Y = t) :
+    G.dL A (Bar.cut K k₀ (Finsupp.single Y 1)) + Bar.cut K k₀ (G.dL A (Finsupp.single Y 1)) =
+      Finsupp.single Y 1 := by
+  have hedge : ∀ Y : SMono (BE E) A, forgetM Y = t → k₀ ∈ Y.1.edgeKeys := fun Y hY => by
+    rw [← edgeKeys_forget, ← forgetM_val, hY]
+    exact hk₀e
+  exact CutComplex.dL_hL_add (t := t) hk₀L (fun x => forgetM_setM k₀ true x)
+    (fun x _ k _ => cutKeys_setF_false k x.1)
+    (fun x hx _ => cutKeys_setF_true (edgeKeys_subset_vkeys (hedge x hx)))
+    (fun x _ h => Subtype.ext (by
+      rw [setM_val, setM_val, setF_setF_self, setF_false_of_notMem h]))
+    (fun x _ h => Subtype.ext (by
+      rw [setM_val, setM_val, setF_setF_self,
+        setF_true_of_mem (nodup_vkeys x.isShuffle x.nodup) h]))
+    (fun x _ h k hk => Subtype.ext (setF_comm (fun e => h (by rw [← e]; exact hk))
+      false true x.1)) hY
 
 section Normal
 
@@ -525,6 +591,34 @@ theorem Rules.bar_normal_setM_true {A : Finset ℕ} {X : SMono (BE E) A} (hX : G
   rw [mem_cutKeys_setF_true]
   exact Or.inr (hX' hy)
 
+/-- **The differential of a normal bar tree is its leading part**, followed by the normal form,
+up to terms over strictly smaller monomials. -/
+theorem Rules.d_sub_dL_mem {A : Finset ℕ} {X : SMono (BE E) A} (hX : X ∈ (G.bar.rw A).Irr) :
+    (G.bar.rw A).nf (Bar.d K (Finsupp.single X 1)) - G.dL A (Finsupp.single X 1) ∈
+      Finsupp.supported K K {Y | O.lt (forgetM Y) (forgetM X)} := by
+  classical
+  set S := G.bar.rw A with hSdef
+  have hirr : ∀ X, X ∈ S.Irr ↔ G.bar.Normal X := fun X => G.bar.mem_irr_iff
+  have hXn : G.bar.Normal X := (hirr X).1 hX
+  rw [Rules.dL, Bar.d, CutComplex.d_single, CutComplex.dL_single, one_smul, one_smul,
+    CutComplex.dX, CutComplex.dLX, map_sum, Finset.sum_filter, ← Finset.sum_sub_distrib]
+  refine Submodule.sum_mem _ fun k _ => ?_
+  by_cases hk : k ∈ G.leadKeys (forgetM X)
+  · rw [if_neg (not_not.2 hk), sub_zero, map_smul]
+    refine Submodule.smul_mem _ _ ?_
+    have hne : (S.red (setM k false X)).Nonempty := by
+      by_contra hne
+      exact ((G.bar_normal_setM_false hquad hXn).1 ((hirr _).1 (S.mem_irr_iff.2 hne))) hk
+    rw [Rewriting.nf_single, one_smul]
+    refine Finsupp.supported_mono (fun Y hY => ?_) (S.nfMono_mem_below hne)
+    show O.lt (forgetM Y) (forgetM X)
+    have : O.bar.lt Y (setM k false X) := hY
+    rw [← forgetM_setM k false X]
+    exact this
+  · rw [if_pos hk, map_smul, S.nf_single_of_irr ((hirr _).2
+      ((G.bar_normal_setM_false hquad hXn).2 hk)), sub_self]
+    exact Submodule.zero_mem _
+
 end Normal
 
 /-- Two linear maps which agree on the basis elements of a set agree on their combinations. -/
@@ -536,103 +630,86 @@ lemma eq_of_supported {X M : Type*} [AddCommGroup M] [Module K M]
     (fun x hx => LinearMap.mem_eqLocus.2 (h x hx)) hv
   exact LinearMap.mem_eqLocus.1 this
 
-/-- **PBW implies Koszul** (Hoffbeck; Dotsenko–Khoroshkin): a shuffle operad presented by
-quadratic rules which are resolvable — whose normal monomials are a basis of the operad, a PBW
-basis, by the Buchberger criterion when the critical ambiguities are resolvable — is Koszul. -/
-theorem Rules.isKoszul_of_resolvable (hquad : ∀ r, (G.lead r).1.weight = 2)
-    (hom : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight = 2)
-    (hres : ∀ C, (G.rw C).Resolvable) : G.IsKoszul := by
+section Exact
+
+variable (hquad : ∀ r, (G.lead r).1.weight = 2)
+  (hom : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight = 2)
+include hquad hom
+
+omit hom in
+lemma Rules.hlead_of_quad : ∀ r a, (G.lead r).1 ≠ leaf a := fun r a h => by
+  have := hquad r
+  rw [h, weight_leaf] at this
+  exact absurd this (by norm_num)
+
+lemma Rules.hom_of_quad : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight = (G.lead r).1.weight :=
+  fun r m hm => by rw [hom r m hm, hquad r]
+
+/-- **The bar trees of a degree are closed under reduction.** -/
+lemma Rules.bar_P_closed {A : Finset ℕ} {w n : ℕ} :
+    ∀ X ∈ Bar.P A w n, ∀ u ∈ (G.bar.rw A).red X, u ∈ Finsupp.supported K K (Bar.P A w n) := by
+  intro X hX u hu
+  refine Finsupp.supported_mono (fun Y hY => ?_)
+    (G.bar_red_inv (G.hlead_of_quad hquad) (G.hom_of_quad hquad hom) hu)
+  obtain ⟨h1, h2, h3⟩ := hY
+  refine ⟨?_, ?_, ?_⟩
+  · rw [h2]
+    exact hX.1
+  · rw [h3]
+    exact hX.2.1
+  · rw [h1]
+    exact hX.2.2
+
+/-- **The normal form of the bar trees of a degree** is a combination of normal ones. -/
+lemma Rules.nf_mem_P {A : Finset ℕ} {w n : ℕ} {u : SMono (BE E) A →₀ K}
+    (hu : u ∈ Finsupp.supported K K (Bar.P A w n)) :
+    (G.bar.rw A).nf u ∈ Finsupp.supported K K ((G.bar.rw A).Irr ∩ Bar.P A w n) := by
+  rw [Finsupp.supported_inter]
+  exact ⟨(G.bar.rw A).nf_mem_supported u,
+    (G.bar.rw A).nf_mem_of_closed (G.bar_P_closed hquad hom) hu⟩
+
+variable (hres : ∀ C, (G.rw C).Resolvable)
+include hres
+
+/-- **The normal form commutes with the differential** modulo the ideal. -/
+lemma Rules.nf_d_nf {A : Finset ℕ} (u : SMono (BE E) A →₀ K) :
+    (G.bar.rw A).nf (Bar.d K ((G.bar.rw A).nf u)) = (G.bar.rw A).nf (Bar.d K u) := by
+  have hlead := G.hlead_of_quad hquad
+  have hom' := G.hom_of_quad hquad hom
+  have h := (G.bar_resolvable hlead hom' hres A).ideal_le_ker
+    (G.bar_d_mem_ideal hlead hom' ((G.bar.rw A).nf_sub_mem u))
+  rw [LinearMap.mem_ker, map_sub, map_sub, sub_eq_zero] at h
+  exact h
+
+/-- **The bar construction of a PBW operad is exact below the diagonal over a down-closed set of
+monomials**, on the normal bar trees: a normal cycle with fewer components than vertices, over
+monomials in a down-closed set `Z`, is the boundary of normal bar trees over `Z`, for the
+differential followed by the normal form. -/
+theorem Rules.bar_exact_down {A : Finset ℕ} {w s : ℕ} (hsw : s < w) {Z : Set (SMono E A)}
+    (hZ : ∀ m ∈ Z, ∀ m', O.lt m' m → m' ∈ Z) {v : SMono (BE E) A →₀ K}
+    (hv : v ∈ Finsupp.supported K K ((G.bar.rw A).Irr ∩ Bar.P A w s ∩ forgetM ⁻¹' Z))
+    (hDv : (G.bar.rw A).nf (Bar.d K v) = 0) :
+    ∃ u ∈ Finsupp.supported K K ((G.bar.rw A).Irr ∩ Bar.P A w (s + 1) ∩ forgetM ⁻¹' Z),
+      (G.bar.rw A).nf (Bar.d K u) = v := by
   classical
-  have hlead : ∀ r a, (G.lead r).1 ≠ leaf a := fun r a h => by
-    have := hquad r
-    rw [h, weight_leaf] at this
-    exact absurd this (by norm_num)
-  have hom' : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight = (G.lead r).1.weight :=
-    fun r m hm => by rw [hom r m hm, hquad r]
-  intro A w s hsw v hv hdv
   set S := G.bar.rw A with hSdef
-  have hS : S.Resolvable := G.bar_resolvable hlead hom' hres A
   have hirr : ∀ X, X ∈ S.Irr ↔ G.bar.Normal X := fun X => G.bar.mem_irr_iff
-  -- the bar trees of a degree: a set closed under reduction
-  let P : ℕ → Set (SMono (BE E) A) := fun n =>
-    {X | rootF X.1 = false ∧ X.1.weight = w ∧ (cuts X).card + 1 = n}
-  have hPcl : ∀ n, ∀ X ∈ P n, ∀ u ∈ S.red X, u ∈ Finsupp.supported K K (P n) := by
-    intro n X hX u hu
-    refine Finsupp.supported_mono (fun Y hY => ?_) (G.bar_red_inv hlead hom' hu)
-    obtain ⟨h1, h2, h3⟩ := hY
-    refine ⟨?_, ?_, ?_⟩
-    · rw [h2]
-      exact hX.1
-    · rw [h3]
-      exact hX.2.1
-    · rw [h1]
-      exact hX.2.2
-  have hnfP : ∀ n, ∀ u ∈ Finsupp.supported K K (P n),
-      S.nf u ∈ Finsupp.supported K K (S.Irr ∩ P n) := by
-    intro n u hu
-    rw [Finsupp.supported_inter]
-    exact ⟨S.nf_mem_supported u, S.nf_mem_of_closed (hPcl n) hu⟩
-  -- the differential lowers the degree
-  have hdP : ∀ n, ∀ X ∈ P (n + 1), Bar.d K (Finsupp.single X 1) ∈ Finsupp.supported K K (P n) := by
-    intro n X hX
-    rw [Bar.d, CutComplex.d_single, one_smul, CutComplex.dX]
-    refine Submodule.sum_mem _ fun k hk => Submodule.smul_mem _ _
-      (Finsupp.single_mem_supported K _ ⟨rootF_setF_false k hX.1, ?_, ?_⟩)
-    · rw [setM_val, weight_setF]
-      exact hX.2.1
-    · have hc : cuts (setM k false X) = (cuts X).erase k := cutKeys_setF_false k X.1
-      have h2 := hX.2.2
-      have hpos := Finset.card_pos.2 ⟨k, hk⟩
-      rw [hc, Finset.card_erase_of_mem hk]
-      omega
-  -- the normal form commutes with the differential modulo the ideal
-  have hnfd : ∀ u, S.nf (Bar.d K (S.nf u)) = S.nf (Bar.d K u) := fun u => by
-    have h := hS.ideal_le_ker (G.bar_d_mem_ideal hlead hom' (S.nf_sub_mem u))
-    rw [LinearMap.mem_ker, map_sub, map_sub, sub_eq_zero] at h
-    exact h
-  let V := S.Irr ∩ P s
-  let V' := S.Irr ∩ P (s + 1)
+  have hnfd := G.nf_d_nf hquad hom hres (A := A)
+  let V := S.Irr ∩ Bar.P A w s
+  let V' := S.Irr ∩ Bar.P A w (s + 1)
   let D : (SMono (BE E) A →₀ K) →ₗ[K] (SMono (BE E) A →₀ K) := S.nf ∘ₗ Bar.d K
-  let D₀ : (SMono (BE E) A →₀ K) →ₗ[K] (SMono (BE E) A →₀ K) :=
-    CutComplex.dL cuts (fun x => setM x false) forgetM G.leadKeys
   have hD : ∀ X ∈ V', D (Finsupp.single X 1) ∈ Finsupp.supported K K V := fun X hX =>
-    hnfP s _ (hdP s X hX.2)
+    G.nf_mem_P hquad hom (Bar.d_mem_P hX.2)
   have hDD : ∀ u ∈ Finsupp.supported K K V', D (D u) = 0 := fun u _ => by
     show S.nf (Bar.d K (S.nf (Bar.d K u))) = 0
     rw [hnfd, Bar.d_d, map_zero]
-  have hlead' : ∀ X ∈ V ∪ V', D (Finsupp.single X 1) - D₀ (Finsupp.single X 1) ∈
-      Finsupp.supported K K {Y | O.lt (forgetM Y) (forgetM X)} := by
-    intro X hX
-    have hXn : G.bar.Normal X := (hirr X).1 (by rcases hX with h | h <;> exact h.1)
-    show S.nf (Bar.d K (Finsupp.single X 1)) - CutComplex.dL cuts (fun x => setM x false) forgetM
-      G.leadKeys (Finsupp.single X 1) ∈ _
-    rw [Bar.d, CutComplex.d_single, CutComplex.dL_single, one_smul, one_smul, CutComplex.dX,
-      CutComplex.dLX, map_sum, Finset.sum_filter, ← Finset.sum_sub_distrib]
-    refine Submodule.sum_mem _ fun k _ => ?_
-    by_cases hk : k ∈ G.leadKeys (forgetM X)
-    · rw [if_neg (not_not.2 hk), sub_zero, map_smul]
-      refine Submodule.smul_mem _ _ ?_
-      have hne : (S.red (setM k false X)).Nonempty := by
-        by_contra hne
-        exact ((G.bar_normal_setM_false hquad hXn).1 ((hirr _).1 (S.mem_irr_iff.2 hne))) hk
-      rw [Rewriting.nf_single, one_smul]
-      refine Finsupp.supported_mono (fun Y hY => ?_) (S.nfMono_mem_below hne)
-      show O.lt (forgetM Y) (forgetM X)
-      have : O.bar.lt Y (setM k false X) := hY
-      rw [← forgetM_setM k false X]
-      exact this
-    · rw [if_pos hk, map_smul, S.nf_single_of_irr ((hirr _).2
-        ((G.bar_normal_setM_false hquad hXn).2 hk)), sub_self]
-      exact Submodule.zero_mem _
-  have hfib : ∀ X ∈ V, D₀ (Finsupp.single X 1) ∈
-      Finsupp.supported K K {Y | forgetM Y = forgetM X} := by
-    intro X _
-    show CutComplex.dL cuts (fun x => setM x false) forgetM G.leadKeys (Finsupp.single X 1) ∈ _
-    rw [CutComplex.dL_single, one_smul, CutComplex.dLX]
-    exact Submodule.sum_mem _ fun k _ => Submodule.smul_mem _ _
-      (Finsupp.single_mem_supported K _ (forgetM_setM k false X))
-  have hexact : ∀ t, ∀ u ∈ Finsupp.supported K K (V ∩ forgetM ⁻¹' {t}), D₀ u = 0 →
-      ∃ u' ∈ Finsupp.supported K K (V' ∩ forgetM ⁻¹' {t}), D₀ u' = u := by
+  have hlead' : ∀ X ∈ V ∪ V', D (Finsupp.single X 1) - G.dL A (Finsupp.single X 1) ∈
+      Finsupp.supported K K {Y | O.lt (forgetM Y) (forgetM X)} := fun X hX =>
+    G.d_sub_dL_mem hquad (by rcases hX with h | h <;> exact h.1)
+  have hfib : ∀ X ∈ V ∪ V', G.dL A (Finsupp.single X 1) ∈
+      Finsupp.supported K K {Y | forgetM Y = forgetM X} := fun X _ => G.dL_mem_fib X
+  have hexact : ∀ t, ∀ u ∈ Finsupp.supported K K (V ∩ forgetM ⁻¹' {t}), G.dL A u = 0 →
+      ∃ u' ∈ Finsupp.supported K K (V' ∩ forgetM ⁻¹' {t}), G.dL A u' = u := by
     intro t u hu hDu
     by_cases hu0 : u = 0
     · exact ⟨0, Submodule.zero_mem _, by rw [hu0, map_zero]⟩
@@ -646,29 +723,19 @@ theorem Rules.isKoszul_of_resolvable (hquad : ∀ r, (G.lead r).1.weight = 2)
     obtain ⟨k₀, hk₀e, hk₀c⟩ := Finset.exists_mem_notMem_of_card_lt_card hcard
     have hk₀L : k₀ ∉ G.leadKeys t := fun h => hk₀c
       ((G.bar_normal_iff_quad hquad X).1 ((hirr X).1 hXirr) (hXt' ▸ h))
-    have hedge : ∀ Y : SMono (BE E) A, forgetM Y = t → k₀ ∈ Y.1.edgeKeys := fun Y hY => by
-      rw [← edgeKeys_forget, ← forgetM_val, hY, ← hXt', forgetM_val, edgeKeys_forget]
+    have hk₀t : k₀ ∈ t.1.edgeKeys := by
+      rw [← hXt', forgetM_val, edgeKeys_forget]
       exact hk₀e
-    let H₀ : (SMono (BE E) A →₀ K) →ₗ[K] (SMono (BE E) A →₀ K) :=
-      CutComplex.hL cuts (fun x => setM x true) k₀
+    have hedge : ∀ Y : SMono (BE E) A, forgetM Y = t → k₀ ∈ Y.1.edgeKeys := fun Y hY => by
+      rw [← edgeKeys_forget, ← forgetM_val, hY]
+      exact hk₀t
     have hhom : ∀ Y ∈ V ∩ forgetM ⁻¹' {t},
-        (D₀ ∘ₗ H₀ + H₀ ∘ₗ D₀) (Finsupp.single Y (1 : K)) =
-          LinearMap.id (R := K) (Finsupp.single Y (1 : K)) := by
-      intro Y hY
-      have hYt : forgetM Y = t := hY.2
-      exact CutComplex.dL_hL_add (t := t) hk₀L (fun x => forgetM_setM k₀ true x)
-        (fun x _ k _ => cutKeys_setF_false k x.1)
-        (fun x hx _ => cutKeys_setF_true (edgeKeys_subset_vkeys (hedge x hx)))
-        (fun x _ h => Subtype.ext (by
-          rw [setM_val, setM_val, setF_setF_self, setF_false_of_notMem h]))
-        (fun x _ h => Subtype.ext (by
-          rw [setM_val, setM_val, setF_setF_self,
-            setF_true_of_mem (nodup_vkeys x.isShuffle x.nodup) h]))
-        (fun x _ h k hk => Subtype.ext (setF_comm (fun e => h (by rw [← e]; exact hk))
-          false true x.1)) hYt
-    refine ⟨H₀ u, Hoffbeck.map_mem_of_supported H₀ (fun Y hY => ?_) hu, ?_⟩
-    · show CutComplex.hL cuts (fun x => setM x true) k₀ (Finsupp.single Y 1) ∈ _
-      rw [CutComplex.hL_single, one_smul, CutComplex.hX]
+        (G.dL A ∘ₗ Bar.cut K k₀ + Bar.cut K k₀ ∘ₗ G.dL A) (Finsupp.single Y (1 : K)) =
+          LinearMap.id (R := K) (Finsupp.single Y (1 : K)) := fun Y hY => by
+      rw [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.comp_apply, LinearMap.id_apply]
+      exact G.dL_cut_add hk₀t hk₀L hY.2
+    refine ⟨Bar.cut K k₀ u, Hoffbeck.map_mem_of_supported (Bar.cut K k₀) (fun Y hY => ?_) hu, ?_⟩
+    · rw [Bar.cut, CutComplex.hL_single, one_smul, CutComplex.hX]
       split_ifs with h
       · exact Submodule.zero_mem _
       · obtain ⟨⟨hYirr, hYr, hYw, hYc⟩, hYt⟩ := hY
@@ -690,21 +757,45 @@ theorem Rules.isKoszul_of_resolvable (hquad : ∀ r, (G.lead r).1.weight = 2)
       rw [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.comp_apply, hDu, map_zero,
         add_zero, LinearMap.id_apply] at h
       exact h
-  have hv₀ : S.nf v ∈ Finsupp.supported K K V := hnfP s v hv
-  have hDv₀ : D (S.nf v) = 0 := by
-    show S.nf (Bar.d K (S.nf v)) = 0
-    rw [hnfd]
+  exact Hoffbeck.exact_of_leading_down (fun x y => O.lt x y) forgetM (O.wf A)
+    O.trans D (G.dL A) hD hDD hlead' hfib hexact hZ v hv hDv
+
+/-- **The bar construction of a PBW operad is exact below the diagonal**, on the normal bar
+trees: a normal cycle with fewer components than vertices is the boundary of normal bar trees,
+for the differential followed by the normal form. -/
+theorem Rules.bar_exact {A : Finset ℕ} {w s : ℕ} (hsw : s < w) {v : SMono (BE E) A →₀ K}
+    (hv : v ∈ Finsupp.supported K K ((G.bar.rw A).Irr ∩ Bar.P A w s))
+    (hDv : (G.bar.rw A).nf (Bar.d K v) = 0) :
+    ∃ u ∈ Finsupp.supported K K ((G.bar.rw A).Irr ∩ Bar.P A w (s + 1)),
+      (G.bar.rw A).nf (Bar.d K u) = v := by
+  have e : ∀ n, (G.bar.rw A).Irr ∩ Bar.P A w n ∩ forgetM ⁻¹' (Set.univ : Set (SMono E A)) =
+      (G.bar.rw A).Irr ∩ Bar.P A w n := fun n => by rw [Set.preimage_univ, Set.inter_univ]
+  obtain ⟨u, hu, hDu⟩ := G.bar_exact_down hquad hom hres hsw (Z := Set.univ)
+    (fun _ _ _ _ => Set.mem_univ _) (by rwa [e]) hDv
+  exact ⟨u, by rwa [e] at hu, hDu⟩
+
+/-- **PBW implies Koszul** (Hoffbeck; Dotsenko–Khoroshkin): a shuffle operad presented by
+quadratic rules which are resolvable — whose normal monomials are a basis of the operad, a PBW
+basis, by the Buchberger criterion when the critical ambiguities are resolvable — is Koszul. -/
+theorem Rules.isKoszul_of_resolvable : G.IsKoszul := by
+  have hlead := G.hlead_of_quad hquad
+  have hom' := G.hom_of_quad hquad hom
+  intro A w s hsw v hv hdv
+  set S := G.bar.rw A with hSdef
+  have hS : S.Resolvable := G.bar_resolvable hlead hom' hres A
+  have hDv₀ : S.nf (Bar.d K (S.nf v)) = 0 := by
+    rw [G.nf_d_nf hquad hom hres]
     exact hS.ideal_le_ker hdv
-  obtain ⟨u, hu, hDu⟩ := Hoffbeck.exact_of_leading (fun x y => O.lt x y) forgetM (O.wf A)
-    O.trans D D₀ hD hDD hlead' hfib hexact (S.nf v) hv₀ hDv₀
+  obtain ⟨u, hu, hDu⟩ := G.bar_exact hquad hom hres hsw (G.nf_mem_P hquad hom hv) hDv₀
   refine ⟨u, Finsupp.supported_mono Set.inter_subset_right hu, ?_⟩
-  have hDu' : S.nf (Bar.d K u) = S.nf v := hDu
   have e : v - Bar.d K u = (v - S.nf v) + (S.nf (Bar.d K u) - Bar.d K u) := by
-    rw [hDu', sub_add_sub_cancel]
+    rw [hDu, sub_add_sub_cancel]
   rw [e]
   refine Submodule.add_mem _ ?_ (S.nf_sub_mem _)
   rw [← neg_sub]
   exact Submodule.neg_mem _ (S.nf_sub_mem v)
+
+end Exact
 
 /-- **A quadratic Gröbner basis presents a Koszul operad** (Dotsenko–Khoroshkin, for generators
 of any arity): if the critical ambiguities of quadratic rules are resolvable, the shuffle operad
@@ -713,10 +804,7 @@ theorem Rules.isKoszul_of_critical (hquad : ∀ r, (G.lead r).1.weight = 2)
     (hom : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight = 2)
     (hcrit : ∀ {C : Finset ℕ} {r₁ r₂ : ρ} (B : G.Amb C r₁ r₂), Critical G B → B.Res) :
     G.IsKoszul := by
-  have hlead : ∀ r a, (G.lead r).1 ≠ leaf a := fun r a h => by
-    have := hquad r
-    rw [h, weight_leaf] at this
-    exact absurd this (by norm_num)
-  exact G.isKoszul_of_resolvable hquad hom (STree.resolvable_of_critical G hlead hcrit)
+  exact G.isKoszul_of_resolvable hquad hom
+    (STree.resolvable_of_critical G (G.hlead_of_quad hquad) hcrit)
 
 end Operad

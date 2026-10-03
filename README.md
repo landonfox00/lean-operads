@@ -426,6 +426,21 @@ differential restricted to the non-leading cuts is contracted by cutting along a
 (`CutComplex.dL_hL_add`), and the filtration argument over a well-founded order, by induction in
 the Dershowitz–Manna order on finite sets (`Hoffbeck.exact_of_leading`).
 
+**The Koszul dual cooperad in any arity.** `Operad/ShuffleAnyKoszulDual.lean` defines **the
+Koszul dual cooperad** of the shuffle operad presented by quadratic rules as the top homology of
+its bar construction: the combinations of bar trees with every edge cut whose differential lies in
+the ideal of the flagged rules (`Rules.KD`). For a quadratic Gröbner basis it has **a basis
+indexed by the full monomials** (`Rules.kdBasis`), those every edge of which is leading: each full
+monomial with every edge cut is the leading term of a cycle, equal to it up to trees over strictly
+smaller monomials (`Rules.exists_kappa`), and these cycles are a basis, so **the dimension of the
+Koszul dual cooperad is the number of full monomials** (`Rules.rank_KD`, `Rules.finrank_KD`) with
+no finiteness assumption. The cycles come from the exactness of the bar construction over the
+down-closed set of monomials below a full one (`Rules.bar_exact_down`, from
+`Hoffbeck.exact_of_leading_down`); they are linearly independent and spanning by two lemmas on
+triangular families (`Hoffbeck.linearIndependent_of_triangular`, `Hoffbeck.span_of_triangular`),
+the leading monomial of a cycle being full since cutting along an edge which is not leading
+contracts its leading part (`Rules.isFull_of_mem_KD`).
+
 **Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
 most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift
 weights uniformly (`STree.IsSCtx.weight_add`), so every admissible order has a weight-graded

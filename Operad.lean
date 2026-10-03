@@ -128,5 +128,6 @@ import Operad.Hoffbeck
 import Operad.ShuffleAnyBar
 import Operad.ShuffleAnyBarNormal
 import Operad.ShuffleAnyKoszul
+import Operad.ShuffleAnyKoszulDual
 import Operad.ShuffleAnyInhom
 import Operad.LInfinity

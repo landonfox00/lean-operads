@@ -17,6 +17,7 @@ Two abstract tools for proving that bar constructions are acyclic, as needed for
 -/
 import Mathlib.Data.Multiset.DershowitzManna
 import Mathlib.LinearAlgebra.Finsupp.LinearCombination
+import Mathlib.LinearAlgebra.LinearIndependent.Defs
 import Mathlib.LinearAlgebra.Finsupp.Supported
 import Mathlib.Order.Preorder.Finite
 
@@ -258,6 +259,45 @@ lemma map_mem_of_supported {X' : Type*} {s : Set X} (f : (X →₀ R) →ₗ[R] 
   rintro _ ⟨x, hx, rfl⟩
   exact h x hx
 
+/-- **The leading part of a cycle**: the part over `t` of a cycle of `D` whose other part lies
+over elements other than `t` and not above it is a cycle of the leading part `D₀`. -/
+lemma leading_cycle (irr : ∀ a, ¬ lt a a) {V : Set X} (D D₀ : (X →₀ R) →ₗ[R] (X →₀ R))
+    (hlead : ∀ x ∈ V,
+      D (single x 1) - D₀ (single x 1) ∈ supported R R {y | lt (u y) (u x)})
+    (hfib : ∀ x ∈ V, D₀ (single x 1) ∈ supported R R {y | u y = u x}) {t : M}
+    {vt vr : X →₀ R} (hvt : vt ∈ supported R R (V ∩ u ⁻¹' {t}))
+    (hvr : vr ∈ supported R R (V ∩ {x | u x ≠ t ∧ ¬ lt t (u x)})) (hDv : D (vt + vr) = 0) :
+    D₀ vt = 0 := by
+  have h1 : D vt - D₀ vt ∈ supported R R {y | lt (u y) t} := by
+    refine map_mem_of_supported (D - D₀) (fun x hx => ?_) hvt
+    rw [LinearMap.sub_apply]
+    have := hlead x hx.1
+    rwa [show u x = t from hx.2] at this
+  have h2 : D vr ∈ supported R R {y | u y ≠ t} := by
+    refine map_mem_of_supported D (fun x hx => ?_) hvr
+    have s1 : {y | lt (u y) (u x)} ⊆ {y | u y ≠ t} := fun y hy heq => by
+      rw [Set.mem_setOf_eq, heq] at hy
+      exact hx.2.2 hy
+    have s2 : {y | u y = u x} ⊆ {y | u y ≠ t} := fun y hy heq => by
+      rw [Set.mem_setOf_eq, heq] at hy
+      exact hx.2.1 hy.symm
+    rw [← sub_add_cancel (D (single x 1)) (D₀ (single x 1))]
+    exact Submodule.add_mem _ (supported_mono s1 (hlead x hx.1)) (supported_mono s2 (hfib x hx.1))
+  have hA : D₀ vt ∈ supported R R {y | u y = t} := by
+    refine map_mem_of_supported D₀ (fun x hx => ?_) hvt
+    have := hfib x hx.1
+    rwa [show u x = t from hx.2] at this
+  have hsum : D vt + D vr = 0 := by rw [← map_add, hDv]
+  have hB : D₀ vt ∈ supported R R {y | u y ≠ t} := by
+    have : D₀ vt = -(D vt - D₀ vt) - D vr := by rw [neg_sub, sub_sub, hsum, sub_zero]
+    have s3 : {y | lt (u y) t} ⊆ {y | u y ≠ t} := fun y hy heq => by
+      rw [Set.mem_setOf_eq, heq] at hy
+      exact irr t hy
+    rw [this]
+    exact Submodule.sub_mem _ (Submodule.neg_mem _ (supported_mono s3 h1)) h2
+  have hdisj : Disjoint {y | u y = t} {y | u y ≠ t} := Set.disjoint_left.2 fun _ h h' => h' h
+  exact Submodule.disjoint_def.1 (disjoint_supported_supported hdisj) _ hA hB
+
 /-- **Hoffbeck's filtration argument.** Let `D` be a linear map on the free module on `X`, squaring
 to zero from `V'` and mapping `V'` to `V`, and `D₀` its leading part: over the well-founded order
 `lt` on `M`, through `u : X → M`, `D` and `D₀` differ on `V ∪ V'` by terms over strictly smaller
@@ -324,39 +364,13 @@ theorem exact_of_leading (wf : WellFounded lt) (trans : ∀ {a b c}, lt a b → 
     rw [Finset.mem_coe, support_filter, Finset.mem_filter] at hx
     exact hx
   -- the part of `D v` over `t` is `D₀ vt`, so `D₀ vt = 0`
-  have h1 : D vt - D₀ vt ∈ supported R R {y | lt (u y) t} := by
-    refine map_mem_of_supported (D - D₀) (fun x hx => ?_) hvt
-    rw [LinearMap.sub_apply]
-    have := hlead x (Or.inl hx.1)
-    rwa [show u x = t from hx.2] at this
-  have h2 : D vr ∈ supported R R {y | u y ≠ t} := by
-    refine map_mem_of_supported D (fun x hx => ?_) hvr
-    have hxV : x ∈ V := (mem_supported R v).1 hv hx.1
-    have s1 : {y | lt (u y) (u x)} ⊆ {y | u y ≠ t} := fun y hy heq => by
-      rw [Set.mem_setOf_eq, heq] at hy
-      exact hmax x hx.1 hy
-    have s2 : {y | u y = u x} ⊆ {y | u y ≠ t} := fun y hy heq => by
-      rw [Set.mem_setOf_eq, heq] at hy
-      exact hx.2 hy.symm
-    rw [← sub_add_cancel (D (single x 1)) (D₀ (single x 1))]
-    exact Submodule.add_mem _ (supported_mono s1 (hlead x (Or.inl hxV)))
-      (supported_mono s2 (hfib x hxV))
+  have s : {x | x ∈ v.support ∧ u x ≠ t} ⊆ V ∩ {x | u x ≠ t ∧ ¬ lt t (u x)} :=
+    fun x hx => ⟨(mem_supported R v).1 hv hx.1, hx.2, hmax x hx.1⟩
+  have hvr' : vr ∈ supported R R (V ∩ {x | u x ≠ t ∧ ¬ lt t (u x)}) := supported_mono s hvr
   have hD₀vt : D₀ vt = 0 := by
-    have hA : D₀ vt ∈ supported R R {y | u y = t} := by
-      refine map_mem_of_supported D₀ (fun x hx => ?_) hvt
-      have := hfib x hx.1
-      rwa [show u x = t from hx.2] at this
-    have hsum : D vt + D vr = 0 := by rw [← map_add, hvsplit, hDv]
-    have hB : D₀ vt ∈ supported R R {y | u y ≠ t} := by
-      have : D₀ vt = -(D vt - D₀ vt) - D vr := by rw [neg_sub, sub_sub, hsum, sub_zero]
-      have s3 : {y | lt (u y) t} ⊆ {y | u y ≠ t} := fun y hy heq => by
-        rw [Set.mem_setOf_eq, heq] at hy
-        exact irr t hy
-      rw [this]
-      exact Submodule.sub_mem _ (Submodule.neg_mem _ (supported_mono s3 h1)) h2
-    have hdisj : Disjoint {y | u y = t} {y | u y ≠ t} :=
-      Set.disjoint_left.2 fun _ h h' => h' h
-    exact Submodule.disjoint_def.1 (disjoint_supported_supported hdisj) _ hA hB
+    refine leading_cycle lt u irr D D₀ (fun x hx => hlead x (Or.inl hx)) hfib hvt hvr' ?_
+    rw [hvsplit]
+    exact hDv
   -- a primitive over `t`, and what remains lies over smaller elements
   obtain ⟨wt, hwt, hD₀wt⟩ := hexact t vt hvt hD₀vt
   have hwtV' : wt ∈ supported R R V' := supported_mono Set.inter_subset_left hwt
@@ -385,6 +399,188 @@ theorem exact_of_leading (wf : WellFounded lt) (trans : ∀ {a b c}, lt a b → 
     · exact Or.inr h
   obtain ⟨w', hw', hDw'⟩ := ih _ hDM (v - D wt) hv'V rfl hDv'
   exact ⟨w' + wt, Submodule.add_mem _ hw' hwtV', by rw [map_add, hDw', sub_add_cancel]⟩
+
+/-- **Hoffbeck's filtration argument over a down-closed set**: when the leading part also
+preserves the fibres on `V'`, every cycle of `D` in `V` lying over a down-closed set `Z` is the
+boundary of an element of `V'` lying over `Z`. -/
+theorem exact_of_leading_down (wf : WellFounded lt)
+    (trans : ∀ {a b c}, lt a b → lt b c → lt a c)
+    {V V' : Set X} (D D₀ : (X →₀ R) →ₗ[R] (X →₀ R))
+    (hD : ∀ x ∈ V', D (single x 1) ∈ supported R R V)
+    (hDD : ∀ w ∈ supported R R V', D (D w) = 0)
+    (hlead : ∀ x ∈ V ∪ V',
+      D (single x 1) - D₀ (single x 1) ∈ supported R R {y | lt (u y) (u x)})
+    (hfib : ∀ x ∈ V ∪ V', D₀ (single x 1) ∈ supported R R {y | u y = u x})
+    (hexact : ∀ t, ∀ v ∈ supported R R (V ∩ u ⁻¹' {t}), D₀ v = 0 →
+      ∃ w ∈ supported R R (V' ∩ u ⁻¹' {t}), D₀ w = v)
+    {Z : Set M} (hZ : ∀ m ∈ Z, ∀ m', lt m' m → m' ∈ Z) :
+    ∀ v ∈ supported R R (V ∩ u ⁻¹' Z), D v = 0 →
+      ∃ w ∈ supported R R (V' ∩ u ⁻¹' Z), D w = v := by
+  refine exact_of_leading lt u wf trans D D₀ (fun x hx => ?_)
+    (fun w hw => hDD w (supported_mono Set.inter_subset_left hw)) (fun x hx => hlead x ?_)
+    (fun x hx => hfib x (Or.inl hx.1)) (fun t v hv hv0 => ?_)
+  · rw [supported_inter]
+    refine ⟨hD x hx.1, ?_⟩
+    rw [← sub_add_cancel (D (single x 1)) (D₀ (single x 1))]
+    have s1 : {y | lt (u y) (u x)} ⊆ u ⁻¹' Z := fun y hy => hZ _ hx.2 _ hy
+    have s2 : {y | u y = u x} ⊆ u ⁻¹' Z := fun y hy => by
+      rw [Set.mem_preimage, show u y = u x from hy]
+      exact hx.2
+    exact Submodule.add_mem _ (supported_mono s1 (hlead x (Or.inr hx.1)))
+      (supported_mono s2 (hfib x (Or.inr hx.1)))
+  · rcases hx with h | h
+    exacts [Or.inl h.1, Or.inr h.1]
+  · by_cases ht : t ∈ Z
+    · have s : V ∩ u ⁻¹' Z ∩ u ⁻¹' {t} ⊆ V ∩ u ⁻¹' {t} :=
+        Set.inter_subset_inter_left _ Set.inter_subset_left
+      obtain ⟨w, hw, hDw⟩ := hexact t v (supported_mono s hv) hv0
+      have s' : V' ∩ u ⁻¹' {t} ⊆ V' ∩ u ⁻¹' Z ∩ u ⁻¹' {t} := fun x hx => by
+        refine ⟨⟨hx.1, ?_⟩, hx.2⟩
+        rw [Set.mem_preimage, Set.mem_singleton_iff.1 hx.2]
+        exact ht
+      exact ⟨w, supported_mono s' hw, hDw⟩
+    · have hv' : v = 0 := by
+        rw [← Finsupp.support_eq_empty, Finset.eq_empty_iff_forall_notMem]
+        intro x hx
+        obtain ⟨⟨-, hxZ⟩, hxt⟩ := (mem_supported R v).1 hv hx
+        rw [Set.mem_preimage, Set.mem_singleton_iff] at hxt
+        rw [Set.mem_preimage, hxt] at hxZ
+        exact ht hxZ
+      exact ⟨0, Submodule.zero_mem _, by rw [map_zero, hv']⟩
+
+/-! ## Triangular families -/
+
+/-- **A finite set has a maximal element** for a strict order, through any map. -/
+lemma exists_max (irr : ∀ a, ¬ lt a a) (trans : ∀ {a b c}, lt a b → lt b c → lt a c)
+    {ι : Type*} (f : ι → M) {s : Finset ι} (hs : s.Nonempty) :
+    ∃ i ∈ s, ∀ j ∈ s, ¬ lt (f i) (f j) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => exact absurd hs Finset.not_nonempty_empty
+  | insert a s ha ih =>
+    rcases s.eq_empty_or_nonempty with rfl | hs'
+    · refine ⟨a, Finset.mem_insert_self a ∅, fun j hj h => ?_⟩
+      rcases Finset.mem_insert.1 hj with rfl | hj
+      · exact irr _ h
+      · exact absurd hj (Finset.notMem_empty _)
+    · obtain ⟨i, hi, hmax⟩ := ih hs'
+      by_cases hia : lt (f i) (f a)
+      · refine ⟨a, Finset.mem_insert_self a s, fun j hj h => ?_⟩
+        rcases Finset.mem_insert.1 hj with rfl | hj
+        · exact irr _ h
+        · exact hmax j hj (trans hia h)
+      · refine ⟨i, Finset.mem_insert_of_mem hi, fun j hj h => ?_⟩
+        rcases Finset.mem_insert.1 hj with rfl | hj
+        · exact hia h
+        · exact hmax j hj h
+
+/-- The coefficient of `x` in an element equal to `x` up to terms over elements strictly smaller
+than `u x` is `1`. -/
+lemma apply_self_of_triangular (irr : ∀ a, ¬ lt a a) {x : X} {f : X →₀ R}
+    (hf : f - single x 1 ∈ supported R R {y | lt (u y) (u x)}) : f x = 1 := by
+  have h : (f - single x 1 : X →₀ R) x = 0 := by
+    by_contra h
+    exact irr _ ((mem_supported R _).1 hf (Finsupp.mem_support_iff.2 h))
+  rwa [Finsupp.sub_apply, Finsupp.single_eq_same, sub_eq_zero] at h
+
+/-- **A triangular family is linearly independent**: a family of elements each equal to a basis
+element `e i`, for an injective `e`, up to terms over elements strictly smaller than `u (e i)`. -/
+theorem linearIndependent_of_triangular (irr : ∀ a, ¬ lt a a)
+    (trans : ∀ {a b c}, lt a b → lt b c → lt a c) {ι : Type*} {e : ι → X}
+    (he : Function.Injective e) {f : ι → X →₀ R}
+    (hf : ∀ i, f i - single (e i) 1 ∈ supported R R {y | lt (u y) (u (e i))}) :
+    LinearIndependent R f := by
+  classical
+  have hcoef : ∀ i j, i ≠ j → f j (e i) ≠ 0 → lt (u (e i)) (u (e j)) := by
+    intro i j hij h
+    have h1 : (f j - single (e j) 1 : X →₀ R) (e i) ≠ 0 := by
+      rwa [Finsupp.sub_apply, Finsupp.single_eq_of_ne (he.ne hij), sub_zero]
+    exact (mem_supported R _).1 (hf j) (Finsupp.mem_support_iff.2 h1)
+  rw [linearIndependent_iff']
+  intro s g hg i₀ hi₀
+  by_contra hne
+  obtain ⟨i, hi, hmax⟩ := exists_max lt irr trans (fun i => u (e i))
+    (s := s.filter (g · ≠ 0)) ⟨i₀, Finset.mem_filter.2 ⟨hi₀, hne⟩⟩
+  obtain ⟨his, hgi⟩ := Finset.mem_filter.1 hi
+  have h := congrArg (fun v => v (e i)) hg
+  simp only [Finsupp.coe_finsetSum, Finset.sum_apply, Finsupp.coe_smul, Pi.smul_apply,
+    smul_eq_mul, Finsupp.coe_zero, Pi.zero_apply] at h
+  rw [Finset.sum_eq_single i (fun j hj hji => ?_) (fun h => absurd his h),
+    apply_self_of_triangular lt u irr (hf i), mul_one] at h
+  · exact hgi h
+  · by_contra hj'
+    have hgj : g j ≠ 0 := left_ne_zero_of_mul hj'
+    exact hmax j (Finset.mem_filter.2 ⟨hj, hgj⟩)
+      (hcoef i j (Ne.symm hji) (right_ne_zero_of_mul hj'))
+
+/-- **A triangular family spans**: if the maximal elements of the support of every element of a
+submodule `S` are among the basis elements `e i`, and each `f i ∈ S` is equal to `e i` up to terms
+over elements strictly smaller than `u (e i)`, the family `f` spans `S`. -/
+theorem span_of_triangular (wf : WellFounded lt) (trans : ∀ {a b c}, lt a b → lt b c → lt a c)
+    {ι : Type*} {e : ι → X} {f : ι → X →₀ R} {S : Submodule R (X →₀ R)} (hfS : ∀ i, f i ∈ S)
+    (hf : ∀ i, f i - single (e i) 1 ∈ supported R R {y | lt (u y) (u (e i))})
+    (hmax : ∀ v ∈ S, ∀ x ∈ v.support, (∀ y ∈ v.support, ¬ lt (u x) (u y)) → x ∈ Set.range e) :
+    S ≤ Submodule.span R (Set.range f) := by
+  classical
+  have irr : ∀ a, ¬ lt a a := fun a => wf.irrefl.irrefl a
+  letI : Preorder X :=
+    { le := fun a b => a = b ∨ lt (u a) (u b)
+      lt := fun a b => lt (u a) (u b)
+      le_refl := fun _ => Or.inl rfl
+      le_trans := by
+        rintro a b c (rfl | hab) (rfl | hbc)
+        · exact Or.inl rfl
+        · exact Or.inr hbc
+        · exact Or.inr hab
+        · exact Or.inr (trans hab hbc)
+      lt_iff_le_not_ge := fun a b => by
+        refine ⟨fun h => ⟨Or.inr h, ?_⟩, ?_⟩
+        · rintro (rfl | h')
+          · exact irr _ h
+          · exact irr _ (trans h h')
+        · rintro ⟨rfl | h, h'⟩
+          · exact absurd (Or.inl rfl) h'
+          · exact h }
+  haveI : WellFoundedLT X := ⟨InvImage.wf u wf⟩
+  suffices key : ∀ U : Multiset X, ∀ v ∈ S, v.support.val = U →
+      v ∈ Submodule.span R (Set.range f) from fun v hv => key _ v hv rfl
+  intro U
+  have hwf := Multiset.wellFounded_isDershowitzMannaLT (α := X)
+  induction U using hwf.induction with
+  | _ U ih =>
+  intro v hv hU
+  by_cases hv0 : v = 0
+  · rw [hv0]
+    exact Submodule.zero_mem _
+  obtain ⟨x, hx, hxmax⟩ := exists_max lt irr trans u (Finsupp.support_nonempty_iff.2 hv0)
+  obtain ⟨i, rfl⟩ := hmax v hv x hx hxmax
+  have hdiag := apply_self_of_triangular lt u irr (hf i)
+  set v' := v - v (e i) • f i with hv'
+  have hv'S : v' ∈ S := S.sub_mem hv (S.smul_mem _ (hfS i))
+  have hsupp : ∀ y ∈ v'.support, (y ∈ v.support ∧ y ≠ e i) ∨ lt (u y) (u (e i)) := by
+    intro y hy
+    rw [Finsupp.mem_support_iff, hv', Finsupp.sub_apply, Finsupp.smul_apply, smul_eq_mul] at hy
+    have hyi : y ≠ e i := by
+      rintro rfl
+      rw [hdiag, mul_one, sub_self] at hy
+      exact hy rfl
+    by_cases hvy : v y = 0
+    · right
+      have h1 : (f i - single (e i) 1 : X →₀ R) y ≠ 0 := by
+        rw [Finsupp.sub_apply, Finsupp.single_eq_of_ne hyi, sub_zero]
+        intro h
+        rw [hvy, h, mul_zero, sub_zero] at hy
+        exact hy rfl
+      exact (mem_supported R _).1 (hf i) (Finsupp.mem_support_iff.2 h1)
+    · exact Or.inl ⟨Finsupp.mem_support_iff.2 hvy, hyi⟩
+  have hDM : Multiset.IsDershowitzMannaLT v'.support.val U := by
+    rw [← hU]
+    exact isDershowitzMannaLT_of_subset (fun a b => lt (u a) (u b)) (fun _ _ => Iff.rfl) hx
+      (irr _) hsupp
+  have e1 : v = v' + v (e i) • f i := by rw [hv', sub_add_cancel]
+  rw [e1]
+  exact Submodule.add_mem _ (ih _ hDM v' hv'S rfl)
+    (Submodule.smul_mem _ _ (Submodule.subset_span ⟨i, rfl⟩))
 
 end Hoffbeck
 
