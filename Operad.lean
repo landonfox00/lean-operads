@@ -105,3 +105,4 @@ import Operad.Schur
 import Operad.FreeAlgebra
 import Operad.ComAlgebra
 import Operad.SymCooperad
+import Operad.ShuffleOperad

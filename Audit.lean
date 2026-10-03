@@ -1166,3 +1166,7 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymCooperadHom.dual
 #print axioms Operad.instSymCooperadComC
 #print axioms Operad.ComC.dualHom_bijective
+#print axioms Operad.ShuffleOperadIdeal.instShuffleOperadQuot
+#print axioms Operad.SymOperad.toShuffle
+#print axioms Operad.SymOperadHom.toShuffle
+#print axioms Operad.SymOperadIdeal.toShuffleQuot

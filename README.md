@@ -304,6 +304,11 @@ infinitesimal decompositions `C (Without A i ⊕ B) → C A ⊗ C B`, their morp
 structure on the linear dual of a cooperad (`SymCooperad.instSymOperadDual`), and the commutative
 cooperad, whose dual is `Com`.
 
+**Shuffle operads.** `Operad/ShuffleOperad.lean` defines shuffle operads on ordered species, with
+partial compositions along shuffles (`IsShuffle`), their morphisms, ideals and quotients, and the
+forgetful functor from symmetric operads (`SymOperad.toShuffle`), which transports morphisms,
+ideals and quotients.
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the
