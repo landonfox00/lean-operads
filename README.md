@@ -497,6 +497,17 @@ along `φ`, agree on the generators exactly when the Maurer–Cartan equation ho
 `Cobar.homOf_comm`). The universal twisting morphism satisfies the Maurer–Cartan equation
 (`Cobar.ι_mc`).
 
+**The convolution Lie algebra and twisted differentials.** `Operad/InvLie.lean` defines the
+graded commutator `[q, q'] = q ⋆ q' - σ(|q| |q'|) q' ⋆ q` of invariant families of a graded operad,
+on all families through their parity decompositions (`GrOperad.Inv.bracket`). It adds parities, is
+graded antisymmetric and satisfies **the graded Jacobi identity** (`GrOperad.Inv.jacobi`), by the
+graded pre-Lie identity; morphisms preserve it and derivations are derivations of it. For an odd
+family, `[α, [α, x]] = [α ⋆ α, x]` without dividing by two (`GrOperad.Inv.bracket_bracket_odd`),
+so for an odd derivation `D` with `D² = 0` and `D α + α ⋆ α = 0`, **the twisted differential
+`D + [α, -]` squares to zero** (`GrOperad.Inv.twD_twD`): for a twisting morphism, this is the
+twisted convolution complex (`Twisting.twD_twD`). When `2` is invertible, the Maurer–Cartan
+equation reads `∂α + ½ [α, α] = 0` (`Twisting.mc_bracket`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every
