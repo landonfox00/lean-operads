@@ -405,6 +405,27 @@ through the action of the Lie algebra on the quotient by left multiplication. In
 canonical map `g → U g` is injective for every Lie algebra which is free as a module
 (`UniversalEnvelopingAlgebra.ι_injective_of_free`).
 
+**PBW implies Koszul in any arity.** `Operad/ShuffleAnyBar.lean` builds **the bar construction of
+the free shuffle operad** on generators of any arity: bar trees are monomials whose vertices carry
+a flag saying whether the edge above is cut; a vertex is named by the least leaf and the number of
+vertices of its subtree, names which are distinct in a monomial (`STree.nodup_vkeys`); merging
+along each cut edge with the sign of its position among the cuts is a differential squaring to
+zero (`STree.Bar.d_d`). For homogeneous rules `G`, the **flagged rules** `G.bar` rewrite a leading
+monomial at an uncut edge; their ideal is a subcomplex (`Rules.bar_d_mem_ideal`), and the quotient
+is the bar construction of the operad presented by `G`. `Operad/ShuffleAnyBarNormal.lean` shows
+that the critical ambiguities of the flagged rules have no cut edge (`Rules.critical_cuts`), so
+they are flagged images of ambiguities of `G` and **resolvability passes to the bar
+construction** (`Rules.bar_resolvable`): a PBW basis of the operad gives a basis of normal bar
+trees. `Operad/ShuffleAnyKoszul.lean` shows that **normality is local** for quadratic rules — a
+bar tree is normal exactly when the edges whose window is leading are cut
+(`Rules.bar_normal_iff_quad`) — and proves **PBW implies Koszul**
+(`Rules.isKoszul_of_resolvable`, and `Rules.isKoszul_of_critical` from the critical ambiguities):
+the homology of the bar construction vanishes below the diagonal in every arity. The proof is
+Hoffbeck's, through two abstract tools in `Operad/Hoffbeck.lean`: complexes of cuts, whose
+differential restricted to the non-leading cuts is contracted by cutting along a non-leading edge
+(`CutComplex.dL_hL_add`), and the filtration argument over a well-founded order, by induction in
+the Dershowitz–Manna order on finite sets (`Hoffbeck.exact_of_leading`).
+
 **The homotopy transfer theorem.** `Operad/HTT.lean` proves Kadeishvili's theorem in the form of
 Kontsevich–Soibelman and Merkulov: for a dg algebra `(V, d, μ)` in the bar convention and a
 retraction onto the image of an even idempotent `e` with an odd homotopy `h` (`h d + d h = e - 1`),

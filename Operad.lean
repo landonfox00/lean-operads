@@ -124,3 +124,7 @@ import Operad.ShuffleAnyOrder
 import Operad.DiamondWords
 import Operad.PBW
 import Operad.HTT
+import Operad.Hoffbeck
+import Operad.ShuffleAnyBar
+import Operad.ShuffleAnyBarNormal
+import Operad.ShuffleAnyKoszul

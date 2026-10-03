@@ -207,6 +207,41 @@ lemma nf_sub_mem (v : M →₀ R) : S.nf v - v ∈ S.ideal :=
       exact S.nfMono_sub_mem m)
     (by rw [supported_univ]; trivial)
 
+/-- **The normal form stays in a set closed under reduction.** -/
+lemma nfMono_mem_of_closed {s : Set M} (hs : ∀ m ∈ s, ∀ v ∈ S.red m, v ∈ supported R R s) :
+    ∀ m ∈ s, S.nfMono m ∈ supported R R s := by
+  intro m
+  induction m using S.wf.induction with
+  | _ m ih =>
+  intro hm
+  by_cases h : (S.red m).Nonempty
+  · rw [S.nfMono_of_nonempty h]
+    have hsupp : h.some ∈ supported R R (s ∩ S.below m) := by
+      rw [supported_inter]
+      exact ⟨hs m hm _ h.some_mem, S.red_mem_supported h.some_mem⟩
+    refine mem_of_supported (N := (supported R R s).comap S.nf) (fun m' hm' => ?_) hsupp
+    rw [Submodule.mem_comap, nf_single, one_smul]
+    exact ih m' hm'.2 hm'.1
+  · rw [S.nfMono_of_irr (S.mem_irr_iff.2 h)]
+    exact single_mem_supported R 1 hm
+
+/-- **The normal form maps the combinations of a set closed under reduction into
+themselves.** -/
+lemma nf_mem_of_closed {s : Set M} (hs : ∀ m ∈ s, ∀ v ∈ S.red m, v ∈ supported R R s)
+    {v : M →₀ R} (hv : v ∈ supported R R s) : S.nf v ∈ supported R R s :=
+  mem_of_supported (N := (supported R R s).comap S.nf)
+    (fun m hm => by
+      rw [Submodule.mem_comap, nf_single, one_smul]
+      exact S.nfMono_mem_of_closed hs m hm) hv
+
+/-- **The normal form of a reducible monomial lies strictly below it.** -/
+lemma nfMono_mem_below {m : M} (h : (S.red m).Nonempty) :
+    S.nfMono m ∈ supported R R (S.below m) := by
+  rw [S.nfMono_of_nonempty h]
+  refine S.nf_mem_of_closed (fun m' hm' v hv => ?_) (S.red_mem_supported h.some_mem)
+  have hsub : S.below m' ⊆ S.below m := fun _ h' => S.trans h' hm'
+  exact supported_mono hsub (S.red_mem_supported hv)
+
 /-! ## The diamond lemma -/
 
 lemma idealOn_le_ker {s : Set M} (h : ∀ m ∈ s, ∀ v ∈ S.red m, S.nf v = S.nfMono m) :
