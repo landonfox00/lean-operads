@@ -1245,6 +1245,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGr.homEquiv
 #print axioms Operad.FreeGr.homEquiv_symm_gen
 #print axioms Operad.FreeGr.hom_ext
+#print axioms Operad.GrOperadIdeal.instGrOperad
+#print axioms Operad.GrOperadIdeal.liftHom_unique
+#print axioms Operad.GrOperadHom.kerLift_injective
+#print axioms Operad.GrOperadIdeal.presHomEquiv
+#print axioms Operad.FreeGr.presHomEquiv
+#print axioms Operad.FreeGr.pres_hom_ext
 #print axioms Operad.Rewriting.resolvable_iff
 #print axioms Operad.Rewriting.Resolvable.basis_apply
 #print axioms Operad.Rewriting.Resolvable.nf_eq_zero_iff

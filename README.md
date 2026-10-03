@@ -436,6 +436,11 @@ morphisms out of a twisted linearization are set morphisms into the twisted oper
 sign data** (`SgnLin.homEquiv`). So the ungraded freeness of planar trees gives **the universal
 property of the free graded operad** (`FreeGr.homEquiv`): a morphism of graded operads
 (`GrOperadHom`) out of it is an operation of the right parity for each generator.
+`Operad/GrPresentation.lean` has ideals of graded operads, stable under the parity projections
+(`GrOperadIdeal`), **quotients** (`GrOperadIdeal.instGrOperad`, parallel associativity descending
+through homogeneous representatives) with their universal property, kernels, and **presented
+graded operads**: a morphism out of a free graded operad modulo relators is a choice of generator
+values of the right parities killing the relators (`FreeGr.presHomEquiv`).
 
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible

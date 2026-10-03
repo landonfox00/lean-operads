@@ -127,6 +127,7 @@ import Operad.GerBV
 import Operad.HyperCom
 import Operad.DGOperad
 import Operad.FreeGraded
+import Operad.GrPresentation
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny
