@@ -1184,3 +1184,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ColEnd.instColOperad
 #print axioms Operad.SymOperad.colHomEquiv
 #print axioms Operad.SymOperad.colAlgebraEquiv
+#print axioms Operad.CycOperad.toSymOperad
+#print axioms Operad.CycOperad.map_swap_one
+#print axioms Operad.CycOperad.reroot_comp_inl
+#print axioms Operad.CycOperad.reroot_comp_inr
+#print axioms Operad.CycOperad.instCom
+#print axioms Operad.CycOperad.compX_root
+#print axioms Operad.CycOperad.compX_eq_compY
+#print axioms Operad.CycOperad.ofExt
+#print axioms Operad.CycOperad.toSymOperad_ofExt
+#print axioms Operad.CycOperad.extEquiv

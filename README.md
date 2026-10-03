@@ -323,6 +323,17 @@ algebras over colored operads (`ColAlgebra`). Operads are one-colored operads
 (`SymOperad.toCol`, with the same morphisms `SymOperad.colHomEquiv`) with the same algebras
 (`SymOperad.colAlgebraEquiv`).
 
+**Cyclic operads.** `Operad/Cyclic.lean` defines cyclic operads in the entries-only form: a linear
+species with gluings `C X → C Y → C ((X ∖ a) ⊔ (Y ∖ b))` of an entry of one operation to an entry
+of another, equivariant, commutative and associative, with a two-entry unit (`CycOperad`). Its
+underlying operad `A ↦ C (Option A)` (`CycOperad.toSymOperad`) carries the extended symmetric
+action by all bijections of the entries, which fixes the unit and is compatible with composition
+in the sense of Getzler–Kapranov (`CycOperad.reroot_comp_inl`, `CycOperad.reroot_comp_inr`); the
+commutative cyclic operad has underlying operad `Com`. `Operad/CyclicExt.lean` proves the
+converse: on a species vanishing on empty sets of entries, **cyclic operad structures are the
+operad structures on `C ∘ Option` with a compatible extended action** (`CycOperad.extEquiv`), the
+gluing being recovered by rooting at any entry (`CycOperad.compX_root`, `CycOperad.compX_eq_compY`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the
