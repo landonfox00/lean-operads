@@ -1181,3 +1181,6 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeReg.finrank_eq
 #print axioms Operad.Pres.shuffle_hom_ext
 #print axioms Operad.SymOperadIdeal.shuffle_hom_ext
+#print axioms Operad.ColEnd.instColOperad
+#print axioms Operad.SymOperad.colHomEquiv
+#print axioms Operad.SymOperad.colAlgebraEquiv

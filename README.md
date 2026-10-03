@@ -316,6 +316,13 @@ trees of any arity form the free non-symmetric set operad (`TreeOfArity.homEquiv
 free symmetric set operad on generators of any arity is the regular operad of planar trees
 (`FreeReg.regIso`), with a basis and the dimension `n!` times the number of planar trees.
 
+**Colored operads.** `Operad/Colored.lean` defines colored operads in the species convention, with
+relabellings and partial compositions carrying proofs that the colors match (`ColOperad`), their
+morphisms, the endomorphism colored operad of a family of modules (`ColEnd.instColOperad`) and
+algebras over colored operads (`ColAlgebra`). Operads are one-colored operads
+(`SymOperad.toCol`, with the same morphisms `SymOperad.colHomEquiv`) with the same algebras
+(`SymOperad.colAlgebraEquiv`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the
