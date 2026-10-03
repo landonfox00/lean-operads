@@ -520,6 +520,16 @@ algebra** over the cobar construction of a coaugmented graded cooperad `C` is a 
 operads `ΩC → End_V` (`HoAlgebra`), and these are **the twisting morphisms `C → End_V`**
 (`HoAlgebra.equivTwisting`).
 
+**The graded decomposition cooperad.** `Operad/GrDecCooperad.lean` makes the twisted linearization
+of a set operad with finite factorizations and sign data a **graded cooperad**
+(`SgnLin.instGrCooperad`): an operation decomposes as the signed sum of its factorizations,
+`Δᵢ x = ∑_{p ∘ᵢ q = x} σ(sgn i p q) p ⊗ q`, and every axiom is the corresponding axiom of the set
+operad on coefficients (`SgnLin.decompT_apply`), together with the cocycle conditions of the sign,
+the parallel one matching the Koszul sign of the super swap. When the units only factor into units,
+the unit is a coaugmentation (`SgnLin.instCoaug`); so **the free graded operad on generators of
+any arity is a coaugmented graded cooperad** (`FreeGr.instUnitFact`), decomposing a planar tree as
+the signed sum of its cuts.
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every
