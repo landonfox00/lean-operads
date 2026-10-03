@@ -309,7 +309,17 @@ a linear map commuting with the generators of a presented operad is a morphism o
 bracket (`Lie.homEquiv`); when `2` is invertible, `Lie`-algebras are Mathlib's Lie algebras
 (`LieAlg.toLieAlgebra`, `LieAlg.ofLieAlgebra`, `LieAlg.homEquiv`), the free `Lie`-algebra on a module
 is the free Lie algebra on it (`Schur.lieLift`), and **the free `Lie`-algebra on `X →₀ R` is
-Mathlib's `FreeLieAlgebra R X`** (`Schur.freeLieAlgebraEquiv`). `Operad/SymCooperad.lean` has symmetric
+Mathlib's `FreeLieAlgebra R X`** (`Schur.freeLieAlgebraEquiv`). `Operad/Composite.lean` builds **the composition product of linear species**: `(M ∘ N)(S)` is
+spanned by `⟨m; y; e⟩` with `m ∈ M A`, `y a ∈ N (B a)` and `e : (Σ a, B a) ≃ S`, up to
+multilinearity and relabelling (`Composite`, `Composite.lift`); it is a species, functorial in both
+variables (`Composite.map₂`), with unit the species `I` and unitors (`Composite.leftUnitorEquiv`,
+`Composite.rightUnitorEquiv`). `Operad/CompositeAssoc.lean` proves **associativity**: the associator
+`(M ∘ N) ∘ L ≅ M ∘ (N ∘ L)` (`Composite.assocEquiv`), whose inverse is multilinear in the classes
+of the slots and respects their relations slot by slot. `Operad/OperadMonoid.lean` proves that
+**operads are the monoids for the composition product** (`SymMonoid`): an operad multiplies by total
+composition (`SymOperad.toSymMonoid`), a monoid composes partially through May's definition
+(`SymMonoid.toSymOperad`), and the two constructions are inverse
+(`SymOperad.toSymMonoid_toSymOperad`, `SymMonoid.toSymOperad_toSymMonoid`). `Operad/SymCooperad.lean` has symmetric
 cooperads with infinitesimal decompositions `C (Without A i ⊕ B) → C A ⊗ C B`, their morphisms, the operad
 structure on the linear dual of a cooperad (`SymCooperad.instSymOperadDual`), and the commutative
 cooperad, whose dual is `Com`.

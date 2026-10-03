@@ -106,6 +106,9 @@ import Operad.FreeAlgebra
 import Operad.ComAlgebra
 import Operad.AssFree
 import Operad.LieFree
+import Operad.Composite
+import Operad.CompositeAssoc
+import Operad.OperadMonoid
 import Operad.SymCooperad
 import Operad.ShuffleOperad
 import Operad.ShuffleIdeal

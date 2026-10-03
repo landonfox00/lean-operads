@@ -416,6 +416,155 @@ lemma liftQ_mkQ (f : MultilinearMap R (fun _ : ι => M) W)
 
 end Quot
 
+/-! ## Families of quotient modules -/
+
+section QuotDep
+
+variable {M : ι → Type*} [∀ i, AddCommGroup (M i)] [∀ i, Module R (M i)]
+  (N : ∀ i, Submodule R (M i))
+
+/-- **A multilinear map vanishing on `N i` in each argument `i` only depends on its arguments
+modulo the `N i`.** -/
+theorem eq_of_sub_mem' (f : MultilinearMap R M W)
+    (hf : ∀ (x : ∀ i, M i) (i : ι), x i ∈ N i → f x = 0) (x y : ∀ i, M i)
+    (h : ∀ i, x i - y i ∈ N i) : f x = f y := by
+  suffices key : ∀ s : Finset ι, ∀ x y : ∀ i, M i, (∀ i, x i - y i ∈ N i) →
+      (∀ i ∉ s, x i = y i) → f x = f y from
+    key Finset.univ x y h fun i hi => absurd (Finset.mem_univ i) hi
+  intro s
+  induction s using Finset.induction_on with
+  | empty =>
+    intro x y _ hs
+    exact congrArg f (funext fun i => hs i (Finset.notMem_empty i))
+  | insert j s hj ih =>
+    intro x y hxy hs
+    have h1 : f (update x j (y j)) = f y := by
+      refine ih _ _ (fun i => ?_) (fun i hi => ?_)
+      · by_cases hij : i = j
+        · subst hij
+          simp
+        · rw [update_of_ne hij]
+          exact hxy i
+      · by_cases hij : i = j
+        · subst hij
+          simp
+        · rw [update_of_ne hij]
+          exact hs i (by simp [hij, hi])
+    have h2 : f x - f (update x j (y j)) = 0 := by
+      rw [← hf (update x j (x j - y j)) j (by simpa using hxy j),
+        MultilinearMap.map_update_sub, update_eq_self]
+    rw [← h1, ← sub_eq_zero, h2]
+
+/-- **A multilinear map vanishing on `N i` in each argument `i` descends to the quotients.** -/
+noncomputable def liftQ' (f : MultilinearMap R M W)
+    (hf : ∀ (x : ∀ i, M i) (i : ι), x i ∈ N i → f x = 0) :
+    MultilinearMap R (fun i => M i ⧸ N i) W where
+  toFun q := f fun i => rep (N i) (q i)
+  map_update_add' q i a b := by
+    have e : ∀ c : M i ⧸ N i, (fun j => rep (N j) (update q i c j))
+        = update (fun j => rep (N j) (q j)) i (rep (N i) c) := fun c => by
+      funext j
+      by_cases hj : j = i
+      · subst hj
+        simp
+      · simp [hj]
+    rw [e, e, e, ← MultilinearMap.map_update_add]
+    refine eq_of_sub_mem' N f hf _ _ fun j => ?_
+    by_cases hj : j = i
+    · subst hj
+      simpa using rep_add_sub_mem (N j) a b
+    · simp [hj]
+  map_update_smul' q i c a := by
+    have e : ∀ c : M i ⧸ N i, (fun j => rep (N j) (update q i c j))
+        = update (fun j => rep (N j) (q j)) i (rep (N i) c) := fun c => by
+      funext j
+      by_cases hj : j = i
+      · subst hj
+        simp
+      · simp [hj]
+    rw [e, e, ← MultilinearMap.map_update_smul]
+    refine eq_of_sub_mem' N f hf _ _ fun j => ?_
+    by_cases hj : j = i
+    · subst hj
+      simpa using rep_smul_sub_mem (N j) c a
+    · simp [hj]
+
+lemma liftQ'_mkQ (f : MultilinearMap R M W)
+    (hf : ∀ (x : ∀ i, M i) (i : ι), x i ∈ N i → f x = 0) (x : ∀ i, M i) :
+    liftQ' N f hf (fun i => (N i).mkQ (x i)) = f x :=
+  eq_of_sub_mem' N f hf _ _ fun i => rep_mkQ_sub_mem (N i) (x i)
+
+@[simp] lemma liftQ'_mk (f : MultilinearMap R M W)
+    (hf : ∀ (x : ∀ i, M i) (i : ι), x i ∈ N i → f x = 0) (x : ∀ i, M i) :
+    liftQ' N f hf (fun i => Submodule.Quotient.mk (x i)) = f x :=
+  liftQ'_mkQ N f hf x
+
+omit [Fintype ι] [DecidableEq ι] in
+/-- **Multilinear maps on a family of quotient modules agree when they agree on
+representatives.** -/
+theorem quot_ext' {f g : MultilinearMap R (fun i => M i ⧸ N i) W}
+    (h : ∀ x : ∀ i, M i, f (fun i => (N i).mkQ (x i)) = g (fun i => (N i).mkQ (x i))) :
+    f = g := by
+  ext y
+  have hy : y = fun i => (N i).mkQ (rep (N i) (y i)) :=
+    funext fun i => (mkQ_rep (N i) (y i)).symm
+  rw [hy]
+  exact h _
+
+end QuotDep
+
+/-! ## Vanishing on generated submodules, for a family of free modules -/
+
+section FinsuppDepZero
+
+variable {X : ι → Type*}
+
+/-- **Vanishing on generated submodules, for a family of free modules**: the multilinear map
+vanishes when one argument lies in the span of relators, as soon as, the other arguments being
+basis vectors, the induced linear map in the remaining argument kills the relators. -/
+theorem finsuppLift'_eq_zero (g : (∀ i, X i) → W) (S : ∀ i, Set (X i →₀ R))
+    (hg : ∀ (t : ∀ i, X i) (i : ι),
+      S i ⊆ LinearMap.ker (Finsupp.lift W R (X i) fun y => g (update t i y)))
+    (x : ∀ i, X i →₀ R) (i : ι) (hx : x i ∈ Submodule.span R (S i)) :
+    finsuppLift' (R := R) g x = 0 := by
+  classical
+  have key : ∀ ρ ∈ S i, ∀ x : ∀ i, X i →₀ R,
+      finsuppLift' (R := R) g (update x i ρ) = 0 := by
+    intro ρ hρ x
+    rcases isEmpty_or_nonempty (X i) with hX | ⟨⟨y₀⟩⟩
+    · rw [show ρ = 0 from Subsingleton.elim _ _, MultilinearMap.map_update_zero]
+    let ℓ : (X i →₀ R) →ₗ[R] (X i →₀ R) := LinearMap.smulRight (Finsupp.lapply y₀) ρ
+    let F : MultilinearMap R (fun i => X i →₀ R) W :=
+      (finsuppLift' (R := R) g).compLinearMap (update (fun _ => LinearMap.id) i ℓ)
+    have hFapp : ∀ z, F z = finsuppLift' (R := R) g (update z i (ℓ (z i))) := by
+      intro z
+      simp only [F, MultilinearMap.compLinearMap_apply]
+      congr 1
+      funext j
+      by_cases hj : j = i
+      · subst hj
+        simp
+      · simp [hj]
+    have hF : F = 0 := by
+      refine finsupp_ext' fun t => ?_
+      rw [MultilinearMap.zero_apply, hFapp]
+      rw [show ℓ (Finsupp.single (t i) 1) = (Finsupp.single (t i) (1 : R)) y₀ • ρ by simp [ℓ],
+        MultilinearMap.map_update_smul, finsuppLift'_update, LinearMap.mem_ker.1 (hg t i hρ),
+        smul_zero]
+    have hℓ : ℓ (Finsupp.single y₀ 1) = ρ := by simp [ℓ]
+    have h := hFapp (update x i (Finsupp.single y₀ 1))
+    rw [hF, MultilinearMap.zero_apply, update_idem, update_self, hℓ] at h
+    exact h.symm
+  have h := Submodule.span_induction
+    (p := fun z _ => ∀ x : ∀ i, X i →₀ R, finsuppLift' (R := R) g (update x i z) = 0)
+    (fun z hz x => key z hz x)
+    (fun x => MultilinearMap.map_update_zero _ _ _)
+    (fun z z' _ _ hz hz' x => by rw [MultilinearMap.map_update_add, hz, hz', add_zero])
+    (fun c z _ hz x => by rw [MultilinearMap.map_update_smul, hz, smul_zero]) hx
+  simpa using h x
+
+end FinsuppDepZero
+
 end ML
 
 end Operad
