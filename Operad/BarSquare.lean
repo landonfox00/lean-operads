@@ -765,6 +765,90 @@ theorem SF_gF_before (hμ : MergeFn.Odd gp μ) {p p₁ j r n n₁ lc lg lh m₁ 
     map_add, LinearMap.add_apply, smul_add]
   simp only [tpar_corolla', hμ, smul_smul, σ_and_not_xor, σ_and_and]
 
+/-- A planar tree with at least two vertices, as a graft with the corolla of its last vertex. -/
+lemma pt_eq_gF {n : ℕ} (s : TreeOfArity T n) (h2 : 2 ≤ s.1.weight) :
+    ∃ (n₁ r lc : ℕ) (s₁ : TreeOfArity T n₁) (c : T lc), r < n₁ ∧ n + 1 = n₁ + lc ∧
+      s₁.1.weight + 1 = s.1.weight ∧
+      (pt s : Pl (T := T) R n) = σ R (gp lc c && Tree.apar gp s₁.1 r) •
+        gF gp R r n (pt s₁) (pt (corolla c)) := by
+  obtain ⟨s₁, r, lc, c, hr, hw, hs⟩ := exists_graft_corolla h2
+  have hn : n + 1 = s₁.arity + lc := by
+    have h1 := Tree.arity_graft s₁ r (Tree.node c (TreeOfArity.leaves lc)) hr
+    rw [← hs, s.2, Tree.arity_node, arityF_leaves] at h1
+    omega
+  refine ⟨s₁.arity, r, lc, ⟨s₁, rfl⟩, c, hr, hn, hw, ?_⟩
+  rw [gF_pt_of ⟨hr, hn⟩, smul_smul, ← tpar_corolla' (gp := gp) c, σ_mul_self, one_smul]
+  exact pt_eq (by rw [graftT_val]; exact hs)
+
+variable (J : GrOperadIdeal R (FreeGr R gp))
+
+/-- **Merging two corollas in series into a planar tree lands in the ideal.** -/
+theorem SF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : ℕ)
+    (s : TreeOfArity T n), s.1.weight ≤ w → ∀ {lg lh : ℕ} (g : T lg) (h : T lh)
+    (p j m₁ m₂ m : ℕ), p < n → j < lg → m₁ + 1 = lg + lh → m₂ + 1 = n + lg → m + 1 = n + m₁ →
+      SF μ gp R p j m₁ m₂ m (pt s) (corolla g) (corolla h) ∈ JF J m := by
+  intro w
+  induction w with
+  | zero =>
+    intro n s hw lg lh g h p j m₁ m₂ m hp hj hm₁ hm₂ hm
+    have hl : s.1.isLeaf = true := by
+      cases hs : s.1 with
+      | leaf => rfl
+      | node e f => rw [hs] at hw; simp at hw
+    unfold SF
+    rw [mF_corolla (μ := μ) ⟨hj, hm₁⟩, twF_pt, map_smul, LinearMap.smul_apply,
+      mF_pt_leaf_left _ hl, mF_pt_leaf_left _ hl, map_zero, LinearMap.zero_apply, smul_zero,
+      add_zero]
+    exact zero_mem _
+  | succ w ih =>
+    intro n s hw lg lh g h p j m₁ m₂ m hp hj hm₁ hm₂ hm
+    rcases Nat.lt_or_ge s.1.weight 2 with hw2 | hw2
+    · by_cases hw0 : s.1.weight = 0
+      · exact ih n s (by omega) g h p j m₁ m₂ m hp hj hm₁ hm₂ hm
+      · -- a corolla
+        obtain ⟨k, x, hx⟩ := eq_corolla_of_weight (t := s.1) (by omega)
+        have hk : k = n := by
+          have := s.2
+          rw [hx, Tree.arity_node, arityF_leaves] at this
+          exact this
+        subst hk
+        have hs : s = corolla x := Subtype.ext hx
+        subst hs
+        unfold SF
+        rw [mF_corolla (μ := μ) ⟨hj, hm₁⟩, twF_pt, map_smul, LinearMap.smul_apply,
+          mF_corolla (μ := μ) ⟨hp, hm⟩, mF_corolla (μ := μ) ⟨hp, hm₂⟩,
+          mF_corolla (μ := μ) ⟨by omega, by omega⟩, tpar_corolla']
+        show ιP gp R m _ ∈ J.sub (Fin m)
+        rw [map_add, map_smul, ιP_corolla, ιP_corolla]
+        exact hA.series _ _ _ x g h p j m₁ m₂ m hp hj hm₁ hm₂ hm
+    · obtain ⟨n₁, r, lc, s₁, c, hr, hn, hw₁, hs⟩ := pt_eq_gF (R := R) (gp := gp) s hw2
+      rw [hs, SF_smul]
+      refine Submodule.smul_mem _ _ ?_
+      rcases Nat.lt_or_ge p r with hpr | hpr
+      · obtain ⟨r', hr'⟩ : ∃ r', r' + 1 = r + m₁ := ⟨r + m₁ - 1, by omega⟩
+        obtain ⟨mA, hmA⟩ : ∃ mA, mA + 1 = n₁ + m₁ := ⟨n₁ + m₁ - 1, by omega⟩
+        obtain ⟨mB, hmB⟩ : ∃ mB, mB + 1 = n₁ + lg := ⟨n₁ + lg - 1, by omega⟩
+        rw [SF_gF_after (μ := μ) hμ hpr hr hn hj hm₁ hm₂ hm hr' hmA hmB]
+        exact Submodule.smul_mem _ _ (gF_mem_left
+          (ih n₁ s₁ (by omega) g h p j m₁ mB mA (by omega) hj hm₁ hmB hmA) _)
+      · rcases Nat.lt_or_ge p (r + lc) with hpc | hpc
+        · obtain ⟨mD, hmD⟩ : ∃ mD, mD + 1 = lc + lg := ⟨lc + lg - 1, by omega⟩
+          obtain ⟨mE, hmE⟩ : ∃ mE, mE + 1 = lc + m₁ := ⟨lc + m₁ - 1, by omega⟩
+          rw [SF_gF_inner (μ := μ) hμ hr (show p = r + (p - r) by omega) (show p - r < lc by omega)
+            hn hj hm₁ hm₂ hm hmD hmE]
+          refine gF_mem_right _ (ih lc (corolla c) ?_ g h (p - r) j m₁ mD mE (by omega) hj hm₁
+            hmD hmE)
+          show (Tree.node c (TreeOfArity.leaves lc)).weight ≤ w
+          rw [Tree.weight_node, weightF_leaves]
+          omega
+        · obtain ⟨mA, hmA⟩ : ∃ mA, mA + 1 = n₁ + m₁ := ⟨n₁ + m₁ - 1, by omega⟩
+          obtain ⟨mB, hmB⟩ : ∃ mB, mB + 1 = n₁ + lg := ⟨n₁ + lg - 1, by omega⟩
+          rw [SF_gF_before (μ := μ) hμ (show r < p + 1 - lc by omega)
+            (show p + 1 - lc < n₁ by omega) (show p + 1 = (p + 1 - lc) + lc by omega) hn hj hm₁
+            hm₂ hm hmA hmB]
+          exact Submodule.smul_mem _ _ (gF_mem_left
+            (ih n₁ s₁ (by omega) g h (p + 1 - lc) j m₁ mB mA (by omega) hj hm₁ hmB hmA) _)
+
 end Series
 
 end FreeGr
