@@ -1260,3 +1260,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Rules.bar_normal_iff_quad
 #print axioms Operad.Rules.isKoszul_of_resolvable
 #print axioms Operad.Rules.isKoszul_of_critical
+#print axioms Operad.STree.IsSCtx.weight_add
+#print axioms Operad.STree.AdmOrder.byWeight
+#print axioms Operad.Rules.top_resolvable
+#print axioms Operad.Rules.wpart_nf
+#print axioms Operad.Rules.pbw
+#print axioms Operad.Rules.grEquiv
+#print axioms Operad.Rules.top_isKoszul

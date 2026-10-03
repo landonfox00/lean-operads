@@ -128,3 +128,4 @@ import Operad.Hoffbeck
 import Operad.ShuffleAnyBar
 import Operad.ShuffleAnyBarNormal
 import Operad.ShuffleAnyKoszul
+import Operad.ShuffleAnyInhom

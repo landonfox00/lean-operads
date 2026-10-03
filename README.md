@@ -426,6 +426,17 @@ differential restricted to the non-leading cuts is contracted by cutting along a
 (`CutComplex.dL_hL_add`), and the filtration argument over a well-founded order, by induction in
 the Dershowitz–Manna order on finite sets (`Hoffbeck.exact_of_leading`).
 
+**Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
+most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift
+weights uniformly (`STree.IsSCtx.weight_add`), so every admissible order has a weight-graded
+refinement (`STree.AdmOrder.byWeight`). The **leading part** `G.top` keeps the top-weight terms
+of the tails; over a weight-graded order, **the leading part of a resolvable presentation is
+resolvable** (`Rules.top_resolvable`), so the quadratic part of a quadratic-linear presentation
+with a PBW basis is Koszul (`Rules.top_isKoszul`). **The PBW theorem** (`Rules.pbw`,
+`Rules.grEquiv`): a combination of monomials of weight `n` is congruent to one of lower weight
+modulo the relations exactly when it lies in the ideal of the leading part, that is, the
+associated graded of the filtered operad presented by `G` is the operad presented by `G.top`.
+
 **The homotopy transfer theorem.** `Operad/HTT.lean` proves Kadeishvili's theorem in the form of
 Kontsevich–Soibelman and Merkulov: for a dg algebra `(V, d, μ)` in the bar convention and a
 retraction onto the image of an even idempotent `e` with an odd homotopy `h` (`h d + d h = e - 1`),
