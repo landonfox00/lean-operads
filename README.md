@@ -466,6 +466,18 @@ cancelling in pairs without dividing by two (`GrOperad.Inv.assoc_odd`). Morphism
 operads preserve the product, and derivations are derivations of it
 (`GrOperad.Inv.appHom_star`, `GrOperad.Inv.appDer_star`).
 
+**Graded cooperads and the convolution operad.** `Operad/GrCooperad.lean` defines graded cooperads
+(`GrCooperad`): decompositions preserving parities, with parallel coassociativity up to the super
+swap `(x ⊗ y) ⊗ z ↦ σ(|y| |z|) (x ⊗ z) ⊗ y` (`sswapLast`); coaugmentations, the reduced part
+`C̄ = C / R·1` (`GrCooperad.Red`) and the parity shift of a graded linear species
+(`GrSpecies.Shift`). `Operad/ConvOperad.lean` builds **the convolution operad** of a graded cooperad
+and a graded operad (`ConvOp`, `ConvOp.instGrOperad`): the linear maps `C A → P A`, composed by
+decomposing, applying `f ⊗ g` with the Koszul sign and composing. Each axiom combines the
+corresponding axioms of `C` and `P`, the Koszul signs of the parallel axioms matching
+(`ConvOp.compC_assoc_par`). Composing with a morphism or a derivation of `P` is a morphism or a
+derivation of the convolution operad (`ConvOp.postHom`, `ConvOp.postDer`); its invariant families are
+the equivariant maps, with the convolution product.
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

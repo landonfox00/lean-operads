@@ -1272,6 +1272,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GrOperad.Inv.assoc_odd
 #print axioms Operad.GrOperad.Inv.appHom_star
 #print axioms Operad.GrOperad.Inv.appDer_star
+#print axioms Operad.GrCooperad.decomp_tw
+#print axioms Operad.GrCooperad.Red.instGrSpecies
+#print axioms Operad.GrSpecies.instGrSpeciesShift
+#print axioms Operad.ConvOp.instGrOperad
+#print axioms Operad.ConvOp.compC_assoc_seq
+#print axioms Operad.ConvOp.compC_assoc_par
+#print axioms Operad.ConvOp.postHom
+#print axioms Operad.ConvOp.postDer
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left
