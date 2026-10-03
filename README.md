@@ -454,6 +454,18 @@ out of `FreeGrL R V` is determined by its values on the generators, which can be
 (`FreeGrL.der_ext`, `FreeGrL.derOf`), and an odd derivation of `FreeGrL R V` squares to zero as
 soon as its square vanishes on the generators (`FreeGrL.sq_eq_zero`).
 
+**Invariant families and their pre-Lie product.** `Operad/InvPreLie.lean` takes an operation of a
+graded operad for every finite input set, compatible with the relabellings (`GrOperad.Inv`), and
+plugs one family into another at every nonempty subset of the inputs (`GrOperad.Inv.star`); for
+the convolution operad of a cooperad and an operad, this is the convolution product. A relabelled
+composite is the composite at the splitting of the inputs by those of the inner operation
+(`GrOperad.map_comp_canon`), so the associator is the sum of the terms at two disjoint subsets
+(`GrOperad.Inv.assoc_eq_sum_disj`): **the product satisfies the graded pre-Lie identity**
+(`GrOperad.Inv.preLie`), and the associator with an odd family twice vanishes, the terms
+cancelling in pairs without dividing by two (`GrOperad.Inv.assoc_odd`). Morphisms of graded
+operads preserve the product, and derivations are derivations of it
+(`GrOperad.Inv.appHom_star`, `GrOperad.Inv.appDer_star`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

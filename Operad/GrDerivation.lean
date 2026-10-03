@@ -119,6 +119,9 @@ variable {R : Type u} [CommRing R] {P : (A : Type) → [Fintype A] → [Decidabl
   [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [GrOperad R Q]
 
+@[simp] lemma id_app {A : Type} [Fintype A] [DecidableEq A] (x : P A) :
+    (GrOperadHom.id R P).app A x = x := rfl
+
 /-- **Morphisms preserve the sign twists.** -/
 lemma app_tw (g : GrOperadHom R P Q) (e : Bool) {A : Type} [Fintype A] [DecidableEq A]
     (x : P A) : g.app A (GrOperad.tw (R := R) e x) = GrOperad.tw (R := R) e (g.app A x) := by
