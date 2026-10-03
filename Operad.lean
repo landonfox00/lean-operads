@@ -126,6 +126,7 @@ import Operad.AInfMorphism
 import Operad.GerBV
 import Operad.HyperCom
 import Operad.DGOperad
+import Operad.FreeGraded
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny

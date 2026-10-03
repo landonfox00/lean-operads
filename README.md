@@ -424,6 +424,19 @@ operad** (`DGOperad.instGrOperadHomology`): composites of cycles are cycles, com
 boundary are boundaries, and the axioms descend to homology, through homogeneous representatives
 for parallel associativity.
 
+**Free graded operads.** `Operad/FreeGraded.lean` builds the free graded operad on generators of
+any arity with parities (`FreeGr`): planar trees with their leaves labelled, composed by grafting
+with the Koszul sign of the vertices the grafted tree moves across, read off from the parity of
+the vertices after each leaf in the preorder (`Tree.apar`, with its four grafting rules). The sign
+bookkeeping is a set operad of **sign data** (orders, parities after the inputs, total parities;
+`SgnData`), on which the sign of a composite is a cocycle (`SgnData.sgn_seq`, `SgnData.sgn_par`).
+Twisting a linearization by sign data gives a graded operad (`SgnLin.instGrOperad`); twisting the
+homogeneous operations of a graded operad gives a set operad (`SgnOp.instSetOperad`); and **graded
+morphisms out of a twisted linearization are set morphisms into the twisted operations, over the
+sign data** (`SgnLin.homEquiv`). So the ungraded freeness of planar trees gives **the universal
+property of the free graded operad** (`FreeGr.homEquiv`): a morphism of graded operads
+(`GrOperadHom`) out of it is an operation of the right parity for each generator.
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable
