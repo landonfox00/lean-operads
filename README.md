@@ -560,6 +560,24 @@ substitutions decompose into `I ⊗ C + C ⊗ I` (`RelComb.decomp_subst_mem`) an
 counit (`RelComb.counit_subst`); and they span an ideal containing the relations
 (`substIdeal`, `FreeGrL.span_le_substIdeal`).
 
+**Subcooperads and the Koszul dual cooperad.** `Operad/GrSubCooperad.lean` defines subcooperads of
+graded cooperads (`GrSubCooperad`): sums of subcooperads are subcooperads, so every family of
+submodules contains a largest subcooperad (`GrSubCooperad.cogen`), and over a field a subcooperad
+is a graded cooperad (`GrSubCooperad.instGrCooperad`), coaugmented when it contains the
+coaugmentation (`GrSubCooperad.coaug`); precomposing with a morphism of cooperads is a morphism of
+convolution operads (`ConvOp.preHom`). `Operad/GrKoszulDual.lean` builds, for generators `E` of any
+arity and relators `r` presenting `P = T(E)/(r)` (`Koszul.Pres`), the desuspension map
+`κ_T : T^c(sE) → T(E)` out of the cut cooperad (`Koszul.kapT`), the `ε`-part of the morphism into
+the square-zero extension by an odd parameter sending `sv` to `εv`, and **the Koszul dual
+cooperad** `P^¡` (`Koszul.Dual`): the largest subcooperad of `T^c(sE)` on which `κ_T ⋆ κ_T` lands in
+the ideal of the relators (`Koszul.dualSub`, `Koszul.le_dualSub`), for quadratic relators the
+cooperad `C(sE, s²R)`. It contains the generators `sE` (`Koszul.ι_mem_dual`, through the
+subcooperad of trees with at most one vertex, `FreeGrL.wtOneSub`). **The Koszul twisting morphism**
+`κ : P^¡ → P` (`Koszul.kappa`) satisfies the Maurer–Cartan equation (`Koszul.mc_kappa`), so the
+cobar adjunction gives **the morphism of dg operads `ΩP^¡ → P`** (`Koszul.cobarMor`), and `P` is
+Koszul when it is a quasi-isomorphism (`Koszul.IsKoszul`); graded operads are dg operads with the
+zero differential (`ZeroDG`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

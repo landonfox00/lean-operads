@@ -144,6 +144,8 @@ import Operad.GrCoideal
 import Operad.TreeRelabel
 import Operad.GrSubst
 import Operad.CofreeGrL
+import Operad.GrSubCooperad
+import Operad.GrKoszulDual
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny
