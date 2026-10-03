@@ -1267,3 +1267,7 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Rules.pbw
 #print axioms Operad.Rules.grEquiv
 #print axioms Operad.Rules.top_isKoszul
+#print axioms Operad.LInf.jac_two_three
+#print axioms Operad.LInf.jac_two_of_ge
+#print axioms Operad.LInf.isLInf_two_iff
+#print axioms Operad.LInf.isLInf_of_dgLie

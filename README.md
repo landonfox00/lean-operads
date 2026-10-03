@@ -437,6 +437,15 @@ with a PBW basis is Koszul (`Rules.top_isKoszul`). **The PBW theorem** (`Rules.p
 modulo the relations exactly when it lies in the ideal of the leading part, that is, the
 associated graded of the filtered operad presented by `G` is the operad presented by `G.top`.
 
+**L∞-algebras.** `Operad/LInfinity.lean` defines **L∞[1]-structures** on a super module (the
+shifted convention): odd, graded symmetric operations of every arity with the generalized Jacobi
+identities `∑_S ± ℓ(ℓ(v_S), v_{Sᶜ}) = 0` over the nonempty sets of inputs, with the Koszul signs
+of the unshuffles (`LInf.IsLInf`). Those concentrated in arities one and two are exactly an odd
+differential and an odd graded symmetric bracket with `d² = 0`, the Leibniz rule and the shifted
+Jacobi identity (`LInf.isLInf_two_iff`), and **dg Lie algebras are L∞-algebras**: a dg Lie
+superalgebra gives an L∞[1]-structure on its parity shift, with `ℓ₂(x, y) = [ε x, y]`
+(`LInf.isLInf_of_dgLie`).
+
 **The homotopy transfer theorem.** `Operad/HTT.lean` proves Kadeishvili's theorem in the form of
 Kontsevich–Soibelman and Merkulov: for a dg algebra `(V, d, μ)` in the bar convention and a
 retraction onto the image of an even idempotent `e` with an odd homotopy `h` (`h d + d h = e - 1`),
