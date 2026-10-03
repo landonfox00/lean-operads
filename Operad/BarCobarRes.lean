@@ -128,6 +128,180 @@ lemma mM_ιL_fin {k l : ℕ} {c : 𝒞 (Fin k)} {pa : Bool} (hc : GrOperad.par (
   rw [map_symm_map]
   rfl
 
+/-! ## The universal twisting morphism on decorated trees -/
+
+variable (R V) in
+/-- **The universal twisting morphism on the trees decorated by homogeneous elements.** -/
+noncomputable def ιF : GrOperad.Inv R (ConvOp R (FreeGr R (grGenPar R V)) (CobarGr R 𝒞)) :=
+  GrOperad.Inv.appHom (ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)) (Cobar.ι R 𝒞)
+
+lemma ιF_apply (y : FreeGr R (grGenPar R V) A) :
+    ConvOp.toLin ((ιF R V).1 A) y = Cobar.ιL R 𝒞 A ((𝒥).proj A y) := rfl
+
+lemma isParC_ιF (A : Type) [Fintype A] [DecidableEq A] : ConvOp.IsParC true ((ιF R V).1 A) :=
+  ConvOp.parC_eq_self_iff.1
+    (((ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)).app_par true
+      ((Cobar.ι R 𝒞).1 A)).symm.trans
+      (congrArg ((ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)).app A)
+        (Cobar.isPar_ι R 𝒞 A)))
+
+lemma ιF_leaf {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = true) :
+    ConvOp.toLin ((ιF R V).1 A) (SgnLin.bas (treeSgn (grGenPar R V)) R x) = 0 := by
+  obtain ⟨e, rfl⟩ := eq_map_one_of_isLeaf hx
+  rw [ιF_apply, ← SgnLin.map_bas]
+  exact Cobar.ιL_unitSpan R 𝒞 (GrCooperad.map_one_mem e)
+
+lemma ιι_proj (y : FreeGr R (grGenPar R V) A) :
+    ConvOp.toLin ((Cobar.ιι R 𝒞).1 A) ((𝒥).proj A y)
+      = ConvOp.toLin ((GrOperad.Inv.star R _ (ιF R V) (ιF R V)).1 A) y :=
+  congrArg (fun q : GrOperad.Inv R (ConvOp R (FreeGr R (grGenPar R V)) (CobarGr R 𝒞)) =>
+    ConvOp.toLin (q.1 A) y)
+    (GrOperad.Inv.appHom_star (ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V))
+      (Cobar.ι R 𝒞) (Cobar.ι R 𝒞))
+
+/-- **The bar differential of the merge on a composite of two generators** merges them. -/
+lemma hM_comp_ιL {k l : ℕ} {c : 𝒞 (Fin k)} {pa : Bool} (hc : GrOperad.par (R := R) pa c = c)
+    (i : Fin k) (c' : 𝒞 (Fin l)) :
+    hM R V _ (GrOperad.comp (R := R) i (Cobar.ιL R 𝒞 (Fin k) c) (Cobar.ιL R 𝒞 (Fin l) c'))
+      = σ R (!pa) • Cobar.ιL R 𝒞 _ (GrOperad.comp (R := R) i (FreeGrL.secC R V (Fin k) c)
+          (FreeGrL.secC R V (Fin l) c')) := by
+  refine ((cobarMerge R V).d_comp i _ _).trans ?_
+  have h1 : (cobarMerge R V).d (Fin k) (Cobar.ιL R 𝒞 (Fin k) c) = 0 := hM_ιL c
+  have h2 : (cobarMerge R V).d (Fin l) (Cobar.ιL R 𝒞 (Fin l) c') = 0 := hM_ιL c'
+  refine (congrArg₂ (fun a b => GrOperad.comp (R := R) i a (Cobar.ιL R 𝒞 (Fin l) c')
+    + GrOperad.comp (R := R) i (GrOperad.tw (R := R) true (Cobar.ιL R 𝒞 (Fin k) c)) b
+    + mM R V i (Cobar.ιL R 𝒞 (Fin k) c) (Cobar.ιL R 𝒞 (Fin l) c')) h1 h2).trans ?_
+  refine Eq.trans ?_ (mM_ιL_fin hc i c')
+  simp only [map_zero, LinearMap.zero_apply, zero_add]
+
+variable {X : Type} [Fintype X] [DecidableEq X]
+
+lemma unitCoeffL_bas {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = false) :
+    FreeGrL.unitCoeffL R V A ((𝒥).proj A (SgnLin.bas (treeSgn (grGenPar R V)) R x)) = 0 := by
+  rw [FreeGrL.unitCoeffL_proj, unitCoeff_bas, if_neg (by rw [hx]; decide)]
+
+lemma ιL_proj_smul (c : R) (y : FreeGr R (grGenPar R V) A) :
+    Cobar.ιL R 𝒞 A ((𝒥).proj A (c • y)) = c • Cobar.ιL R 𝒞 A ((𝒥).proj A y) := by
+  rw [map_smul, map_smul]
+
+lemma ιL_proj_map (e : A ≃ B) (y : FreeGr R (grGenPar R V) A) :
+    GrOperad.map (R := R) e (Cobar.ιL R 𝒞 A ((𝒥).proj A y))
+      = Cobar.ιL R 𝒞 B ((𝒥).proj B (GrOperad.map (R := R) e y)) := by
+  rw [← Cobar.ιL_map]
+  rfl
+
+/-- **The merge after the cut at a factorization** gives back the tree, with a minus sign. -/
+lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
+    (q : Reg (TreeOfArity (GrGen R V)) (Fin l)) (e : Without (Fin k) i ⊕ Fin l ≃ X)
+    (hp : (treeOf p).isLeaf = false) (hq : (treeOf q).isLeaf = false) :
+    hM R V X (repW (ιF R V) (ιF R V) e p q)
+      = -Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R
+          (SetOperad.map e (SetOperad.comp i p q)))) := by
+  have e1 : ConvOp.toLin ((ιF R V).1 (Fin k))
+      (GrSpecies.tw (R := R) true (SgnLin.bas (treeSgn (grGenPar R V)) R p))
+      = σ R (Tree.tpar (grGenPar R V) (treeOf p)) •
+          Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)) := by
+    rw [ιF_apply, tw_bas, ιL_proj_smul]
+  have hpa : GrOperad.par (R := R) (Tree.tpar (grGenPar R V) (treeOf p))
+      ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p))
+      = (𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p) :=
+    congrArg ((𝒥).proj (Fin k)) (SgnLin.par_bas p)
+  have e2 := hM_comp_ιL (R := R) (V := V) hpa i
+    ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))
+  have e3 : FreeGrL.secC R V (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p))
+      = (𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p) :=
+    FreeGrL.secC_of_unitCoeff (unitCoeffL_bas hp)
+  have e4 : FreeGrL.secC R V (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))
+      = (𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q) :=
+    FreeGrL.secC_of_unitCoeff (unitCoeffL_bas hq)
+  have e5 : GrOperad.comp (R := R) i
+      ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p))
+      ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))
+      = σ R (cSgn (grGenPar R V) i p q) • (𝒥).proj _ (SgnLin.bas (treeSgn (grGenPar R V)) R
+          (SetOperad.comp i p q)) := by
+    show (𝒥).proj _ (GrOperad.comp (R := R) i _ _) = _
+    rw [comp_bas_eq, map_smul]
+  have e6 : GrOperad.comp (R := R) i
+      (FreeGrL.secC R V (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+      (FreeGrL.secC R V (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))
+      = σ R (cSgn (grGenPar R V) i p q) • (𝒥).proj _ (SgnLin.bas (treeSgn (grGenPar R V)) R
+          (SetOperad.comp i p q)) := by
+    rw [e3, e4, e5]
+  have e7 := e2.trans (congrArg (fun z => σ R (!(Tree.tpar (grGenPar R V) (treeOf p))) •
+    Cobar.ιL R 𝒞 _ z) e6)
+  have e8 := ιL_proj_smul (R := R) (V := V) (σ R (cSgn (grGenPar R V) i p q))
+    (SgnLin.bas (treeSgn (grGenPar R V)) R (SetOperad.comp i p q))
+  have s1 : repW (ιF R V) (ιF R V) e p q
+      = GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
+          * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
+          GrOperad.comp (R := R) i
+            (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+            (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))))
+      := by
+    unfold repW
+    refine congrArg (GrOperad.map (R := R) e) ?_
+    refine (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • GrOperad.comp (R := R) i z
+      (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) e1).trans
+      ?_
+    exact (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • z)
+      (LinearMap.map_smul₂ _ _ _ _)).trans (smul_smul _ _ _)
+  have s2 := ((cobarMerge R V).map_d e ((σ R (cSgn (grGenPar R V) i p q)
+          * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
+          GrOperad.comp (R := R) i
+            (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+            (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))))
+  refine (congrArg (hM R V X) s1).trans (s2.symm.trans ?_)
+  refine (congrArg (GrOperad.map (R := R) e) ((map_smul _ _ _).trans
+    (congrArg _ (e7.trans (congrArg _ e8))))).trans ?_
+  have hsign : σ R (cSgn (grGenPar R V) i p q) * σ R (Tree.tpar (grGenPar R V) (treeOf p))
+      * σ R (!(Tree.tpar (grGenPar R V) (treeOf p))) * σ R (cSgn (grGenPar R V) i p q) = -1 := by
+    generalize Tree.tpar (grGenPar R V) (treeOf p) = a
+    generalize cSgn (grGenPar R V) i p q = c
+    cases a <;> cases c <;> simp
+  have hW := (ιL_proj_map (R := R) (V := V) e
+    (SgnLin.bas (treeSgn (grGenPar R V)) R (SetOperad.comp i p q))).trans
+    (congrArg (fun y => Cobar.ιL R 𝒞 X ((𝒥).proj X y)) (SgnLin.map_bas e _))
+  rw [smul_smul, smul_smul, hsign, neg_one_smul, map_neg]
+  exact congrArg Neg.neg hW
+
+/-- **The merge after the cut at a vertex** gives back the tree, with a minus sign. -/
+lemma hM_starV (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
+    (hv : v ∈ Finset.Ico 1 (treeOf t).weight) :
+    hM R V X (starV (ιF R V) (ιF R V) t v)
+      = -Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t)) := by
+  rw [Finset.mem_Ico] at hv
+  obtain ⟨e, he⟩ := exists_rep t hv.2
+  have hst := starV_eq (ιF R V) (ιF R V) he (Tree.isLeaf_cutV _ _ hv.2)
+  have hvert : vert ⟨((treeOf t).cutV v).2.2, Tree.lt_arity_cutV _ v hv.2⟩
+      (stdT ((treeOf t).cutV v).1) = v := by
+    show (treeOf (stdT _)).vb ((stdT _).1.rank _) = v
+    rw [treeOf_stdT, rank_stdT]
+    exact Tree.vb_cutV _ _ hv.2
+  rw [hvert] at hst
+  refine (congrArg (hM R V X) hst).trans ((hM_repW _ (stdT ((treeOf t).cutV v).1)
+    (stdT ((treeOf t).cutV v).2.1) e
+    (Tree.isLeaf_cutV_fst hv.1 hv.2 rfl) (Tree.isLeaf_cutV _ _ hv.2)).trans ?_)
+  rw [he]
+
+/-- **The merge after the cobar differential on a generator** counts the edges of its tree:
+`h (d (ι t)) = (w - 1) ι t` for a tree `t` with `w` vertices, none of them nullary. -/
+theorem hM_d_ιL_bas (t : Reg (TreeOfArity (GrGen R V)) X) (ht : (treeOf t).NoNull) :
+    hM R V X ((Cobar.d R 𝒞).app X
+        (Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t))))
+      = ((treeOf t).weight - 1) •
+          Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t)) := by
+  have h1 := Cobar.d_ιL R 𝒞 ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t))
+  rw [ιι_proj, star_bas (ιF R V) (ιF R V) isParC_ιF (fun _ _ _ x hx => ιF_leaf hx)
+    (fun _ _ _ x hx => ιF_leaf hx) t] at h1
+  have hfilter : (Finset.Ico 1 (treeOf t).weight).filter
+      (fun v => 0 < ((treeOf t).cutV v).2.1.arity) = Finset.Ico 1 (treeOf t).weight :=
+    Finset.filter_true_of_mem fun v hv =>
+      ((ht.cutV (Finset.mem_Ico.1 hv).2).2).arity_pos
+  rw [hfilter] at h1
+  refine (congrArg (hM R V X) h1).trans ?_
+  rw [map_neg, map_sum, Finset.sum_congr rfl fun v hv => hM_starV t hv, Finset.sum_neg_distrib,
+    neg_neg, Finset.sum_const, Nat.card_Ico]
+
 end Cobar
 
 end Generators
