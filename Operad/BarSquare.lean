@@ -144,7 +144,8 @@ noncomputable def dF (n : ℕ) : Pl (T := T) R n →ₗ[R] Pl (T := T) R n :=
     ∑ k ∈ Finset.Ico 1 t.1.weight, σ R (Tree.contrSgn gp t.1 k) • pt (contrT μ t k)
 
 /-- **Grafting at a position**, with its Koszul sign. -/
-noncomputable def gF (a : ℕ) {n l : ℕ} (m : ℕ) : Pl (T := T) R n →ₗ[R] Pl (T := T) R l →ₗ[R] Pl (T := T) R m :=
+noncomputable def gF (a : ℕ) {n l : ℕ} (m : ℕ) :
+    Pl (T := T) R n →ₗ[R] Pl (T := T) R l →ₗ[R] Pl (T := T) R m :=
   Finsupp.linearCombination R fun s : TreeOfArity T n =>
     Finsupp.linearCombination R fun u : TreeOfArity T l =>
       if h : a < n ∧ m + 1 = n + l then
@@ -153,7 +154,8 @@ noncomputable def gF (a : ℕ) {n l : ℕ} (m : ℕ) : Pl (T := T) R n →ₗ[R]
 
 variable (μ) in
 /-- **Merge-grafting at a position**, with its sign. -/
-noncomputable def mF (a : ℕ) {n l : ℕ} (m : ℕ) : Pl (T := T) R n →ₗ[R] Pl (T := T) R l →ₗ[R] Pl (T := T) R m :=
+noncomputable def mF (a : ℕ) {n l : ℕ} (m : ℕ) :
+    Pl (T := T) R n →ₗ[R] Pl (T := T) R l →ₗ[R] Pl (T := T) R m :=
   Finsupp.linearCombination R fun s : TreeOfArity T n =>
     Finsupp.linearCombination R fun u : TreeOfArity T l =>
       if h : a < n ∧ m + 1 = n + l then
@@ -193,7 +195,8 @@ lemma mF_pt (a : ℕ) {n l m : ℕ} (s : TreeOfArity T n) (u : TreeOfArity T l) 
 
 lemma gF_pt_of {a n l m : ℕ} (h : a < n ∧ m + 1 = n + l) (s : TreeOfArity T n)
     (u : TreeOfArity T l) :
-    gF gp R a m (pt s) (pt u) = σ R (Tree.tpar gp u.1 && Tree.apar gp s.1 a) • pt (graftT s a u h) :=
+    gF gp R a m (pt s) (pt u)
+      = σ R (Tree.tpar gp u.1 && Tree.apar gp s.1 a) • pt (graftT s a u h) :=
   (gF_pt a s u).trans (dif_pos h)
 
 lemma mF_pt_of {a n l m : ℕ} (h : a < n ∧ m + 1 = n + l) {s : TreeOfArity T n}
@@ -688,7 +691,8 @@ lemma SF_smul (p j m₁ m₂ m : ℕ) {n lg lh : ℕ} (c : R) (x : Pl (T := T) R
   simp only [SF, map_smul, LinearMap.smul_apply, smul_add]
 
 lemma twF_gF_pt (a : ℕ) {n l m : ℕ} (x : Pl (T := T) R n) (c : TreeOfArity T l) :
-    twF gp R m (gF gp R a m x (pt c)) = σ R (Tree.tpar gp c.1) • gF gp R a m (twF gp R n x) (pt c) := by
+    twF gp R m (gF gp R a m x (pt c))
+      = σ R (Tree.tpar gp c.1) • gF gp R a m (twF gp R n x) (pt c) := by
   rw [twF_gF, twF_pt, map_smul]
 
 lemma tpar_corolla' {k : ℕ} (g : T k) : Tree.tpar gp (corolla g).1 = gp k g :=
@@ -1143,6 +1147,178 @@ theorem PF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : 
               (p₂ + 1 - lc) q₂' mA mB mC (by omega) (by omega) hq₂' hmA hmB hmC) _)
 
 end Parallel
+
+/-! ## The square of the bar differential -/
+
+section Square
+
+variable {μ}
+
+variable (μ gp R) in
+/-- **The failure of the square of the bar differential to be a derivation**, at a graft with a
+corolla. -/
+noncomputable def NF (q m : ℕ) {n lh : ℕ} (x : Pl (T := T) R n) (h : TreeOfArity T lh) :
+    Pl (T := T) R m :=
+  dF μ gp R m (mF μ gp R q m x (pt h)) + mF μ gp R q m (dF μ gp R n x) (pt h)
+
+lemma NF_smul (q m : ℕ) {n lh : ℕ} (c : R) (x : Pl (T := T) R n) (h : TreeOfArity T lh) :
+    NF μ gp R q m (c • x) h = c • NF μ gp R q m x h := by
+  simp only [NF, map_smul, LinearMap.smul_apply, smul_add]
+
+lemma dF_gF_corolla (hμ : MergeFn.Odd gp μ) (a : ℕ) {n lc : ℕ} (m : ℕ) (x : Pl (T := T) R n)
+    (c : T lc) :
+    dF μ gp R m (gF gp R a m x (pt (corolla c)))
+      = gF gp R a m (dF μ gp R n x) (pt (corolla c)) + mF μ gp R a m x (pt (corolla c)) := by
+  rw [dF_gF μ hμ, dF_corolla, map_zero, add_zero]
+
+/-- The failure at a graft point after the merge. -/
+theorem NF_gF_after (hμ : MergeFn.Odd gp μ) {q r r' n n₁ lc lh m mA : ℕ} (hqr : q < r)
+    (hr : r < n₁) (hn : n + 1 = n₁ + lc) (hm : m + 1 = n + lh) (hr' : r' + 1 = r + lh)
+    (hmA : mA + 1 = n₁ + lh) (X : Pl (T := T) R n₁) (c : T lc) (h : T lh) :
+    NF μ gp R q m (gF gp R r n X (pt (corolla c))) (corolla h)
+      = σ R (gp lc c && gp lh h) • gF gp R r' m (NF μ gp R q mA X (corolla h)) (pt (corolla c))
+        + PF μ gp R q r r' mA n m X (corolla h) (corolla c) := by
+  unfold NF PF
+  rw [mF_gF_after (μ := μ) hqr hr hr' hn hmA hm X (corolla c) (corolla h), map_smul,
+    dF_gF_corolla hμ, dF_gF_corolla hμ, map_add, LinearMap.add_apply,
+    mF_gF_after (μ := μ) hqr hr hr' hn hmA hm _ (corolla c) (corolla h)]
+  simp only [tpar_corolla', map_add, LinearMap.add_apply, smul_add, Bool.and_comm (gp lh h)]
+  abel
+
+/-- The failure at a graft point before the merge. -/
+theorem NF_gF_before (hμ : MergeFn.Odd gp μ) {q q₁ r n n₁ lc lh m mA : ℕ} (hrq : r < q₁)
+    (hq₁ : q₁ < n₁) (hq : q + 1 = q₁ + lc) (hn : n + 1 = n₁ + lc) (hm : m + 1 = n + lh)
+    (hmA : mA + 1 = n₁ + lh) (X : Pl (T := T) R n₁) (c : T lc) (h : T lh) :
+    NF μ gp R q m (gF gp R r n X (pt (corolla c))) (corolla h)
+      = σ R (gp lc c && gp lh h) • gF gp R r m (NF μ gp R q₁ mA X (corolla h)) (pt (corolla c))
+        + σ R (gp lc c && gp lh h) • PF μ gp R r q₁ q n mA m X (corolla c) (corolla h) := by
+  unfold NF PF
+  rw [mF_gF_before (μ := μ) hμ hrq hq₁ hq hn hmA hm X (corolla c) (corolla h), map_smul,
+    dF_gF_corolla hμ, dF_gF_corolla hμ, map_add, LinearMap.add_apply,
+    mF_gF_before (μ := μ) hμ hrq hq₁ hq hn hmA hm _ (corolla c) (corolla h)]
+  simp only [tpar_corolla', map_add, LinearMap.add_apply, smul_add, smul_smul, σ_mul_self,
+    one_smul]
+  abel
+
+/-- The failure at a leaf of the grafted corolla. -/
+theorem NF_gF_inner (hμ : MergeFn.Odd gp μ) {q j r n n₁ lc lh m mD : ℕ} (hr : r < n₁)
+    (hj : j < lc) (hq : q = r + j) (hn : n + 1 = n₁ + lc) (hm : m + 1 = n + lh)
+    (hmD : mD + 1 = lc + lh) (X : Pl (T := T) R n₁) (c : T lc) (h : T lh) :
+    NF μ gp R q m (gF gp R r n X (pt (corolla c))) (corolla h)
+      = SF μ gp R r j mD n m X (corolla c) (corolla h) := by
+  have hW := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj, hmD⟩ c h
+  unfold NF SF
+  rw [mF_gF_inner (μ := μ) hμ hr hj hq hn hmD hm X (isLeaf_corolla c) (corolla h), hW,
+    dF_gF_corolla hμ, dF_gF_corolla hμ, map_add, LinearMap.add_apply,
+    mF_gF_inner (μ := μ) hμ hr hj hq hn hmD hm _ (isLeaf_corolla c) (corolla h), hW,
+    dF_twF hμ, ← hq]
+  simp only [map_neg, LinearMap.neg_apply]
+  abel
+
+variable (J : GrOperadIdeal R (FreeGr R gp))
+
+/-- **The failure of the square of the bar differential to be a derivation lands in the
+ideal.** -/
+theorem NF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : ℕ)
+    (s : TreeOfArity T n), s.1.weight ≤ w → ∀ {lh : ℕ} (h : T lh) (q m : ℕ), q < n →
+      m + 1 = n + lh → NF μ gp R q m (pt s) (corolla h) ∈ JF J m := by
+  intro w
+  induction w with
+  | zero =>
+    intro n s hw lh h q m hq hm
+    have hl : s.1.isLeaf = true := by
+      cases hs : s.1 with
+      | leaf => rfl
+      | node e f => rw [hs] at hw; simp at hw
+    have hd : dF μ gp R n (pt s) = 0 := by
+      rw [dF_pt, show s.1.weight = 0 by omega, Finset.Ico_eq_empty_of_le zero_le_one,
+        Finset.sum_empty]
+    unfold NF
+    rw [mF_pt_leaf_left _ hl, hd, map_zero, map_zero, LinearMap.zero_apply, add_zero]
+    exact zero_mem _
+  | succ w ih =>
+    intro n s hw lh h q m hq hm
+    rcases Nat.lt_or_ge s.1.weight 2 with hw2 | hw2
+    · have hd : dF μ gp R n (pt s) = 0 := by
+        rw [dF_pt, Finset.Ico_eq_empty_of_le (by omega), Finset.sum_empty]
+      by_cases hw0 : s.1.weight = 0
+      · exact ih n s (by omega) h q m hq hm
+      · obtain ⟨k, x, hx⟩ := eq_corolla_of_weight (t := s.1) (by omega)
+        have hk : k = n := by
+          have := s.2
+          rw [hx, Tree.arity_node, arityF_leaves] at this
+          exact this
+        subst hk
+        have hs : s = corolla x := Subtype.ext hx
+        subst hs
+        unfold NF
+        rw [hd, map_zero, LinearMap.zero_apply, add_zero, mF_corolla (μ := μ) ⟨hq, hm⟩,
+          dF_corolla]
+        exact zero_mem _
+    · obtain ⟨n₁, r, lc, s₁, c, hr, hn, hw₁, hs⟩ := pt_eq_gF (R := R) (gp := gp) s hw2
+      rw [hs, NF_smul]
+      refine Submodule.smul_mem _ _ ?_
+      obtain ⟨mA, hmA⟩ : ∃ mA, mA + 1 = n₁ + lh := ⟨n₁ + lh - 1, by omega⟩
+      rcases Nat.lt_or_ge q r with hqr | hqr
+      · obtain ⟨r', hr'⟩ : ∃ r', r' + 1 = r + lh := ⟨r + lh - 1, by omega⟩
+        rw [NF_gF_after (μ := μ) hμ hqr hr hn hm hr' hmA]
+        exact add_mem (Submodule.smul_mem _ _ (gF_mem_left
+            (ih n₁ s₁ (by omega) h q mA (by omega) hmA) _))
+          (PF_mem J hμ hA w n₁ s₁ (by omega) h c q r r' mA n m hqr hr hr' hmA hn
+            (by omega))
+      · rcases Nat.lt_or_ge q (r + lc) with hqc | hqc
+        · obtain ⟨mD, hmD⟩ : ∃ mD, mD + 1 = lc + lh := ⟨lc + lh - 1, by omega⟩
+          rw [NF_gF_inner (μ := μ) hμ hr (show q - r < lc by omega) (show q = r + (q - r) by omega)
+            hn hm hmD]
+          exact SF_mem J hμ hA w n₁ s₁ (by omega) c h r (q - r) mD n m hr (by omega) hmD hn
+            (by omega)
+        · rw [NF_gF_before (μ := μ) hμ (show r < q + 1 - lc by omega)
+            (show q + 1 - lc < n₁ by omega) (show q + 1 = (q + 1 - lc) + lc by omega) hn hm hmA]
+          exact add_mem (Submodule.smul_mem _ _ (gF_mem_left
+              (ih n₁ s₁ (by omega) h (q + 1 - lc) mA (by omega) hmA) _))
+            (Submodule.smul_mem _ _ (PF_mem J hμ hA w n₁ s₁ (by omega) c h r (q + 1 - lc) q n mA
+              m (by omega) (by omega) (by omega) hn hmA (by omega)))
+
+/-- **The square of the bar differential of a planar tree lands in the ideal.** -/
+theorem dF_dF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : ℕ)
+    (s : TreeOfArity T n), s.1.weight ≤ w → dF μ gp R n (dF μ gp R n (pt s)) ∈ JF J n := by
+  intro w
+  induction w with
+  | zero =>
+    intro n s hw
+    rw [dF_pt, Finset.Ico_eq_empty_of_le (by omega), Finset.sum_empty, map_zero]
+    exact zero_mem _
+  | succ w ih =>
+    intro n s hw
+    rcases Nat.lt_or_ge s.1.weight 2 with hw2 | hw2
+    · rw [dF_pt, Finset.Ico_eq_empty_of_le (by omega), Finset.sum_empty, map_zero]
+      exact zero_mem _
+    · obtain ⟨n₁, r, lc, s₁, c, hr, hn, hw₁, hs⟩ := pt_eq_gF (R := R) (gp := gp) s hw2
+      rw [hs, map_smul, map_smul]
+      refine Submodule.smul_mem _ _ ?_
+      rw [dF_gF_corolla hμ, map_add, dF_gF_corolla hμ, add_assoc]
+      refine add_mem (gF_mem_left (ih n₁ s₁ (by omega)) _) ?_
+      rw [add_comm]
+      exact NF_mem J hμ hA w n₁ s₁ (by omega) c r n hr (by omega)
+
+/-- **The square of the bar differential lands in the ideal** generated by relations making the
+merge function associative. -/
+theorem barD_barD_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) {A : Type} [Fintype A]
+    [DecidableEq A] (x : FreeGr R gp A) : barD μ gp R A (barD μ gp R A x) ∈ J.sub A := by
+  induction x using induction_bas with
+  | zero => rw [map_zero, map_zero]; exact zero_mem _
+  | add x y hx hy => rw [map_add, map_add]; exact add_mem hx hy
+  | bas c t =>
+    rw [map_smul, map_smul]
+    refine Submodule.smul_mem _ c ?_
+    have ht : SgnLin.bas (treeSgn gp) R t = GrOperad.map (R := R)
+        ((finCongr t.2.2).trans t.1.toRank.symm) (ιP gp R _ (pt t.2.1.2)) := by
+      rw [ιP_pt, SgnLin.map_bas]
+      exact congrArg _ (Reg.eq_map_std t)
+    rw [ht, ← map_barD, ← map_barD, ← ιP_dF, ← ιP_dF]
+    exact J.map_mem _ (dF_dF_mem J hμ hA _ _ t.2.1.2 le_rfl)
+
+end Square
 
 end FreeGr
 
