@@ -1215,6 +1215,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GerBV.IsBV.bracket_mul_right
 #print axioms Operad.GerBV.IsBV.bracket_jacobi
 #print axioms Operad.GerBV.Δ_bracket
+#print axioms Operad.HyperComOp.algebraEquiv
+#print axioms Operad.HCAlg.mul_comm
+#print axioms Operad.HCAlg.mul_assoc
+#print axioms Operad.HCAlg.ofComm
 #print axioms Operad.DGOperad.comp_boundary_right
 #print axioms Operad.DGOperad.hcomp_cls
 #print axioms Operad.DGOperad.instGrOperadHomology

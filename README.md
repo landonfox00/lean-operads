@@ -397,6 +397,16 @@ identity, with `Δ` a derivation of it (`GerBV.IsBV.bracket_antisymm`, `bracket_
 `bracket_jacobi`, `GerBV.Δ_bracket`). The Jacobi identity needs only `Δ² = 0` and the order
 condition (`GerBV.dev_jacobi`).
 
+**The hypercommutative operad.** `Operad/HyperCom.lean` presents Getzler's operad `HyperCom` (the
+homology of the moduli spaces `M̄₀,ₙ₊₁`, concentrated in even degrees) by one totally symmetric
+generator `mₙ` in each arity `n ≥ 2` and the **WDVV relations**
+`∑_{i, j ∈ S, k ∉ S} m(m(x_S), x_{Sᶜ}) = ∑_{i, k ∈ S, j ∉ S} m(m(x_S), x_{Sᶜ})`
+(`HyperComOp`, `HyperCom.hcRel`). **Its algebras are the hypercommutative algebras**
+(`HyperComOp.algebraEquiv`): totally symmetric operations satisfying the WDVV identities (`HCAlg`).
+In arity three the WDVV identity is associativity, so the binary operation is a commutative
+associative product (`HCAlg.mul_comm`, `HCAlg.mul_assoc`), and commutative algebras are
+hypercommutative, with no higher operations (`HCAlg.ofComm`).
+
 **Graded and dg operads.** `Operad/DGOperad.lean` defines graded operads in super modules, with a
 parity decomposition preserved by relabellings and compositions and parallel associativity up to
 the Koszul sign (`GrOperad`), and dg operads, with an odd differential satisfying the Leibniz rule
