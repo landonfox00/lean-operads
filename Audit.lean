@@ -1299,6 +1299,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.STree.graft_canon_normalize
 #print axioms Operad.FreeSh.hom_ext
 #print axioms Operad.FreeSh.eq_lift
+#print axioms Operad.ShuffleOperadIdeal.liftHom
+#print axioms Operad.ev_ctx
+#print axioms Operad.Rules.evL_ideal
+#print axioms Operad.Rules.presLift
+#print axioms Operad.Rules.presLift_gen
+#print axioms Operad.Rules.presented_hom_ext
+#print axioms Operad.Rules.holds_of_hom
+#print axioms Operad.Rules.eq_presLift
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable

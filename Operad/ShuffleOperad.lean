@@ -271,6 +271,42 @@ def projHom : ShuffleOperadHom R P I.Quot where
   app_one := rfl
   app_comp _ _ _ _ _ := rfl
 
+section Lift
+
+variable {Q : (A : Type) → [Fintype A] → [LinearOrder A] → Type w}
+  [∀ (A : Type) [Fintype A] [LinearOrder A], AddCommGroup (Q A)]
+  [∀ (A : Type) [Fintype A] [LinearOrder A], Module R (Q A)] [ShuffleOperad R Q]
+
+/-- **The universal property of the quotient**: a morphism of shuffle operads vanishing on an
+ideal factors through the quotient. -/
+def liftHom (ψ : ShuffleOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [LinearOrder A], ∀ x ∈ I.sub A, ψ.app A x = 0) :
+    ShuffleOperadHom R I.Quot Q where
+  app A _ _ := (I.sub A).liftQ (ψ.app A) fun x hx => h A x hx
+  app_map e q := by
+    obtain ⟨x, rfl⟩ := I.proj_surjective _ q
+    exact ψ.app_map e x
+  app_one := ψ.app_one
+  app_comp i e he p q := by
+    obtain ⟨x, rfl⟩ := I.proj_surjective _ p
+    obtain ⟨y, rfl⟩ := I.proj_surjective _ q
+    exact ψ.app_comp i e he x y
+
+@[simp] lemma liftHom_proj (ψ : ShuffleOperadHom R P Q)
+    (h : ∀ (A : Type) [Fintype A] [LinearOrder A], ∀ x ∈ I.sub A, ψ.app A x = 0)
+    (A : Type) [Fintype A] [LinearOrder A] (x : P A) :
+    (I.liftHom ψ h).app A (I.proj A x) = ψ.app A x := rfl
+
+/-- **Morphisms out of a quotient** agreeing on the classes agree. -/
+lemma hom_ext_proj {ψ₁ ψ₂ : ShuffleOperadHom R I.Quot Q}
+    (h : ∀ (A : Type) [Fintype A] [LinearOrder A] (x : P A),
+      ψ₁.app A (I.proj A x) = ψ₂.app A (I.proj A x))
+    (A : Type) [Fintype A] [LinearOrder A] (q : I.Quot A) : ψ₁.app A q = ψ₂.app A q := by
+  obtain ⟨x, rfl⟩ := I.proj_surjective A q
+  exact h A x
+
+end Lift
+
 end ShuffleOperadIdeal
 
 /-! ## The forgetful functor from symmetric operads -/

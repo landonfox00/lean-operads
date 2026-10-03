@@ -131,5 +131,6 @@ import Operad.ShuffleAnyKoszul
 import Operad.ShuffleAnyKoszulDual
 import Operad.ShuffleFreeAny
 import Operad.ShuffleFreeUniv
+import Operad.ShufflePresUniv
 import Operad.ShuffleAnyInhom
 import Operad.LInfinity
