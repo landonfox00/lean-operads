@@ -1199,3 +1199,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Contraction.perturb_key
 #print axioms Operad.Contraction.perturb_dW_dW
 #print axioms Operad.Contraction.perturb
+#print axioms Operad.End.kcompFin_assoc_seq
+#print axioms Operad.End.kcompFin_assoc_par
+#print axioms Operad.End.kstar_assoc_symm
+#print axioms Operad.End.kstar_kstar_odd
+#print axioms Operad.AInf.tstar_assoc_symm
+#print axioms Operad.AInf.tstar_tstar_odd
+#print axioms Operad.AInf.hoch_hoch
+#print axioms Operad.AInf.isAInf_dga_iff

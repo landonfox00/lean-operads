@@ -341,6 +341,18 @@ endomorphism, induced maps of chain maps and their invariance under chain homoto
 a perturbation `δ` of the differential with `1 - δ h` invertible transfers the contraction, with
 explicit formulas, the key identity being `d A + A d + A ι π A = 0` (`Contraction.perturb_key`).
 
+**Koszul signs and A∞-algebras.** `Operad/KoszulSign.lean` treats a super module as a module with
+an involution `ε`; inserting a homogeneous operation of parity `q` into a slot twists the inputs
+before it by `ε^q` (`End.kcompFin`). Sequential associativity holds on the nose and parallel
+associativity up to the Koszul sign (`End.kcompFin_assoc_seq`, `End.kcompFin_assoc_par`), so the
+Koszul circle product satisfies the graded pre-Lie identity (`End.kstar_assoc_symm`), an odd
+operation cancelling against itself without division by two (`End.kstar_kstar_odd`).
+`Operad/AInfinity.lean` extends this to families of all arities (`AInf.tstar`,
+`AInf.tstar_assoc_symm`), defines A∞-structures in the bar convention as odd families with
+`b ⋆ b = 0` (`AInf.IsAInf`), proves that **the Hochschild differential of an A∞-structure squares
+to zero** (`AInf.hoch_hoch`), and identifies dg algebras with the A∞-structures concentrated in
+arities one and two (`AInf.isAInf_dga_iff`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

@@ -112,3 +112,5 @@ import Operad.Colored
 import Operad.Cyclic
 import Operad.CyclicExt
 import Operad.Perturbation
+import Operad.KoszulSign
+import Operad.AInfinity
