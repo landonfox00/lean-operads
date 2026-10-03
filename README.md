@@ -568,6 +568,10 @@ differential and an odd graded symmetric bracket with `d² = 0`, the Leibniz rul
 Jacobi identity (`LInf.isLInf_two_iff`), and **dg Lie algebras are L∞-algebras**: a dg Lie
 superalgebra gives an L∞[1]-structure on its parity shift, with `ℓ₂(x, y) = [ε x, y]`
 (`LInf.isLInf_of_dgLie`).
+`Operad/CInfinity.lean` defines **C∞-structures**: A∞-structures whose operations vanish on the
+signed shuffles of homogeneous words, the interleavings being weighted by the Koszul signs of the
+unshuffles (`CInf.IsCInf`, `CInf.merge`); **a dg algebra is C∞ exactly when its product is
+commutative in the bar convention**, `μ(x, y) + σ(|x| |y|) μ(y, x) = 0` (`CInf.isCInf_dga_iff`).
 
 **The homotopy transfer theorem.** `Operad/HTT.lean` proves Kadeishvili's theorem in the form of
 Kontsevich–Soibelman and Merkulov: for a dg algebra `(V, d, μ)` in the bar convention and a

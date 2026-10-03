@@ -147,3 +147,4 @@ import Operad.ShuffleSymPres
 import Operad.ShuffleFreeBin
 import Operad.ShuffleAnyInhom
 import Operad.LInfinity
+import Operad.CInfinity

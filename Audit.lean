@@ -1406,3 +1406,4 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.LInf.jac_two_of_ge
 #print axioms Operad.LInf.isLInf_two_iff
 #print axioms Operad.LInf.isLInf_of_dgLie
+#print axioms Operad.CInf.isCInf_dga_iff
