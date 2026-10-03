@@ -1162,3 +1162,7 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Sym.ComAlg.homEquiv
 #print axioms Operad.Schur.isSymmetricAlgebra_com
 #print axioms Operad.Schur.symmetricAlgebraEquiv
+#print axioms Operad.SymCooperad.instSymOperadDual
+#print axioms Operad.SymCooperadHom.dual
+#print axioms Operad.instSymCooperadComC
+#print axioms Operad.ComC.dualHom_bijective

@@ -104,3 +104,4 @@ import Operad.MultilinearQuot
 import Operad.Schur
 import Operad.FreeAlgebra
 import Operad.ComAlgebra
+import Operad.SymCooperad

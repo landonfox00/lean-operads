@@ -299,7 +299,10 @@ every algebra acts through total composition (`SymAlgebra.act_total`), and morph
 of `S(P, V)` are the linear maps out of `V` (`Schur.liftEquiv`). `Operad/ComAlgebra.lean` shows
 that algebras over `Com` are commutative algebras (`ComAlg.toCommRing`, `ComAlg.ofCommAlgebra`,
 `ComAlg.homEquiv`) and that the free `Com`-algebra is Mathlib's `SymmetricAlgebra`
-(`Schur.isSymmetricAlgebra_com`).
+(`Schur.isSymmetricAlgebra_com`). `Operad/SymCooperad.lean` has symmetric cooperads with
+infinitesimal decompositions `C (Without A i ⊕ B) → C A ⊗ C B`, their morphisms, the operad
+structure on the linear dual of a cooperad (`SymCooperad.instSymOperadDual`), and the commutative
+cooperad, whose dual is `Com`.
 
 ## Roadmap
 
