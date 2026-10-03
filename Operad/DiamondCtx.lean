@@ -130,6 +130,18 @@ theorem mapDomain_mem_idealOn {a b : ι} {g : M a → M b} (hg : O.IsCtx g) {t :
     ← mapDomain_comp]
   exact key
 
+/-- **Contexts map the ideal into the ideal.** -/
+theorem mapDomain_mem_ideal {a b : ι} {g : M a → M b} (hg : O.IsCtx g) {v : M a →₀ R}
+    (hv : v ∈ (G.rw a).ideal) : mapDomain g v ∈ (G.rw b).ideal := by
+  suffices h : (G.rw a).ideal ≤ ((G.rw b).ideal).comap (lmapDomain R R g) from h hv
+  refine Submodule.span_le.2 ?_
+  rintro _ ⟨m, -, v, ⟨r, f, hf, rfl, rfl⟩, rfl⟩
+  have hred : mapDomain (g ∘ f) (G.tail r) ∈ (G.rw b).red (g (f (G.lead r))) :=
+    ⟨r, g ∘ f, O.ctx_comp hg hf, rfl, rfl⟩
+  rw [SetLike.mem_coe, Submodule.mem_comap, lmapDomain_apply, mapDomain_sub, mapDomain_single,
+    ← mapDomain_comp]
+  exact (G.rw b).sub_mem_ideal hred
+
 /-! ## Ambiguities -/
 
 /-- **An ambiguity** of type `b` between the rules `r₁` and `r₂`: a monomial in which the two
@@ -222,6 +234,11 @@ theorem res_of_factors {a : ι} {B : G.Amb a r₁ r₂} (h : A.FactorsThrough B)
   rw [mapDomain_sub, ← mapDomain_comp, ← mapDomain_comp] at this
   rw [Res, top, h₁, h₂]
   exact this
+
+/-- **Resolvability does not depend on the order of the two occurrences.** -/
+theorem res_swap : A.swap.Res ↔ A.Res := by
+  rw [Res, Res, swap_top, ← neg_mem_iff, neg_sub]
+  rfl
 
 /-- **A trivial ambiguity is resolvable**: the same occurrence twice. -/
 theorem res_of_eq {r : ρ} (A : G.Amb b r r) (h : A.f₁ = A.f₂) : A.Res := by

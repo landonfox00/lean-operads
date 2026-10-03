@@ -13,6 +13,7 @@ renaming and generalization.
 |---|---|---|---|
 | `Operad/Perturbation.lean` | homology of a square-zero endomorphism, chain homotopies, contractions, the homological perturbation lemma | `Mathlib/Algebra/Homology/` | state for `HomologicalComplex` (or for a differential of a fixed degree on a graded object), and recover the present statements as the ungraded case; the key identity `d A + A d + A ι π A = 0` and the five contraction identities transfer unchanged |
 | `Operad/MultilinearQuot.lean` | multilinear maps out of quotients of direct sums of `Finsupp`s | `Mathlib/LinearAlgebra/Multilinear/` | the lemmas are about `MultilinearMap` and `Submodule.Quotient` only |
+| `Operad/Diamond.lean`, `Operad/DiamondCtx.lean`, `Operad/DiamondWords.lean`, `Operad/PBW.lean` | Bergman's diamond lemma (linear rewriting, rules in contexts, free algebras) and **the Poincaré–Birkhoff–Witt theorem** for Lie algebras with a basis, with the injectivity of `g → U g` for free `g` | `Mathlib/Algebra/Lie/UniversalEnveloping.lean`, new `Mathlib/Algebra/FreeAlgebra/Diamond.lean` | Mathlib's `Lie/Free.lean` and `Lie/SerreConstruction.lean` note that PBW is missing; state the words lemma for `FreeAlgebra R I` through `FreeAlgebra.equivMonoidAlgebraFreeMonoid` and the degree-lexicographic order from Mathlib's monomial orders; `PBW.lean` depends only on the three diamond files and on `STree.DegLex` (to be moved next to the words) |
 | `Operad/GerBV.lean` | BV algebras and Koszul's theorem (the derived bracket is a Gerstenhaber bracket) | new `Mathlib/Algebra/BV.lean` | replace the involution and `Bool` parities by a `ZMod 2`-grading (`DirectSum.Decomposition`) or a `SuperModule` class if one lands; the proofs are case analyses on parities followed by `linear_combination (norm := module)` and port directly |
 
 ## Operads
@@ -37,7 +38,8 @@ definition of an operad. The choices made here, and the reasons for them, are in
 
 ## A suggested order of pull requests
 
-1. The homological perturbation lemma (no dependencies).
+1. The homological perturbation lemma (no dependencies); the diamond lemma and the
+   Poincaré–Birkhoff–Witt theorem (no dependencies beyond the degree-lexicographic order).
 2. Multilinear maps out of quotients (no dependencies).
 3. BV and Gerstenhaber algebras (no dependencies once a parity convention is chosen).
 4. Non-symmetric operads, the endomorphism operad, algebras over operads; `Ass`-algebras are

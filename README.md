@@ -390,6 +390,21 @@ overlapping leading monomials, are resolvable, the normal monomials are a basis 
 operad in every arity. `Operad/ShuffleAnyOrder.lean` constructs **the path-lexicographic order**
 from the words of the leaves (`STree.pathLex`) and proves it admissible (`STree.pathLexOrder`).
 
+**Bergman's diamond lemma for free algebras and the Poincaré–Birkhoff–Witt theorem.**
+`Operad/DiamondWords.lean` is the same theory for words, compared degree-lexicographically, with
+the contexts `w ↦ u ++ w ++ v`: ambiguities are disjoint or factor through the segment covered
+by two overlapping leading words (`Words.classify`), so the critical ambiguities decide everything
+(`Words.isCompl_of_critical`). `Operad/PBW.lean` applies it to the quadratic-linear presentation
+of the universal enveloping algebra — the classical instance of inhomogeneous Koszul duality —
+and proves **the Poincaré–Birkhoff–Witt theorem** for a Lie algebra with a basis over any
+commutative ring: the products of the basis vectors along nondecreasing words are a basis of
+`UniversalEnvelopingAlgebra R g` (`PBW.basis`, `PBW.basis_apply`). The critical ambiguities are the
+words `k j i` with `i < j < k`, resolved by the Jacobi identity (`PBW.overlap_res`); the quotient of
+the free module on words by the ideal of the rules is the enveloping algebra (`PBW.quotEquiv`),
+through the action of the Lie algebra on the quotient by left multiplication. In particular the
+canonical map `g → U g` is injective for every Lie algebra which is free as a module
+(`UniversalEnvelopingAlgebra.ι_injective_of_free`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

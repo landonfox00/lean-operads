@@ -121,3 +121,5 @@ import Operad.DiamondCtx
 import Operad.ShuffleAny
 import Operad.ShuffleAnyGroebner
 import Operad.ShuffleAnyOrder
+import Operad.DiamondWords
+import Operad.PBW

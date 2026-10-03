@@ -1231,3 +1231,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.STree.degLex_wf
 #print axioms Operad.STree.pathLex_ctx
 #print axioms Operad.STree.pathLexOrder
+#print axioms Operad.Words.classify
+#print axioms Operad.Words.isCompl_of_critical
+#print axioms Operad.PBW.overlap_res
+#print axioms Operad.PBW.resolvable
+#print axioms Operad.PBW.quotEquiv
+#print axioms Operad.PBW.basis_apply
+#print axioms Operad.UniversalEnvelopingAlgebra.ι_injective_of_free
