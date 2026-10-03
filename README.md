@@ -303,7 +303,13 @@ that algebras over `Com` are commutative algebras (`ComAlg.toCommRing`, `ComAlg.
 as the ordered product (`Sym.LinOrd.oprod`, compatible with relabelling and composition through the
 ordered lists of `Sym.LinOrd.toList`), `Ass`-algebras are associative algebras
 (`Sym.AssAlg.toRing`, `Sym.AssAlg.ofAlgebra`, `Sym.AssAlg.homEquiv`), and **the free `Ass`-algebra is
-Mathlib's `TensorAlgebra`** (`Schur.tensorAlgebraEquiv`). `Operad/SymCooperad.lean` has symmetric
+Mathlib's `TensorAlgebra`** (`Schur.tensorAlgebraEquiv`). `Operad/LieFree.lean` does it for `Lie`:
+a linear map commuting with the generators of a presented operad is a morphism of algebras
+(`SymOperadIdeal.algHomOfGen`), so morphisms of `Lie`-algebras are the linear maps preserving the
+bracket (`Lie.homEquiv`); when `2` is invertible, `Lie`-algebras are Mathlib's Lie algebras
+(`LieAlg.toLieAlgebra`, `LieAlg.ofLieAlgebra`, `LieAlg.homEquiv`), the free `Lie`-algebra on a module
+is the free Lie algebra on it (`Schur.lieLift`), and **the free `Lie`-algebra on `X →₀ R` is
+Mathlib's `FreeLieAlgebra R X`** (`Schur.freeLieAlgebraEquiv`). `Operad/SymCooperad.lean` has symmetric
 cooperads with infinitesimal decompositions `C (Without A i ⊕ B) → C A ⊗ C B`, their morphisms, the operad
 structure on the linear dual of a cooperad (`SymCooperad.instSymOperadDual`), and the commutative
 cooperad, whose dual is `Com`.
