@@ -478,6 +478,15 @@ corresponding axioms of `C` and `P`, the Koszul signs of the parallel axioms mat
 derivation of the convolution operad (`ConvOp.postHom`, `ConvOp.postDer`); its invariant families are
 the equivariant maps, with the convolution product.
 
+**The cobar construction.** `Operad/Cobar.lean` builds the cobar construction `ΩC` of a coaugmented
+graded cooperad: the free graded operad on the desuspension `s⁻¹ C̄` of the reduced part, with the
+odd derivation extending `s⁻¹ c̄ ↦ -(ι ⋆ ι)(c)` (`Cobar.d`), where `ι : C → ΩC` is the universal
+twisting morphism, an odd invariant family of the convolution operad (`Cobar.ι`). `ι ⋆ ι` vanishes
+on the coaugmentation (`Cobar.star_ι_ι_unit`) and `d ∘ ι = -(ι ⋆ ι)` (`Cobar.d_ι`); as `d²` is an
+even derivation, it vanishes as soon as it vanishes on the generators, where it is the associator
+of `ι` with itself: **`d² = 0`** (`Cobar.d_d`), and the cobar construction is a dg operad
+(`Cobar.instDGOperad`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

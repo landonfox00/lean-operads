@@ -135,6 +135,7 @@ import Operad.GrDerivation
 import Operad.InvPreLie
 import Operad.GrCooperad
 import Operad.ConvOperad
+import Operad.Cobar
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny

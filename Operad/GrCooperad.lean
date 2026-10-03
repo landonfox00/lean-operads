@@ -11,7 +11,7 @@ coassociativity up to the Koszul sign of exchanging the two inner cooperations: 
 `(x ⊗ y) ⊗ z ↦ σ(|y| |z|) (x ⊗ z) ⊗ y` (`sswapLast`).
 
 * **Coaugmentations** (`GrCooperad.Coaug`): an even cooperation `1` of arity one, of counit one,
-  decomposing as `1 ⊗ 1`.
+  whose relabellings span a subcooperad.
 * **The reduced part** `C̄ = C / R·1` (`GrCooperad.Red`), the quotient by the span of the
   relabellings of `1`, a graded linear species, and **the parity shift** of a graded linear species
   (`GrSpecies.Shift`): the generators `s⁻¹ C̄` of the cobar construction.
@@ -244,22 +244,31 @@ lemma decomp_tw (e : Bool) (i : A) :
 /-! ## Coaugmentations and the reduced part -/
 
 variable (R C) in
+/-- The span of the relabellings of a cooperation of arity one. -/
+def unitSpanOf (one : C Unit) (A : Type) [Fintype A] [DecidableEq A] : Submodule R (C A) :=
+  Submodule.span R (Set.range fun e : Unit ≃ A => SymSpecies.map (R := R) e one)
+
+variable (R C) in
 /-- **A coaugmentation** of a graded cooperad: an even cooperation `1` of arity one, of counit
-one, decomposing as `1 ⊗ 1`. -/
+one, whose relabellings span a subcooperad. -/
 class Coaug where
   /-- The coaugmentation, the cooperation `1` of arity one. -/
   one : C Unit
   par_one : GrSpecies.par (R := R) false one = one
   counit_one : counit (R := R) (C := C) one = 1
-  decomp_one : decomp (R := R) (C := C) (A := Unit) (B := Unit) ()
-    (SymSpecies.map (R := R) (leftUnitEquiv Unit).symm one) = one ⊗ₜ one
+  /-- The decompositions of the relabellings of `1` are tensors of relabellings of `1`. -/
+  decomp_mem {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+    (e : Unit ≃ Without A i ⊕ B) :
+    decomp (R := R) (C := C) i (SymSpecies.map (R := R) e one)
+      ∈ Submodule.map₂ (TensorProduct.mk R (C A) (C B)) (unitSpanOf R C one A)
+          (unitSpanOf R C one B)
 
 variable [Coaug R C]
 
 variable (R C) in
 /-- The span `R·1` of the relabellings of the coaugmentation. -/
-def unitSpan (A : Type) [Fintype A] [DecidableEq A] : Submodule R (C A) :=
-  Submodule.span R (Set.range fun e : Unit ≃ A => SymSpecies.map (R := R) e (Coaug.one (R := R)))
+abbrev unitSpan (A : Type) [Fintype A] [DecidableEq A] : Submodule R (C A) :=
+  unitSpanOf R C (Coaug.one (R := R)) A
 
 lemma map_one_mem (e : Unit ≃ A) :
     SymSpecies.map (R := R) e (Coaug.one (R := R) (C := C)) ∈ unitSpan R C A :=
@@ -267,7 +276,7 @@ lemma map_one_mem (e : Unit ≃ A) :
 
 lemma unitSpan_le_comap_map (σ' : A ≃ B) :
     unitSpan R C A ≤ (unitSpan R C B).comap (SymSpecies.map (R := R) σ') := by
-  rw [unitSpan, Submodule.span_le]
+  rw [unitSpan, unitSpanOf, Submodule.span_le]
   rintro _ ⟨e, rfl⟩
   show SymSpecies.map (R := R) σ' (SymSpecies.map (R := R) e _) ∈ unitSpan R C B
   rw [← SymSpecies.map_trans]
@@ -275,7 +284,7 @@ lemma unitSpan_le_comap_map (σ' : A ≃ B) :
 
 lemma unitSpan_le_comap_par (b : Bool) :
     unitSpan R C A ≤ (unitSpan R C A).comap (GrSpecies.par (R := R) b) := by
-  rw [unitSpan, Submodule.span_le]
+  rw [unitSpan, unitSpanOf, Submodule.span_le]
   rintro _ ⟨e, rfl⟩
   show GrSpecies.par (R := R) b (SymSpecies.map (R := R) e _) ∈ unitSpan R C A
   rw [← GrSpecies.map_par, ← Coaug.par_one (R := R) (C := C), GrSpecies.par_par]

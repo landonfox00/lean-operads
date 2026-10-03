@@ -814,6 +814,16 @@ theorem appDer_star {e p : Bool} (D : GrDer (GrOperadHom.id R Q) e) {q : Inv R Q
   simp only [term, D.app_map, D.app_comp, appDer_apply, GrOperadHom.id_app]
   rw [tw_hom e (hq _), map_smul, LinearMap.smul_apply, map_add, map_smul]
 
+lemma neg_one_smul_inv (X : Inv R Q) : (-1 : R) • X = -X :=
+  Subtype.ext (funext fun _ => funext fun _ => funext fun _ => neg_one_smul R _)
+
+/-- **An odd derivation sending an odd family `α` to `-(α ⋆ α)` kills `α ⋆ α`**: its value there
+is the associator of `α` with itself. -/
+theorem appDer_star_self {α : Inv R Q} (hα : IsPar true α) (D : GrDer (GrOperadHom.id R Q) true)
+    (hD : appDer D α = -star R Q α α) : appDer D (star R Q α α) = 0 := by
+  rw [appDer_star D hα, hD, Bool.and_self, σ_true, neg_one_smul_inv, map_neg, map_neg,
+    LinearMap.neg_apply, neg_neg, assoc_odd α α hα, neg_add_cancel]
+
 end Inv
 
 end GrOperad

@@ -2,9 +2,10 @@
 # The convolution operad of a graded cooperad and a graded operad
 
 For a graded cooperad `C` and a graded operad `P`, the linear maps `C A → P A` form a graded
-operad (`ConvOp R C P`, `ConvOp.instGrOperad`), **the convolution operad**: a map of parity `p` raises
-parities by `p`, relabellings act on both sides, the unit is the counit followed by the unit, and
-the composite of `f` and `g` decomposes, applies `f ⊗ g` with the Koszul sign, and composes,
+operad (`ConvOp R C P`, `ConvOp.instGrOperad`), **the convolution operad**: a map of parity `p`
+raises parities by `p`, relabellings act on both sides, the unit is the counit followed by the
+unit, and the composite of `f` and `g` decomposes, applies `f ⊗ g` with the Koszul sign, and
+composes,
 
   `(f ∘ᵢ g) = μᵢ ∘ (f ⊗ g) ∘ Δᵢ`,   `(f ⊗ g)(x ⊗ y) = σ(|g| |x|) f x ⊗ g y`.
 
@@ -89,6 +90,15 @@ def toLin (f : ConvOp R C P A) : C A →ₗ[R] P A := f
 @[simp] lemma toLin_zero : toLin (0 : ConvOp R C P A) = 0 := rfl
 
 @[simp] lemma toLin_sub (f g : ConvOp R C P A) : toLin (f - g) = toLin f - toLin g := rfl
+
+@[simp] lemma toLin_neg (f : ConvOp R C P A) : toLin (-f) = -toLin f := rfl
+
+@[simp] lemma toLin_sum {I : Type} (s : Finset I) (f : I → ConvOp R C P A) :
+    toLin (∑ i ∈ s, f i) = ∑ i ∈ s, toLin (f i) := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => rfl
+  | insert a s ha ih => simp only [Finset.sum_insert ha, toLin_add, ih]
 
 @[ext] lemma ext {f g : ConvOp R C P A} (h : ∀ x, toLin f x = toLin g x) : f = g :=
   LinearMap.ext h
@@ -655,7 +665,8 @@ omit [GrCooperad R C] [GrOperad R P] [GrOperad R P'] in
     toLin (postL φ f) = φ ∘ₗ toLin f := rfl
 
 /-- **Composing with a morphism of graded operads is a morphism of convolution operads.** -/
-noncomputable def postHom (φ : GrOperadHom R P P') : GrOperadHom R (ConvOp R C P) (ConvOp R C P') where
+noncomputable def postHom (φ : GrOperadHom R P P') :
+    GrOperadHom R (ConvOp R C P) (ConvOp R C P') where
   app A _ _ := postL (φ.app A)
   app_par b f := by
     ext x
@@ -725,6 +736,16 @@ noncomputable def postDer {e : Bool} (D : GrDer (GrOperadHom.id R P) e) :
 
 @[simp] lemma postDer_app {e : Bool} (D : GrDer (GrOperadHom.id R P) e) (f : ConvOp R C P A) :
     toLin ((postDer (C := C) D).app A f) = D.app A ∘ₗ toLin f := rfl
+
+lemma appDer_postDer_apply {e : Bool} (D : GrDer (GrOperadHom.id R P) e)
+    (q : GrOperad.Inv R (ConvOp R C P)) (x : C A) :
+    toLin ((GrOperad.Inv.appDer (postDer (C := C) D) q).1 A) x = D.app A (toLin (q.1 A) x) :=
+  rfl
+
+lemma appHom_postHom_apply (φ : GrOperadHom R P P') (q : GrOperad.Inv R (ConvOp R C P))
+    (x : C A) :
+    toLin ((GrOperad.Inv.appHom (postHom (C := C) φ) q).1 A) x = φ.app A (toLin (q.1 A) x) :=
+  rfl
 
 end ConvOp
 
