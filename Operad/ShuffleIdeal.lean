@@ -24,7 +24,7 @@ import Operad.SymPresentation
 import Mathlib.Data.Finset.Sort
 import Mathlib.Order.WithBot
 
-universe u v w
+universe u v w x
 
 namespace Operad
 
@@ -368,8 +368,15 @@ variable {R : Type u} [CommRing R]
   subst this
   rfl
 
+/-- The identity morphism. -/
+protected def id : ShuffleOperadHom R P P where
+  app _ _ _ := LinearMap.id
+  app_map _ _ := rfl
+  app_one := rfl
+  app_comp _ _ _ _ _ := rfl
+
 /-- The composite of morphisms. -/
-def comp {P' : (A : Type) → [Fintype A] → [LinearOrder A] → Type v}
+def comp {P' : (A : Type) → [Fintype A] → [LinearOrder A] → Type x}
     [∀ (A : Type) [Fintype A] [LinearOrder A], AddCommGroup (P' A)]
     [∀ (A : Type) [Fintype A] [LinearOrder A], Module R (P' A)] [ShuffleOperad R P']
     (ψ : ShuffleOperadHom R P Q) (φ : ShuffleOperadHom R P' P) : ShuffleOperadHom R P' Q where

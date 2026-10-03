@@ -1307,6 +1307,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Rules.presented_hom_ext
 #print axioms Operad.Rules.holds_of_hom
 #print axioms Operad.Rules.eq_presLift
+#print axioms Operad.LT.instSetOperad
+#print axioms Operad.PTree.isShuffle_sortTree
+#print axioms Operad.PTree.sortTree_map
+#print axioms Operad.PTree.sortTree_bind
+#print axioms Operad.LT.sortHom
+#print axioms Operad.FreeSet.toSh_comp_fromSh
+#print axioms Operad.FreeSet.fromSh_comp_toSh
+#print axioms Operad.FreeSet.shuffleEquiv
+#print axioms Operad.FreeSet.shuffleBasis
+#print axioms Operad.FreeSet.shuffleBasis_apply
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable

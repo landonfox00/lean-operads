@@ -468,6 +468,18 @@ the relations (`Rules.Holds`). Evaluation respects contexts (`ev_ctx`) — the i
 their least leaves, substituted one at a time, and the subtree grafted at its least leaf — so it
 kills the ideal of the rules as soon as it kills the relations (`Rules.evL_ideal`); quotients of
 shuffle operads have the universal property of quotients (`ShuffleOperadIdeal.liftHom`).
+`Operad/ShuffleFreeSym.lean` proves that **the free symmetric operad is the free shuffle operad
+on the relabelled generators**: for generators without operations of arity zero, the lift of the
+generators with a permutation of their inputs, `T k × Perm (Fin k)`, is an isomorphism of shuffle
+operads onto the underlying shuffle operad of `Lin R (FreeSet T)` (`FreeSet.fromSh`,
+`FreeSet.toSh_comp_fromSh`, `FreeSet.fromSh_comp_toSh`), so the free symmetric operad has on every
+finite linear order a basis of shuffle monomials (`FreeSet.shuffleBasis`). The inverse sorts:
+labelled planar trees form a set operad receiving the free one (`LT`, `FreeSet.toLT`), and a
+planar tree with distinct leaves becomes a shuffle tree once the children of every vertex are
+sorted by their least leaves, the vertex recording the permutation (`PTree.sortTree`); sorting
+commutes with strictly increasing relabellings and with substitutions increasing with the least
+leaves (`PTree.sortTree_map`, `PTree.sortTree_bind`), so it is a morphism of shuffle operads
+(`LT.sortHom`).
 
 **Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
 most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift
