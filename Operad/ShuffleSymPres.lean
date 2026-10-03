@@ -124,7 +124,8 @@ noncomputable def presEquiv (A : Type) [Fintype A] [LinearOrder A] :
   (Submodule.quotEquivOfEq _ _ (sub_eq_relabel R r A)).trans
     (Submodule.Quotient.equiv _ _ (shuffleEquiv R A) (map_shuffleEquiv R r A))
 
-lemma presEquiv_apply (A : Type) [Fintype A] [LinearOrder A] (q : (SymOperadIdeal.span R r).Quot A) :
+lemma presEquiv_apply (A : Type) [Fintype A] [LinearOrder A]
+    (q : (SymOperadIdeal.span R r).Quot A) :
     presEquiv R r A q = (presToSh R r).app A q := by
   obtain ⟨x, rfl⟩ := (SymOperadIdeal.span R r).proj_surjective A q
   rfl
