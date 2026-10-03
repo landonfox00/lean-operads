@@ -2275,6 +2275,74 @@ theorem contrSgn_graft_root (hp : p < y.arity) (hz : z.isLeaf = false) :
 
 end ContrSgn
 
+/-! ### Contractions of the parts of a cut -/
+
+/-- **Contracting an edge of the outer tree of a graft, with any grafted tree.** -/
+theorem contr_graft_outer' {y z : Tree E} {p k : ℕ} (hp : p < y.arity) (hk1 : 1 ≤ k)
+    (hk : k < y.weight) :
+    (y.graft p z).contr μ (k + if y.vb p ≤ k then z.weight else 0) = (y.contr μ k).graft p z := by
+  by_cases hz : z.isLeaf = true
+  · rw [eq_leaf_of_isLeaf hz, graft_leaf_right, graft_leaf_right, weight_leaf]
+    simp
+  · exact contr_graft_outer μ hp (by simpa using hz) hk1 hk
+
+/-- **The sign of contracting an edge of the outer tree of a graft, with any grafted tree.** -/
+theorem contrSgn_graft_outer' (gp : ∀ k, E k → Bool) (hμ : MergeFn.Odd gp μ) {y z : Tree E}
+    {p k : ℕ} (hp : p < y.arity) (hk1 : 1 ≤ k) (hk : k < y.weight) :
+    xor (tpar gp z && apar gp y p)
+        (contrSgn gp (y.graft p z) (k + if y.vb p ≤ k then z.weight else 0))
+      = xor (contrSgn gp y k) (tpar gp z && apar gp (y.contr μ k) p) := by
+  by_cases hz : z.isLeaf = true
+  · rw [eq_leaf_of_isLeaf hz, graft_leaf_right, weight_leaf, tpar_leaf]
+    simp
+  · exact contrSgn_graft_outer μ gp hμ hp (by simpa using hz) hk1 hk
+
+/-- Contracting edges of the outer trees of two cuts at a leaf, with the same grafted tree, gives
+the same trees at the same vertices only for the same cut and the same edge. -/
+lemma contr_outer_inj {a a' b : Tree E} {r k k' : ℕ} (hr : r < a.arity) (hr' : r < a'.arity)
+    (hb : b.isLeaf = false) (hk1 : 1 ≤ k) (hk : k < a.weight) (hk1' : 1 ≤ k')
+    (hk' : k' < a'.weight) (h : a.graft r b = a'.graft r b) (hc : a.contr μ k = a'.contr μ k')
+    (hi : k + (if a.vb r ≤ k then b.weight else 0) = k' + if a'.vb r ≤ k' then b.weight else 0) :
+    a = a' ∧ k = k' := by
+  have h1 := vb_contr μ hk1 hk hr
+  have h2 := vb_contr μ hk1' hk' hr'
+  rw [hc] at h1
+  have hbw := weight_pos hb
+  have hv : a.vb r = a'.vb r := by split_ifs at h1 h2 hi <;> omega
+  obtain ⟨rfl, -, -⟩ := graft_inj hr hr' hb hb h hv
+  refine ⟨rfl, ?_⟩
+  split_ifs at hi <;> omega
+
+/-- Contracting an edge of the outer tree of a cut never gives the contraction of an edge of the
+grafted tree of another cut at the same leaf, at the same vertex. -/
+lemma contr_outer_ne_inner {a a' b b' : Tree E} {r k₁ k₂ : ℕ} (hr : r < a.arity)
+    (hb' : b'.isLeaf = false) (hk1 : 1 ≤ k₁) (hk : k₁ < a.weight) (hk₂1 : 1 ≤ k₂)
+    (hk₂ : k₂ < b'.weight) (h : a.graft r b = a'.graft r b') (hc : a.contr μ k₁ = a')
+    (hc' : b'.contr μ k₂ = b) (hi : k₁ + (if a.vb r ≤ k₁ then b.weight else 0) = a'.vb r + k₂) :
+    False := by
+  have hbw : (b'.contr μ k₂).weight + 1 = b'.weight := weight_contr μ hk₂1 hk₂
+  rw [hc'] at hbw
+  have hb : b.isLeaf = false := isLeaf_of_weight (by omega)
+  have h1 := vb_contr μ hk1 hk hr
+  rw [hc] at h1
+  have haw := weight_contr μ hk1 hk
+  rw [hc] at haw
+  have hbpos := weight_pos hb
+  by_cases hlt : k₁ < a.vb r
+  · rw [if_pos hlt] at h1
+    rw [if_neg (by omega)] at hi
+    omega
+  · rw [if_neg hlt] at h1
+    rw [if_pos (by omega)] at hi
+    have hr' : r < a'.arity := by rw [← hc, arity_contr]; exact hr
+    obtain ⟨rfl, -, -⟩ := graft_inj hr hr' hb hb' h (by omega)
+    omega
+
+/-- Grafting at a leaf is injective in the grafted tree. -/
+lemma graft_inj_right {a b b' : Tree E} {r : ℕ} (hr : r < a.arity)
+    (h : a.graft r b = a.graft r b') : b = b' :=
+  (graft_cancel (fun _ e => e) a a b b' r hr h rfl).2
+
 end Tree
 
 end Operad
