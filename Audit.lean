@@ -1170,3 +1170,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymOperad.toShuffle
 #print axioms Operad.SymOperadHom.toShuffle
 #print axioms Operad.SymOperadIdeal.toShuffleQuot
+#print axioms Operad.exists_shuffle
+#print axioms Operad.SymOperad.map_comp_eq_shuffle
+#print axioms Operad.SymOperadIdeal.map_mem_span_relabel
+#print axioms Operad.SymOperadIdeal.toShuffle_span
+#print axioms Operad.SymOperadIdeal.toShuffleSpanQuot_bijective

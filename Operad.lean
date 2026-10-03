@@ -106,3 +106,4 @@ import Operad.FreeAlgebra
 import Operad.ComAlgebra
 import Operad.SymCooperad
 import Operad.ShuffleOperad
+import Operad.ShuffleIdeal
