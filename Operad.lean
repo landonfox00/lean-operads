@@ -120,3 +120,4 @@ import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny
 import Operad.ShuffleAnyGroebner
+import Operad.ShuffleAnyOrder

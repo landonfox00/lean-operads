@@ -1228,3 +1228,6 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.STree.classify
 #print axioms Operad.STree.isCompl_of_critical
 #print axioms Operad.STree.basisOfCritical
+#print axioms Operad.STree.degLex_wf
+#print axioms Operad.STree.pathLex_ctx
+#print axioms Operad.STree.pathLexOrder
