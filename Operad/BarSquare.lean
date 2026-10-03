@@ -660,10 +660,11 @@ structure AssocHyp (J : GrOperadIdeal R (FreeGr R gp)) : Prop where
     j < lg → m₁ + 1 = lg + lh → m₂ + 1 = kx + lg → m + 1 = kx + m₁ →
     σ R (gp kx x) • gen (R := R) (gp := gp) (μ kx m₁ x p (μ lg lh g j h m₁) m)
       + gen (R := R) (gp := gp) (μ m₂ lh (μ kx lg x p g m₂) (p + j) h m) ∈ J.sub (Fin m)
-  parallel : ∀ (kx l₁ l₂ : ℕ) (x : T kx) (a₁ : T l₁) (a₂ : T l₂) (p₁ p₂ m₁ m₂ m : ℕ),
-    p₁ < p₂ → p₂ < kx → m₁ + 1 = kx + l₁ → m₂ + 1 = kx + l₂ → m + 1 = m₁ + l₂ →
+  parallel : ∀ (kx l₁ l₂ : ℕ) (x : T kx) (a₁ : T l₁) (a₂ : T l₂) (p₁ p₂ p₂' m₁ m₂ m : ℕ),
+    p₁ < p₂ → p₂ < kx → p₂' + 1 = p₂ + l₁ → m₁ + 1 = kx + l₁ → m₂ + 1 = kx + l₂ →
+    m + 1 = m₁ + l₂ →
     σ R (gp l₁ a₁ && gp l₂ a₂) •
-        gen (R := R) (gp := gp) (μ m₁ l₂ (μ kx l₁ x p₁ a₁ m₁) (p₂ + l₁ - 1) a₂ m)
+        gen (R := R) (gp := gp) (μ m₁ l₂ (μ kx l₁ x p₁ a₁ m₁) p₂' a₂ m)
       + gen (R := R) (gp := gp) (μ m₂ l₁ (μ kx l₂ x p₂ a₂ m₂) p₁ a₁ m) ∈ J.sub (Fin m)
 
 end Ideal
@@ -850,6 +851,194 @@ theorem SF_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) : ∀ (w n : 
             (ih n₁ s₁ (by omega) g h (p + 1 - lc) j m₁ mB mA (by omega) hj hm₁ hmB hmA) _)
 
 end Series
+
+/-! ## Merging two corollas in parallel -/
+
+section Parallel
+
+variable {μ}
+
+variable (μ gp R) in
+/-- **Merging two corollas at two leaves**, in the two orders. -/
+noncomputable def PF (p₁ p₂ p₂' m₁ m₂ m : ℕ) {n l₁ l₂ : ℕ} (x : Pl (T := T) R n)
+    (a₁ : TreeOfArity T l₁) (a₂ : TreeOfArity T l₂) : Pl (T := T) R m :=
+  σ R (Tree.tpar gp a₁.1 && Tree.tpar gp a₂.1) •
+      mF μ gp R p₂' m (mF μ gp R p₁ m₁ x (pt a₁)) (pt a₂)
+    + mF μ gp R p₁ m (mF μ gp R p₂ m₂ x (pt a₂)) (pt a₁)
+
+lemma PF_smul (p₁ p₂ p₂' m₁ m₂ m : ℕ) {n l₁ l₂ : ℕ} (c : R) (x : Pl (T := T) R n)
+    (a₁ : TreeOfArity T l₁) (a₂ : TreeOfArity T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (c • x) a₁ a₂ = c • PF μ gp R p₁ p₂ p₂' m₁ m₂ m x a₁ a₂ := by
+  simp only [PF, map_smul, LinearMap.smul_apply, smul_add, smul_comm c]
+
+/-- Merging in parallel at two leaves before a graft point. -/
+theorem PF_gF_before_before {p₁ p₂ p₂' r n n₁ lc l₁ l₂ m₁ m₂ m r₁ r₂ r₁₂ mA mB mC : ℕ}
+    (h12 : p₁ < p₂) (h2r : p₂ < r) (hr : r < n₁) (hn : n + 1 = n₁ + lc)
+    (hp₂' : p₂' + 1 = p₂ + l₁) (hm₁ : m₁ + 1 = n + l₁) (hm₂ : m₂ + 1 = n + l₂)
+    (hm : m + 1 = m₁ + l₂) (hr₁ : r₁ + 1 = r + l₁) (hr₂ : r₂ + 1 = r + l₂)
+    (hr₁₂ : r₁₂ + 1 = r₁ + l₂) (hmA : mA + 1 = n₁ + l₁) (hmB : mB + 1 = n₁ + l₂)
+    (hmC : mC + 1 = mA + l₂) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = (σ R (gp lc c && gp l₁ a₁) * σ R (gp lc c && gp l₂ a₂)) •
+          gF gp R r₁₂ m (PF μ gp R p₁ p₂ p₂' mA mB mC X (corolla a₁) (corolla a₂))
+            (pt (corolla c)) := by
+  unfold PF
+  rw [mF_gF_after (μ := μ) (by omega) hr hr₁ hn hmA hm₁ X (corolla c) (corolla a₁), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_after (μ := μ) (show p₂' < r₁ by omega) (show r₁ < mA by omega) hr₁₂
+      (show m₁ + 1 = mA + lc by omega) hmC (show m + 1 = m₁ + l₂ by omega) _ (corolla c)
+      (corolla a₂),
+    mF_gF_after (μ := μ) h2r hr hr₂ hn hmB hm₂ X (corolla c) (corolla a₂), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_after (μ := μ) (show p₁ < r₂ by omega) (show r₂ < mB by omega)
+      (show r₁₂ + 1 = r₂ + l₁ by omega) (show m₂ + 1 = mB + lc by omega)
+      (show mC + 1 = mB + l₁ by omega) (show m + 1 = m₂ + l₁ by omega) _ (corolla c)
+      (corolla a₁)]
+  simp only [tpar_corolla', map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply,
+    smul_add, smul_smul]
+  congr 1
+  · ring_nf
+  · ring_nf
+
+/-- Merging in parallel at two leaves after a graft point. -/
+theorem PF_gF_after_after (hμ : MergeFn.Odd gp μ)
+    {p₁ p₂ p₂' q₁ q₂ q₂' r n n₁ lc l₁ l₂ m₁ m₂ m mA mB mC : ℕ}
+    (h12 : q₁ < q₂) (hrq : r < q₁) (hq₂ : q₂ < n₁) (hn : n + 1 = n₁ + lc)
+    (hp₁ : p₁ + 1 = q₁ + lc) (hp₂ : p₂ + 1 = q₂ + lc) (hp₂' : p₂' + 1 = p₂ + l₁)
+    (hq₂' : q₂' + 1 = q₂ + l₁) (hm₁ : m₁ + 1 = n + l₁) (hm₂ : m₂ + 1 = n + l₂)
+    (hm : m + 1 = m₁ + l₂) (hmA : mA + 1 = n₁ + l₁) (hmB : mB + 1 = n₁ + l₂)
+    (hmC : mC + 1 = mA + l₂) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = (σ R (gp lc c && gp l₁ a₁) * σ R (gp lc c && gp l₂ a₂)) •
+          gF gp R r m (PF μ gp R q₁ q₂ q₂' mA mB mC X (corolla a₁) (corolla a₂))
+            (pt (corolla c)) := by
+  unfold PF
+  rw [mF_gF_before (μ := μ) hμ hrq (by omega) hp₁ hn hmA hm₁ X (corolla c) (corolla a₁),
+    map_smul, LinearMap.smul_apply,
+    mF_gF_before (μ := μ) hμ (show r < q₂' by omega) (show q₂' < mA by omega)
+      (show p₂' + 1 = q₂' + lc by omega) (show m₁ + 1 = mA + lc by omega) hmC hm _ (corolla c)
+      (corolla a₂),
+    mF_gF_before (μ := μ) hμ (by omega) hq₂ hp₂ hn hmB hm₂ X (corolla c) (corolla a₂), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_before (μ := μ) hμ hrq (show q₁ < mB by omega) hp₁ (show m₂ + 1 = mB + lc by omega)
+      (show mC + 1 = mB + l₁ by omega) (show m + 1 = m₂ + l₁ by omega) _ (corolla c)
+      (corolla a₁)]
+  simp only [tpar_corolla', map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply,
+    smul_add, smul_smul]
+  congr 1
+  · ring_nf
+  · ring_nf
+
+/-- Merging in parallel at a leaf before a graft point and a leaf after it. -/
+theorem PF_gF_before_after (hμ : MergeFn.Odd gp μ)
+    {p₁ p₂ p₂' q₂ q₂' r r₁ n n₁ lc l₁ l₂ m₁ m₂ m mA mB mC : ℕ}
+    (h1r : p₁ < r) (hrq : r < q₂) (hq₂ : q₂ < n₁) (hn : n + 1 = n₁ + lc)
+    (hp₂ : p₂ + 1 = q₂ + lc) (hp₂' : p₂' + 1 = p₂ + l₁) (hq₂' : q₂' + 1 = q₂ + l₁)
+    (hr₁ : r₁ + 1 = r + l₁) (hm₁ : m₁ + 1 = n + l₁) (hm₂ : m₂ + 1 = n + l₂)
+    (hm : m + 1 = m₁ + l₂) (hmA : mA + 1 = n₁ + l₁) (hmB : mB + 1 = n₁ + l₂)
+    (hmC : mC + 1 = mA + l₂) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = (σ R (gp lc c && gp l₁ a₁) * σ R (gp lc c && gp l₂ a₂)) •
+          gF gp R r₁ m (PF μ gp R p₁ q₂ q₂' mA mB mC X (corolla a₁) (corolla a₂))
+            (pt (corolla c)) := by
+  unfold PF
+  rw [mF_gF_after (μ := μ) h1r (by omega) hr₁ hn hmA hm₁ X (corolla c) (corolla a₁), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_before (μ := μ) hμ (show r₁ < q₂' by omega) (show q₂' < mA by omega)
+      (show p₂' + 1 = q₂' + lc by omega) (show m₁ + 1 = mA + lc by omega) hmC hm _ (corolla c)
+      (corolla a₂),
+    mF_gF_before (μ := μ) hμ hrq hq₂ hp₂ hn hmB hm₂ X (corolla c) (corolla a₂), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_after (μ := μ) h1r (show r < mB by omega) hr₁ (show m₂ + 1 = mB + lc by omega)
+      (show mC + 1 = mB + l₁ by omega) (show m + 1 = m₂ + l₁ by omega) _ (corolla c)
+      (corolla a₁)]
+  simp only [tpar_corolla', map_add, map_smul, LinearMap.add_apply, LinearMap.smul_apply,
+    smul_add, smul_smul]
+  congr 1
+  · ring_nf
+  · ring_nf
+
+/-- Merging in parallel at two leaves of the grafted corolla. -/
+theorem PF_gF_inner_inner (hμ : MergeFn.Odd gp μ)
+    {p₁ p₂ p₂' j₁ j₂ j₂' r n n₁ lc l₁ l₂ m₁ m₂ m mD mD' mE : ℕ}
+    (h12 : j₁ < j₂) (hj₂ : j₂ < lc) (hr : r < n₁) (hn : n + 1 = n₁ + lc)
+    (hp₁ : p₁ = r + j₁) (hp₂ : p₂ = r + j₂) (hp₂' : p₂' + 1 = p₂ + l₁)
+    (hj₂' : j₂' + 1 = j₂ + l₁) (hm₁ : m₁ + 1 = n + l₁) (hm₂ : m₂ + 1 = n + l₂)
+    (hm : m + 1 = m₁ + l₂) (hmD : mD + 1 = lc + l₁) (hmD' : mD' + 1 = lc + l₂)
+    (hmE : mE + 1 = mD + l₂) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = gF gp R r m X (PF μ gp R j₁ j₂ j₂' mD mD' mE (pt (corolla c)) (corolla a₁)
+          (corolla a₂)) := by
+  have hW₁ := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨show j₁ < lc by omega, hmD⟩ c a₁
+  have hW₂ := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj₂, hmD'⟩ c a₂
+  unfold PF
+  rw [mF_gF_inner (μ := μ) hμ hr (show j₁ < lc by omega) hp₁ hn hmD hm₁ X (isLeaf_corolla c)
+      (corolla a₁), hW₁,
+    mF_gF_inner (μ := μ) hμ hr (show j₂' < mD by omega) (show p₂' = r + j₂' by omega)
+      (show m₁ + 1 = n₁ + mD by omega) hmE hm _ (isLeaf_corolla _) (corolla a₂), twF_twF,
+    mF_gF_inner (μ := μ) hμ hr hj₂ hp₂ hn hmD' hm₂ X (isLeaf_corolla c) (corolla a₂), hW₂,
+    mF_gF_inner (μ := μ) hμ hr (show j₁ < mD' by omega) hp₁ (show m₂ + 1 = n₁ + mD' by omega)
+      (show mE + 1 = mD' + l₁ by omega) (show m + 1 = m₂ + l₁ by omega) _ (isLeaf_corolla _)
+      (corolla a₁), twF_twF, map_add, map_smul]
+
+lemma σ_par_zero (c a₁ a₂ : Bool) :
+    σ R (a₁ && a₂) * σ R (c && a₁) * σ R a₁ = σ R ((!(xor c a₂)) && a₁) := by
+  cases c <;> cases a₁ <;> cases a₂ <;> simp
+
+/-- Merging in parallel at a leaf before a graft point and a leaf of the grafted corolla. -/
+theorem PF_gF_before_inner (hμ : MergeFn.Odd gp μ)
+    {p₁ p₂ p₂' j₂ r r₁ n n₁ lc l₁ l₂ m₁ m₂ m mA mD : ℕ}
+    (h1r : p₁ < r) (hr : r < n₁) (hj₂ : j₂ < lc) (hn : n + 1 = n₁ + lc) (hp₂ : p₂ = r + j₂)
+    (hp₂' : p₂' + 1 = p₂ + l₁) (hr₁ : r₁ + 1 = r + l₁) (hm₁ : m₁ + 1 = n + l₁)
+    (hm₂ : m₂ + 1 = n + l₂) (hm : m + 1 = m₁ + l₂) (hmA : mA + 1 = n₁ + l₁)
+    (hmD : mD + 1 = lc + l₂) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = 0 := by
+  have hW := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj₂, hmD⟩ c a₂
+  unfold PF
+  rw [mF_gF_after (μ := μ) h1r hr hr₁ hn hmA hm₁ X (corolla c) (corolla a₁), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_inner (μ := μ) hμ (show r₁ < mA by omega) hj₂ (show p₂' = r₁ + j₂ by omega)
+      (show m₁ + 1 = mA + lc by omega) hmD hm _ (isLeaf_corolla c) (corolla a₂), hW,
+    twF_mF hμ, twF_pt,
+    mF_gF_inner (μ := μ) hμ hr hj₂ hp₂ hn hmD hm₂ X (isLeaf_corolla c) (corolla a₂), hW,
+    mF_gF_after (μ := μ) h1r hr hr₁ (show m₂ + 1 = n₁ + mD by omega) hmA
+      (show m + 1 = m₂ + l₁ by omega) _ (corolla (μ lc l₂ c j₂ a₂ mD)) (corolla a₁)]
+  simp only [tpar_corolla', hμ, map_neg, map_smul, LinearMap.neg_apply, LinearMap.smul_apply,
+    smul_neg, smul_smul]
+  rw [← σ_par_zero, neg_add_eq_zero]
+  congr 1
+  ring
+
+/-- Merging in parallel at a leaf of the grafted corolla and a leaf after the graft point. -/
+theorem PF_gF_inner_after (hμ : MergeFn.Odd gp μ)
+    {p₁ p₂ p₂' j₁ q₂ r n n₁ lc l₁ l₂ m₁ m₂ m mB mD : ℕ}
+    (hj₁ : j₁ < lc) (hrq : r < q₂) (hq₂ : q₂ < n₁) (hn : n + 1 = n₁ + lc) (hp₁ : p₁ = r + j₁)
+    (hp₂ : p₂ + 1 = q₂ + lc) (hp₂' : p₂' + 1 = p₂ + l₁) (hm₁ : m₁ + 1 = n + l₁)
+    (hm₂ : m₂ + 1 = n + l₂) (hm : m + 1 = m₁ + l₂) (hmB : mB + 1 = n₁ + l₂)
+    (hmD : mD + 1 = lc + l₁) (X : Pl (T := T) R n₁) (c : T lc) (a₁ : T l₁) (a₂ : T l₂) :
+    PF μ gp R p₁ p₂ p₂' m₁ m₂ m (gF gp R r n X (pt (corolla c))) (corolla a₁) (corolla a₂)
+      = 0 := by
+  have hW := mF_corolla (μ := μ) (gp := gp) (R := R) ⟨hj₁, hmD⟩ c a₁
+  unfold PF
+  rw [mF_gF_inner (μ := μ) hμ (by omega) hj₁ hp₁ hn hmD hm₁ X (isLeaf_corolla c) (corolla a₁),
+    hW,
+    mF_gF_before (μ := μ) hμ hrq hq₂ (show p₂' + 1 = q₂ + mD by omega)
+      (show m₁ + 1 = n₁ + mD by omega) hmB hm _ (corolla (μ lc l₁ c j₁ a₁ mD)) (corolla a₂),
+    mF_gF_before (μ := μ) hμ hrq hq₂ hp₂ hn hmB hm₂ X (corolla c) (corolla a₂), map_smul,
+    LinearMap.smul_apply,
+    mF_gF_inner (μ := μ) hμ (show r < mB by omega) hj₁ hp₁ (show m₂ + 1 = mB + lc by omega) hmD
+      (show m + 1 = m₂ + l₁ by omega) _ (isLeaf_corolla c) (corolla a₁), hW, twF_mF hμ, twF_pt]
+  simp only [tpar_corolla', hμ, map_neg, map_smul, LinearMap.neg_apply, LinearMap.smul_apply,
+    smul_neg, smul_smul]
+  rw [add_neg_eq_zero]
+  congr 1
+  have key : σ R (gp l₁ a₁ && gp l₂ a₂) * σ R (!(xor (gp lc c) (gp l₁ a₁)) && gp l₂ a₂)
+      = σ R (gp lc c && gp l₂ a₂) * σ R (gp l₂ a₂) := by
+    cases gp lc c <;> cases gp l₁ a₁ <;> cases gp l₂ a₂ <;> simp
+  linear_combination key
+
+end Parallel
 
 end FreeGr
 
