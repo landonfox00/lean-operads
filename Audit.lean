@@ -1589,3 +1589,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.CobarDG.d_d
 #print axioms Operad.CobarDG.instDGOperad
 #print axioms Operad.CobarDG.homEquiv
+#print axioms Operad.FreeGr.vanish_bas
+#print axioms Operad.FreeGr.inner_inputs
+#print axioms Operad.FreeGr.fact_corolla_unique
+#print axioms Operad.Sym.LinOrd.comp_cancel
+#print axioms Operad.Bar.piL_barD_corollas
+#print axioms Operad.Bar.star_piF_corollas
+#print axioms Operad.Bar.star_piF_eq
+#print axioms Operad.Bar.mc_pi
+#print axioms Operad.Bar.twisting
+#print axioms Operad.Bar.counit

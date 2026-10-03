@@ -176,3 +176,4 @@ import Operad.BarSquare
 import Operad.DGCooperad
 import Operad.Bar
 import Operad.TwistingDG
+import Operad.BarCobar

@@ -599,6 +599,20 @@ associative modulo them, by the associativity of `P` in positions (`assoc_seq_po
 `assoc_par_pos`, `barMerge_assocHyp`), so **the bar construction is a dg cooperad**
 (`Bar.instDGCooperad`, `Bar.d_d`), its differential killing the coaugmentation (`Bar.d_one`).
 
+**Twisting morphisms out of dg cooperads and the bar–cobar counit.** `Operad/TwistingDG.lean`
+shows that precomposing with the differential of a dg cooperad, with the Koszul sign, is an odd
+derivation of the convolution operad (`ConvOp.preDer`), and defines **twisting morphisms out of a
+dg cooperad** (`TwistingDG`), satisfying `d ∘ α + α ∘ d + α ⋆ α = 0`, **the cobar construction of
+a dg cooperad**, with differential extending `s⁻¹ c̄ ↦ -(ι ⋆ ι)(c) - s⁻¹ (d c)‾`, a dg operad
+(`CobarDG.d_d`, `CobarDG.instDGOperad`), and **its cobar adjunction** (`CobarDG.homEquiv`).
+`Operad/BarCobar.lean` builds **the universal twisting morphism** `π : B(P, I) → P`, the
+projection onto the cogenerators desuspended (`Bar.pi`): it satisfies the Maurer–Cartan equation
+`π ∘ d + π ⋆ π = 0` when `I` has no operations without inputs (`Bar.mc_pi`), both terms seeing
+only the composites of two corollas, merged by the bar differential and composed by the
+convolution square at the unique splitting by the inputs of the inner corolla
+(`Bar.piL_barD_corollas`, `Bar.star_piF_corollas`). By the cobar adjunction it gives **the
+counit of the bar–cobar adjunction**, the morphism of dg operads `ΩB(P, I) → P` (`Bar.counit`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

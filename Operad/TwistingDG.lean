@@ -4,10 +4,23 @@
 For a dg cooperad `C` and a graded operad `P`, **precomposing with the differential of `C`, with
 the Koszul sign**, `f ↦ (-1)^{|f|} f ∘ d`, is an odd derivation of the convolution operad
 (`ConvOp.preDer`): `(f ∘ᵢ g) ∘ d = (-1)^{|g|} (f ∘ d) ∘ᵢ g + f ∘ᵢ (g ∘ d)` by the coderivation
-rule (`ConvOp.preL_d_compC`).
+rule (`ConvOp.preL_d_compC`). It anticommutes with postcomposing with an odd derivation of `P`
+and squares to zero (`ConvOp.appDer_post_pre`, `ConvOp.appDer_pre_pre`).
+
+* **Twisting morphisms** out of a coaugmented dg cooperad into a dg operad (`TwistingDG`): odd
+  equivariant maps `α` vanishing on the coaugmentation with `d ∘ α + α ∘ d + α ⋆ α = 0`.
+* **The cobar construction of a dg cooperad** whose differential kills the coaugmentation
+  (`DGCooperad.DOne`): the free graded operad on `s⁻¹ C̄` with the odd derivation extending
+  `s⁻¹ c̄ ↦ -(ι ⋆ ι)(c) - s⁻¹ (d c)‾` (`CobarDG.d`). **It squares to zero** (`CobarDG.d_d`): on the
+  generators its square is a combination of `(ι ⋆ ι) ⋆ ι - ι ⋆ (ι ⋆ ι)`, which vanishes, and of the
+  terms of the Leibniz rule of the two derivations on `ι ⋆ ι`, which cancel. It is a dg operad
+  (`CobarDG.instDGOperad`).
+* **The cobar adjunction** (`CobarDG.homEquiv`): the morphisms of graded operads out of it
+  commuting with the differentials are the twisting morphisms.
 -/
 import Operad.Twisting
 import Operad.DGCooperad
+import Operad.GrSubCooperad
 
 universe u v w
 
@@ -25,20 +38,6 @@ variable {R : Type u} [CommRing R] {C : (A : Type) → [Fintype A] → [Decidabl
   [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)]
   {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
-
-/-- Precomposing with a linear map `C A → C A`. -/
-def preL (ψ : C A →ₗ[R] C A) : ConvOp R C P A →ₗ[R] ConvOp R C P A where
-  toFun f := of (toLin f ∘ₗ ψ)
-  map_add' f g := by
-    simp only [toLin_add, LinearMap.add_comp]
-    rfl
-  map_smul' a f := by
-    simp only [toLin_smul, LinearMap.smul_comp]
-    rfl
-
-
-@[simp] lemma toLin_preL (ψ : C A →ₗ[R] C A) (f : ConvOp R C P A) :
-    toLin (preL ψ f) = toLin f ∘ₗ ψ := rfl
 
 variable [DGCooperad R C] [GrOperad R P]
 
