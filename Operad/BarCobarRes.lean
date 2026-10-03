@@ -71,7 +71,8 @@ lemma mM_ι_fin {k l : ℕ} {v : CobarGen R 𝒞 (Fin k)} {b : Bool}
     show (cobarMerge R V).mc i ((𝒥Ω).proj _ (gen _)) ((𝒥Ω).proj _ (gen _)) = _
     rw [(cobarMerge R V).mc_gen _ i _ m h]
     congr 1
-    have hp : GrSpecies.par (R := R) (!(xor b c)) (cobarVal R V b v i (GrSpecies.par (R := R) c w) m h)
+    have hp : GrSpecies.par (R := R) (!(xor b c))
+        (cobarVal R V b v i (GrSpecies.par (R := R) c w) m h)
         = cobarVal R V b v i (GrSpecies.par (R := R) c w) m h :=
       (cobarMerge R V).par _ _ _ _ _ _ _ hv (GrSpecies.par_par_self (R := R) c w)
     rw [FreeGrL.ι_app_hom (R := R) (V := CobarGen R 𝒞) hp]
@@ -190,6 +191,42 @@ lemma ιL_proj_map (e : A ≃ B) (y : FreeGr R (grGenPar R V) A) :
   rw [← Cobar.ιL_map]
   rfl
 
+/-- **The generators have no unit component.** -/
+lemma unitCoeffL_ι (v : CobarGen R 𝒞 A) :
+    FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((FreeGrL.ι R (CobarGen R 𝒞)).app A v) = 0 := by
+  rw [GrSpeciesHom.app_eq_chart (FreeGrL.ι R (CobarGen R 𝒞)) (Fintype.equivFin A).symm,
+    FreeGrL.ι_app_fin]
+  show FreeGrL.unitCoeffL R (CobarGen R 𝒞) A (GrOperad.map (R := R) _
+    ((𝒥Ω).proj _ (gen _) + (𝒥Ω).proj _ (gen _))) = 0
+  rw [FreeGrL.unitCoeffL_map, map_add, FreeGrL.unitCoeffL_proj, FreeGrL.unitCoeffL_proj,
+    unitCoeff_gen, unitCoeff_gen, add_zero]
+
+lemma unitCoeffL_ιL (c : 𝒞 A) :
+    FreeGrL.unitCoeffL R (CobarGen R 𝒞) A (Cobar.ιL R 𝒞 A c) = 0 := unitCoeffL_ι _
+
+/-- **The term of a factorization**, as a composite of generators. -/
+lemma repW_ιF {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
+    (q : Reg (TreeOfArity (GrGen R V)) (Fin l)) (e : Without (Fin k) i ⊕ Fin l ≃ X) :
+    repW (ιF R V) (ιF R V) e p q
+      = GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
+          * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
+          GrOperad.comp (R := R) i
+            (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+            (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))))
+      := by
+  have e1 : ConvOp.toLin ((ιF R V).1 (Fin k))
+      (GrSpecies.tw (R := R) true (SgnLin.bas (treeSgn (grGenPar R V)) R p))
+      = σ R (Tree.tpar (grGenPar R V) (treeOf p)) •
+          Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)) := by
+    rw [ιF_apply, tw_bas, ιL_proj_smul]
+  unfold repW
+  refine congrArg (GrOperad.map (R := R) e) ?_
+  refine (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • GrOperad.comp (R := R) i z
+    (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) e1).trans
+    ?_
+  exact (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • z)
+    (LinearMap.map_smul₂ _ _ _ _)).trans (smul_smul _ _ _)
+
 /-- **The merge after the cut at a factorization** gives back the tree, with a minus sign. -/
 lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
     (q : Reg (TreeOfArity (GrGen R V)) (Fin l)) (e : Without (Fin k) i ⊕ Fin l ≃ X)
@@ -197,11 +234,6 @@ lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k)
     hM R V X (repW (ιF R V) (ιF R V) e p q)
       = -Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R
           (SetOperad.map e (SetOperad.comp i p q)))) := by
-  have e1 : ConvOp.toLin ((ιF R V).1 (Fin k))
-      (GrSpecies.tw (R := R) true (SgnLin.bas (treeSgn (grGenPar R V)) R p))
-      = σ R (Tree.tpar (grGenPar R V) (treeOf p)) •
-          Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)) := by
-    rw [ιF_apply, tw_bas, ιL_proj_smul]
   have hpa : GrOperad.par (R := R) (Tree.tpar (grGenPar R V) (treeOf p))
       ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p))
       = (𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p) :=
@@ -231,20 +263,7 @@ lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k)
     Cobar.ιL R 𝒞 _ z) e6)
   have e8 := ιL_proj_smul (R := R) (V := V) (σ R (cSgn (grGenPar R V) i p q))
     (SgnLin.bas (treeSgn (grGenPar R V)) R (SetOperad.comp i p q))
-  have s1 : repW (ιF R V) (ιF R V) e p q
-      = GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
-          * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
-          GrOperad.comp (R := R) i
-            (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
-            (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))))
-      := by
-    unfold repW
-    refine congrArg (GrOperad.map (R := R) e) ?_
-    refine (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • GrOperad.comp (R := R) i z
-      (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) e1).trans
-      ?_
-    exact (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • z)
-      (LinearMap.map_smul₂ _ _ _ _)).trans (smul_smul _ _ _)
+  have s1 := repW_ιF (R := R) (V := V) i p q e
   have s2 := ((cobarMerge R V).map_d e ((σ R (cSgn (grGenPar R V) i p q)
           * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
           GrOperad.comp (R := R) i

@@ -401,6 +401,25 @@ theorem mc_map {A' B' : Type} [Fintype A'] [DecidableEq A'] [Fintype B'] [Decida
   obtain ⟨y, rfl⟩ := (𝒥).proj_surjective B Y
   rw [← proj_map'', ← proj_map'', mc_proj, mc_proj, mcomp_map, proj_map'']
 
+/-- **Merge-composition commutes with relabelling the outer operation.** -/
+theorem mc_map_left {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (i : A)
+    (X : FreeGrL R W A) (Y : FreeGrL R W B) :
+    M.mc (e i) (GrOperad.map (R := R) e X) Y
+      = GrOperad.map (R := R) (compEquiv e (Equiv.refl B) i) (M.mc i X Y) := by
+  obtain ⟨x, rfl⟩ := (𝒥).proj_surjective A X
+  obtain ⟨y, rfl⟩ := (𝒥).proj_surjective B Y
+  rw [← proj_map'', mc_proj, mc_proj, mcomp_map_left, proj_map'']
+
+/-- **Merge-composition commutes with relabelling the inner operation.** -/
+theorem mc_map_right {B' : Type} [Fintype B'] [DecidableEq B'] (e : B ≃ B') (i : A)
+    (X : FreeGrL R W A) (Y : FreeGrL R W B) :
+    M.mc i X (GrOperad.map (R := R) e Y)
+      = GrOperad.map (R := R) (compEquiv (Equiv.refl A) e i) (M.mc i X Y) := by
+  obtain ⟨x, rfl⟩ := (𝒥).proj_surjective A X
+  obtain ⟨y, rfl⟩ := (𝒥).proj_surjective B Y
+  rw [← proj_map'', mc_proj, mc_proj, mcomp_map_right]
+  rfl
+
 /-- **Merging at an input other than the one composed at**:
 `(x ∘ᵢ y) ⊛ₖ z = (-1)^{|y||z|} (x ⊛ₖ z) ∘ᵢ y`. -/
 theorem mc_comp_par {i k : A} (hik : i ≠ k) (X : FreeGrL R W A) {q r : Bool}
