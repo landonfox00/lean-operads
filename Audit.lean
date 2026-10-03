@@ -1325,6 +1325,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeSet.presEquiv_apply
 #print axioms Operad.FreeSet.presBasis
 #print axioms Operad.FreeSet.presBasis_apply
+#print axioms Operad.LTree.monoEquiv
+#print axioms Operad.FreeBin.shuffleBasis
+#print axioms Operad.FreeBin.finrank_eq_doubleFactorial
+#print axioms Operad.BinPres.presBasis
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable

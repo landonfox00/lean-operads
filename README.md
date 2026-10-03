@@ -488,6 +488,11 @@ relabelled generators modulo the sorted relabellings of the relators** (`FreeSet
 `FreeSet.presToSh`, `FreeSet.presEquiv`), so that when these generate the ideal of a resolvable
 set of rules, **the normal monomials are a basis of the symmetric operad** (`FreeSet.presBasis`,
 Dotsenko–Khoroshkin).
+`Operad/ShuffleFreeBin.lean` specializes this to binary generators: the binary shuffle trees
+with decorations `G × Perm (Fin 2)` are the shuffle monomials (`LTree.monoEquiv`), a basis of
+`FreeBin R G` (`FreeBin.shuffleBasis`), of dimension `(2n - 1)!! (2 |G|)ⁿ` in arity `n + 1`
+(`FreeBin.finrank_eq_doubleFactorial`), and binary presented operads have PBW bases from
+resolvable rules (`BinPres.presBasis`).
 
 **Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
 most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift
