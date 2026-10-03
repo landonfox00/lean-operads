@@ -1194,3 +1194,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.CycOperad.ofExt
 #print axioms Operad.CycOperad.toSymOperad_ofExt
 #print axioms Operad.CycOperad.extEquiv
+#print axioms Operad.Homology.map_eq_of_homotopy
+#print axioms Operad.Contraction.homologyEquiv
+#print axioms Operad.Contraction.perturb_key
+#print axioms Operad.Contraction.perturb_dW_dW
+#print axioms Operad.Contraction.perturb

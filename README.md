@@ -334,6 +334,13 @@ converse: on a species vanishing on empty sets of entries, **cyclic operad struc
 operad structures on `C ∘ Option` with a compatible extended action** (`CycOperad.extEquiv`), the
 gluing being recovered by rooting at any entry (`CycOperad.compX_root`, `CycOperad.compX_eq_compY`).
 
+**Homological algebra.** `Operad/Perturbation.lean` has the homology of a module with a square-zero
+endomorphism, induced maps of chain maps and their invariance under chain homotopy, contractions
+(strong deformation retracts with the side conditions), which induce isomorphisms on homology
+(`Contraction.homologyEquiv`), and **the homological perturbation lemma** (`Contraction.perturb`):
+a perturbation `δ` of the differential with `1 - δ h` invertible transfers the contraction, with
+explicit formulas, the key identity being `d A + A d + A ι π A = 0` (`Contraction.perturb_key`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

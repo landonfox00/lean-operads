@@ -111,3 +111,4 @@ import Operad.PlanarFree
 import Operad.Colored
 import Operad.Cyclic
 import Operad.CyclicExt
+import Operad.Perturbation
