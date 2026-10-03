@@ -1156,3 +1156,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Schur.mk_eq_act
 #print axioms Operad.Schur.algHom_ext
 #print axioms Operad.Schur.liftEquiv
+#print axioms Operad.Sym.ComAlg.act_eq_prod
+#print axioms Operad.Sym.ComAlg.ofCommAlgebra_toCommRing
+#print axioms Operad.Sym.ComAlg.toCommRing_ofCommAlgebra
+#print axioms Operad.Sym.ComAlg.homEquiv
+#print axioms Operad.Schur.isSymmetricAlgebra_com
+#print axioms Operad.Schur.symmetricAlgebraEquiv

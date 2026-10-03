@@ -296,7 +296,10 @@ species, with their universal properties (`FreeSp.homEquiv`, `FreeL.homEquiv`).
 `Operad/Schur.lean` presents the Schur functor `S(P, V) = ⊕ₙ P(n) ⊗_{Σₙ} V^{⊗n}` as a module, and
 `Operad/FreeAlgebra.lean` makes it the free `P`-algebra on `V`. Operations act by total composition,
 every algebra acts through total composition (`SymAlgebra.act_total`), and morphisms of algebras out
-of `S(P, V)` are the linear maps out of `V` (`Schur.liftEquiv`).
+of `S(P, V)` are the linear maps out of `V` (`Schur.liftEquiv`). `Operad/ComAlgebra.lean` shows
+that algebras over `Com` are commutative algebras (`ComAlg.toCommRing`, `ComAlg.ofCommAlgebra`,
+`ComAlg.homEquiv`) and that the free `Com`-algebra is Mathlib's `SymmetricAlgebra`
+(`Schur.isSymmetricAlgebra_com`).
 
 ## Roadmap
 
