@@ -1302,6 +1302,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GrOperad.Inv.twD_twD
 #print axioms Operad.Twisting.twD_twD
 #print axioms Operad.Twisting.mc_bracket
+#print axioms Operad.GrOperad.innerL_comp
+#print axioms Operad.GrOperad.innerL_par
+#print axioms Operad.GrOperad.innerL_map
+#print axioms Operad.GrOperad.innerL_one
+#print axioms Operad.GrOperad.innerDer
+#print axioms Operad.GrOperad.innerL_innerL
+#print axioms Operad.GrOperad.innerDG
+#print axioms Operad.EndGr.dE_odd
+#print axioms Operad.EndGr.dE_comp_dE
+#print axioms Operad.EndGr.instDGOperad
+#print axioms Operad.HoAlgebra.equivTwisting
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left

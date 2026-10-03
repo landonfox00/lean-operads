@@ -508,6 +508,18 @@ so for an odd derivation `D` with `D² = 0` and `D α + α ⋆ α = 0`, **the tw
 twisted convolution complex (`Twisting.twD_twD`). When `2` is invertible, the Maurer–Cartan
 equation reads `∂α + ½ [α, α] = 0` (`Twisting.mc_bracket`).
 
+**Inner derivations, dg endomorphism operads and homotopy algebras.** `Operad/InnerDer.lean`
+defines, for an odd operation `D` with one input of a graded operad, the inner derivation
+`[D, x] = D ∘ x - σ(|x|) ∑_a x ∘_a D` (`GrOperad.innerL`): a derivation of the compositions
+(`GrOperad.innerDer`), by sequential and parallel associativity, which squares to zero when
+`D ∘ D = 0` (`GrOperad.innerL_innerL`), the terms `(x ∘_a D) ∘_b D` cancelling in pairs; so the
+graded operad is a dg operad (`GrOperad.innerDG`). For a **dg super module** `V` (`DGSuperMod`),
+the differential of `V` is such an operation of `End_V`, which is thus **a dg operad**
+(`EndGr.instDGOperad`) with the differential `∂f = d ∘ f - σ(|f|) ∑_a f ∘_a d`. A **homotopy
+algebra** over the cobar construction of a coaugmented graded cooperad `C` is a morphism of dg
+operads `ΩC → End_V` (`HoAlgebra`), and these are **the twisting morphisms `C → End_V`**
+(`HoAlgebra.equivTwisting`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

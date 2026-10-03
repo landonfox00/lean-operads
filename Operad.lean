@@ -138,6 +138,7 @@ import Operad.ConvOperad
 import Operad.Cobar
 import Operad.Twisting
 import Operad.InvLie
+import Operad.InnerDer
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny
