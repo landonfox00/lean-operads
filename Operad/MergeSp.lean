@@ -364,7 +364,8 @@ lemma proj_tw' (e : Bool) (x : FreeGr R (grGenPar R W) A) :
   rw [GrSpecies.tw_apply, GrOperad.tw_apply, map_add, map_smul]
   rfl
 
-/-- **The bar differential of a composite**: `d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y`. -/
+/-- **The bar differential of a composite**:
+`d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y`. -/
 theorem d_comp (i : A) (X : FreeGrL R W A) (Y : FreeGrL R W B) :
     M.d _ (GrOperad.comp (R := R) i X Y)
       = GrOperad.comp (R := R) i (M.d A X) Y
