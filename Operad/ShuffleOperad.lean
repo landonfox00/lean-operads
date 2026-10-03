@@ -277,9 +277,21 @@ end ShuffleOperadIdeal
 
 /-- **The ordered species underlying a species**: the same components, on ordered sets. -/
 @[nolint unusedArguments]
-abbrev Shuf (P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v) :
+def Shuf (P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v) :
     (A : Type) → [Fintype A] → [LinearOrder A] → Type v :=
   fun A _ _ => P A
+
+instance Shuf.instAddCommGroup (P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v)
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)] (A : Type) [Fintype A]
+    [LinearOrder A] : AddCommGroup (Shuf P A) :=
+  inferInstanceAs (AddCommGroup (P A))
+
+instance Shuf.instModule (R : Type u) [CommRing R]
+    (P : (A : Type) → [Fintype A] → [DecidableEq A] → Type v)
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] (A : Type) [Fintype A]
+    [LinearOrder A] : Module R (Shuf P A) :=
+  inferInstanceAs (Module R (P A))
 
 namespace SymOperad
 

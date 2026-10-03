@@ -1175,3 +1175,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymOperadIdeal.map_mem_span_relabel
 #print axioms Operad.SymOperadIdeal.toShuffle_span
 #print axioms Operad.SymOperadIdeal.toShuffleSpanQuot_bijective
+#print axioms Operad.TreeOfArity.evalArr_graft
+#print axioms Operad.TreeOfArity.homEquiv
+#print axioms Operad.FreeReg.regIso
+#print axioms Operad.FreeReg.finrank_eq
+#print axioms Operad.Pres.shuffle_hom_ext
+#print axioms Operad.SymOperadIdeal.shuffle_hom_ext
