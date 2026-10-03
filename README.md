@@ -353,6 +353,14 @@ operation cancelling against itself without division by two (`End.kstar_kstar_od
 to zero** (`AInf.hoch_hoch`), and identifies dg algebras with the A∞-structures concentrated in
 arities one and two (`AInf.isAInf_dga_iff`).
 
+**Gerstenhaber and BV algebras.** `Operad/GerBV.lean` proves **Koszul's theorem**: for a graded
+commutative product and an odd operator `Δ` with `Δ² = 0` of order at most two (a BV algebra,
+`GerBV.IsBV`), the derived bracket `[x, y] = σ|x| (Δ(xy) - Δ(x) y - σ|x| x Δ(y))` is a Gerstenhaber
+bracket: graded antisymmetric, a graded derivation of the product, satisfying the graded Jacobi
+identity, with `Δ` a derivation of it (`GerBV.IsBV.bracket_antisymm`, `bracket_mul_right`,
+`bracket_jacobi`, `GerBV.Δ_bracket`). The Jacobi identity needs only `Δ² = 0` and the order
+condition (`GerBV.dev_jacobi`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

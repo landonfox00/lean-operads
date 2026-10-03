@@ -1207,3 +1207,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.AInf.tstar_tstar_odd
 #print axioms Operad.AInf.hoch_hoch
 #print axioms Operad.AInf.isAInf_dga_iff
+#print axioms Operad.GerBV.dev_jacobi
+#print axioms Operad.GerBV.IsBV.bracket_antisymm
+#print axioms Operad.GerBV.IsBV.bracket_mul_right
+#print axioms Operad.GerBV.IsBV.bracket_jacobi
+#print axioms Operad.GerBV.Δ_bracket
