@@ -116,3 +116,7 @@ import Operad.KoszulSign
 import Operad.AInfinity
 import Operad.GerBV
 import Operad.DGOperad
+import Operad.Diamond
+import Operad.DiamondCtx
+import Operad.ShuffleAny
+import Operad.ShuffleAnyGroebner

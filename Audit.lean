@@ -1215,3 +1215,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.DGOperad.comp_boundary_right
 #print axioms Operad.DGOperad.hcomp_cls
 #print axioms Operad.DGOperad.instGrOperadHomology
+#print axioms Operad.Rewriting.resolvable_iff
+#print axioms Operad.Rewriting.Resolvable.basis_apply
+#print axioms Operad.Rewriting.Resolvable.nf_eq_zero_iff
+#print axioms Operad.Rules.ideal_eq_span
+#print axioms Operad.Rules.Amb.res_of_isDisjoint
+#print axioms Operad.Rules.Amb.res_of_factors
+#print axioms Operad.Rules.isCompl_of_crit
+#print axioms Operad.STree.trunc_subst
+#print axioms Operad.STree.exists_subst_trunc
+#print axioms Operad.STree.isSCtx_comp
+#print axioms Operad.STree.classify
+#print axioms Operad.STree.isCompl_of_critical
+#print axioms Operad.STree.basisOfCritical
