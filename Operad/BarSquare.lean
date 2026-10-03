@@ -1320,6 +1320,18 @@ theorem barD_barD_mem (hμ : MergeFn.Odd gp μ) (hA : AssocHyp μ gp R J) {A : T
 
 end Square
 
+/-! ## Merging generators -/
+
+/-- **Merge-composing two generators** is the generator of the merged label, relabelled to the
+positions of the composite. -/
+theorem mcomp_gen_gen {k l : ℕ} (c : T k) (i : Fin k) (g : T l) (m : ℕ) (h : m + 1 = k + l) :
+    mcomp μ gp R i (gen c) (gen g)
+      = GrOperad.map (R := R) (posEquiv k i l m ⟨i.2, h⟩).symm
+          (gen (R := R) (gp := gp) (μ k l c i g m)) := by
+  have e := ιP_mF (μ := μ) (gp := gp) (R := R) ⟨i.2, h⟩ (pt (corolla c)) (pt (corolla g))
+  rw [mF_corolla (μ := μ) ⟨i.2, h⟩, ιP_corolla, ιP_corolla, ιP_corolla] at e
+  rw [e, ← GrOperad.map_trans, Equiv.self_trans_symm, GrOperad.map_refl]
+
 end FreeGr
 
 end Operad
