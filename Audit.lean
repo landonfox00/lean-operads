@@ -1296,6 +1296,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeSh.liftApp_graft
 #print axioms Operad.FreeSh.lift
 #print axioms Operad.FreeSh.lift_gen
+#print axioms Operad.STree.graft_canon_normalize
+#print axioms Operad.FreeSh.hom_ext
+#print axioms Operad.FreeSh.eq_lift
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable
