@@ -102,3 +102,4 @@ import Operad.SpeciesOp
 import Operad.FreeSpecies
 import Operad.MultilinearQuot
 import Operad.Schur
+import Operad.FreeAlgebra

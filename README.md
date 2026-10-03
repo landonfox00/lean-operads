@@ -289,6 +289,15 @@ multilinear (`SymOperad.totalL`). `Operad/MayClass.lean` builds partial composit
 composition and proves that the two constructions are inverse to each other
 (`MaySetOperad.toSetOperad_toMaySetOperad`, `MaySetOperad.toMaySetOperad_toSetOperad`).
 
+**Species, free operads and free algebras.** `Operad/SpeciesOp.lean` has species of sets and of
+modules indexed like operads, with the skeleton (a morphism of species is an equivariant family on
+the `Fin n`). `Operad/FreeSpecies.lean` builds the free operad on a set species and on a linear
+species, with their universal properties (`FreeSp.homEquiv`, `FreeL.homEquiv`).
+`Operad/Schur.lean` presents the Schur functor `S(P, V) = ⊕ₙ P(n) ⊗_{Σₙ} V^{⊗n}` as a module, and
+`Operad/FreeAlgebra.lean` makes it the free `P`-algebra on `V`. Operations act by total composition,
+every algebra acts through total composition (`SymAlgebra.act_total`), and morphisms of algebras out
+of `S(P, V)` are the linear maps out of `V` (`Schur.liftEquiv`).
+
 ## Roadmap
 
 **The plan of record is now [`ROADMAP.md`](ROADMAP.md)** (2026-09-28), which settles the

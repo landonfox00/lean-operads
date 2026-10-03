@@ -1149,3 +1149,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Schur.mkA_map
 #print axioms Operad.Schur.lift_mk
 #print axioms Operad.Schur.hom_ext
+#print axioms Operad.Sym.SymAlgebra.act_total
+#print axioms Operad.SymOperad.comp_eq_total
+#print axioms Operad.Schur.act_mkA
+#print axioms Operad.Schur.algebra
+#print axioms Operad.Schur.mk_eq_act
+#print axioms Operad.Schur.algHom_ext
+#print axioms Operad.Schur.liftEquiv
