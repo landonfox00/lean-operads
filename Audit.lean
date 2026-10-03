@@ -1140,3 +1140,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeL.homEquiv
 #print axioms Operad.FreeL.homEquiv_symm_ι
 #print axioms Operad.FreeL.hom_ext
+#print axioms Operad.ML.finsuppLift_eq_zero
+#print axioms Operad.ML.dsLift_eq_zero
+#print axioms Operad.ML.ds_ext
+#print axioms Operad.ML.liftQ_mk
+#print axioms Operad.ML.quot_ext
+#print axioms Operad.Schur.mkA_chart
+#print axioms Operad.Schur.mkA_map
+#print axioms Operad.Schur.lift_mk
+#print axioms Operad.Schur.hom_ext

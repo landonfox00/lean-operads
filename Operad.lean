@@ -100,3 +100,5 @@ import Operad.MayOperad
 import Operad.MayClass
 import Operad.SpeciesOp
 import Operad.FreeSpecies
+import Operad.MultilinearQuot
+import Operad.Schur
