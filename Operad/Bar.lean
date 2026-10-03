@@ -5,7 +5,7 @@ Let `P` be a graded operad and `I` an ideal of `P`, for instance the augmentatio
 augmented operad. **The bar construction** `B(P, I)` (`BarCoop`) is the cut cooperad of the free
 graded operad on the suspension `s I` (`BarGen`) with the bar differential, which contracts the
 edges of trees, merging the decorations of their ends by the composition of `P`:
-`s a ⊛ᵢ s b = (-1)^{|s a|} s (a ∘ᵢ b)`, relabelled to the positions of the merged vertex
+`s a ⊛ᵢ s b = (-1)^{|a|} s (a ∘ᵢ b)`, relabelled to the positions of the merged vertex
 (`barMerge`).
 
 * The merge is compatible with the linearity relations of the free graded operad on `s I`
@@ -176,11 +176,11 @@ lemma BarT.par_val {k : ℕ} (x : BarT I k) : GrOperad.par (R := R) (!x.1.2) x.v
   congrArg (IdealSp.val I) x.2
 
 variable (I) in
-/-- **The value of merging two decorations**: `s a ⊛ⱼ s b = (-1)^{|s a|} s (a ∘ⱼ b)`, in the
+/-- **The value of merging two decorations**: `s a ⊛ⱼ s b = (-1)^{|a|} s (a ∘ⱼ b)`, in the
 positions of the merged vertex. -/
 noncomputable def barVal {k l : ℕ} (x : BarT I k) (q : Fin k) (y : BarT I l) (m : ℕ)
     (h : m + 1 = k + l) : P (Fin m) :=
-  σ R x.1.2 • GrOperad.map (R := R) (posEquivF q l m h) (GrOperad.comp (R := R) q x.val y.val)
+  σ R (!x.1.2) • GrOperad.map (R := R) (posEquivF q l m h) (GrOperad.comp (R := R) q x.val y.val)
 
 lemma barVal_mem {k l : ℕ} (x : BarT I k) (q : Fin k) (y : BarT I l) (m : ℕ)
     (h : m + 1 = k + l) : barVal I x q y m h ∈ I.sub (Fin m) :=

@@ -593,7 +593,7 @@ merge function associative** in series and in parallel (`FreeGr.AssocHyp`, `Free
 by a planar induction on the number of vertices. `Operad/DGCooperad.lean` defines dg cooperads and
 their morphisms (`DGCooperad`, `DGCooperadHom`). `Operad/Bar.lean` builds **the bar construction**
 `B(P, I)` of a graded operad relative to an ideal (`BarCoop`): the cut cooperad on the suspension
-`s I`, with the merge `s a ⊛ᵢ s b = (-1)^{|s a|} s (a ∘ᵢ b)` in the positions of the merged vertex
+`s I`, with the merge `s a ⊛ᵢ s b = (-1)^{|a|} s (a ∘ᵢ b)` in the positions of the merged vertex
 (`barMerge`). The merge is compatible with the linearity relations (`barMerge_relHyp`) and
 associative modulo them, by the associativity of `P` in positions (`assoc_seq_pos`,
 `assoc_par_pos`, `barMerge_assocHyp`), so **the bar construction is a dg cooperad**

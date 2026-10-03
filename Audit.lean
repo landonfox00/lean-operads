@@ -1584,3 +1584,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Bar.d_one
 #print axioms Operad.Bar.instDGCooperad
 #print axioms Operad.DGCooperad.decomp_d_tw
+#print axioms Operad.ConvOp.preL_d_compC
+#print axioms Operad.ConvOp.preDer
+#print axioms Operad.CobarDG.d_d
+#print axioms Operad.CobarDG.instDGOperad
+#print axioms Operad.CobarDG.homEquiv

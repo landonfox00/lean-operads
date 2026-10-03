@@ -74,6 +74,22 @@ lemma decomp_d_tw {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [Decidabl
       rfl
   rw [decomp_d, h]
 
+variable (R C) in
+/-- **A coaugmented dg cooperad**: the differential kills the coaugmentation. -/
+class DOne [GrCooperad.Coaug R C] : Prop where
+  d_one : d (R := R) (GrCooperad.Coaug.one (R := R) (C := C)) = 0
+
+/-- **The differential kills the relabellings of the coaugmentation.** -/
+lemma d_unitSpan [GrCooperad.Coaug R C] [DOne R C] {A : Type} [Fintype A] [DecidableEq A]
+    {x : C A} (hx : x ∈ GrCooperad.unitSpan R C A) : d (R := R) x = 0 := by
+  refine Submodule.span_induction (p := fun x _ => d (R := R) x = 0) ?_ (map_zero _) ?_ ?_ hx
+  · rintro _ ⟨e, rfl⟩
+    rw [← map_d, DOne.d_one, map_zero]
+  · intro x y _ _ hx hy
+    rw [map_add, hx, hy, add_zero]
+  · intro a x _ hx
+    rw [map_smul, hx, smul_zero]
+
 end DGCooperad
 
 end Operad
