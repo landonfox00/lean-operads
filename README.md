@@ -441,6 +441,18 @@ triangular families (`Hoffbeck.linearIndependent_of_triangular`, `Hoffbeck.span_
 the leading monomial of a cycle being full since cutting along an edge which is not leading
 contracts its leading part (`Rules.isFull_of_mem_KD`).
 
+**The free shuffle operad on generators of any arity.** `Operad/ShuffleFreeAny.lean` makes the
+shuffle monomials an instance of `ShuffleOperad` (`FreeSh`): on a finite linear order `A`, the
+combinations of shuffle monomials whose leaves are the positions of the elements of `A`
+(`opos`). Composition along a shuffle grafts the inner monomial at the leaf of the input, the
+leaves relabelled by the positions of their images (`STree.graft`), and the shuffle condition
+makes the graft a shuffle monomial (`STree.isShuffle_graft`, `STree.labels_graft`); the axioms
+are those of substitution (`STree.subst_graftFam_seq`, `STree.subst_graftFam_par`). Grafting on
+either side is a context of the Gröbner theory (`STree.isSCtx_graft_left`,
+`STree.isSCtx_graft_right`), so **the ideal of rules is a shuffle operad ideal**
+(`Rules.shuffleIdeal`), and the shuffle operad presented by a resolvable set of rules has **the
+normal monomials as a basis** (`Rules.presentedBasis`).
+
 **Inhomogeneous presentations.** `Operad/ShuffleAnyInhom.lean` treats rules whose tails have at
 most as many vertices as their leading monomials, such as quadratic-linear rules. Contexts shift
 weights uniformly (`STree.IsSCtx.weight_add`), so every admissible order has a weight-graded

@@ -129,5 +129,6 @@ import Operad.ShuffleAnyBar
 import Operad.ShuffleAnyBarNormal
 import Operad.ShuffleAnyKoszul
 import Operad.ShuffleAnyKoszulDual
+import Operad.ShuffleFreeAny
 import Operad.ShuffleAnyInhom
 import Operad.LInfinity

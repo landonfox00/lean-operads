@@ -1276,6 +1276,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Rules.kdBasis
 #print axioms Operad.Rules.rank_KD
 #print axioms Operad.Rules.finrank_KD
+#print axioms Operad.opos_orderIso
+#print axioms Operad.STree.labels_graft
+#print axioms Operad.STree.subst_graftFam_seq
+#print axioms Operad.STree.subst_graftFam_par
+#print axioms Operad.FreeSh.instShuffleOperad
+#print axioms Operad.STree.isSCtx_graft_right
+#print axioms Operad.Rules.shuffleIdeal
+#print axioms Operad.Rules.presentedBasis
 #print axioms Operad.STree.IsSCtx.weight_add
 #print axioms Operad.STree.AdmOrder.byWeight
 #print axioms Operad.Rules.top_resolvable
