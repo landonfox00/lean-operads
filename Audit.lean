@@ -1257,6 +1257,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.homEquiv_symm_ι
 #print axioms Operad.FreeGrL.hom_ext
 #print axioms Operad.FreeGrL.ι_app_hom
+#print axioms Operad.GrOperad.tw_comp
+#print axioms Operad.DualExt.instGrOperad
+#print axioms Operad.GrDer.equiv
+#print axioms Operad.GrDer.sq
+#print axioms Operad.DGOperad.toDer
+#print axioms Operad.FreeGrL.der_ext
+#print axioms Operad.FreeGrL.derOf_ι
+#print axioms Operad.FreeGrL.sq_eq_zero
 #print axioms Operad.GrEnd.inp_compL
 #print axioms Operad.GrEnd.rsg_trans
 #print axioms Operad.GrEnd.rsg_comp_left

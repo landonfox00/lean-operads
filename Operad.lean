@@ -131,6 +131,7 @@ import Operad.GrPresentation
 import Operad.GradedEnd
 import Operad.GerOperad
 import Operad.FreeGrSpecies
+import Operad.GrDerivation
 import Operad.Diamond
 import Operad.DiamondCtx
 import Operad.ShuffleAny
