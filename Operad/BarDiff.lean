@@ -409,7 +409,7 @@ lemma map_tw_barD_decomp_bas (i : A) (s : Reg (TreeOfArity T) (Without A i ⊕ B
   refine Finset.sum_congr rfl fun k _ => ?_
   simp only [decTermI, TensorProduct.smul_tmul', TensorProduct.tmul_smul, smul_smul]
   congr 1
-  ring
+  ring_nf
 
 variable (μ) in
 /-- The vertex of a composite, and the factorization of the contraction at that vertex, given by an
@@ -576,7 +576,7 @@ theorem decomp_barD_bas (hμ : MergeFn.Odd gp μ) (i : A)
         · rw [Finset.inr_mem_disjSum, Finset.mem_sigma, mem_fib, Finset.mem_Ico]
           exact ⟨comp_eq_iff.2 ⟨by rw [withTree_fst, hord], by rw [treeOf_withTree, hb']⟩,
             hk₂1, hk₂⟩
-        · simp only [liftIdx, Sum.elim_inr, treeOf_withTree]
+        · simp only [liftIdx, Sum.elim_inr]
           rw [← hkk]
           congr 1
           exact Prod.ext rfl (reg_ext rfl (by rw [treeOf_contrR, treeOf_withTree, hcb]))
@@ -602,7 +602,7 @@ theorem decomp_barD_bas (hμ : MergeFn.Odd gp μ) (i : A)
       dsimp only at hz
       obtain ⟨hpq, hk1, hk⟩ := hz
       obtain ⟨ht, -, -⟩ := hfac hpq
-      simp only [liftIdx, Sum.elim_inr, decTermI, decTermL, cSgn, contrR_fst, treeOf_contrR]
+      simp only [liftIdx, Sum.elim_inr, decTermI, decTermL, cSgn, treeOf_contrR]
       rw [ht, Tree.contrSgn_graft_inner gp (rank_lt_arity p i) hk1 hk,
         Tree.tpar_contr μ gp hμ hk1 hk]
       congr 1
@@ -610,6 +610,133 @@ theorem decomp_barD_bas (hμ : MergeFn.Odd gp μ) (i : A)
       congr 1
       cases Tree.tpar gp (treeOf q) <;> cases Tree.apar gp (treeOf p) (p.1.rank i) <;>
         cases Tree.tpar gp (treeOf p) <;> cases Tree.contrSgn gp (treeOf q) k <;> rfl
+
+/-- **The bar differential is a coderivation**:
+`Δᵢ ∘ d = (d ⊗ 1 + (-1)^• ⊗ d) ∘ Δᵢ`, the Koszul sign of `d` passing the outer factor. -/
+theorem decomp_barD (hμ : MergeFn.Odd gp μ) (i : A) (x : FreeGr R gp (Without A i ⊕ B)) :
+    GrCooperad.decomp (R := R) (C := FreeGr R gp) i (barD μ gp R _ x)
+      = TensorProduct.map (barD μ gp R A) LinearMap.id
+          (GrCooperad.decomp (R := R) (C := FreeGr R gp) i x)
+        + TensorProduct.map (GrSpecies.tw (R := R) (V := FreeGr R gp) true) (barD μ gp R B)
+          (GrCooperad.decomp (R := R) (C := FreeGr R gp) i x) := by
+  have h := Lin.induction₁ (S := Reg (TreeOfArity T))
+    (GrCooperad.decomp (R := R) (C := FreeGr R gp) (B := B) i ∘ₗ barD μ gp R _)
+    (TensorProduct.map (barD μ gp R A) LinearMap.id ∘ₗ
+        GrCooperad.decomp (R := R) (C := FreeGr R gp) (B := B) i +
+      TensorProduct.map (GrSpecies.tw (R := R) (V := FreeGr R gp) true) (barD μ gp R B) ∘ₗ
+        GrCooperad.decomp (R := R) (C := FreeGr R gp) (B := B) i)
+    (fun s => decomp_barD_bas hμ i s) x
+  simpa using h
+
+/-- **The bar differential of a composite**, for all operations:
+`d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y`. -/
+theorem barD_comp (hμ : MergeFn.Odd gp μ) (i : A) (x : FreeGr R gp A) (y : FreeGr R gp B) :
+    barD μ gp R _ (GrOperad.comp (R := R) i x y)
+      = GrOperad.comp (R := R) i (barD μ gp R A x) y
+        + GrOperad.comp (R := R) i (GrSpecies.tw (R := R) (V := FreeGr R gp) true x)
+            (barD μ gp R B y)
+        + mcomp μ gp R i x y := by
+  have htw : ∀ p : Reg (TreeOfArity T) A, GrSpecies.tw (R := R) (V := FreeGr R gp) true
+      (SgnLin.bas (treeSgn gp) R p)
+        = σ R (Tree.tpar gp (treeOf p)) • SgnLin.bas (treeSgn gp) R p :=
+    fun p => (GrSpecies.tw_hom true (SgnLin.par_bas p)).trans (by rw [Bool.true_and]; rfl)
+  have h : (GrOperad.comp (R := R) (P := FreeGr R gp) (B := B) i).compr₂ (barD μ gp R _)
+      = (GrOperad.comp (R := R) (P := FreeGr R gp) (B := B) i).comp (barD μ gp R A)
+        + ((GrOperad.comp (R := R) (P := FreeGr R gp) (B := B) i).comp
+            (GrSpecies.tw (R := R) (V := FreeGr R gp) true)).compl₂ (barD μ gp R B)
+        + mcomp μ gp R i := by
+    refine Finsupp.lhom_ext' fun s => LinearMap.ext_ring
+      (Finsupp.lhom_ext' fun t => LinearMap.ext_ring ?_)
+    have e := barD_comp_bas (R := R) hμ i s t
+    show barD μ gp R _ (GrOperad.comp (R := R) i (SgnLin.bas (treeSgn gp) R s)
+        (SgnLin.bas (treeSgn gp) R t))
+      = GrOperad.comp (R := R) i (barD μ gp R A (SgnLin.bas (treeSgn gp) R s))
+          (SgnLin.bas (treeSgn gp) R t)
+        + GrOperad.comp (R := R) i (GrSpecies.tw (R := R) (V := FreeGr R gp) true
+            (SgnLin.bas (treeSgn gp) R s)) (barD μ gp R B (SgnLin.bas (treeSgn gp) R t))
+        + mcomp μ gp R i (SgnLin.bas (treeSgn gp) R s) (SgnLin.bas (treeSgn gp) R t)
+    rw [htw, map_smul, LinearMap.smul_apply]
+    exact e
+  have := LinearMap.congr_fun (LinearMap.congr_fun h x) y
+  simpa using this
+
+/-- **The bar differential is odd.** -/
+theorem par_barD (hμ : MergeFn.Odd gp μ) (b : Bool) (x : FreeGr R gp A) :
+    GrOperad.par (R := R) b (barD μ gp R A x) = barD μ gp R A (GrOperad.par (R := R) (!b) x) := by
+  have h := Lin.induction₁ (S := Reg (TreeOfArity T)) (GrOperad.par (R := R) b ∘ₗ barD μ gp R A)
+    (barD μ gp R A ∘ₗ GrOperad.par (R := R) (P := FreeGr R gp) (A := A) (!b)) (fun s => ?_) x
+  · simpa using h
+  show GrOperad.par (R := R) b (barD μ gp R A (SgnLin.bas (treeSgn gp) R s))
+    = barD μ gp R A (GrOperad.par (R := R) (!b) (SgnLin.bas (treeSgn gp) R s))
+  have hp : ∀ (c : Bool) (t : Reg (TreeOfArity T) A),
+      GrOperad.par (R := R) c (SgnLin.bas (treeSgn gp) R t)
+        = if Tree.tpar gp (treeOf t) = c then SgnLin.bas (treeSgn gp) R t else 0 :=
+    fun c t => SgnLin.parT_single c t 1
+  rw [hp, barD_bas, map_sum]
+  simp only [map_smul, hp, treeOf_contrR]
+  by_cases hs : Tree.tpar gp (treeOf s) = !b
+  · rw [if_pos hs, barD_bas]
+    refine Finset.sum_congr rfl fun k hk => ?_
+    rw [Finset.mem_Ico] at hk
+    rw [if_pos (by rw [Tree.tpar_contr μ gp hμ hk.1 hk.2, hs, Bool.not_not])]
+  · rw [if_neg hs, map_zero]
+    refine Finset.sum_eq_zero fun k hk => ?_
+    rw [Finset.mem_Ico] at hk
+    have hc := Tree.tpar_contr μ gp hμ hk.1 hk.2
+    rw [if_neg (fun h => hs (by rw [hc] at h; rw [← h, Bool.not_not])), smul_zero]
+
+/-- **The bar differential commutes with relabellings.** -/
+theorem map_barD {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (x : FreeGr R gp A) :
+    GrOperad.map (R := R) e (barD μ gp R A x) = barD μ gp R A' (GrOperad.map (R := R) e x) := by
+  have h := Lin.induction₁ (S := Reg (TreeOfArity T)) (GrOperad.map (R := R) e ∘ₗ barD μ gp R A)
+    (barD μ gp R A' ∘ₗ GrOperad.map (R := R) (P := FreeGr R gp) e) (fun s => ?_) x
+  · simpa using h
+  show GrOperad.map (R := R) e (barD μ gp R A (SgnLin.bas (treeSgn gp) R s))
+    = barD μ gp R A' (GrOperad.map (R := R) e (SgnLin.bas (treeSgn gp) R s))
+  rw [SgnLin.map_bas, barD_bas, barD_bas, map_sum]
+  simp only [map_smul, SgnLin.map_bas]
+  rfl
+
+/-- **The bar differential kills the counit.** -/
+theorem counit_barD (x : FreeGr R gp Unit) :
+    GrCooperad.counit (R := R) (C := FreeGr R gp) (barD μ gp R Unit x) = 0 := by
+  have h := Lin.induction₁ (S := Reg (TreeOfArity T))
+    (GrCooperad.counit (R := R) (C := FreeGr R gp) ∘ₗ barD μ gp R Unit) 0 (fun s => ?_) x
+  · simpa using h
+  show GrCooperad.counit (R := R) (C := FreeGr R gp)
+      (barD μ gp R Unit (SgnLin.bas (treeSgn gp) R s)) = 0
+  rw [barD_bas, map_sum]
+  refine Finset.sum_eq_zero fun k hk => ?_
+  rw [Finset.mem_Ico] at hk
+  rw [map_smul]
+  have hw := Tree.weight_contr μ hk.1 hk.2
+  have hne : contrR μ s k ≠ SetOperad.one := fun h => by
+    have := congrArg (fun x => (treeOf x).weight) h
+    simp only [treeOf_contrR] at this
+    rw [this] at hw
+    have h1 : (treeOf (SetOperad.one : Reg (TreeOfArity T) Unit)).weight = 0 := rfl
+    omega
+  show σ R _ • (Finsupp.single (contrR μ s k) (1 : R)) SetOperad.one = 0
+  rw [Finsupp.single_eq_of_ne hne.symm, smul_zero]
+
+/-- The bar differential of a trivial tree vanishes. -/
+theorem barD_one : barD μ gp R Unit (GrCooperad.Coaug.one (R := R) (C := FreeGr R gp)) = 0 :=
+  barD_bas_of_isLeaf (x := (SetOperad.one : Reg (TreeOfArity T) Unit)) rfl
+
+omit [CommRing R] in
+lemma weightF_leaves : ∀ k : ℕ, (TreeOfArity.leaves (E := T) k).weightF = 0
+  | 0 => rfl
+  | k + 1 => by
+    simp only [TreeOfArity.leaves, Tree.weightF_cons, Tree.weight_leaf, weightF_leaves k]
+
+/-- **The bar differential vanishes on the generators.** -/
+theorem barD_gen {k : ℕ} (g : T k) :
+    barD μ gp R (Fin k) (FreeGr.gen (R := R) (gp := gp) g) = 0 := by
+  rw [FreeGr.gen, barD_bas]
+  have h : (treeOf (Reg.std (corolla g) : Reg (TreeOfArity T) (Fin k))).weight = 1 := by
+    show (Tree.node g (TreeOfArity.leaves k)).weight = 1
+    rw [Tree.weight_node, weightF_leaves]
+  rw [h, Finset.Ico_self, Finset.sum_empty]
 
 end FreeGr
 
