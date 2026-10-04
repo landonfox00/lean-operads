@@ -136,23 +136,24 @@ variable (R V) in
 noncomputable def ιF : GrOperad.Inv R (ConvOp R (FreeGr R (grGenPar R V)) (CobarGr R 𝒞)) :=
   GrOperad.Inv.appHom (ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)) (Cobar.ι R 𝒞)
 
-lemma ιF_apply (y : FreeGr R (grGenPar R V) A) :
+private lemma ιF_apply (y : FreeGr R (grGenPar R V) A) :
     ConvOp.toLin ((ιF R V).1 A) y = Cobar.ιL R 𝒞 A ((𝒥).proj A y) := rfl
 
-lemma isParC_ιF (A : Type) [Fintype A] [DecidableEq A] : ConvOp.IsParC true ((ιF R V).1 A) :=
+private lemma isParC_ιF (A : Type) [Fintype A] [DecidableEq A] :
+    ConvOp.IsParC true ((ιF R V).1 A) :=
   ConvOp.parC_eq_self_iff.1
     (((ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)).app_par true
       ((Cobar.ι R 𝒞).1 A)).symm.trans
       (congrArg ((ConvOp.preHom (P := CobarGr R 𝒞) (FreeGrL.projHom R V)).app A)
         (Cobar.isPar_ι R 𝒞 A)))
 
-lemma ιF_leaf {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = true) :
+private lemma ιF_leaf {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = true) :
     ConvOp.toLin ((ιF R V).1 A) (SgnLin.bas (treeSgn (grGenPar R V)) R x) = 0 := by
   obtain ⟨e, rfl⟩ := eq_map_one_of_isLeaf hx
   rw [ιF_apply, ← SgnLin.map_bas]
   exact Cobar.ιL_unitSpan R 𝒞 (GrCooperad.map_one_mem e)
 
-lemma ιι_proj (y : FreeGr R (grGenPar R V) A) :
+private lemma ιι_proj (y : FreeGr R (grGenPar R V) A) :
     ConvOp.toLin ((Cobar.ιι R 𝒞).1 A) ((𝒥).proj A y)
       = ConvOp.toLin ((GrOperad.Inv.star R _ (ιF R V) (ιF R V)).1 A) y :=
   congrArg (fun q : GrOperad.Inv R (ConvOp R (FreeGr R (grGenPar R V)) (CobarGr R 𝒞)) =>
@@ -204,34 +205,66 @@ lemma unitCoeffL_ι (v : CobarGen R 𝒞 A) :
 lemma unitCoeffL_ιL (c : 𝒞 A) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) A (Cobar.ιL R 𝒞 A c) = 0 := unitCoeffL_ι _
 
-/-- **The term of a factorization**, as a composite of generators. -/
-lemma repW_ιF {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
-    (q : Reg (TreeOfArity (GrGen R V)) (Fin l)) (e : Without (Fin k) i ⊕ Fin l ≃ X) :
-    repW (ιF R V) (ιF R V) e p q
-      = GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
-          * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
-          GrOperad.comp (R := R) i
-            (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
-            (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q))))
-      := by
-  have e1 : ConvOp.toLin ((ιF R V).1 (Fin k))
+variable (R V) in
+/-- **The term of a factorization** `e·(p ∘ᵢ q)` of a tree in the convolution square `ι ⋆ ι` of
+the cobar construction: `(-1)^ε e·(ι p ∘ᵢ ι q)`. -/
+noncomputable def repI {i : A} (e : Without A i ⊕ B ≃ X) (p : Reg (TreeOfArity (GrGen R V)) A)
+    (q : Reg (TreeOfArity (GrGen R V)) B) : CobarGr R 𝒞 X :=
+  GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
+      * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
+    GrOperad.comp (R := R) i
+      (Cobar.ιL R 𝒞 A ((𝒥).proj A (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+      (Cobar.ιL R 𝒞 B ((𝒥).proj B (SgnLin.bas (treeSgn (grGenPar R V)) R q))))
+
+variable (R V) in
+/-- **The term of the convolution square `ι ⋆ ι` at a vertex** of a tree: the term of the cut
+there. -/
+noncomputable def starI (t : Reg (TreeOfArity (GrGen R V)) X) (v : ℕ) : CobarGr R 𝒞 X :=
+  starV (ιF R V) (ιF R V) t v
+
+private lemma repW_ιF (i : A) (p : Reg (TreeOfArity (GrGen R V)) A)
+    (q : Reg (TreeOfArity (GrGen R V)) B) (e : Without A i ⊕ B ≃ X) :
+    repW (ιF R V) (ιF R V) e p q = repI R V e p q := by
+  have e1 : ConvOp.toLin ((ιF R V).1 A)
       (GrSpecies.tw (R := R) true (SgnLin.bas (treeSgn (grGenPar R V)) R p))
       = σ R (Tree.tpar (grGenPar R V) (treeOf p)) •
-          Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)) := by
+          Cobar.ιL R 𝒞 A ((𝒥).proj A (SgnLin.bas (treeSgn (grGenPar R V)) R p)) := by
     rw [ιF_apply, tw_bas, ιL_proj_smul]
-  unfold repW
+  unfold repW repI
   refine congrArg (GrOperad.map (R := R) e) ?_
   refine (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • GrOperad.comp (R := R) i z
-    (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) e1).trans
-    ?_
+    (Cobar.ιL R 𝒞 B ((𝒥).proj B (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) e1).trans ?_
   exact (congrArg (fun z => σ R (cSgn (grGenPar R V) i p q) • z)
     (LinearMap.map_smul₂ _ _ _ _)).trans (smul_smul _ _ _)
 
+/-- **The term at a vertex is the term of any factorization with that vertex.** -/
+theorem starI_eq {i : A} {p : Reg (TreeOfArity (GrGen R V)) A}
+    {q : Reg (TreeOfArity (GrGen R V)) B} {e : Without A i ⊕ B ≃ X}
+    {t : Reg (TreeOfArity (GrGen R V)) X} (h : SetOperad.map e (SetOperad.comp i p q) = t)
+    (hq : (treeOf q).isLeaf = false) : starI R V t (vert i p) = repI R V e p q :=
+  (starV_eq (ιF R V) (ιF R V) h hq).trans (repW_ιF i p q e)
+
+/-- **The cobar differential of the generator of a tree** without nullary vertices: minus the sum
+of the terms of its cuts at the vertices other than the root. -/
+theorem d_ιL_bas (t : Reg (TreeOfArity (GrGen R V)) X) (ht : (treeOf t).NoNull) :
+    (Cobar.d R 𝒞).app X
+        (Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t)))
+      = -∑ v ∈ Finset.Ico 1 (treeOf t).weight, starI R V t v := by
+  have h1 := Cobar.d_ιL R 𝒞 ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t))
+  rw [ιι_proj, star_bas (ιF R V) (ιF R V) isParC_ιF (fun _ _ _ x hx => ιF_leaf hx)
+    (fun _ _ _ x hx => ιF_leaf hx) t] at h1
+  have hfilter : (Finset.Ico 1 (treeOf t).weight).filter
+      (fun v => 0 < ((treeOf t).cutV v).2.1.arity) = Finset.Ico 1 (treeOf t).weight :=
+    Finset.filter_true_of_mem fun v hv =>
+      ((ht.cutV (Finset.mem_Ico.1 hv).2).2).arity_pos
+  rw [hfilter] at h1
+  exact h1
+
 /-- **The merge after the cut at a factorization** gives back the tree, with a minus sign. -/
-lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
+lemma hM_repI {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k))
     (q : Reg (TreeOfArity (GrGen R V)) (Fin l)) (e : Without (Fin k) i ⊕ Fin l ≃ X)
     (hp : (treeOf p).isLeaf = false) (hq : (treeOf q).isLeaf = false) :
-    hM R V X (repW (ιF R V) (ιF R V) e p q)
+    hM R V X (repI R V e p q)
       = -Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R
           (SetOperad.map e (SetOperad.comp i p q)))) := by
   have hpa : GrOperad.par (R := R) (Tree.tpar (grGenPar R V) (treeOf p))
@@ -263,7 +296,12 @@ lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k)
     Cobar.ιL R 𝒞 _ z) e6)
   have e8 := ιL_proj_smul (R := R) (V := V) (σ R (cSgn (grGenPar R V) i p q))
     (SgnLin.bas (treeSgn (grGenPar R V)) R (SetOperad.comp i p q))
-  have s1 := repW_ιF (R := R) (V := V) i p q e
+  have s1 : repI R V e p q = GrOperad.map (R := R) e ((σ R (cSgn (grGenPar R V) i p q)
+      * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
+      GrOperad.comp (R := R) i
+        (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) (SgnLin.bas (treeSgn (grGenPar R V)) R p)))
+        (Cobar.ιL R 𝒞 (Fin l) ((𝒥).proj (Fin l) (SgnLin.bas (treeSgn (grGenPar R V)) R q)))) :=
+    rfl
   have s2 := ((cobarMerge R V).map_d e ((σ R (cSgn (grGenPar R V) i p q)
           * σ R (Tree.tpar (grGenPar R V) (treeOf p))) •
           GrOperad.comp (R := R) i
@@ -284,20 +322,20 @@ lemma hM_repW {k l : ℕ} (i : Fin k) (p : Reg (TreeOfArity (GrGen R V)) (Fin k)
   exact congrArg Neg.neg hW
 
 /-- **The merge after the cut at a vertex** gives back the tree, with a minus sign. -/
-lemma hM_starV (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
+theorem hM_starI (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
     (hv : v ∈ Finset.Ico 1 (treeOf t).weight) :
-    hM R V X (starV (ιF R V) (ιF R V) t v)
+    hM R V X (starI R V t v)
       = -Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t)) := by
   rw [Finset.mem_Ico] at hv
   obtain ⟨e, he⟩ := exists_rep t hv.2
-  have hst := starV_eq (ιF R V) (ιF R V) he (Tree.isLeaf_cutV _ _ hv.2)
+  have hst := starI_eq (R := R) (V := V) he (Tree.isLeaf_cutV _ _ hv.2)
   have hvert : vert ⟨((treeOf t).cutV v).2.2, Tree.lt_arity_cutV _ v hv.2⟩
       (stdT ((treeOf t).cutV v).1) = v := by
     show (treeOf (stdT _)).vb ((stdT _).1.rank _) = v
     rw [treeOf_stdT, rank_stdT]
     exact Tree.vb_cutV _ _ hv.2
   rw [hvert] at hst
-  refine (congrArg (hM R V X) hst).trans ((hM_repW _ (stdT ((treeOf t).cutV v).1)
+  refine (congrArg (hM R V X) hst).trans ((hM_repI _ (stdT ((treeOf t).cutV v).1)
     (stdT ((treeOf t).cutV v).2.1) e
     (Tree.isLeaf_cutV_fst hv.1 hv.2 rfl) (Tree.isLeaf_cutV _ _ hv.2)).trans ?_)
   rw [he]
@@ -309,16 +347,8 @@ theorem hM_d_ιL_bas (t : Reg (TreeOfArity (GrGen R V)) X) (ht : (treeOf t).NoNu
         (Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t))))
       = ((treeOf t).weight - 1) •
           Cobar.ιL R 𝒞 X ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t)) := by
-  have h1 := Cobar.d_ιL R 𝒞 ((𝒥).proj X (SgnLin.bas (treeSgn (grGenPar R V)) R t))
-  rw [ιι_proj, star_bas (ιF R V) (ιF R V) isParC_ιF (fun _ _ _ x hx => ιF_leaf hx)
-    (fun _ _ _ x hx => ιF_leaf hx) t] at h1
-  have hfilter : (Finset.Ico 1 (treeOf t).weight).filter
-      (fun v => 0 < ((treeOf t).cutV v).2.1.arity) = Finset.Ico 1 (treeOf t).weight :=
-    Finset.filter_true_of_mem fun v hv =>
-      ((ht.cutV (Finset.mem_Ico.1 hv).2).2).arity_pos
-  rw [hfilter] at h1
-  refine (congrArg (hM R V X) h1).trans ?_
-  rw [map_neg, map_sum, Finset.sum_congr rfl fun v hv => hM_starV t hv, Finset.sum_neg_distrib,
+  refine (congrArg (hM R V X) (d_ιL_bas t ht)).trans ?_
+  rw [map_neg, map_sum, Finset.sum_congr rfl fun v hv => hM_starI t hv, Finset.sum_neg_distrib,
     neg_neg, Finset.sum_const, Nat.card_Ico]
 
 end Cobar
