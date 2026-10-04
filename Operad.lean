@@ -183,3 +183,4 @@ import Operad.CobarMerge
 import Operad.BarCobarRes
 import Operad.CobarMergeComm
 import Operad.CobarHomotopy
+import Operad.CobarContraction
