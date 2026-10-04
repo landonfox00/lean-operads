@@ -1600,3 +1600,30 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Bar.twisting
 #print axioms Operad.Bar.counit
 #print axioms Operad.Bar.twistingOfHom
+
+/-! ## The bar–cobar resolution -/
+
+#print axioms Operad.Cobar.d_ιL_bas
+#print axioms Operad.Cobar.hM_d_ιL_bas
+#print axioms Operad.Cobar.d_mM_ιL_bas
+#print axioms Operad.Cobar.xiM_eq
+#print axioms Operad.FreeGrL.wtD_proj_bas
+#print axioms Operad.Cobar.wtΩ_ιL
+#print axioms Operad.Cobar.dh_hd
+#print axioms Operad.iSupIndep_eigenspace_nat
+#print axioms Operad.exists_eq_D_of_weights
+#print axioms Operad.Cobar.d_wtΩ
+#print axioms Operad.Cobar.mem_units_sup
+#print axioms Operad.Cobar.isInternal_wt
+#print axioms Operad.Cobar.mem_unitsΩ_of_mem_wt
+#print axioms Operad.Cobar.mem_corGen_of_mem_wt
+#print axioms Operad.Cobar.wtΩ_δ
+#print axioms Operad.Cobar.exists_sub_eq
+#print axioms Operad.Cobar.sub_eq_zero_of_low
+#print axioms Operad.GrDer.sub
+#print axioms Operad.Bar.wtD_d
+#print axioms Operad.Bar.exists_d_eq_of_counit_eq_zero
+#print axioms Operad.Bar.exists_cycle_counit_eq
+#print axioms Operad.Bar.homologyEquiv
+#print axioms Operad.Bar.homologyEquiv_mk
+#print axioms Operad.Bar.counit_bijective

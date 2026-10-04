@@ -184,3 +184,5 @@ import Operad.BarCobarRes
 import Operad.CobarMergeComm
 import Operad.CobarHomotopy
 import Operad.CobarContraction
+import Operad.CobarWeight
+import Operad.BarCobarQIso

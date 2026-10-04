@@ -615,6 +615,30 @@ counit of the bar–cobar adjunction**, the morphism of dg operads `ΩB(P, I) �
 Conversely, a morphism of coaugmented dg cooperads `f : C → B(P, I)` gives the twisting morphism
 `π ∘ f` (`Bar.twistingOfHom`).
 
+**The bar–cobar resolution.** A **merge structure** on a graded linear species composes
+homogeneous elements at an input, adding the parities plus one; its bar differential and its
+merge-composition descend to the free graded operad (`Operad/MergeSp.lean`). Composing in the cut
+cooperad `C = FreeGrL R V` gives a merge structure on the generators `s⁻¹ C̄` of the cobar
+construction `ΩC` (`cobarMerge`, `Operad/CobarMerge.lean`), whose bar differential `h` contracts
+the edges of the outer trees (`Cobar.hM`), while the cobar differential `d` cuts the inner trees,
+the convolution square on a tree being a sum over its vertices (`FreeGr.star_bas`,
+`Operad/CutStar.lean`; `Cobar.d_ιL_bas`, `Operad/BarCobarRes.lean`). **The commutator of `d` and
+the merge is the composite of the parts without unit component** (`Cobar.xiM_eq`,
+`Operad/CobarMergeComm.lean`, `Operad/CobarHomotopy.lean`), and with the even derivation `E`
+counting the vertices of the trees decorating the generators (`Cobar.wtΩ`), **the contraction
+identity `d h + h d = E - (1 - ε)`** holds (`Cobar.dh_hd`, `Operad/CobarContraction.lean`). Over a
+`ℚ`-algebra, `ΩC` is the direct sum of the weight spaces of `E` (`Cobar.isInternal_wt`), `E`
+commutes with `d` (`Cobar.d_wtΩ`), the weights zero and one are the units and the generators of
+the corollas, and an acyclicity criterion by weights (`exists_eq_D_of_weights`) shows that **a
+cycle of `d - δ`, for an inner differential `δ` lowering the weight, killed by a map injective on
+the weights at most one, is a boundary** (`Cobar.exists_sub_eq`, `Operad/CobarWeight.lean`).
+For the bar construction, the differential of `ΩB(P, I)` is `d - δ` with `δ` contracting the
+edges of the inner trees (`Bar.δI`, `Bar.wtD_d`), which gives **Theorem A, the bar–cobar
+resolution**: over a `ℚ`-algebra, for a graded operad `P = R 1 ⊕ I` augmented by an ideal
+without operations without inputs, with a free unit, **the counit `ΩB(P, I) → P` is a
+quasi-isomorphism** (`Bar.homologyEquiv`, `Bar.exists_d_eq_of_counit_eq_zero`,
+`Bar.exists_cycle_counit_eq`, `Operad/BarCobarQIso.lean`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

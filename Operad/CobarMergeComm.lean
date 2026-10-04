@@ -216,7 +216,7 @@ lemma sgn_inner (x y c₀ c₁ c₂ c₃ : Bool) (h : xor c₁ c₃ = xor c₂ c
   cases x <;> cases y <;> cases c₀ <;> cases c₁ <;> cases c₂ <;> cases c₃ <;> simp at h ⊢
 
 /-- The relabelling of the factorization of a composite at a factorization of its inner tree. -/
-abbrev seqRel (j : A) {A₂ B₂ : Type} [Fintype A₂] [DecidableEq A₂] [Fintype B₂] [DecidableEq B₂]
+abbrev seqRel (j : A) {A₂ B₂ : Type} [DecidableEq A₂]
     (r₂ : A₂) (e₂ : Without A₂ r₂ ⊕ B₂ ≃ B) :
     Without (Without A j ⊕ A₂) (Sum.inr r₂) ⊕ B₂ ≃ Without A j ⊕ B :=
   (seqEquiv j r₂ B₂).trans (compEquiv (Equiv.refl A) e₂ j)
@@ -338,7 +338,7 @@ lemma sgn_outer_inl (x y z c₀ c₁ c₂ c₃ : Bool) (h : xor c₁ c₀ = xor 
 
 /-- The relabelling of the factorization of a composite at a factorization of its outer tree,
 the composite being above the cut. -/
-abbrev seqRel' {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁]
+abbrev seqRel' {A₁ B₁ : Type} [DecidableEq A₁] [DecidableEq B₁]
     (r₁ : A₁) (w : B₁) (e₁ : Without A₁ r₁ ⊕ B₁ ≃ A) :
     Without A₁ r₁ ⊕ (Without B₁ w ⊕ B) ≃ Without A (e₁ (Sum.inr w)) ⊕ B :=
   (seqEquiv r₁ w B).symm.trans (compEquiv e₁ (Equiv.refl B) (Sum.inr w))
@@ -354,7 +354,7 @@ lemma map_seqRel' {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype 
 
 /-- The relabelling of the factorization of a composite at a factorization of its outer tree,
 the composite being beside the cut. -/
-abbrev parRel {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁]
+abbrev parRel {A₁ B₁ : Type} [DecidableEq A₁] [DecidableEq B₁]
     {r₁ u : A₁} (hu : r₁ ≠ u) (e₁ : Without A₁ r₁ ⊕ B₁ ≃ A) :
     Without (Without A₁ u ⊕ B) (Sum.inl ⟨r₁, hu⟩) ⊕ B₁
       ≃ Without A (e₁ (Sum.inl ⟨u, Ne.symm hu⟩)) ⊕ B :=

@@ -90,10 +90,10 @@ variable {A B D : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
 
 /-! ## The laws on labelled trees -/
 
-@[simp] lemma treeOf_map (e : A ≃ B) (x : Reg (TreeOfArity T) A) :
+lemma treeOf_map (e : A ≃ B) (x : Reg (TreeOfArity T) A) :
     treeOf (SetOperad.map e x) = treeOf x := rfl
 
-@[simp] lemma map_fst (e : A ≃ B) (x : Reg (TreeOfArity T) A) :
+lemma map_fst (e : A ≃ B) (x : Reg (TreeOfArity T) A) :
     (SetOperad.map e x).1 = LinOrd.map e x.1 := rfl
 
 /-- **Merge-composition commutes with relabelling.** -/
