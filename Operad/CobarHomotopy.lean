@@ -126,6 +126,11 @@ lemma proj_bas_corolla {k : ℕ} (g : GrGen R V k) :
     (𝒥).proj (Fin k) (𝔟 (Reg.std (corolla g))) = (ι R V).app (Fin k) g.1.1 :=
   (ι_app_hom g.2).symm
 
+/-- A tree with vertices has no unit component. -/
+lemma unitCoeffL_proj_bas {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = false) :
+    unitCoeffL R V A ((𝒥).proj A (𝔟 x)) = 0 := by
+  rw [unitCoeffL_proj, unitCoeff_bas, if_neg (by rw [hx]; decide)]
+
 /-- The class of a trivial tree is a relabelled unit. -/
 lemma proj_bas_leaf {x : Reg (TreeOfArity (GrGen R V)) A} (hx : (treeOf x).isLeaf = true) :
     ∃ e : Unit ≃ A, (𝒥).proj A (𝔟 x) = GrOperad.map (R := R) e (GrOperad.one (R := R)) := by
@@ -172,7 +177,8 @@ theorem par_mc {a b : Bool} (i : A) {X : FreeGrL R W A} {Y : FreeGrL R W B}
   rw [← hX, ← hY, ← proj_par', ← proj_par', mc_proj, ← proj_par', par_mcomp M.fn M.fn_odd,
     if_pos rfl]
 
-/-- **The sign twist of a merge-composite**: `(-1)^{|x ⊛ y|} x ⊛ y = -((-1)^{|x|} x) ⊛ ((-1)^{|y|} y)`. -/
+/-- **The sign twist of a merge-composite**:
+`(-1)^{|x ⊛ y|} x ⊛ y = -((-1)^{|x|} x) ⊛ ((-1)^{|y|} y)`. -/
 theorem tw_mc (i : A) (X : FreeGrL R W A) (Y : FreeGrL R W B) :
     GrOperad.tw (R := R) true (M.mc i X Y)
       = -M.mc i (GrOperad.tw (R := R) true X) (GrOperad.tw (R := R) true Y) := by
@@ -264,7 +270,8 @@ lemma d_comp (j : A) (W : CobarGr R 𝒞 A) (Q : CobarGr R 𝒞 B) :
   (Cobar.d R 𝒞).app_comp j W Q
 
 lemma d_unit (e : Unit ≃ A) :
-    (Cobar.d R 𝒞).app A (GrOperad.map (R := R) e (GrOperad.one (R := R) (P := CobarGr R 𝒞))) = 0 := by
+    (Cobar.d R 𝒞).app A (GrOperad.map (R := R) e (GrOperad.one (R := R) (P := CobarGr R 𝒞)))
+      = 0 := by
   rw [GrDer.app_map, GrDer.app_one, map_zero]
 
 lemma tw_unit (e : Unit ≃ A) :
@@ -298,12 +305,12 @@ lemma xiM_map_left {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (i :
   have h4 := (congrArg ((Cobar.d R 𝒞).app _) h1).trans ((Cobar.d R 𝒞).app_map _ _)
   exact (congrArg₂ (· + ·) (congrArg₂ (· + ·) h4 h2) h3).trans (map_add₃ _ _ _ _).symm
 
-lemma xiM_eq_of_left {i : A} {X : CobarGr R 𝒞 A} (hX : X = 0) (Y : CobarGr R 𝒞 B) :
+private lemma xiM_eq_of_left {i : A} {X : CobarGr R 𝒞 A} (hX : X = 0) (Y : CobarGr R 𝒞 B) :
     xiM R V i X Y = GrOperad.comp (R := R) i X Y := by
   subst hX
   exact (LinearMap.map_zero₂ (xiM R V i) Y).trans (LinearMap.map_zero₂ _ Y).symm
 
-lemma xiM_eq_of_right {i : A} (X : CobarGr R 𝒞 A) {Y : CobarGr R 𝒞 B} (hY : Y = 0) :
+private lemma xiM_eq_of_right {i : A} (X : CobarGr R 𝒞 A) {Y : CobarGr R 𝒞 B} (hY : Y = 0) :
     xiM R V i X Y = GrOperad.comp (R := R) i X Y := by
   subst hY
   exact (map_zero (xiM R V i X)).trans (map_zero _).symm
@@ -351,7 +358,7 @@ theorem xiM_ιL (hV0 : ∀ v : V (Fin 0), v = 0) (i : A) (y : FreeGr R (grGenPar
 /-! ### The commutator on units and composites -/
 
 /-- The commutator vanishes on a relabelled unit on the right. -/
-lemma xiM_unit_right (e : Unit ≃ B) (i : A) (X : CobarGr R 𝒞 A) :
+private lemma xiM_unit_right (e : Unit ≃ B) (i : A) (X : CobarGr R 𝒞 A) :
     xiM R V i X (GrOperad.map (R := R) e (GrOperad.one (R := R) (P := CobarGr R 𝒞))) = 0 := by
   have h1 := (cobarMerge R V).mc_unit_right e i X
   have h2 := (cobarMerge R V).mc_unit_right e i ((Cobar.d R 𝒞).app A X)
@@ -362,7 +369,7 @@ lemma xiM_unit_right (e : Unit ≃ B) (i : A) (X : CobarGr R 𝒞 A) :
   simp only [add_zero]
 
 /-- The commutator vanishes on a relabelled unit on the left. -/
-lemma xiM_unit_left (e : Unit ≃ A) (i : A) (Y : CobarGr R 𝒞 B) :
+private lemma xiM_unit_left (e : Unit ≃ A) (i : A) (Y : CobarGr R 𝒞 B) :
     xiM R V i (GrOperad.map (R := R) e (GrOperad.one (R := R) (P := CobarGr R 𝒞))) Y = 0 := by
   have h1 := (cobarMerge R V).mc_unit_left e i Y
   have h2 := (congrArg (fun z => mM R V i z Y) (d_unit e)).trans
@@ -374,7 +381,7 @@ lemma xiM_unit_left (e : Unit ≃ A) (i : A) (Y : CobarGr R 𝒞 B) :
   simp only [add_zero]
 
 /-- The algebra of the commutator of a composite, merged at the outer factor. -/
-lemma alg_outer {M N P P' : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+private lemma alg_outer {M N P P' : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
     [AddCommGroup P] [Module R P] [AddCommGroup P'] [Module R P'] (S : P →ₗ[R] P')
     (c : M →ₗ[R] N →ₗ[R] P) (a b e t f : M) (q q' : N) (h : t = -f) :
     S (c a q + c t q') + S (c b q) + (S (c e q) + S (c f q')) = S (c (a + b + e) q) := by
@@ -384,7 +391,7 @@ lemma alg_outer {M N P P' : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N
 
 /-- **The commutator with a composite, merged into its outer factor**:
 `Ξ(x, y ∘ᵣ z) = Ξ(x, y) ∘ᵣ z`, for `y` and `d y` without unit component. -/
-lemma xiM_comp_outer (i : A) (r : B) (X : CobarGr R 𝒞 A) {P : CobarGr R 𝒞 B}
+private lemma xiM_comp_outer (i : A) (r : B) (X : CobarGr R 𝒞 A) {P : CobarGr R 𝒞 B}
     (hP : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B P = 0)
     (hdP : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B ((Cobar.d R 𝒞).app B P) = 0)
     (Q : CobarGr R 𝒞 D) :
@@ -418,7 +425,7 @@ lemma xiM_comp_outer (i : A) (r : B) (X : CobarGr R 𝒞 A) {P : CobarGr R 𝒞 
     (GrOperad.comp (R := R) (Sum.inr r) z Q)) (xiM_apply i X P).symm
 
 /-- The algebra of the commutator of a composite, merged at the inner factor. -/
-lemma alg_inner {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+private lemma alg_inner {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
     [AddCommGroup P] [Module R P] (c : M →ₗ[R] N →ₗ[R] P) (a a' p p' : M) (m dm x y : N)
     (ha : a = -a') (hp : p' = p) :
     c a m + c p' dm + (c a' m + c p' x) + c p' y = c p (dm + x + y) := by
@@ -428,7 +435,7 @@ lemma alg_inner {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [
 
 /-- **The commutator with a composite, merging into its inner factor**:
 `Ξ(x ∘ᵣ y, z) = x ∘ᵣ Ξ(y, z)`, for `y` and `d y` without unit component. -/
-lemma xiM_comp_inner (r : A) (w : B) (P : CobarGr R 𝒞 A) {Q : CobarGr R 𝒞 B}
+private lemma xiM_comp_inner (r : A) (w : B) (P : CobarGr R 𝒞 A) {Q : CobarGr R 𝒞 B}
     (hQ : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B Q = 0)
     (hdQ : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B ((Cobar.d R 𝒞).app B Q) = 0)
     (Z : CobarGr R 𝒞 D) :
@@ -465,7 +472,7 @@ lemma xiM_comp_inner (r : A) (w : B) (P : CobarGr R 𝒞 A) {Q : CobarGr R 𝒞 
   exact congrArg (GrOperad.comp (R := R) r P) (xiM_apply w Q Z).symm
 
 /-- The algebra of the commutator of a composite, merged beside its inner factor. -/
-lemma alg_par {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+private lemma alg_par {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
     [AddCommGroup P] [Module R P] (c : M →ₗ[R] N →ₗ[R] P) (a b e W : M) (Q dQ : N)
     (s s₁ s₂ tz tq : R) (h₁ : s₁ = s * tz) (h₂ : s₂ * tq = s) :
     s • (c a Q + c (-(tz • W)) dQ) + (s • c b Q + s₁ • c W dQ) + s₂ • c e (tq • Q)
@@ -477,7 +484,7 @@ lemma alg_par {M N P : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Mo
 
 /-- **The commutator with a composite, merging beside its inner factor**:
 `Ξ(x ∘ᵣ y, z) = (-1)^{|y||z|} Ξ(x, z) ∘ᵣ y`, for homogeneous `y`, `z`. -/
-lemma xiM_comp_par {r u : A} (hru : r ≠ u) (P : CobarGr R 𝒞 A) {q z : Bool}
+private lemma xiM_comp_par {r u : A} (hru : r ≠ u) (P : CobarGr R 𝒞 A) {q z : Bool}
     {Q : CobarGr R 𝒞 B} {Z : CobarGr R 𝒞 D} (hQ : GrOperad.par (R := R) q Q = Q)
     (hZ : GrOperad.par (R := R) z Z = Z) :
     GrOperad.map (R := R) (parEquiv hru B D)
@@ -500,11 +507,7 @@ lemma xiM_comp_par {r u : A} (hru : r ≠ u) (P : CobarGr R 𝒞 A) {q z : Bool}
       = GrOperad.comp (R := R) r ((Cobar.d R 𝒞).app A P) Q
         + GrOperad.comp (R := R) r (GrOperad.tw (R := R) true P) ((Cobar.d R 𝒞).app B Q) :=
     d_comp r P Q
-  have dl2 : (Cobar.d R 𝒞).app _ (GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) (mM R V u P Z) Q)
-      = GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) ((Cobar.d R 𝒞).app _ (mM R V u P Z)) Q
-        + GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) (GrOperad.tw (R := R) true (mM R V u P Z))
-            ((Cobar.d R 𝒞).app B Q) :=
-    d_comp _ _ _
+  have dl2 := d_comp (R := R) (V := V) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) (mM R V u P Z) Q
   have tm : GrOperad.tw (R := R) true (mM R V u P Z)
       = -(σ R (true && z) • mM R V u (GrOperad.tw (R := R) true P) Z) :=
     ((cobarMerge R V).tw_mc u P Z).trans (congrArg Neg.neg
@@ -514,11 +517,13 @@ lemma xiM_comp_par {r u : A} (hru : r ≠ u) (P : CobarGr R 𝒞 A) {q z : Bool}
     ((congrArg ((Cobar.d R 𝒞).app _) p1).trans ((map_smul ((Cobar.d R 𝒞).app _)
       (σ R (q && z)) _).trans
       (congrArg (fun x => σ R (q && z) • x) (dl2.trans (congrArg (fun x =>
-        GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) ((Cobar.d R 𝒞).app _ (mM R V u P Z)) Q
-          + GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) x ((Cobar.d R 𝒞).app B Q)) tm)))))
+        GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D)
+            ((Cobar.d R 𝒞).app _ (mM R V u P Z)) Q
+          + GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) x
+              ((Cobar.d R 𝒞).app B Q)) tm)))))
   have h2 := (congrArg (fun x => GrOperad.map (R := R) (parEquiv hru B D)
-    (mM R V (Sum.inl ⟨u, Ne.symm hru⟩ : Without A r ⊕ B) x Z)) dl).trans ((congrArg (GrOperad.map (R := R)
-      (parEquiv hru B D)) (LinearMap.map_add₂ _ _ _ _)).trans
+    (mM R V (Sum.inl ⟨u, Ne.symm hru⟩ : Without A r ⊕ B) x Z)) dl).trans
+      ((congrArg (GrOperad.map (R := R) (parEquiv hru B D)) (LinearMap.map_add₂ _ _ _ _)).trans
         ((map_add (GrOperad.map (R := R) (parEquiv hru B D)) _ _).trans
         (congrArg₂ (· + ·) p2 p3)))
   have h3 := (congrArg (fun x => GrOperad.map (R := R) (parEquiv hru B D)
@@ -531,8 +536,8 @@ lemma xiM_comp_par {r u : A} (hru : r ≠ u) (P : CobarGr R 𝒞 A) {q z : Bool}
     ((map_add₃ _ _ _ _).trans ((congrArg₂ (· + ·) (congrArg₂ (· + ·) h1 h2) h3).trans ?_))
   refine (alg_par _ _ _ _ _ _ _ _ _ _ _ _ (by cases q <;> cases z <;> simp)
     (by cases q <;> cases z <;> simp)).trans ?_
-  exact congrArg (fun x => σ R (q && z) • GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) x Q)
-    (xiM_apply u P Z).symm
+  exact congrArg (fun x => σ R (q && z) •
+    GrOperad.comp (R := R) (Sum.inl ⟨r, hru⟩ : Without A u ⊕ D) x Q) (xiM_apply u P Z).symm
 
 /-! ### Unit components -/
 
@@ -549,7 +554,7 @@ lemma exists_ιL_eq (v : CobarGen R 𝒞 A) :
   exact LinearEquiv.apply_symm_apply _ v
 
 /-- The terms of the convolution square at the vertices have no unit component. -/
-lemma unitCoeffL_starI (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
+private lemma unitCoeffL_starI (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
     (hv : v ∈ Finset.Ico 1 (treeOf t).weight) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) X (starI R V t v) = 0 := by
   rw [Finset.mem_Ico] at hv
@@ -568,7 +573,7 @@ lemma unitCoeffL_starI (t : Reg (TreeOfArity (GrGen R V)) X) {v : ℕ}
 
 /-- **The cobar differential of a generator has no unit component**, when there are no
 generators without inputs. -/
-lemma unitCoeffL_d_ιL (hV0 : ∀ v : V (Fin 0), v = 0) (y : FreeGr R (grGenPar R V) A) :
+private lemma unitCoeffL_d_ιL (hV0 : ∀ v : V (Fin 0), v = 0) (y : FreeGr R (grGenPar R V) A) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) A
       ((Cobar.d R 𝒞).app A (Cobar.ιL R 𝒞 A ((𝒥).proj A y))) = 0 := by
   refine lin_eq_zero_of_single ((FreeGrL.unitCoeffL R (CobarGen R 𝒞) A).comp
@@ -582,17 +587,17 @@ lemma unitCoeffL_d_ιL (hV0 : ∀ v : V (Fin 0), v = 0) (y : FreeGr R (grGenPar 
       neg_zero]
   · rw [ιL_bas_null hV0 hn, map_zero, map_zero]
 
-lemma uc_d_map {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (W : CobarGr R 𝒞 A) :
+private lemma uc_d_map {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (W : CobarGr R 𝒞 A) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) A' ((Cobar.d R 𝒞).app A' (GrOperad.map (R := R) e W))
       = FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((Cobar.d R 𝒞).app A W) := by
   rw [GrDer.app_map, FreeGrL.unitCoeffL_map]
 
-lemma uc_d_smul (c : R) (W : CobarGr R 𝒞 A) :
+private lemma uc_d_smul (c : R) (W : CobarGr R 𝒞 A) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((Cobar.d R 𝒞).app A (c • W))
       = c • FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((Cobar.d R 𝒞).app A W) := by
   rw [map_smul, map_smul]
 
-lemma uc_d_comp (r : A) {P : CobarGr R 𝒞 A} {Q : CobarGr R 𝒞 B}
+private lemma uc_d_comp (r : A) {P : CobarGr R 𝒞 A} {Q : CobarGr R 𝒞 B}
     (hp : FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((Cobar.d R 𝒞).app A P) = 0)
     (hq : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B ((Cobar.d R 𝒞).app B Q) = 0) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) _ ((Cobar.d R 𝒞).app _ (GrOperad.comp (R := R) r P Q))
@@ -606,7 +611,7 @@ lemma uc_d_comp (r : A) {P : CobarGr R 𝒞 A} {Q : CobarGr R 𝒞 B}
 
 /-- **The cobar differential of a tree has no unit component**, when there are no generators
 without inputs. -/
-lemma unitCoeffL_d_bas (hV0 : ∀ v : V (Fin 0), v = 0)
+private lemma unitCoeffL_d_bas (hV0 : ∀ v : V (Fin 0), v = 0)
     (x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A) :
     FreeGrL.unitCoeffL R (CobarGen R 𝒞) A ((Cobar.d R 𝒞).app A ((𝒥Ω).proj A (𝔅 x))) = 0 := by
   refine tree_induction (motive := fun A _ _ x => FreeGrL.unitCoeffL R (CobarGen R 𝒞) A
@@ -641,6 +646,319 @@ theorem unitCoeffL_d (hV0 : ∀ v : V (Fin 0), v = 0) (Y : CobarGr R 𝒞 A) :
   obtain ⟨y, rfl⟩ := (𝒥Ω).proj_surjective A Y
   exact lin_eq_zero_of_single ((FreeGrL.unitCoeffL R (CobarGen R 𝒞) A).comp
     (((Cobar.d R 𝒞).app A).comp ((𝒥Ω).proj A))) (fun x => unitCoeffL_d_bas hV0 x) y
+
+/-! ### The commutator on trees -/
+
+/-- A relabelled composite of trees with vertices has vertices. -/
+private lemma isLeaf_map_comp {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁]
+    {T : ℕ → Type v} {r : A₁} {p : Reg (TreeOfArity T) A₁} (q : Reg (TreeOfArity T) B₁)
+    (e : Without A₁ r ⊕ B₁ ≃ X) (hp : (treeOf p).isLeaf = false) :
+    (treeOf (SetOperad.map e (SetOperad.comp r p q))).isLeaf = false := by
+  rw [treeOf_map, treeOf_comp]
+  exact Tree.isLeaf_graft_left hp _ _
+
+/-- Composing with a relabelled operation relabels the composite. -/
+lemma comp_map_right (i : A) (X : CobarGr R 𝒞 A) (e : B ≃ D) (W : CobarGr R 𝒞 B) :
+    GrOperad.comp (R := R) i X (GrOperad.map (R := R) e W)
+      = GrOperad.map (R := R) (compEquiv (Equiv.refl A) e i) (GrOperad.comp (R := R) i X W) :=
+  ((congrArg (fun z => GrOperad.comp (R := R) i z (GrOperad.map (R := R) e W))
+    (GrOperad.map_refl X)).symm.trans (GrOperad.map_comp (Equiv.refl A) e i X W).symm)
+
+private lemma xiM_bas_right_leaf {i : A} (X : CobarGr R 𝒞 A)
+    {x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B} (e : Unit ≃ B)
+    (he : (𝒥Ω).proj B (𝔅 x) = GrOperad.map (R := R) e (GrOperad.one (R := R))) :
+    xiM R V i X ((𝒥Ω).proj B (𝔅 x))
+      = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 x))) := by
+  exact (congrArg (xiM R V i X) he).trans ((xiM_unit_right e i X).trans
+    ((congrArg (fun z => GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B z))
+      he).trans ((congrArg (GrOperad.comp (R := R) i X) (FreeGrL.secC_unit e)).trans
+        (map_zero _))).symm)
+
+private lemma xiM_bas_right_corolla {i : A} {X : CobarGr R 𝒞 A}
+    (hgen : ∀ (B : Type) [Fintype B] [DecidableEq B] (y : FreeGr R (grGenPar R V) B),
+      xiM R V i X (Cobar.ιL R 𝒞 B ((𝒥).proj B y))
+        = GrOperad.comp (R := R) i X (Cobar.ιL R 𝒞 B ((𝒥).proj B y)))
+    {k : ℕ} (g : GrGen R (CobarGen R 𝒞) k) (e : Fin k ≃ B) :
+    xiM R V i X ((𝒥Ω).proj B (𝔅 (SetOperad.map e (Reg.std (corolla g)))))
+      = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B
+          ((𝒥Ω).proj B (𝔅 (SetOperad.map e (Reg.std (corolla g)))))) := by
+  obtain ⟨y, hy⟩ := exists_ιL_eq (R := R) (V := V) g.1.1
+  have hZ : (𝒥Ω).proj B (𝔅 (SetOperad.map e (Reg.std (corolla g))))
+      = GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y)) :=
+    (FreeGrL.proj_bas_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      ((FreeGrL.proj_bas_corolla g).trans hy.symm))
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) B
+      (GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y)))
+      = GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y)) :=
+    (FreeGrL.secC_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      (FreeGrL.secC_of_unitCoeff (unitCoeffL_ιL _)))
+  refine (congrArg (xiM R V i X) hZ).trans ((xiM_map_right e i X _).trans
+    ((congrArg _ (hgen _ y)).trans ?_))
+  exact ((comp_map_right i X e _).symm.trans (congrArg (GrOperad.comp (R := R) i X)
+    hs.symm)).trans (congrArg (fun z => GrOperad.comp (R := R) i X
+      (FreeGrL.secC R (CobarGen R 𝒞) B z)) hZ.symm)
+
+private lemma xiM_bas_right_comp (hV0 : ∀ v : V (Fin 0), v = 0) {i : A} (X : CobarGr R 𝒞 A)
+    {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁] (r : A₁)
+    (p : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A₁)
+    (q : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B₁) (e : Without A₁ r ⊕ B₁ ≃ B)
+    (hpl : (treeOf p).isLeaf = false)
+    (hp : xiM R V i X ((𝒥Ω).proj A₁ (𝔅 p))
+      = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) A₁ ((𝒥Ω).proj A₁ (𝔅 p)))) :
+    xiM R V i X ((𝒥Ω).proj B (𝔅 (SetOperad.map e (SetOperad.comp r p q))))
+      = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B
+          ((𝒥Ω).proj B (𝔅 (SetOperad.map e (SetOperad.comp r p q))))) := by
+  have hP0 : FreeGrL.unitCoeffL R (CobarGen R 𝒞) A₁ ((𝒥Ω).proj A₁ (𝔅 p)) = 0 :=
+    FreeGrL.unitCoeffL_proj_bas hpl
+  have hIH : xiM R V i X ((𝒥Ω).proj A₁ (𝔅 p))
+      = GrOperad.comp (R := R) i X ((𝒥Ω).proj A₁ (𝔅 p)) :=
+    hp.trans (congrArg (GrOperad.comp (R := R) i X) (FreeGrL.secC_of_unitCoeff hP0))
+  have hX : (𝒥Ω).proj B (𝔅 (SetOperad.map e (SetOperad.comp r p q)))
+      = GrOperad.map (R := R) e (σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) •
+          GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B₁ (𝔅 q))) :=
+    (FreeGrL.proj_bas_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      (FreeGrL.proj_bas_comp r p q))
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 (SetOperad.map e
+      (SetOperad.comp r p q)))) = (𝒥Ω).proj B (𝔅 (SetOperad.map e (SetOperad.comp r p q))) :=
+    FreeGrL.secC_of_unitCoeff (FreeGrL.unitCoeffL_proj_bas (isLeaf_map_comp q e hpl))
+  have hL := (congrArg (xiM R V i X) hX).trans ((xiM_map_right e i X _).trans
+    (congrArg (GrOperad.map (R := R) (compEquiv (Equiv.refl A) e i))
+      ((map_smul (xiM R V i X) _ _).trans (congrArg (fun z =>
+        σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) • z)
+        ((xiM_comp_outer i r X hP0 (unitCoeffL_d hV0 _) _).trans
+          ((congrArg (fun z => GrOperad.map (R := R) (seqEquiv i r B₁)
+            (GrOperad.comp (R := R) (Sum.inr r) z ((𝒥Ω).proj B₁ (𝔅 q)))) hIH).trans
+            (GrOperad.comp_assoc_seq i r X _ _)))))))
+  have hR := ((congrArg (GrOperad.comp (R := R) i X) hs).trans
+    (congrArg (GrOperad.comp (R := R) i X) hX)).trans ((comp_map_right i X e _).trans
+      (congrArg (GrOperad.map (R := R) (compEquiv (Equiv.refl A) e i))
+        (map_smul (GrOperad.comp (R := R) i X) _ _)))
+  exact hL.trans hR.symm
+
+/-- **The commutator of an element commuting with the generators, on trees**: if
+`Ξ(x, ι c) = x ∘ᵢ ι c` for all `c`, then `Ξ(x, y) = x ∘ᵢ y'` for every tree `y`, `y'` its part
+without unit component, when there are no generators without inputs. -/
+private theorem xiM_bas_right (hV0 : ∀ v : V (Fin 0), v = 0) {i : A} {X : CobarGr R 𝒞 A}
+    (hgen : ∀ (B : Type) [Fintype B] [DecidableEq B] (y : FreeGr R (grGenPar R V) B),
+      xiM R V i X (Cobar.ιL R 𝒞 B ((𝒥).proj B y))
+        = GrOperad.comp (R := R) i X (Cobar.ιL R 𝒞 B ((𝒥).proj B y)))
+    (x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B) :
+    xiM R V i X ((𝒥Ω).proj B (𝔅 x))
+      = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 x))) :=
+  tree_induction (motive := fun B _ _ x => xiM R V i X ((𝒥Ω).proj B (𝔅 x))
+    = GrOperad.comp (R := R) i X (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 x))))
+    (fun _ _ _ _ hl => (FreeGrL.proj_bas_leaf hl).elim fun e he => xiM_bas_right_leaf X e he)
+    (fun _ _ _ _ g e => xiM_bas_right_corolla hgen g e)
+    (fun _ _ _ _ _ _ _ _ _ r p q e hpl _ hp _ => xiM_bas_right_comp hV0 X r p q e hpl hp) B x
+
+/-- A basis tree is homogeneous. -/
+lemma par_proj_bas (x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A) :
+    GrOperad.par (R := R) (Tree.tpar (grGenPar R (CobarGen R 𝒞)) (treeOf x)) ((𝒥Ω).proj A (𝔅 x))
+      = (𝒥Ω).proj A (𝔅 x) :=
+  congrArg ((𝒥Ω).proj A) (SgnLin.par_bas x)
+
+private lemma secC_proj_bas_par (x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A) :
+    GrOperad.par (R := R) (Tree.tpar (grGenPar R (CobarGen R 𝒞)) (treeOf x))
+        (FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)))
+      = FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)) :=
+  (FreeGrL.secC_par _ _).symm.trans (congrArg (FreeGrL.secC R (CobarGen R 𝒞) A) (par_proj_bas x))
+
+/-- Composing a relabelled operation relabels the composite. -/
+lemma comp_map_left {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') (j : A)
+    (W : CobarGr R 𝒞 A) (Y : CobarGr R 𝒞 B) :
+    GrOperad.comp (R := R) (e j) (GrOperad.map (R := R) e W) Y
+      = GrOperad.map (R := R) (compEquiv e (Equiv.refl B) j) (GrOperad.comp (R := R) j W Y) :=
+  ((congrArg (fun z => GrOperad.comp (R := R) (e j) (GrOperad.map (R := R) e W) z)
+    (GrOperad.map_refl Y)).symm.trans (GrOperad.map_comp e (Equiv.refl B) j W Y).symm)
+
+private lemma xiM_bas_leaf {x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A} (e : Unit ≃ A)
+    (he : (𝒥Ω).proj A (𝔅 x) = GrOperad.map (R := R) e (GrOperad.one (R := R)))
+    (i : A) (Y : CobarGr R 𝒞 B) :
+    xiM R V i ((𝒥Ω).proj A (𝔅 x)) Y
+      = GrOperad.comp (R := R) i (FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)))
+          (FreeGrL.secC R (CobarGen R 𝒞) B Y) := by
+  have hL : xiM R V i ((𝒥Ω).proj A (𝔅 x)) Y = 0 :=
+    (congrArg (fun z => xiM R V i z Y) he).trans (xiM_unit_left e i Y)
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)) = 0 :=
+    (congrArg (FreeGrL.secC R (CobarGen R 𝒞) A) he).trans
+      (FreeGrL.secC_unit (R := R) (V := CobarGen R 𝒞) e)
+  have hR : GrOperad.comp (R := R) i (FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)))
+      (FreeGrL.secC R (CobarGen R 𝒞) B Y) = 0 :=
+    (congrArg (fun z => GrOperad.comp (R := R) i z (FreeGrL.secC R (CobarGen R 𝒞) B Y)) hs).trans
+      (LinearMap.map_zero₂ (GrOperad.comp (R := R) (P := CobarGr R 𝒞) i) _)
+  exact hL.trans hR.symm
+
+private lemma xiM_bas_corolla (hV0 : ∀ v : V (Fin 0), v = 0) {k : ℕ} (g : GrGen R (CobarGen R 𝒞) k)
+    (e : Fin k ≃ A) (j : Fin k) (y : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B) :
+    xiM R V (e j) ((𝒥Ω).proj A (𝔅 (SetOperad.map e (Reg.std (corolla g))))) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) (e j) (FreeGrL.secC R (CobarGen R 𝒞) A
+          ((𝒥Ω).proj A (𝔅 (SetOperad.map e (Reg.std (corolla g))))))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) := by
+  have hex := exists_ιL_eq (R := R) (V := V) g.1.1
+  cases hex with
+  | intro y₀ hy =>
+  have hZ : (𝒥Ω).proj A (𝔅 (SetOperad.map e (Reg.std (corolla g))))
+      = GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y₀)) :=
+    (FreeGrL.proj_bas_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      ((FreeGrL.proj_bas_corolla g).trans hy.symm))
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) A
+      (GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y₀)))
+      = GrOperad.map (R := R) e (Cobar.ιL R 𝒞 (Fin k) ((𝒥).proj (Fin k) y₀)) :=
+    (FreeGrL.secC_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      (FreeGrL.secC_of_unitCoeff (unitCoeffL_ιL _)))
+  have hL := (congrArg (fun z => xiM R V (e j) z ((𝒥Ω).proj B (𝔅 y))) hZ).trans
+    ((xiM_map_left e j _ _).trans (congrArg (GrOperad.map (R := R) (compEquiv e (Equiv.refl B) j))
+      (xiM_bas_right hV0 (fun B _ _ c => xiM_ιL hV0 j y₀ c) y)))
+  have hR := (congrArg (fun z => GrOperad.comp (R := R) (e j) (FreeGrL.secC R (CobarGen R 𝒞) A z)
+    (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) hZ).trans
+      ((congrArg (fun z => GrOperad.comp (R := R) (e j) z
+        (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) hs).trans
+        (comp_map_left e j _ _))
+  exact hL.trans hR.symm
+
+private lemma map_inj_eq {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') {a b : CobarGr R 𝒞 A}
+    (h : GrOperad.map (R := R) e a = GrOperad.map (R := R) e b) : a = b :=
+  (map_symm_map e a).symm.trans ((congrArg (GrOperad.map (R := R) e.symm) h).trans
+    (map_symm_map e b))
+
+private lemma xiM_bas_comp_inr (hV0 : ∀ v : V (Fin 0), v = 0) {A₁ B₁ : Type} [Fintype A₁]
+    [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁] (r : A₁)
+    (p : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A₁)
+    (q : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B₁) (e : Without A₁ r ⊕ B₁ ≃ A)
+    (hpl : (treeOf p).isLeaf = false) (hql : (treeOf q).isLeaf = false) (w : B₁)
+    (y : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B)
+    (hq : xiM R V w ((𝒥Ω).proj B₁ (𝔅 q)) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) w (FreeGrL.secC R (CobarGen R 𝒞) B₁ ((𝒥Ω).proj B₁ (𝔅 q)))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) :
+    xiM R V (e (Sum.inr w)) ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q))))
+        ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) (e (Sum.inr w)) (FreeGrL.secC R (CobarGen R 𝒞) A
+          ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) := by
+  have hQ0 : FreeGrL.unitCoeffL R (CobarGen R 𝒞) B₁ ((𝒥Ω).proj B₁ (𝔅 q)) = 0 :=
+    FreeGrL.unitCoeffL_proj_bas hql
+  have hIH : xiM R V w ((𝒥Ω).proj B₁ (𝔅 q)) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) w ((𝒥Ω).proj B₁ (𝔅 q))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) :=
+    hq.trans (congrArg (fun z => GrOperad.comp (R := R) w z
+      (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) (FreeGrL.secC_of_unitCoeff hQ0))
+  have hX : (𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))
+      = GrOperad.map (R := R) e (σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) •
+          GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B₁ (𝔅 q))) :=
+    (FreeGrL.proj_bas_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      (FreeGrL.proj_bas_comp r p q))
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 (SetOperad.map e
+      (SetOperad.comp r p q)))) = (𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q))) :=
+    FreeGrL.secC_of_unitCoeff (FreeGrL.unitCoeffL_proj_bas (isLeaf_map_comp q e hpl))
+  -- the inner merge
+  have hin : xiM R V (Sum.inr w) (GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p))
+      ((𝒥Ω).proj B₁ (𝔅 q))) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) (Sum.inr w) (GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p))
+          ((𝒥Ω).proj B₁ (𝔅 q))) (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) :=
+    map_inj_eq (seqEquiv r w B) ((xiM_comp_inner r w _ hQ0 (unitCoeffL_d hV0 _) _).trans
+      ((congrArg (GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p))) hIH).trans
+        (GrOperad.comp_assoc_seq r w _ _ _).symm))
+  have hL := (congrArg (fun z => xiM R V (e (Sum.inr w)) z ((𝒥Ω).proj B (𝔅 y))) hX).trans
+    ((xiM_map_left e (Sum.inr w) _ _).trans (congrArg (GrOperad.map (R := R)
+      (compEquiv e (Equiv.refl B) (Sum.inr w))) ((LinearMap.map_smul₂ _ _ _ _).trans
+        (congrArg (fun z => σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) • z) hin))))
+  have hR := (congrArg (fun z => GrOperad.comp (R := R) (e (Sum.inr w)) z
+    (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) (hs.trans hX)).trans
+      ((comp_map_left e (Sum.inr w) _ _).trans (congrArg (GrOperad.map (R := R)
+        (compEquiv e (Equiv.refl B) (Sum.inr w))) (LinearMap.map_smul₂ _ _ _ _)))
+  exact hL.trans hR.symm
+
+private lemma xiM_bas_comp_inl {A₁ B₁ : Type} [Fintype A₁]
+    [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁] (r : A₁)
+    (p : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A₁)
+    (q : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B₁) (e : Without A₁ r ⊕ B₁ ≃ A)
+    (hpl : (treeOf p).isLeaf = false) {u : A₁} (hu : u ≠ r)
+    (y : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B)
+    (hp : xiM R V u ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) u (FreeGrL.secC R (CobarGen R 𝒞) A₁ ((𝒥Ω).proj A₁ (𝔅 p)))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) :
+    xiM R V (e (Sum.inl ⟨u, hu⟩)) ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q))))
+        ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) (e (Sum.inl ⟨u, hu⟩)) (FreeGrL.secC R (CobarGen R 𝒞) A
+          ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) := by
+  have hP0 : FreeGrL.unitCoeffL R (CobarGen R 𝒞) A₁ ((𝒥Ω).proj A₁ (𝔅 p)) = 0 :=
+    FreeGrL.unitCoeffL_proj_bas hpl
+  have hIH : xiM R V u ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) u ((𝒥Ω).proj A₁ (𝔅 p))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) :=
+    hp.trans (congrArg (fun z => GrOperad.comp (R := R) u z
+      (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) (FreeGrL.secC_of_unitCoeff hP0))
+  have hX : (𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))
+      = GrOperad.map (R := R) e (σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) •
+          GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B₁ (𝔅 q))) :=
+    (FreeGrL.proj_bas_map e _).trans (congrArg (GrOperad.map (R := R) e)
+      (FreeGrL.proj_bas_comp r p q))
+  have hs : FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 (SetOperad.map e
+      (SetOperad.comp r p q)))) = (𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q))) :=
+    FreeGrL.secC_of_unitCoeff (FreeGrL.unitCoeffL_proj_bas (isLeaf_map_comp q e hpl))
+  -- the merge beside the inner factor
+  have hin : xiM R V (Sum.inl ⟨u, hu⟩ : Without A₁ r ⊕ B₁) (GrOperad.comp (R := R) r
+      ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B₁ (𝔅 q))) ((𝒥Ω).proj B (𝔅 y))
+      = GrOperad.comp (R := R) (Sum.inl ⟨u, hu⟩ : Without A₁ r ⊕ B₁)
+          (GrOperad.comp (R := R) r ((𝒥Ω).proj A₁ (𝔅 p)) ((𝒥Ω).proj B₁ (𝔅 q)))
+          (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) :=
+    map_inj_eq (parEquiv (Ne.symm hu) B₁ B) ((xiM_comp_par (Ne.symm hu) _ (par_proj_bas q)
+      (par_proj_bas y)).trans ((congrArg (fun z => σ R (Tree.tpar (grGenPar R (CobarGen R 𝒞))
+        (treeOf q) && Tree.tpar (grGenPar R (CobarGen R 𝒞)) (treeOf y)) •
+          GrOperad.comp (R := R) (Sum.inl ⟨r, Ne.symm hu⟩ : Without A₁ u ⊕ B) z
+            ((𝒥Ω).proj B₁ (𝔅 q))) hIH).trans
+        (GrOperad.comp_assoc_par (Ne.symm hu) _ (par_proj_bas q) (secC_proj_bas_par y)).symm))
+  have hL := (congrArg (fun z => xiM R V (e (Sum.inl ⟨u, hu⟩)) z ((𝒥Ω).proj B (𝔅 y))) hX).trans
+    ((xiM_map_left e (Sum.inl ⟨u, hu⟩) _ _).trans (congrArg (GrOperad.map (R := R)
+      (compEquiv e (Equiv.refl B) (Sum.inl ⟨u, hu⟩))) ((LinearMap.map_smul₂ _ _ _ _).trans
+        (congrArg (fun z => σ R (cSgn (grGenPar R (CobarGen R 𝒞)) r p q) • z) hin))))
+  have hR := (congrArg (fun z => GrOperad.comp (R := R) (e (Sum.inl ⟨u, hu⟩)) z
+    (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y)))) (hs.trans hX)).trans
+      ((comp_map_left e (Sum.inl ⟨u, hu⟩) _ _).trans (congrArg (GrOperad.map (R := R)
+        (compEquiv e (Equiv.refl B) (Sum.inl ⟨u, hu⟩))) (LinearMap.map_smul₂ _ _ _ _)))
+  exact hL.trans hR.symm
+
+/-- **The commutator on two trees** is the composite of their parts without unit component, when
+there are no generators without inputs. -/
+private theorem xiM_bas_all (hV0 : ∀ v : V (Fin 0), v = 0)
+    (x : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) A) :
+    ∀ (B : Type) [Fintype B] [DecidableEq B] (y : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B)
+      (i : A), xiM R V i ((𝒥Ω).proj A (𝔅 x)) ((𝒥Ω).proj B (𝔅 y))
+        = GrOperad.comp (R := R) i (FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)))
+            (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) :=
+  tree_induction (motive := fun A _ _ x => ∀ (B : Type) [Fintype B] [DecidableEq B]
+    (y : Reg (TreeOfArity (GrGen R (CobarGen R 𝒞))) B) (i : A),
+      xiM R V i ((𝒥Ω).proj A (𝔅 x)) ((𝒥Ω).proj B (𝔅 y))
+        = GrOperad.comp (R := R) i (FreeGrL.secC R (CobarGen R 𝒞) A ((𝒥Ω).proj A (𝔅 x)))
+            (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))))
+    (fun _ _ _ _ hl _ _ _ _ i =>
+      (FreeGrL.proj_bas_leaf hl).elim fun e he => xiM_bas_leaf e he i _)
+    (fun _ _ _ _ g e _ _ _ y i => (e.apply_symm_apply i) ▸ xiM_bas_corolla hV0 g e (e.symm i) y)
+    (fun A A₁ B₁ _ _ _ _ _ _ r p q e hpl hql hp hq B _ _ y i => by
+      have key : ∀ j : Without A₁ r ⊕ B₁, xiM R V (e j)
+          ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))) ((𝒥Ω).proj B (𝔅 y))
+          = GrOperad.comp (R := R) (e j) (FreeGrL.secC R (CobarGen R 𝒞) A
+              ((𝒥Ω).proj A (𝔅 (SetOperad.map e (SetOperad.comp r p q)))))
+              (FreeGrL.secC R (CobarGen R 𝒞) B ((𝒥Ω).proj B (𝔅 y))) := by
+        rintro (⟨u, hu⟩ | w)
+        · exact xiM_bas_comp_inl r p q e hpl hu y (hp B y u)
+        · exact xiM_bas_comp_inr hV0 r p q e hpl hql w y (hq B y w)
+      exact (e.apply_symm_apply i) ▸ key (e.symm i)) A x
+
+/-- **The commutator of the cobar differential and the merge** is the composite of the parts
+without unit component: `d (x ⊛ᵢ y) + d x ⊛ᵢ y + (-1)^{|x|} x ⊛ᵢ d y = x̄ ∘ᵢ ȳ`, when there are
+no generators without inputs. -/
+theorem xiM_eq (hV0 : ∀ v : V (Fin 0), v = 0) (i : A) (X : CobarGr R 𝒞 A)
+    (Y : CobarGr R 𝒞 B) :
+    xiM R V i X Y = GrOperad.comp (R := R) i (FreeGrL.secC R (CobarGen R 𝒞) A X)
+      (FreeGrL.secC R (CobarGen R 𝒞) B Y) := by
+  have hx := Function.surjInv_eq ((𝒥Ω).proj_surjective A) X
+  have hy := Function.surjInv_eq ((𝒥Ω).proj_surjective B) Y
+  rw [← hx, ← hy]
+  exact bilin_ext_single (xiM R V i) ((GrOperad.comp (R := R) (P := CobarGr R 𝒞) i).compl₁₂
+    (FreeGrL.secC R (CobarGen R 𝒞) A) (FreeGrL.secC R (CobarGen R 𝒞) B)) ((𝒥Ω).proj A)
+    ((𝒥Ω).proj B) (fun s t => xiM_bas_all hV0 s B t i) _ _
 
 end Cobar
 
