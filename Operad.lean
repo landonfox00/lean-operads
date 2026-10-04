@@ -181,3 +181,4 @@ import Operad.CutStar
 import Operad.MergeSp
 import Operad.CobarMerge
 import Operad.BarCobarRes
+import Operad.CobarMergeComm
