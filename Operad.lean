@@ -193,3 +193,4 @@ import Operad.SpSplitting
 import Operad.FreeGrArity
 import Operad.FreeGrGenCoef
 import Operad.FreeGrCompare
+import Operad.CobarQIso

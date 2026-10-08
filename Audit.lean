@@ -1657,3 +1657,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.CompareData.qiso_of_qiso
 #print axioms Operad.FreeGrL.CompareData.qiso_step
 #print axioms Operad.FreeGrL.CompareData.qiso_of_qiso_free
+#print axioms Operad.QIso.bijective_iff
+#print axioms Operad.FreeGrL.der_mem_vx
+#print axioms Operad.CobarDG.d_eq_sub
+#print axioms Operad.CobarDG.cobar_d_mem_vx
+#print axioms Operad.CobarDG.cobar_d_map
+#print axioms Operad.CobarDG.map_d
+#print axioms Operad.CobarDG.compareData
+#print axioms Operad.CobarDG.map_bijective_iff

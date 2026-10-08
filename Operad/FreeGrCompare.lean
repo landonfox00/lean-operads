@@ -31,7 +31,9 @@ namespace Operad
 
 open Sym GerBV
 
-variable {R : Type u} [Field R]
+section General
+
+variable {R : Type u} [CommRing R]
   {V : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
   [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
@@ -101,7 +103,7 @@ lemma derSp_mem_vx {d : GrSpEnd R X true} {k : ℕ} {x : FreeGrL R X A} (hx : x 
     rw [GrSpEnd.id_app, GrSpEnd.id_app, Bool.false_and, σ_false, one_smul]), Bool.false_and,
     σ_false, one_smul, mem_eig.1 hx, map_smul]
 
-lemma vx_disjoint [CharZero R] (p : ℕ) : Disjoint (vx R X p A) (vxGe R X (p + 1) A) :=
+lemma vx_disjoint [Algebra ℚ R] (p : ℕ) : Disjoint (vx R X p A) (vxGe R X (p + 1) A) :=
   (iSupIndep_eigenspace_nat _ p).mono_right
     (iSup_le fun k => le_iSup₂_of_le (f := fun (j : ℕ) (_ : j ≠ p) => vx R X j A) k.1
       (by have := k.2; omega) le_rfl)
@@ -115,14 +117,14 @@ lemma vxGe_eq (p : ℕ) : vxGe R X p A = vx R X p A ⊔ vxGe R X (p + 1) A := by
     exact le_sup_left
   · exact le_sup_of_le_right (le_iSup (fun k : {k : ℕ // p + 1 ≤ k} => vx R X k.1 A) ⟨k.1, h⟩)
 
-lemma vxGe_zero [CharZero R] : vxGe R X 0 A = ⊤ := by
+lemma vxGe_zero [Algebra ℚ R] : vxGe R X 0 A = ⊤ := by
   refine eq_top_iff.2 ((iSup_eig_eq_top (a := GrSpEnd.id R X) (fun A _ _ v =>
     Submodule.mem_iSup_of_mem 1 (by
       rw [Module.End.mem_eigenspace_iff, Nat.cast_one, one_smul]
       rfl)) A).symm.le.trans (iSup_le fun k => ?_))
   exact le_iSup (fun k : {k : ℕ // 0 ≤ k} => vx R X k.1 A) ⟨k, Nat.zero_le k⟩
 
-lemma vxGe_card [CharZero R]
+lemma vxGe_card [Algebra ℚ R]
     (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : X B, v = 0) :
     vxGe R X (Fintype.card A) A = ⊥ :=
   eq_bot_iff.2 (iSup_le fun k _ hx => (Submodule.mem_bot R).2 (eig_card_eq_bot hred k.2 hx))
@@ -159,7 +161,7 @@ lemma totD_mem_vxGe {d : GrSpEnd R X true} {D₁ : GrDer (GrOperadHom.id R (Free
     vxGe R X p A ≤ (vxGe R X p A).comap (totD d D₁ A)) hx
 
 /-- **The splitting of the filtration** by the trees with exactly `p` vertices. -/
-lemma split_vx [CharZero R] {d : GrSpEnd R X true}
+lemma split_vx [Algebra ℚ R] {d : GrSpEnd R X true}
     {D₁ : GrDer (GrOperadHom.id R (FreeGrL R X)) true}
     (hdd : ∀ x : FreeGrL R X A, totD d D₁ A (totD d D₁ A x) = 0)
     (hD : ∀ (k : ℕ) (x : FreeGrL R X A), x ∈ vx R X k A → D₁.app A x ∈ vx R X (k + 1) A)
@@ -171,7 +173,7 @@ lemma split_vx [CharZero R] {d : GrSpEnd R X true}
   memW _ hw := totD_mem_vxGe hD hw
 
 /-- **Derivations vanish on the trees without vertices**, over a field of characteristic zero. -/
-lemma der_vx_zero [CharZero R] {e : Bool} {D : GrDer (GrOperadHom.id R (FreeGrL R X)) e}
+lemma der_vx_zero [Algebra ℚ R] {e : Bool} {D : GrDer (GrOperadHom.id R (FreeGrL R X)) e}
     {x : FreeGrL R X A} (hx : x ∈ vx R X 0 A) : D.app A x = 0 := by
   have h0 : D.compHom (mapSp (GrSpEnd.zero R X false).toHom) = GrDer.zero _ e :=
     der_eq_zero fun B _ _ v => by
@@ -197,7 +199,7 @@ private lemma comp_trunc_eq {g g' : GrSpeciesHom R X Y} {m : ℕ}
   · rw [if_pos h, one_smul, hg B h]
   · rw [if_neg (by omega), zero_smul, map_zero, map_zero]
 
-variable [CharZero R]
+variable [Algebra ℚ R]
   (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : X B, v = 0)
   {g g' : GrSpeciesHom R X Y} {m : ℕ}
   (hg : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ m →
@@ -234,9 +236,25 @@ def InjAt (dV : GrSpEnd R V true) (dW : GrSpEnd R W true) (f : GrSpeciesHom R V 
     (A : Type) [Fintype A] [DecidableEq A] : Prop :=
   ∀ x : V A, dV.app A x = 0 → ∀ w', f.app A x = dW.app A w' → ∃ z, dV.app A z = x
 
+end FreeGrL
+
+end General
+
+section Field
+
+variable {R : Type u} [Field R] [CharZero R]
+  {V : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
+  {W : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (W A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (W A)] [GrSpecies R W]
+
+namespace FreeGrL
+
 namespace CompareData
 
-variable [CharZero R] {dV : GrSpEnd R V true} {dW : GrSpEnd R W true}
+variable {dV : GrSpEnd R V true} {dW : GrSpEnd R W true}
   {D₁ : GrDer (GrOperadHom.id R (FreeGrL R V)) true}
   {D₁' : GrDer (GrOperadHom.id R (FreeGrL R W)) true} {f : GrSpeciesHom R V W}
   (hc : CompareData dV dW D₁ D₁' f) (A : Type) [Fintype A] [DecidableEq A]
@@ -418,5 +436,7 @@ theorem qiso_of_qiso_free
 end CompareData
 
 end FreeGrL
+
+end Field
 
 end Operad
