@@ -1690,3 +1690,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Bar.counit_comp_map
 #print axioms Operad.Koszul.counit_comp
 #print axioms Operad.Koszul.isKoszul_iff
+#print axioms Operad.CobarHom.postcomp
+#print axioms Operad.CobarHom.postcomp_twisting
+#print axioms Operad.Koszul.DGAlgebra.toPInf
+#print axioms Operad.Koszul.DGAlgebra.toPInf_twisting
+#print axioms Operad.Koszul.DGAlgebra.toPInf_gen
+#print axioms Operad.Koszul.DGAlgebra.toPInf_injective

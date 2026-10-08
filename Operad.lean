@@ -200,3 +200,4 @@ import Operad.ConvFilt
 import Operad.BarWeights
 import Operad.KoszulBar
 import Operad.KoszulCriterion
+import Operad.PInfinity

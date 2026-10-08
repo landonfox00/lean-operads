@@ -656,6 +656,12 @@ Theorem A this gives **the Koszul criterion: `P` is Koszul iff `P^¡ → B(P, I)
 quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
 `Operad/KoszulCriterion.lean`).
 
+**Homotopy algebras over a quadratic operad.** A `P∞`-algebra on a dg super module `V` is an
+algebra over `ΩP^¡`, a twisting morphism `P^¡ → End_V` (`Koszul.PInfAlgebra`). Every dg
+`P`-algebra is one, by restriction along `ΩP^¡ → P`, with twisting morphism `φ ∘ κ` sending a
+generator `sv` to the operation `φ(v)`, and faithfully (`Koszul.DGAlgebra.toPInf`,
+`Koszul.DGAlgebra.toPInf_gen`, `Koszul.DGAlgebra.toPInf_injective`, `Operad/PInfinity.lean`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every
