@@ -1669,3 +1669,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.proj_mapF
 #print axioms Operad.Cobar.mem_vxGe_succ
 #print axioms Operad.Cobar.eq_zero_of_d_ιL
+#print axioms Operad.ConvOp.toLin_star_mem
+#print axioms Operad.ConvOp.toLin_star_d
+#print axioms Operad.FreeGrL.snd_eq_zero_of_vx
+#print axioms Operad.Bar.d_mem_vxGe_one
+#print axioms Operad.Bar.mem_vxGe_two
+#print axioms Operad.Bar.ιι_d_mem
+#print axioms Operad.Bar.d_app_eq_zero
+#print axioms Operad.Bar.piL_d_app
+#print axioms Operad.Koszul.pi_toBar
+#print axioms Operad.Koszul.piL_d_toBar
+#print axioms Operad.Koszul.d_toBar

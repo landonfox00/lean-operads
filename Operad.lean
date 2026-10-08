@@ -196,3 +196,6 @@ import Operad.FreeGrCompare
 import Operad.CobarQIso
 import Operad.CutFunctor
 import Operad.CofreeVanish
+import Operad.ConvFilt
+import Operad.BarWeights
+import Operad.KoszulBar
