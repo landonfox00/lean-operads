@@ -299,6 +299,40 @@ theorem inj_of_sup (hWs : Surj W W' (D₀ + D₁) (D₀' + D₁') F)
     (W.add_mem (W.add_mem (W.add_mem (hs.mem₁ a ha) (hs.memW' hc)) hw) hw₁)
     (by linear_combination (norm := module) hdz)).1
 
+/-- **Direct summands, surjectivity**: when `D₁` vanishes on `U`, a quasi-isomorphism on
+`U ⊔ W` is surjective on the homology of `W`. -/
+theorem surj_of_sup_right (hU : ∀ u ∈ U, D₁ u = 0) (hU' : ∀ u ∈ U', D₁' u = 0)
+    (hs_ : Surj (U ⊔ W) (U' ⊔ W') (D₀ + D₁) (D₀' + D₁') F) :
+    Surj W W' (D₀ + D₁) (D₀' + D₁') F := by
+  intro y' hy' hdy
+  obtain ⟨x, hx, hdx, z', hz', hxz⟩ := hs_ y' (Submodule.mem_sup_right hy') hdy
+  obtain ⟨u, hu, w, hw, rfl⟩ := Submodule.mem_sup.1 hx
+  obtain ⟨a', ha', b', hb', rfl⟩ := Submodule.mem_sup.1 hz'
+  obtain ⟨-, h1⟩ := hs.comps hu hw hdx
+  rw [hU u hu, zero_add] at h1
+  refine ⟨w, hw, by rw [LinearMap.add_apply]; exact h1, b', hb', ?_⟩
+  simp only [LinearMap.add_apply, map_add] at hxz ⊢
+  rw [hU' a' ha', add_zero] at hxz
+  have := (eq_zero_of_add hs'.disj (U'.sub_mem (hF.memU u hu) (hs'.mem₀ a' ha'))
+    (W'.sub_mem (W'.sub_mem (hF.memW w hw) hy') (hs'.memW' hb'))
+    (by linear_combination (norm := module) hxz)).2
+  linear_combination (norm := module) this
+
+omit hs' hF in
+/-- **Direct summands, injectivity**. -/
+theorem inj_of_sup_right (hU : ∀ u ∈ U, D₁ u = 0)
+    (hi_ : Inj (U ⊔ W) (U' ⊔ W') (D₀ + D₁) (D₀' + D₁') F) :
+    Inj W W' (D₀ + D₁) (D₀' + D₁') F := by
+  intro x hx hdx z' hz' hFx
+  obtain ⟨z, hz, hdz⟩ := hi_ x (Submodule.mem_sup_right hx) hdx z' (Submodule.mem_sup_right hz') hFx
+  obtain ⟨a, ha, c, hc, rfl⟩ := Submodule.mem_sup.1 hz
+  refine ⟨c, hc, ?_⟩
+  simp only [LinearMap.add_apply, map_add] at hdz ⊢
+  rw [hU a ha, add_zero] at hdz
+  have := (eq_zero_of_add hs.disj (hs.mem₀ a ha) (W.sub_mem (hs.memW' hc) hx)
+    (by linear_combination (norm := module) hdz)).2
+  linear_combination (norm := module) this
+
 end Extension
 
 /-! ## Finite filtrations -/
@@ -321,17 +355,17 @@ structure FiltData (D₀ D₁ : M →ₗ[R] M) (D₀' D₁' : M' →ₗ[R] M') (
 
 variable {X S X' S' m}
 
-/-- **A quasi-isomorphism on the graded pieces of finite filtrations is one on the filtered
-modules.** -/
-theorem qiso_filt (hd : FiltData X S X' S' m D₀ D₁ D₀' D₁' F)
-    (hs : ∀ p, Surj (X p) (X' p) D₀ D₀' F) (hi : ∀ p, Inj (X p) (X' p) D₀ D₀' F) (p : ℕ) :
+/-- **A quasi-isomorphism on the graded pieces of finite filtrations from `p₀` on is one on the
+filtered modules from `p₀` on.** -/
+theorem qiso_filt_ge (hd : FiltData X S X' S' m D₀ D₁ D₀' D₁' F) {p₀ : ℕ}
+    (hs : ∀ p, p₀ ≤ p → Surj (X p) (X' p) D₀ D₀' F)
+    (hi : ∀ p, p₀ ≤ p → Inj (X p) (X' p) D₀ D₀' F) (p : ℕ) (hp : p₀ ≤ p) :
     Surj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F ∧ Inj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F := by
-  suffices h : ∀ j p, p + j = m →
+  suffices h : ∀ j p, p₀ ≤ p → p + j = m →
       Surj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F ∧ Inj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F by
-    rcases le_or_gt p m with hp | hp
-    · exact h (m - p) p (by omega)
-    · -- beyond `m` the filtration vanishes
-      have hb : ∀ k, S (m + k) = ⊥ ∧ S' (m + k) = ⊥ := by
+    rcases le_or_gt p m with hpm | hpm
+    · exact h (m - p) p hp (by omega)
+    · have hb : ∀ k, S (m + k) = ⊥ ∧ S' (m + k) = ⊥ := by
         intro k
         induction k with
         | zero => exact ⟨hd.top, hd.top'⟩
@@ -339,23 +373,30 @@ theorem qiso_filt (hd : FiltData X S X' S' m D₀ D₁ D₀' D₁' F)
           refine ⟨eq_bot_iff.2 ?_, eq_bot_iff.2 ?_⟩
           · rw [← ih.1, hd.sup (m + k)]; exact le_sup_right
           · rw [← ih.2, hd.sup' (m + k)]; exact le_sup_right
-      obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hp.le
+      obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le hpm.le
       rw [(hb k).1, (hb k).2]
       exact ⟨surj_bot _ _ _, inj_bot _ _ _⟩
   intro j
   induction j with
   | zero =>
-    intro p hp
+    intro p _ hp
     rw [add_zero] at hp
     subst hp
     rw [hd.top, hd.top']
     exact ⟨surj_bot _ _ _, inj_bot _ _ _⟩
   | succ j ih =>
-    intro p hp
-    obtain ⟨h1, h2⟩ := ih (p + 1) (by omega)
+    intro p hp₀ hp
+    obtain ⟨h1, h2⟩ := ih (p + 1) (by omega) (by omega)
     rw [hd.sup p, hd.sup' p]
-    exact ⟨surj_sup (hd.split p) (hd.split' p) (hd.hom p) (hs p) h1 h2,
-      inj_sup (hd.split p) (hd.split' p) (hd.hom p) (hs p) (hi p) h2⟩
+    exact ⟨surj_sup (hd.split p) (hd.split' p) (hd.hom p) (hs p hp₀) h1 h2,
+      inj_sup (hd.split p) (hd.split' p) (hd.hom p) (hs p hp₀) (hi p hp₀) h2⟩
+
+/-- **A quasi-isomorphism on the graded pieces of finite filtrations is one on the filtered
+modules.** -/
+theorem qiso_filt (hd : FiltData X S X' S' m D₀ D₁ D₀' D₁' F)
+    (hs : ∀ p, Surj (X p) (X' p) D₀ D₀' F) (hi : ∀ p, Inj (X p) (X' p) D₀ D₀' F) (p : ℕ) :
+    Surj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F ∧ Inj (S p) (S' p) (D₀ + D₁) (D₀' + D₁') F :=
+  qiso_filt_ge hd (p₀ := 0) (fun p _ => hs p) (fun p _ => hi p) p (Nat.zero_le p)
 
 end Filtration
 
@@ -404,6 +445,19 @@ theorem inj_of_retract (hKG : ∀ x ∈ S, K (G x) = r x) : Inj S S' D D' F := b
     rw [this, map_sub, hr'.rD, hr'.rD, sub_self]
   have h1 : r x = 0 := by rw [← hr.rr x, ← hKG _ (hr.mem x hx), h0, map_zero]
   exact ⟨w, hw, by rw [hdw, h1, sub_zero]⟩
+
+omit hr hr' hFS hFD hG in
+/-- A retraction for `D` is one for `-D`. -/
+lemma Retract.neg (hr : Retract S D r) : Retract S (-D) r where
+  mem := hr.mem
+  memD x hx := by rw [LinearMap.neg_apply]; exact S.neg_mem (hr.memD x hx)
+  rr := hr.rr
+  rD x := by rw [LinearMap.neg_apply, map_neg, hr.rD, neg_zero]
+  Dr x := by rw [LinearMap.neg_apply, hr.Dr, neg_zero]
+  acyc x hx hdx hrx := by
+    rw [LinearMap.neg_apply, neg_eq_zero] at hdx
+    obtain ⟨z, hz, hdz⟩ := hr.acyc x hx hdx hrx
+    exact ⟨-z, S.neg_mem hz, by rw [LinearMap.neg_apply, map_neg, neg_neg, hdz]⟩
 
 end Retract
 

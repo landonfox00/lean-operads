@@ -262,7 +262,7 @@ noncomputable def mapSp (φ : GrSpeciesHom R V W) : GrOperadHom R (FreeGrL R V) 
   homEquiv_symm_ι _ v
 
 /-- **Functoriality.** -/
-lemma mapSp_comp {U : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+lemma mapSp_comp {U : (A : Type) → [Fintype A] → [DecidableEq A] → Type*}
     [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (U A)]
     [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (U A)] [GrSpecies R U]
     (ψ : GrSpeciesHom R W U) (φ : GrSpeciesHom R V W) {A : Type} [Fintype A] [DecidableEq A]

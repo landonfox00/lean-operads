@@ -192,3 +192,4 @@ import Operad.FreeGrKunneth
 import Operad.SpSplitting
 import Operad.FreeGrArity
 import Operad.FreeGrGenCoef
+import Operad.FreeGrCompare
