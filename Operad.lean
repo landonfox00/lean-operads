@@ -199,3 +199,4 @@ import Operad.CofreeVanish
 import Operad.ConvFilt
 import Operad.BarWeights
 import Operad.KoszulBar
+import Operad.KoszulCriterion

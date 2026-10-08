@@ -639,6 +639,23 @@ without operations without inputs, with a free unit, **the counit `ΩB(P, I) →
 quasi-isomorphism** (`Bar.homologyEquiv`, `Bar.exists_d_eq_of_counit_eq_zero`,
 `Bar.exists_cycle_counit_eq`, `Operad/BarCobarQIso.lean`).
 
+**The Koszul criterion.** Over a field of characteristic zero, comparing the filtrations of free
+graded operads by the number of vertices (`FreeGrL.CompareData`, `Operad/FreeGrCompare.lean`)
+shows that **the cobar construction preserves and reflects quasi-isomorphisms of reduced
+coaugmented dg cooperads**: `Ωf` is a quasi-isomorphism iff `f` is one in the arities at least
+two (`CobarDG.map_bijective_iff`, and `CobarZero.map_bijective_iff` for a source with the zero
+differential, `Operad/CobarQIso.lean`). The cut cooperad is functorial (`FreeGrL.mapCoop`,
+`Operad/CutFunctor.lean`) and cofree: an element with at least `k ≥ 2` vertices whose convolution
+square has weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
+`Operad/CofreeVanish.lean`), so a morphism into the bar construction whose composite with `π` is
+killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
+`Operad/BarWeights.lean`). For quadratic data `(E, r)` without generators with at most one input,
+**the comparison morphism `i : P^¡ → B(P, I)` commutes with the differentials** (`Koszul.d_toBar`,
+`Operad/KoszulBar.lean`), `ΩP^¡ → P` is the counit after `Ωi` (`Koszul.counit_comp`), and with
+Theorem A this gives **the Koszul criterion: `P` is Koszul iff `P^¡ → B(P, I)` is a
+quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
+`Operad/KoszulCriterion.lean`).
+
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
 (`EndGr.instGrOperad`): an operation with inputs `A` is a multilinear map `V^A → V` for every

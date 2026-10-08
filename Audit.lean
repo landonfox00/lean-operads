@@ -1660,8 +1660,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.QIso.bijective_iff
 #print axioms Operad.FreeGrL.der_mem_vx
 #print axioms Operad.CobarDG.d_eq_sub
-#print axioms Operad.CobarDG.cobar_d_mem_vx
-#print axioms Operad.CobarDG.cobar_d_map
+#print axioms Operad.CobarMap.d_mem_vx
+#print axioms Operad.CobarMap.d_map
 #print axioms Operad.CobarDG.map_d
 #print axioms Operad.CobarDG.compareData
 #print axioms Operad.CobarDG.map_bijective_iff
@@ -1680,3 +1680,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Koszul.pi_toBar
 #print axioms Operad.Koszul.piL_d_toBar
 #print axioms Operad.Koszul.d_toBar
+#print axioms Operad.CobarZero.map_d
+#print axioms Operad.CobarZero.compareData
+#print axioms Operad.CobarZero.map_bijective_iff
+#print axioms Operad.Homology.bijective_comp_iff
+#print axioms Operad.FreeGrL.mem_unitSpan_of_card_le
+#print axioms Operad.Koszul.dual_mem_unitSpan
+#print axioms Operad.Koszul.bar_mem_unitSpan
+#print axioms Operad.Bar.counit_comp_map
+#print axioms Operad.Koszul.counit_comp
+#print axioms Operad.Koszul.isKoszul_iff
