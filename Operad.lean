@@ -194,3 +194,5 @@ import Operad.FreeGrArity
 import Operad.FreeGrGenCoef
 import Operad.FreeGrCompare
 import Operad.CobarQIso
+import Operad.CutFunctor
+import Operad.CofreeVanish

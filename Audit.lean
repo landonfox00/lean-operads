@@ -1665,3 +1665,7 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.CobarDG.map_d
 #print axioms Operad.CobarDG.compareData
 #print axioms Operad.CobarDG.map_bijective_iff
+#print axioms Operad.FreeGrL.mapCoop
+#print axioms Operad.FreeGrL.proj_mapF
+#print axioms Operad.Cobar.mem_vxGe_succ
+#print axioms Operad.Cobar.eq_zero_of_d_ιL
