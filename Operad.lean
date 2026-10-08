@@ -190,3 +190,5 @@ import Operad.QIsoLemmas
 import Operad.FreeGrDer
 import Operad.FreeGrKunneth
 import Operad.SpSplitting
+import Operad.FreeGrArity
+import Operad.FreeGrGenCoef
