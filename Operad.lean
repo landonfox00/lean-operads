@@ -186,3 +186,7 @@ import Operad.CobarHomotopy
 import Operad.CobarContraction
 import Operad.CobarWeight
 import Operad.BarCobarQIso
+import Operad.QIsoLemmas
+import Operad.FreeGrDer
+import Operad.FreeGrKunneth
+import Operad.SpSplitting
