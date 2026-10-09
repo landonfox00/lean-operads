@@ -249,18 +249,17 @@ theorem word_ctx_out {T U₁ U₂ : STree E} {p : List ℕ} (hp : (T.get? p).isS
     exact hr
   rw [pos_eq hn₂ hr₂, pathWord_replace_incomp ltr hinc, pathWord_replace_incomp ltr hinc]
 
-/-! ## The path-lexicographic order -/
+/-! ## Path orders -/
 
-variable [LinearOrder L]
-
-/-- **The path-lexicographic order** on the monomials on `A`: the words of the leaves compared
-lexicographically in the order of the leaves, each degree-lexicographically. -/
-def pathLex {A : Finset ℕ} (x y : SMono E A) : Prop :=
-  Pi.Lex (· < ·) (fun {_} u w => DegLex u w) (fun a : A => word ltr x.1 a)
+/-- **The path order of a word order** `W` on the monomials on `A`: the words of the leaves
+compared lexicographically in the order of the leaves, each by `W`. -/
+def pathLexBy (W : List L → List L → Prop) {A : Finset ℕ} (x y : SMono E A) : Prop :=
+  Pi.Lex (· < ·) (fun {_} u w => W u w) (fun a : A => word ltr x.1 a)
     (fun a : A => word ltr y.1 a)
 
-theorem pathLex_trans {A : Finset ℕ} {x y z : SMono E A} (h₁ : pathLex ltr x y)
-    (h₂ : pathLex ltr y z) : pathLex ltr x z := by
+theorem pathLexBy_trans {W : List L → List L → Prop} (hW : ∀ {u v w}, W u v → W v w → W u w)
+    {A : Finset ℕ} {x y z : SMono E A} (h₁ : pathLexBy ltr W x y) (h₂ : pathLexBy ltr W y z) :
+    pathLexBy ltr W x z := by
   obtain ⟨i, hi, hxy⟩ := h₁
   obtain ⟨j, hj, hyz⟩ := h₂
   rcases lt_trichotomy i j with hij | rfl | hij
@@ -269,21 +268,18 @@ theorem pathLex_trans {A : Finset ℕ} {x y z : SMono E A} (h₁ : pathLex ltr x
     simp only at this hxy ⊢
     rw [← this]
     exact hxy
-  · exact ⟨i, fun k hk => (hi k hk).trans (hj k hk), hxy.trans hyz⟩
+  · exact ⟨i, fun k hk => (hi k hk).trans (hj k hk), hW hxy hyz⟩
   · refine ⟨j, fun k hk => (hi k (hk.trans hij)).trans (hj k hk), ?_⟩
     have := hi j hij
     simp only at this hyz ⊢
     rw [this]
     exact hyz
 
-theorem pathLex_wf [WellFoundedLT L] (A : Finset ℕ) :
-    WellFounded (pathLex ltr (A := A)) :=
-  InvImage.wf (fun x : SMono E A => fun a : A => word ltr x.1 a)
-    (Pi.Lex.wellFounded (· < ·) fun _ => degLex_wf)
-
-/-- **Contexts preserve the path-lexicographic order.** -/
-theorem pathLex_ctx {A B : Finset ℕ} {f : SMono E A → SMono E B} (hf : IsSCtx f)
-    {x y : SMono E A} (h : pathLex ltr x y) : pathLex ltr (f x) (f y) := by
+/-- **Contexts preserve the path order of a word order preserved by concatenation.** -/
+theorem pathLexBy_ctx {W : List L → List L → Prop}
+    (hW : ∀ {u w}, W u w → ∀ P Q, W (P ++ (u ++ Q)) (P ++ (w ++ Q))) {A B : Finset ℕ}
+    {f : SMono E A → SMono E B} (hf : IsSCtx f) {x y : SMono E A} (h : pathLexBy ltr W x y) :
+    pathLexBy ltr W (f x) (f y) := by
   obtain ⟨T, p, xs, hp, hin, hfe⟩ := hf
   obtain ⟨a₀, ha₀, hlt⟩ := h
   have hs₀ := hin.shuffle a₀ a₀.2
@@ -318,9 +314,31 @@ theorem pathLex_ctx {A B : Finset ℕ} {f : SMono E A → SMono E B} (hf : IsSCt
       rw [labels_subst, Multiset.mem_bind]
       rintro ⟨a, ha, hba⟩
       exact hex a (x.mem_labels.1 ha) hba
-  · show DegLex (word ltr (f x).1 (xs a₀).first) (word ltr (f y).1 (xs a₀).first)
+  · show W (word ltr (f x).1 (xs a₀).first) (word ltr (f y).1 (xs a₀).first)
     rw [hfx x a₀ a₀.2 _ (first_mem hs₀), hfx y a₀ a₀.2 _ (first_mem hs₀)]
-    exact DegLex.append hlt _ _
+    exact hW hlt _ _
+
+/-! ## The path-lexicographic order -/
+
+variable [LinearOrder L]
+
+/-- **The path-lexicographic order** on the monomials on `A`: the words of the leaves compared
+lexicographically in the order of the leaves, each degree-lexicographically. -/
+def pathLex {A : Finset ℕ} (x y : SMono E A) : Prop := pathLexBy ltr DegLex x y
+
+theorem pathLex_trans {A : Finset ℕ} {x y z : SMono E A} (h₁ : pathLex ltr x y)
+    (h₂ : pathLex ltr y z) : pathLex ltr x z :=
+  pathLexBy_trans ltr (W := DegLex) (fun h h' => DegLex.trans h h') h₁ h₂
+
+theorem pathLex_wf [WellFoundedLT L] (A : Finset ℕ) :
+    WellFounded (pathLex ltr (A := A)) :=
+  InvImage.wf (fun x : SMono E A => fun a : A => word ltr x.1 a)
+    (Pi.Lex.wellFounded (· < ·) fun _ => degLex_wf)
+
+/-- **Contexts preserve the path-lexicographic order.** -/
+theorem pathLex_ctx {A B : Finset ℕ} {f : SMono E A → SMono E B} (hf : IsSCtx f)
+    {x y : SMono E A} (h : pathLex ltr x y) : pathLex ltr (f x) (f y) :=
+  pathLexBy_ctx ltr (fun h P Q => DegLex.append h P Q) hf h
 
 /-- **The path-lexicographic order is an admissible order.** -/
 def pathLexOrder [WellFoundedLT L] : AdmOrder E where

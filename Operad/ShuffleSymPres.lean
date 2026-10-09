@@ -20,6 +20,7 @@ presentations.
 -/
 import Operad.ShuffleFreeSym
 import Operad.ShufflePresUniv
+import Mathlib.LinearAlgebra.Dimension.Constructions
 
 universe u v w
 
@@ -156,6 +157,43 @@ theorem presBasis_apply {ρ : Type*} {O : AdmOrder (SGen T)} (G : Rules R ρ O.t
     rfl
   rw [presBasis, Module.Basis.map_apply, ← key]
   exact LinearEquiv.symm_apply_apply _ _
+
+/-- **Normal monomials span** (the spanning half of Dotsenko–Khoroshkin, no resolvability needed):
+when the ideal of a set of rules lies in the shuffle ideal of the sorted relators and has finitely
+many normal monomials on the positions of a finite linear order, the symmetric operad presented by
+the relators is finite-dimensional there, of dimension at most their number. -/
+theorem finrank_le_card_irr {K : Type u} [Field K]
+    (r : ∀ n : ℕ, Set (Lin K (FreeSet T) (Fin n))) {ρ : Type*} {O : AdmOrder (SGen T)}
+    (G : Rules K ρ O.toCtxOrder) (hG : G.shuffleIdeal ≤ ShuffleOperadIdeal.span K (shuffleRel K r))
+    (A : Type) [Fintype A] [LinearOrder A] [Finite (G.rw (Finset.range (Fintype.card A))).Irr] :
+    Module.Finite K ((SymOperadIdeal.span K r).Quot A) ∧
+      Module.finrank K ((SymOperadIdeal.span K r).Quot A) ≤
+        Nat.card (G.rw (Finset.range (Fintype.card A))).Irr := by
+  set S := G.rw (Finset.range (Fintype.card A))
+  set J := ShuffleOperadIdeal.span K (shuffleRel K r)
+  have : Fintype S.Irr := Fintype.ofFinite _
+  have htop : Submodule.map (J.proj A) (Finsupp.supported K K S.Irr) = ⊤ := by
+    refine eq_top_iff.2 fun q _ => ?_
+    obtain ⟨x, rfl⟩ := J.proj_surjective A q
+    have hx : x ∈ Finsupp.supported K K S.Irr ⊔ S.ideal := by
+      rw [S.sup_eq_top]
+      trivial
+    obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.1 hx
+    refine ⟨a, ha, ?_⟩
+    rw [map_add, show J.proj A b = 0 from (Submodule.Quotient.mk_eq_zero _).2 (hG A hb), add_zero]
+  let g := J.proj A ∘ₗ (Finsupp.supported K K S.Irr).subtype
+  have hg : LinearMap.range g = ⊤ := by
+    rw [LinearMap.range_comp, Submodule.range_subtype, htop]
+  have hfin : Module.Finite K (Finsupp.supported K K S.Irr) :=
+    Module.Finite.equiv (Finsupp.supportedEquivFinsupp S.Irr).symm
+  have hQ : Module.Finite K (J.Quot A) :=
+    Module.Finite.of_surjective g (LinearMap.range_eq_top.1 hg)
+  have hle : Module.finrank K (J.Quot A) ≤ Nat.card S.Irr := by
+    have h1 := LinearMap.finrank_range_le g
+    rw [hg, finrank_top, (Finsupp.supportedEquivFinsupp S.Irr).finrank_eq,
+      Module.finrank_finsupp_self] at h1
+    rwa [Nat.card_eq_fintype_card]
+  exact ⟨Module.Finite.equiv (presEquiv K r A).symm, (presEquiv K r A).finrank_eq ▸ hle⟩
 
 end FreeSet
 
