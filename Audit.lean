@@ -1696,3 +1696,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Koszul.DGAlgebra.toPInf_twisting
 #print axioms Operad.Koszul.DGAlgebra.toPInf_gen
 #print axioms Operad.Koszul.DGAlgebra.toPInf_injective
+#print axioms Operad.KK.jacobi
+#print axioms Operad.KK.poisAlg
+#print axioms Operad.KK.wordPoisAlg
+#print axioms Operad.PoisDim.binop_mem_Tsp
+#print axioms Operad.PoisDim.killBad_comb
+#print axioms Operad.PoisDim.linearIndependent_lead
+#print axioms Operad.PoisDim.factorial_le_finrank
