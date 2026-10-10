@@ -807,6 +807,34 @@ lemma map_actOwn_seq (L : LinOrd A) (m : V A) (f : S → A) (yy : ∀ a, C (Fib 
 
 end Seq
 
+/-- **Sequential associativity of the action.** -/
+lemma map_act_seq {D : Type} [Fintype D] [DecidableEq D] (i : S) (j : Y) (y : C Y) (z : C D)
+    (x : GrComposite R V C S) :
+    map (seqEquiv i j D) (act R V (Sum.inr j) z (act R V i y x))
+      = act R V i (GrOperad.comp (R := R) j y z) x := by
+  have key : ∀ q r : Bool, map (seqEquiv i j D) (act R V (Sum.inr j) (GrOperad.par (R := R) r z)
+      (act R V i (GrOperad.par (R := R) q y) x))
+      = act R V i (GrOperad.comp (R := R) j (GrOperad.par (R := R) q y)
+          (GrOperad.par (R := R) r z)) x := fun q r => by
+    have h : (map (R := R) (M := V) (N := C) (seqEquiv i j D)).comp
+        ((act R V (Sum.inr j) (GrOperad.par (R := R) r z)).comp
+          (act R V i (GrOperad.par (R := R) q y)))
+        = act R V i (GrOperad.comp (R := R) j (GrOperad.par (R := R) q y)
+            (GrOperad.par (R := R) r z)) := hom_ext fun g => by
+      simp only [LinearMap.comp_apply, act_mk, actFun]
+      exact map_actOwn_seq _ _ _ _ i j _ _ (GrOperad.par_par_self (R := R) q y)
+        (GrOperad.par_par_self (R := R) r z)
+    exact LinearMap.congr_fun h x
+  have hy : y = GrOperad.par (R := R) false y + GrOperad.par (R := R) true y :=
+    (GrOperad.par_add (R := R) y).symm
+  have hz : z = GrOperad.par (R := R) false z + GrOperad.par (R := R) true z :=
+    (GrOperad.par_add (R := R) z).symm
+  conv_lhs => rw [hy, hz]
+  conv_rhs => rw [hy, hz]
+  simp only [← actL_apply, map_add, LinearMap.add_apply]
+  simp only [actL_apply, key]
+  abel
+
 end GrComposite
 
 end Operad
