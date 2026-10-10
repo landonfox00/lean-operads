@@ -13,6 +13,7 @@ namespace Operad
 namespace GerDim
 
 open STree PoisDim GerBV
+open Sym (insertEquiv)
 
 /-! ## Planar trees of shuffle trees -/
 
@@ -845,6 +846,669 @@ theorem uv_surjective (B : Finset ℕ) (x : Reg (TreeOfArity GerGen) ↥B) :
     show pl (sortT (plant X w)) = X
     rw [pl_sortT, pl_plant]
 
+/-! ## Operations of arity two and three -/
+
+/-- The planar corolla. -/
+abbrev cg (e : GerGen 2) : Tree GerGen := .node e (.cons .leaf (.cons .leaf .nil))
+
+/-- `g (h (-, -), -)`. -/
+abbrev tLp (g h : GerGen 2) : Tree GerGen := .node g (.cons (cg h) (.cons .leaf .nil))
+
+/-- `g (-, h (-, -))`. -/
+abbrev tRp (g h : GerGen 2) : Tree GerGen := .node g (.cons .leaf (.cons (cg h) .nil))
+
+/-- An operation with two inputs, read in the order `π`. -/
+def op2 (e : GerGen 2) (π : Equiv.Perm (Fin 2)) : Reg (TreeOfArity GerGen) (Fin 2) :=
+  (Sym.LinOrd.map π (Sym.LinOrd.std 2), ⟨TreeOfArity.toArr (cg e), by
+    show (cg e).arity = _
+    rw [Fintype.card_fin]
+    rfl⟩)
+
+/-- An operation with three inputs, read in the order `π`. -/
+def op3 (T : Tree GerGen) (hT : T.arity = 3) (π : Equiv.Perm (Fin 3)) :
+    Reg (TreeOfArity GerGen) (Fin 3) :=
+  (Sym.LinOrd.map π (Sym.LinOrd.std 3), ⟨TreeOfArity.toArr T, by
+    show T.arity = _
+    rw [Fintype.card_fin]
+    exact hT⟩)
+
+/-- The permutation `0 ↦ 1, 1 ↦ 0, 2 ↦ 2`. -/
+def c102 : Equiv.Perm (Fin 3) := ⟨![1, 0, 2], ![1, 0, 2], by decide, by decide⟩
+/-- The permutation `0 ↦ 0, 1 ↦ 2, 2 ↦ 1`. -/
+def c021 : Equiv.Perm (Fin 3) := ⟨![0, 2, 1], ![0, 2, 1], by decide, by decide⟩
+/-- The permutation `0 ↦ 2, 1 ↦ 0, 2 ↦ 1`. -/
+def c201 : Equiv.Perm (Fin 3) := ⟨![2, 0, 1], ![1, 2, 0], by decide, by decide⟩
+
+lemma std_corolla (e : GerGen 2) : Reg.std (TreeOfArity.corolla e) = op2 e 1 :=
+  Reg.ext (Sym.LinOrd.ext fun _ _ => Iff.rfl) (TreeOfArity.arr_ext rfl)
+
+lemma map_op2 (e : GerGen 2) (π τ : Equiv.Perm (Fin 2)) :
+    SetOperad.map π (op2 e τ) = op2 e (π * τ) :=
+  Reg.ext (Sym.LinOrd.ext fun _ _ => Iff.rfl) rfl
+
+lemma map_op3 (T : Tree GerGen) (hT : T.arity = 3) (π τ : Equiv.Perm (Fin 3)) :
+    SetOperad.map π (op3 T hT τ) = op3 T hT (π * τ) :=
+  Reg.ext (Sym.LinOrd.ext fun _ _ => Iff.rfl) rfl
+
+lemma s01 (g h : GerGen 2) (τ : Equiv.Perm (Fin 2)) (hτ : τ = 1 ∨ τ = Equiv.swap 0 1) :
+    SetOperad.map (insertEquiv 0 1 2) (SetOperad.comp (⟨0, by omega⟩ : Fin (0 + 1 + 1))
+      (op2 g 1) (op2 h τ)) = op3 (tLp g h) rfl (if τ = 1 then 1 else c102) := by
+  refine Reg.ext ?_ (TreeOfArity.arr_ext ?_)
+  · refine Sym.LinOrd.ext fun a b => ?_
+    rcases hτ with rfl | rfl <;>
+    fin_cases a <;> fin_cases b <;> simp [SetOperad.map, SetOperad.comp, Reg.mapR,
+      Reg.compR, op2, op3, Sym.LinOrd.compLt, insertEquiv, c102] <;> decide
+  · change (NSSetOperad.Arr.comp (TreeOfArity.toArr (cg g))
+      ((Sym.LinOrd.map 1 (Sym.LinOrd.std 2)).rank (⟨0, by omega⟩ : Fin 2))
+      (TreeOfArity.toArr (cg h))).2.1 = tLp g h
+    rw [TreeOfArity.arr_comp_tree _ _ (by
+      rw [Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]; exact Fin.is_lt _),
+      Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]
+    rfl
+
+lemma s10 (g h : GerGen 2) (τ : Equiv.Perm (Fin 2)) (hτ : τ = 1 ∨ τ = Equiv.swap 0 1) :
+    SetOperad.map (insertEquiv 1 0 2) (SetOperad.comp (⟨1, by omega⟩ : Fin (1 + 1 + 0))
+      (op2 g 1) (op2 h τ)) = op3 (tRp g h) rfl (if τ = 1 then 1 else c021) := by
+  refine Reg.ext ?_ (TreeOfArity.arr_ext ?_)
+  · refine Sym.LinOrd.ext fun a b => ?_
+    rcases hτ with rfl | rfl <;>
+    fin_cases a <;> fin_cases b <;> simp [SetOperad.map, SetOperad.comp, Reg.mapR,
+      Reg.compR, op2, op3, Sym.LinOrd.compLt, insertEquiv, c021] <;> decide
+  · change (NSSetOperad.Arr.comp (TreeOfArity.toArr (cg g))
+      ((Sym.LinOrd.map 1 (Sym.LinOrd.std 2)).rank (⟨1, by omega⟩ : Fin 2))
+      (TreeOfArity.toArr (cg h))).2.1 = tRp g h
+    rw [TreeOfArity.arr_comp_tree _ _ (by
+      rw [Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]; exact Fin.is_lt _),
+      Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]
+    rfl
+
+lemma s01_one (g h : GerGen 2) :
+    SetOperad.map (insertEquiv 0 1 2) (SetOperad.comp (⟨0, by omega⟩ : Fin (0 + 1 + 1))
+      (op2 g 1) (op2 h 1)) = op3 (tLp g h) rfl 1 := s01 g h 1 (Or.inl rfl)
+
+lemma s10_one (g h : GerGen 2) :
+    SetOperad.map (insertEquiv 1 0 2) (SetOperad.comp (⟨1, by omega⟩ : Fin (1 + 1 + 0))
+      (op2 g 1) (op2 h 1)) = op3 (tRp g h) rfl 1 := s10 g h 1 (Or.inl rfl)
+
+lemma s01_swap (g h : GerGen 2) :
+    SetOperad.map (insertEquiv 0 1 2) (SetOperad.comp (⟨0, by omega⟩ : Fin (0 + 1 + 1))
+      (op2 g 1) (op2 h (Equiv.swap 0 1))) = op3 (tLp g h) rfl c102 :=
+  (s01 g h _ (Or.inr rfl)).trans (by rw [if_neg (by decide)])
+
+lemma s10_swap (g h : GerGen 2) :
+    SetOperad.map (insertEquiv 1 0 2) (SetOperad.comp (⟨1, by omega⟩ : Fin (1 + 1 + 0))
+      (op2 g 1) (op2 h (Equiv.swap 0 1))) = op3 (tRp g h) rfl c021 :=
+  (s10 g h _ (Or.inr rfl)).trans (by rw [if_neg (by decide)])
+
+lemma s01_out (g h : GerGen 2) :
+    SetOperad.map (insertEquiv 0 1 2) (SetOperad.comp (⟨0, by omega⟩ : Fin (0 + 1 + 1))
+      (op2 g (Equiv.swap 0 1)) (op2 h 1)) = op3 (tRp g h) rfl c201 := by
+  refine Reg.ext ?_ (TreeOfArity.arr_ext ?_)
+  · refine Sym.LinOrd.ext fun a b => ?_
+    fin_cases a <;> fin_cases b <;> simp [SetOperad.map, SetOperad.comp, Reg.mapR,
+      Reg.compR, op2, op3, Sym.LinOrd.compLt, insertEquiv, c201] <;> decide
+  · change (NSSetOperad.Arr.comp (TreeOfArity.toArr (cg g))
+      ((Sym.LinOrd.map (Equiv.swap 0 1) (Sym.LinOrd.std 2)).rank (⟨0, by omega⟩ : Fin 2))
+      (TreeOfArity.toArr (cg h))).2.1 = tRp g h
+    rw [TreeOfArity.arr_comp_tree _ _ (by
+      rw [Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]; exact Fin.is_lt _),
+      Sym.LinOrd.rank_map, Sym.LinOrd.rank_std]
+    rfl
+
+/-! ### In the free graded operad -/
+
+
+lemma apar_cg (e : GerGen 2) (r : ℕ) : Tree.apar gerPar (cg e) r = false := by
+  simp only [Tree.apar, Forest.aparF, Forest.tparF, Tree.tpar]
+  split_ifs <;> rfl
+
+/-- A basis element with two inputs. -/
+noncomputable abbrev b2 (e : GerGen 2) (π : Equiv.Perm (Fin 2)) : FreeGr R gerPar (Fin 2) :=
+  Finsupp.single (op2 e π) 1
+
+/-- A basis element with three inputs. -/
+noncomputable abbrev b3 (T : Tree GerGen) (hT : T.arity = 3) (π : Equiv.Perm (Fin 3)) :
+    FreeGr R gerPar (Fin 3) :=
+  Finsupp.single (op3 T hT π) 1
+
+lemma gen_eq (e : GerGen 2) : (FreeGr.gen e : FreeGr R gerPar (Fin 2)) = b2 R e 1 := by
+  rw [FreeGr.gen, SgnLin.bas, std_corolla]
+
+lemma map_b2 (e : GerGen 2) (π τ : Equiv.Perm (Fin 2)) :
+    GrOperad.map (R := R) π (b2 R e τ) = b2 R e (π * τ) := by
+  rw [SgnLin.map_def, Lin.mapL_single, map_op2]
+
+lemma map_b3 (T : Tree GerGen) (hT : T.arity = 3) (π τ : Equiv.Perm (Fin 3)) :
+    GrOperad.map (R := R) π (b3 R T hT τ) = b3 R T hT (π * τ) := by
+  rw [SgnLin.map_def, Lin.mapL_single, map_op3]
+
+lemma nsc01_b2 (g h : GerGen 2) (π τ : Equiv.Perm (Fin 2)) :
+    GrOperad.nsc R 0 1 (b2 R g π) (b2 R h τ) = Finsupp.single (SetOperad.map (insertEquiv 0 1 2)
+      (SetOperad.comp (⟨0, by omega⟩ : Fin (0 + 1 + 1)) (op2 g π) (op2 h τ))) 1 := by
+  rw [GrOperad.nsc, SgnLin.comp_def, SgnLin.compT_single, SgnLin.map_def, Lin.mapL_single]
+  congr 1
+  show σ R (_ && Tree.apar gerPar (cg g) _) * (1 * 1) = 1
+  rw [apar_cg, Bool.and_false, σ_false, mul_one, mul_one]
+
+lemma nsc10_b2 (g h : GerGen 2) (π τ : Equiv.Perm (Fin 2)) :
+    GrOperad.nsc R 1 0 (b2 R g π) (b2 R h τ) = Finsupp.single (SetOperad.map (insertEquiv 1 0 2)
+      (SetOperad.comp (⟨1, by omega⟩ : Fin (1 + 1 + 0)) (op2 g π) (op2 h τ))) 1 := by
+  rw [GrOperad.nsc, SgnLin.comp_def, SgnLin.compT_single, SgnLin.map_def, Lin.mapL_single]
+  congr 1
+  show σ R (_ && Tree.apar gerPar (cg g) _) * (1 * 1) = 1
+  rw [apar_cg, Bool.and_false, σ_false, mul_one, mul_one]
+
+/-! ### The relations -/
+
+/-- The ideal of the Gerstenhaber operad. -/
+noncomputable abbrev JG : GrOperadIdeal R (FreeGr R gerPar) := GrOperadIdeal.span R (Ger.rel R)
+
+lemma relOf_mem {n : ℕ} (r : Ger.Rel n) :
+    Ger.relOf R (Ger.μ R) (Ger.β R) r ∈ (JG R).sub (Fin n) :=
+  GrOperadIdeal.subset_span n ⟨r, rfl⟩
+
+lemma μ_eq : Ger.μ R = b2 R .mul 1 := gen_eq R _
+lemma β_eq : Ger.β R = b2 R .br 1 := gen_eq R _
+
+lemma nsc_mem_left {a b n : ℕ} {x : FreeGr R gerPar (Fin (a + 1 + b))}
+    (hx : x ∈ (JG R).sub _) (y : FreeGr R gerPar (Fin n)) :
+    GrOperad.nsc R a b x y ∈ (JG R).sub _ :=
+  (JG R).map_mem _ ((JG R).comp_mem_left _ y hx)
+
+lemma nsc_mem_right {a b n : ℕ} (x : FreeGr R gerPar (Fin (a + 1 + b)))
+    {y : FreeGr R gerPar (Fin n)} (hy : y ∈ (JG R).sub _) :
+    GrOperad.nsc R a b x y ∈ (JG R).sub _ :=
+  (JG R).map_mem _ ((JG R).comp_mem_right _ x hy)
+
+lemma nsc_sub_right {a b n : ℕ} (x : FreeGr R gerPar (Fin (a + 1 + b)))
+    (y y' : FreeGr R gerPar (Fin n)) :
+    GrOperad.nsc R a b x (y - y') = GrOperad.nsc R a b x y - GrOperad.nsc R a b x y' := by
+  simp only [GrOperad.nsc, map_sub]
+
+lemma rel2_mem (e : GerGen 2) : b2 R e (Equiv.swap 0 1) - b2 R e 1 ∈ (JG R).sub (Fin 2) := by
+  cases e
+  · have := relOf_mem R Ger.Rel.comm
+    rwa [Ger.relOf, μ_eq, map_b2, mul_one] at this
+  · have := relOf_mem R Ger.Rel.symm
+    rwa [Ger.relOf, β_eq, map_b2, mul_one] at this
+
+lemma outer_mem (g h : GerGen 2) :
+    b3 R (tRp g h) rfl c201 - b3 R (tLp g h) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have := nsc_mem_left R (a := 0) (b := 1) (rel2_mem R g) (b2 R h 1)
+  rwa [GrOperad.nsc_sub_left, nsc01_b2, nsc01_b2, s01_out, s01_one g h] at this
+
+lemma innerL_mem (g h : GerGen 2) :
+    b3 R (tLp g h) rfl c102 - b3 R (tLp g h) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have := nsc_mem_right R (a := 0) (b := 1) (b2 R g 1) (rel2_mem R h)
+  rwa [nsc_sub_right, nsc01_b2, nsc01_b2, s01_swap g h, s01_one g h] at this
+
+lemma innerR_mem (g h : GerGen 2) :
+    b3 R (tRp g h) rfl c021 - b3 R (tRp g h) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have := nsc_mem_right R (a := 1) (b := 0) (b2 R g 1) (rel2_mem R h)
+  rwa [nsc_sub_right, nsc10_b2, nsc10_b2, s10_swap g h, s10_one g h] at this
+
+lemma swap_eq : Equiv.swap (0 : Fin 3) 1 * 1 = c102 := by decide
+
+lemma assoc_mem : b3 R (tLp .mul .mul) rfl 1 - b3 R (tRp .mul .mul) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have := relOf_mem R Ger.Rel.assoc
+  rwa [Ger.relOf, μ_eq, nsc01_b2, nsc10_b2, s01_one _ _, s10_one _ _] at this
+
+lemma leib_mem : b3 R (tRp .br .mul) rfl 1 - b3 R (tLp .mul .br) rfl 1 -
+    b3 R (tRp .mul .br) rfl c102 ∈ (JG R).sub (Fin 3) := by
+  have := relOf_mem R Ger.Rel.leibniz
+  rwa [Ger.relOf, μ_eq, β_eq, nsc01_b2, nsc10_b2, nsc10_b2, s01_one _ _,
+    s10_one _ _, s10_one _ _ , map_b3, swap_eq] at this
+
+lemma jac_mem : b3 R (tLp .br .br) rfl 1 + b3 R (tRp .br .br) rfl 1 +
+    b3 R (tRp .br .br) rfl c102 ∈ (JG R).sub (Fin 3) := by
+  have := relOf_mem R Ger.Rel.jacobi
+  rwa [Ger.relOf, β_eq, nsc01_b2, nsc10_b2, s01_one _ _,
+    s10_one _ _ , map_b3, swap_eq] at this
+
+/-! ### The certificates -/
+
+lemma pm1 : c021 * c201 = c102 := by decide
+lemma pm2 : c102 * c102 = 1 := by decide
+lemma pm3 : c201 * c102 = c021 := by decide
+lemma pm4 : c021 * c102 = c201 := by decide
+
+lemma mapJ {x : FreeGr R gerPar (Fin 3)} (π : Equiv.Perm (Fin 3)) (hx : x ∈ (JG R).sub (Fin 3)) :
+    GrOperad.map (R := R) π x ∈ (JG R).sub (Fin 3) :=
+  (JG R).map_mem π hx
+
+/-- **The Jacobi rule.** -/
+lemma cert_jac : b3 R (tLp .br .br) rfl 1 + b3 R (tLp .br .br) rfl c021 +
+    b3 R (tRp .br .br) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have h2 := mapJ R c021 (outer_mem R .br .br)
+  rw [map_sub, map_b3, map_b3, mul_one, pm1] at h2
+  convert sub_mem (jac_mem R) h2 using 1
+  abel
+
+/-- **The Leibniz rule** at the root. -/
+lemma cert_leib₁ : b3 R (tRp .br .mul) rfl 1 - b3 R (tLp .mul .br) rfl 1 -
+    b3 R (tLp .mul .br) rfl c021 ∈ (JG R).sub (Fin 3) := by
+  have h2 := mapJ R c021 (outer_mem R .mul .br)
+  rw [map_sub, map_b3, map_b3, mul_one, pm1] at h2
+  convert add_mem (leib_mem R) h2 using 1
+  abel
+
+/-- **The Leibniz rule** below, the inputs exchanged. -/
+lemma cert_leib₂ : b3 R (tLp .br .mul) rfl c021 - b3 R (tLp .mul .br) rfl 1 -
+    b3 R (tRp .mul .br) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have h1 := mapJ R c021 (outer_mem R .br .mul)
+  rw [map_sub, map_b3, map_b3, mul_one, pm1] at h1
+  have h2 := mapJ R c102 (leib_mem R)
+  rw [map_sub, map_sub, map_b3, map_b3, map_b3, mul_one, pm2] at h2
+  convert add_mem (sub_mem h2 h1) (innerL_mem R .mul .br) using 1
+  abel
+
+/-- **The Leibniz rule** below. -/
+lemma cert_leib₃ : b3 R (tLp .br .mul) rfl 1 - b3 R (tLp .mul .br) rfl c021 -
+    b3 R (tRp .mul .br) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  have h2 := mapJ R c201 (leib_mem R)
+  rw [map_sub, map_sub, map_b3, map_b3, map_b3, mul_one, pm3] at h2
+  have h3 := mapJ R c021 (innerL_mem R .mul .br)
+  rw [map_sub, map_b3, map_b3, mul_one, pm4] at h3
+  convert add_mem (add_mem (sub_mem h2 (outer_mem R .br .mul)) h3) (innerR_mem R .mul .br)
+    using 1
+  abel
+
+/-- **Associativity** at the root. -/
+lemma cert_as₁ : b3 R (tRp .mul .mul) rfl 1 - b3 R (tLp .mul .mul) rfl 1 ∈ (JG R).sub (Fin 3) := by
+  convert neg_mem (assoc_mem R) using 1
+  abel
+
+/-- **Associativity** below, the inputs exchanged. -/
+lemma cert_as₂ : b3 R (tLp .mul .mul) rfl c021 - b3 R (tLp .mul .mul) rfl 1 ∈
+    (JG R).sub (Fin 3) := by
+  have h1 := mapJ R c021 (assoc_mem R)
+  rw [map_sub, map_b3, map_b3, mul_one] at h1
+  convert sub_mem (add_mem h1 (innerR_mem R .mul .mul)) (assoc_mem R) using 1
+  abel
+
+/-! ## The monomials of arity two and three -/
+
+/-- The positions `0, 1, 2`. -/
+def e3 : Fin 3 ≃ ↥p3 where
+  toFun k := ⟨k.1, by rw [Finset.mem_range, Fintype.card_fin]; exact k.2⟩
+  invFun x := ⟨x.1, by have := x.2; rwa [Finset.mem_range, Fintype.card_fin] at this⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-- The positions `0, 1`. -/
+def e2 : Fin 2 ≃ ↥p2 where
+  toFun k := ⟨k.1, by rw [Finset.mem_range, Fintype.card_fin]; exact k.2⟩
+  invFun x := ⟨x.1, by have := x.2; rwa [Finset.mem_range, Fintype.card_fin] at this⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-- The basis element of a monomial. -/
+noncomputable def bs {A : Finset ℕ} (m : SMono PE A) : FreeGr R gerPar ↥A :=
+  Finsupp.single (uv m.1 A (okV m.valid (lset_smono m))) 1
+
+lemma pw_mL₁ (g h : PoisOp) : pw (mL₁ g h).1 = [0, 1, 2] := rfl
+lemma pw_mL₂ (g h : PoisOp) : pw (mL₂ g h).1 = [0, 2, 1] := rfl
+lemma pw_mR (g h : PoisOp) : pw (mR g h).1 = [0, 1, 2] := rfl
+
+lemma fin3_cases (x : ↥p3) : x = e3 0 ∨ x = e3 1 ∨ x = e3 2 := by
+  obtain ⟨a, ha⟩ := x
+  have : a < 3 := by rwa [Finset.mem_range, Fintype.card_fin] at ha
+  interval_cases a
+  · exact Or.inl rfl
+  · exact Or.inr (Or.inl rfl)
+  · exact Or.inr (Or.inr rfl)
+
+lemma fin2_cases (x : ↥p2) : x = e2 0 ∨ x = e2 1 := by
+  obtain ⟨a, ha⟩ := x
+  have : a < 2 := by rwa [Finset.mem_range, Fintype.card_fin] at ha
+  interval_cases a
+  · exact Or.inl rfl
+  · exact Or.inr rfl
+
+lemma uv_mL₁ (g h : PoisOp) (hh) :
+    uv (mL₁ g h).1 p3 hh = SetOperad.map e3 (op3 (tLp (gg g) (gg h)) rfl 1) := by
+  refine Reg.ext (Sym.LinOrd.ext fun x y => ?_) (TreeOfArity.arr_ext rfl)
+  change (ordOf (pw _) hh).lt x y ↔ _
+  rw [ordOf_lt, pw_mL₁]
+  rcases fin3_cases x with rfl | rfl | rfl <;> rcases fin3_cases y with rfl | rfl | rfl <;>
+    simp [e3, op3, SetOperad.map, Reg.mapR, ← Equiv.Perm.inv_def]
+
+lemma uv_mL₂ (g h : PoisOp) (hh) :
+    uv (mL₂ g h).1 p3 hh = SetOperad.map e3 (op3 (tLp (gg g) (gg h)) rfl c021) := by
+  refine Reg.ext (Sym.LinOrd.ext fun x y => ?_) (TreeOfArity.arr_ext rfl)
+  change (ordOf (pw _) hh).lt x y ↔ _
+  rw [ordOf_lt, pw_mL₂]
+  rcases fin3_cases x with rfl | rfl | rfl <;> rcases fin3_cases y with rfl | rfl | rfl <;>
+    simp [e3, op3, SetOperad.map, Reg.mapR, c021]
+
+lemma uv_mR (g h : PoisOp) (hh) :
+    uv (mR g h).1 p3 hh = SetOperad.map e3 (op3 (tRp (gg g) (gg h)) rfl 1) := by
+  refine Reg.ext (Sym.LinOrd.ext fun x y => ?_) (TreeOfArity.arr_ext rfl)
+  change (ordOf (pw _) hh).lt x y ↔ _
+  rw [ordOf_lt, pw_mR]
+  rcases fin3_cases x with rfl | rfl | rfl <;> rcases fin3_cases y with rfl | rfl | rfl <;>
+    simp [e3, op3, SetOperad.map, Reg.mapR, ← Equiv.Perm.inv_def]
+
+lemma uv_cor_one (g : PoisOp) (hh) :
+    uv (cor g 1).1 p2 hh = SetOperad.map e2 (op2 (gg g) 1) := by
+  refine Reg.ext (Sym.LinOrd.ext fun x y => ?_) (TreeOfArity.arr_ext rfl)
+  change (ordOf (pw _) hh).lt x y ↔ _
+  rw [ordOf_lt, show pw (cor g 1).1 = [0, 1] from rfl]
+  rcases fin2_cases x with rfl | rfl <;> rcases fin2_cases y with rfl | rfl <;>
+    simp [e2, op2, SetOperad.map, Reg.mapR, ← Equiv.Perm.inv_def]
+
+lemma uv_cor_swap (g : PoisOp) (hh) :
+    uv (cor g (Equiv.swap 0 1)).1 p2 hh = SetOperad.map e2 (op2 (gg g) (Equiv.swap 0 1)) := by
+  refine Reg.ext (Sym.LinOrd.ext fun x y => ?_) (TreeOfArity.arr_ext rfl)
+  change (ordOf (pw _) hh).lt x y ↔ _
+  rw [ordOf_lt, show pw (cor g (Equiv.swap 0 1)).1 = [1, 0] from rfl]
+  rcases fin2_cases x with rfl | rfl <;> rcases fin2_cases y with rfl | rfl <;>
+    simp [e2, op2, SetOperad.map, Reg.mapR]
+
+lemma bs_mL₁ (g h : PoisOp) :
+    bs R (mL₁ g h) = GrOperad.map (R := R) e3 (b3 R (tLp (gg g) (gg h)) rfl 1) := by
+  rw [bs, uv_mL₁, b3, SgnLin.map_def, Lin.mapL_single]
+
+lemma bs_mL₂ (g h : PoisOp) :
+    bs R (mL₂ g h) = GrOperad.map (R := R) e3 (b3 R (tLp (gg g) (gg h)) rfl c021) := by
+  rw [bs, uv_mL₂, b3, SgnLin.map_def, Lin.mapL_single]
+
+lemma bs_mR (g h : PoisOp) :
+    bs R (mR g h) = GrOperad.map (R := R) e3 (b3 R (tRp (gg g) (gg h)) rfl 1) := by
+  rw [bs, uv_mR, b3, SgnLin.map_def, Lin.mapL_single]
+
+lemma bs_cor_one (g : PoisOp) : bs R (cor g 1) = GrOperad.map (R := R) e2 (b2 R (gg g) 1) := by
+  rw [bs, uv_cor_one, b2, SgnLin.map_def, Lin.mapL_single]
+
+lemma bs_cor_swap (g : PoisOp) :
+    bs R (cor g (Equiv.swap 0 1)) = GrOperad.map (R := R) e2 (b2 R (gg g) (Equiv.swap 0 1)) := by
+  rw [bs, uv_cor_swap, b2, SgnLin.map_def, Lin.mapL_single]
+
+lemma mem_span_bs {A : Finset ℕ} {S : Set (SMono PE A)} {g : SMono PE A} (hg : g ∈ S) :
+    bs R g ∈ Submodule.span R (bs R '' S) :=
+  Submodule.subset_span (Set.mem_image_of_mem _ hg)
+
+/-- The monomials of the tails of the rules. -/
+def tails : ∀ r : PR, Set (SMono PE r.src)
+  | .jac => {mL₂ .bracket .bracket, mR .bracket .bracket}
+  | .leib₁ => {mL₁ .mul .bracket, mL₂ .mul .bracket}
+  | .leib₂ => {mL₁ .mul .bracket, mR .mul .bracket}
+  | .leib₃ => {mL₂ .mul .bracket, mR .mul .bracket}
+  | .as₁ => {mL₁ .mul .mul}
+  | .as₂ => {mL₁ .mul .mul}
+  | .cm => {cor .mul 1}
+  | .an => {cor .bracket 1}
+
+theorem tails_lt : ∀ r : PR, ∀ m ∈ tails r, poisOrder.lt m r.lead
+  | .jac, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl | rfl
+    · refine lt_at1 ((words_L₂ _ _).1.trans (words_L₁ _ _).1.symm) ?_
+      rw [(words_L₂ _ _).2.1, (words_L₁ _ _).2.1]
+      exact Or.inl (by decide)
+    · refine lt_at0 ?_
+      rw [(words_R _ _).1, (words_L₁ _ _).1]
+      exact Or.inl (by decide)
+  | .leib₁, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl | rfl
+    · refine lt_at0 ?_
+      rw [(words_L₁ _ _).1, (words_R _ _).1]
+      exact Or.inr ⟨by decide, Or.inl (by decide)⟩
+    · refine lt_at0 ?_
+      rw [(words_L₂ _ _).1, (words_R _ _).1]
+      exact Or.inr ⟨by decide, Or.inl (by decide)⟩
+  | .leib₂, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl | rfl
+    · refine lt_at0 ?_
+      rw [(words_L₁ _ _).1, (words_L₂ _ _).1]
+      exact Or.inr ⟨by decide, Or.inr ⟨by decide, by decide⟩⟩
+    · refine lt_at0 ?_
+      rw [(words_R _ _).1, (words_L₂ _ _).1]
+      exact Or.inl (by decide)
+  | .leib₃, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl | rfl
+    · refine lt_at0 ?_
+      rw [(words_L₂ _ _).1, (words_L₁ _ _).1]
+      exact Or.inr ⟨by decide, Or.inr ⟨by decide, by decide⟩⟩
+    · refine lt_at0 ?_
+      rw [(words_R _ _).1, (words_L₁ _ _).1]
+      exact Or.inl (by decide)
+  | .as₁, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl
+    refine lt_at0 ?_
+    rw [(words_L₁ _ _).1, (words_R _ _).1]
+    exact Or.inr ⟨by decide, Or.inl (by decide)⟩
+  | .as₂, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl
+    refine lt_at1 ((words_L₁ _ _).1.trans (words_L₂ _ _).1.symm) ?_
+    rw [(words_L₁ _ _).2.1, (words_L₂ _ _).2.1]
+    exact Or.inr ⟨by decide, Or.inl (by decide)⟩
+  | .cm, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl
+    refine ⟨⟨0, mem_p2⟩, fun j hj => absurd hj (by
+      show ¬ j.1 < 0
+      omega), ?_⟩
+    show PW (STree.word ltr (cor _ _).1 0) (STree.word ltr (cor _ _).1 0)
+    rw [word_cor, word_cor]
+    exact Or.inr ⟨by decide, Or.inr ⟨by decide, by decide⟩⟩
+  | .an, m, hm => by
+    dsimp only [PR.lead]
+    rcases hm with rfl
+    refine ⟨⟨0, mem_p2⟩, fun j hj => absurd hj (by
+      show ¬ j.1 < 0
+      omega), ?_⟩
+    show PW (STree.word ltr (cor _ _).1 0) (STree.word ltr (cor _ _).1 0)
+    rw [word_cor, word_cor]
+    exact Or.inr ⟨by decide, Or.inr ⟨by decide, by decide⟩⟩
+
+
+/-- **The rules hold in the Gerstenhaber operad**, up to a unit: each leading monomial is a unit
+multiple of a combination of its tails modulo the ideal of `Ger`. -/
+theorem cert : ∀ r : PR, ∃ ρ ∈ (JG R).sub ↥r.src, ∃ u : R, IsUnit u ∧
+    ρ - u • bs R r.lead ∈ Submodule.span R (bs R '' tails r)
+  | .jac => by
+    refine ⟨_, (JG R).map_mem e3 (cert_jac R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mL₁ R .bracket .bracket
+    have e2 := bs_mL₂ R .bracket .bracket
+    have e4 := bs_mR R .bracket .bracket
+    dsimp only [gg] at e1 e2 e4
+    have : GrOperad.map (R := R) e3 (b3 R (tLp .br .br) rfl 1 + b3 R (tLp .br .br) rfl c021 +
+        b3 R (tRp .br .br) rfl 1) - (1 : R) • bs R (mL₁ .bracket .bracket) =
+        bs R (mL₂ .bracket .bracket) + bs R (mR .bracket .bracket) := by
+      rw [e1, e2, e4, map_add, map_add, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mL₁ .bracket .bracket) ∈ _
+    rw [this]
+    exact add_mem (mem_span_bs R (Or.inl rfl))
+      (mem_span_bs R (Or.inr rfl))
+  | .leib₁ => by
+    refine ⟨_, (JG R).map_mem e3 (cert_leib₁ R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mR R .bracket .mul
+    have e2 := bs_mL₁ R .mul .bracket
+    have e4 := bs_mL₂ R .mul .bracket
+    dsimp only [gg] at e1 e2 e4
+    have : GrOperad.map (R := R) e3 (b3 R (tRp .br .mul) rfl 1 - b3 R (tLp .mul .br) rfl 1 -
+        b3 R (tLp .mul .br) rfl c021) - (1 : R) • bs R (mR .bracket .mul) =
+        -bs R (mL₁ .mul .bracket) - bs R (mL₂ .mul .bracket) := by
+      rw [e1, e2, e4, map_sub, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mR .bracket .mul) ∈ _
+    rw [this]
+    exact sub_mem (neg_mem (mem_span_bs R (Or.inl rfl)))
+      (mem_span_bs R (Or.inr rfl))
+  | .leib₂ => by
+    refine ⟨_, (JG R).map_mem e3 (cert_leib₂ R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mL₂ R .bracket .mul
+    have e2 := bs_mL₁ R .mul .bracket
+    have e4 := bs_mR R .mul .bracket
+    dsimp only [gg] at e1 e2 e4
+    have : GrOperad.map (R := R) e3 (b3 R (tLp .br .mul) rfl c021 - b3 R (tLp .mul .br) rfl 1 -
+        b3 R (tRp .mul .br) rfl 1) - (1 : R) • bs R (mL₂ .bracket .mul) =
+        -bs R (mL₁ .mul .bracket) - bs R (mR .mul .bracket) := by
+      rw [e1, e2, e4, map_sub, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mL₂ .bracket .mul) ∈ _
+    rw [this]
+    exact sub_mem (neg_mem (mem_span_bs R (Or.inl rfl)))
+      (mem_span_bs R (Or.inr rfl))
+  | .leib₃ => by
+    refine ⟨_, (JG R).map_mem e3 (cert_leib₃ R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mL₁ R .bracket .mul
+    have e2 := bs_mL₂ R .mul .bracket
+    have e4 := bs_mR R .mul .bracket
+    dsimp only [gg] at e1 e2 e4
+    have : GrOperad.map (R := R) e3 (b3 R (tLp .br .mul) rfl 1 - b3 R (tLp .mul .br) rfl c021 -
+        b3 R (tRp .mul .br) rfl 1) - (1 : R) • bs R (mL₁ .bracket .mul) =
+        -bs R (mL₂ .mul .bracket) - bs R (mR .mul .bracket) := by
+      rw [e1, e2, e4, map_sub, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mL₁ .bracket .mul) ∈ _
+    rw [this]
+    exact sub_mem (neg_mem (mem_span_bs R (Or.inl rfl)))
+      (mem_span_bs R (Or.inr rfl))
+  | .as₁ => by
+    refine ⟨_, (JG R).map_mem e3 (cert_as₁ R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mR R .mul .mul
+    have e2 := bs_mL₁ R .mul .mul
+    dsimp only [gg] at e1 e2
+    have : GrOperad.map (R := R) e3 (b3 R (tRp .mul .mul) rfl 1 - b3 R (tLp .mul .mul) rfl 1) -
+        (1 : R) • bs R (mR .mul .mul) = -bs R (mL₁ .mul .mul) := by
+      rw [e1, e2, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mR .mul .mul) ∈ _
+    rw [this]
+    exact neg_mem (mem_span_bs R (rfl))
+  | .as₂ => by
+    refine ⟨_, (JG R).map_mem e3 (cert_as₂ R), 1, isUnit_one, ?_⟩
+    have e1 := bs_mL₂ R .mul .mul
+    have e2 := bs_mL₁ R .mul .mul
+    dsimp only [gg] at e1 e2
+    have : GrOperad.map (R := R) e3 (b3 R (tLp .mul .mul) rfl c021 -
+        b3 R (tLp .mul .mul) rfl 1) - (1 : R) • bs R (mL₂ .mul .mul) = -bs R (mL₁ .mul .mul) := by
+      rw [e1, e2, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (mL₂ .mul .mul) ∈ _
+    rw [this]
+    exact neg_mem (mem_span_bs R (rfl))
+  | .cm => by
+    refine ⟨_, (JG R).map_mem e2 (rel2_mem R .mul), 1, isUnit_one, ?_⟩
+    have e1 := bs_cor_swap R .mul
+    have e4 := bs_cor_one R .mul
+    dsimp only [gg] at e1 e4
+    have : GrOperad.map (R := R) e2 (b2 R .mul (Equiv.swap 0 1) - b2 R .mul 1) -
+        (1 : R) • bs R (cor .mul (Equiv.swap 0 1)) = -bs R (cor .mul 1) := by
+      rw [e1, e4, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (cor .mul (Equiv.swap 0 1)) ∈ _
+    rw [this]
+    exact neg_mem (mem_span_bs R (rfl))
+  | .an => by
+    refine ⟨_, (JG R).map_mem e2 (rel2_mem R .br), 1, isUnit_one, ?_⟩
+    have e1 := bs_cor_swap R .bracket
+    have e4 := bs_cor_one R .bracket
+    dsimp only [gg] at e1 e4
+    have : GrOperad.map (R := R) e2 (b2 R .br (Equiv.swap 0 1) - b2 R .br 1) -
+        (1 : R) • bs R (cor .bracket (Equiv.swap 0 1)) = -bs R (cor .bracket 1) := by
+      rw [e1, e4, map_sub, one_smul]
+      abel
+    show _ - (1 : R) • bs R (cor .bracket (Equiv.swap 0 1)) ∈ _
+    rw [this]
+    exact neg_mem (mem_span_bs R (rfl))
+
+/-! ## Spanning -/
+
+section Span
+
+variable (K : Type u) [Field K]
+
+/-- **The class of a monomial** in the Gerstenhaber operad. -/
+noncomputable def vG {B : Finset ℕ} (m : SMono PE B) : GerOp K ↥B := (JG K).proj ↥B (bs K m)
+
+/-- **The normal monomials span the Gerstenhaber operad**, modulo smaller monomials: every
+monomial is a combination of normal monomials, by well-founded induction along the order. -/
+theorem vG_mem_span {B : Finset ℕ} (m : SMono PE B) :
+    vG K m ∈ Submodule.span K (Set.range fun n : ((rules K).rw B).Irr => vG K n.1) := by
+  induction m using (poisOrder.wf B).induction with
+  | h m ih =>
+  set W := Submodule.span K (Set.range fun n : ((rules K).rw B).Irr => vG K n.1)
+  by_cases hm : (rules K).Normal m
+  · exact Submodule.subset_span ⟨⟨m, (rules K).mem_irr_iff.2 hm⟩, rfl⟩
+  · simp only [Rules.Normal, not_forall, not_not] at hm
+    obtain ⟨r, f, hf, rfl⟩ := hm
+    obtain ⟨F, ⟨L, hL1, hL2⟩, hF⟩ := uv_ctx K (A := r.src) (f := f) hf (PR.lead r)
+    obtain ⟨ρ, hρ, u, hu, hv⟩ := cert K r
+    have hL : ∀ g : SMono PE r.src, ∃ c : K, IsUnit c ∧ L (bs K g) = c • bs K (f g) := fun g => by
+      obtain ⟨c, hc, h⟩ := hL2 (uv g.1 _ (okV g.valid (lset_smono g)))
+      refine ⟨c, hc, ?_⟩
+      rw [bs, h, ← hF g (okV g.valid (lset_smono g)) (okV (f g).valid (lset_smono (f g))), bs]
+      exact (Finsupp.smul_single_one _ _).symm
+    have hW : ∀ x ∈ Submodule.span K (bs K '' tails r), (JG K).proj ↥B (L x) ∈ W := by
+      intro x hx
+      induction hx using Submodule.span_induction with
+      | mem x hx =>
+        obtain ⟨g, hg, rfl⟩ := hx
+        obtain ⟨c, -, h⟩ := hL g
+        rw [h, map_smul]
+        exact Submodule.smul_mem _ _ (ih (f g) (poisOrder.lt_ctx hf (tails_lt r g hg)))
+      | zero => rw [map_zero, map_zero]; exact W.zero_mem
+      | add x y _ _ hx hy => rw [map_add, map_add]; exact W.add_mem hx hy
+      | smul a x _ hx => rw [map_smul, map_smul]; exact W.smul_mem a hx
+    obtain ⟨c, hc, h0⟩ := hL (PR.lead r)
+    have h1 : (JG K).proj ↥B (L ρ) = 0 :=
+      ((JG K).proj_eq_zero_iff _).2 (hL1 _ ρ hρ)
+    have h2 : (JG K).proj ↥B (L ρ) = (u * c) • vG K (f (PR.lead r)) +
+        (JG K).proj ↥B (L (ρ - u • bs K (PR.lead r))) := by
+      rw [map_sub, map_sub, map_smul, h0, smul_smul, vG, map_smul]
+      abel
+    rw [h1, eq_comm, ← eq_neg_iff_add_eq_zero] at h2
+    have h3 : (u * c) • vG K (f (PR.lead r)) ∈ W := by
+      rw [h2]
+      exact W.neg_mem (hW _ hv)
+    exact (Submodule.smul_mem_iff W (hu.mul hc).ne_zero).1 h3
+
+/-- **The normal monomials span the Gerstenhaber operad.** -/
+theorem span_vG (B : Finset ℕ) :
+    Submodule.span K (Set.range fun n : ((rules K).rw B).Irr => vG K n.1) = ⊤ := by
+  set W := Submodule.span K (Set.range fun n : ((rules K).rw B).Irr => vG K n.1)
+  have key : ∀ x : FreeGr K gerPar ↥B, x ∈ W.comap ((JG K).proj ↥B) := fun x => by
+    induction x using Finsupp.induction_linear with
+    | zero => exact Submodule.zero_mem _
+    | add x y hx hy => exact Submodule.add_mem _ hx hy
+    | single s a =>
+      obtain ⟨m, hm⟩ := uv_surjective B s
+      have : (Finsupp.single s a : FreeGr K gerPar ↥B) = a • bs K m := by
+        rw [bs, hm]
+        exact (Finsupp.smul_single_one _ _).symm
+      rw [this]
+      exact Submodule.smul_mem _ _ (vG_mem_span K m)
+  refine eq_top_iff.2 fun q _ => ?_
+  obtain ⟨x, rfl⟩ := (JG K).proj_surjective ↥B q
+  exact key x
+
+/-- **The Gerstenhaber operad has at most `n!` operations of arity `n`.** -/
+theorem finite_finrank_le (n : ℕ) :
+    Module.Finite K (GerOp K ↥(Finset.range n)) ∧
+      Module.finrank K (GerOp K ↥(Finset.range n)) ≤ n.factorial := by
+  classical
+  obtain ⟨hfin, hcard⟩ := card_irr_le (K := K) n
+  have := Fintype.ofFinite ((rules K).rw (Finset.range n)).Irr
+  have htop := span_vG K (Finset.range n)
+  refine ⟨⟨⟨Finset.univ.image fun n' : ((rules K).rw (Finset.range n)).Irr => vG K n'.1, ?_⟩⟩, ?_⟩
+  · rw [Finset.coe_image, Finset.coe_univ, Set.image_univ, htop]
+  · have h := finrank_range_le_card (R := K)
+      (fun n' : ((rules K).rw (Finset.range n)).Irr => vG K n'.1)
+    rw [Set.finrank, htop, finrank_top, ← Nat.card_eq_fintype_card] at h
+    exact h.trans hcard
+
+end Span
+
 end GerDim
 
 end Operad
+
