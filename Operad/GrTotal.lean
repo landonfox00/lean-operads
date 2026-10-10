@@ -859,6 +859,47 @@ lemma totalGen_act (L : LinOrd A) (m : M A) (f : S → A) (yy : ∀ a, P (Fib f 
   refine gmap_congr ?_ _
   rintro ⟨a, b, ⟨u, hu⟩ | ⟨y, hy⟩⟩ <;> rfl
 
+/-- **Total composition after the right action** of a homogeneous operation, on generators given
+by owners with homogeneous inner operations. -/
+lemma total_act_ownGen (L : LinOrd A) (m : M A) (f : S → A) (yy : ∀ a, P (Fib f a))
+    (c : A → Bool) (hyy : ∀ a, GrOperad.par (R := R) (c a) (yy a) = yy a) (i : S) {q : Bool}
+    (z : P Y) (hz : GrOperad.par (R := R) q z = z) :
+    total R F (act R M i z (mk R (ownGen L m f yy)))
+      = GrOperad.comp (R := R) i (total R F (mk R (ownGen L m f yy))) z := by
+  rw [act_mk_ownGen, actOwn_hom L m f yy i z hz, total_mk, total_mk,
+    totalFun_eq_single F _ (update c (f i) (xor (c (f i)) q)) (actY_par L f yy i z q hz c hyy),
+    totalFun_eq_single F _ c hyy, map_sum, LinearMap.sum_apply]
+  exact Finset.sum_congr rfl fun p _ => totalGen_act F L m f yy c hyy i z hz p
+
+variable (R M) in
+/-- **Total composition is a morphism of right modules**: composing after acting at `i` is
+composing at `i`. -/
+theorem total_act (i : S) (z : P Y) (ω : GrComposite R M P S) :
+    total R F (act R M i z ω) = GrOperad.comp (R := R) i (total R F ω) z := by
+  have hq : ∀ q : Bool, ∀ ω : GrComposite R M P S,
+      total R F (act R M i (GrOperad.par (R := R) q z) ω)
+        = GrOperad.comp (R := R) i (total R F ω) (GrOperad.par (R := R) q z) := by
+    intro q ω
+    induction ω using induction_on with
+    | h0 => simp only [map_zero, LinearMap.zero_apply]
+    | hadd x y hx hy => simp only [map_add, LinearMap.add_apply, hx, hy]
+    | hsmul r x hx => simp only [map_smul, LinearMap.smul_apply, hx]
+    | hmk g =>
+      rw [mk_eq_sum (R := R) g]
+      simp only [map_sum, LinearMap.sum_apply]
+      refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun c _ => ?_
+      rw [mk_eq_ownGen (R := R) (parGen (R := R) g p c)]
+      exact total_act_ownGen F _ _ _ _ c (fun a => by
+        show GrOperad.par (R := R) (c a) (GrOperad.map (R := R) _ (GrSpecies.par (R := R) (c a)
+          (g.y a))) = _
+        rw [← GrOperad.map_par]
+        exact congrArg _ (GrOperad.par_par_self (R := R) (c a) (g.y a))) i _
+        (GrOperad.par_par_self (R := R) q z)
+  have hz : z = GrOperad.par (R := R) false z + GrOperad.par (R := R) true z :=
+    (GrOperad.par_add (R := R) z).symm
+  rw [hz, ← actL_apply, map_add, LinearMap.add_apply, map_add, actL_apply, actL_apply, hq, hq,
+    map_add]
+
 end Act
 
 end GrComposite
