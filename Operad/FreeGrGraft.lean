@@ -96,6 +96,124 @@ theorem unitCoeffL_graft (ω : GrComposite R W (FreeGrL R W) S) :
     unitCoeffL R W S (graft R W S ω) = 0 :=
   (root_graft_and ω).2
 
+/-! ## Grafting the root decomposition -/
+
+lemma comp_unitL {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+    (y : FreeGrL R W B) :
+    GrOperad.comp (R := R) i (unitL R W A) y
+      = ∑ e : Unit ≃ A, GrOperad.map (R := R) (unitEquiv e i B).symm y := by
+  rw [unitL, map_sum, LinearMap.sum_apply]
+  refine Finset.sum_congr rfl fun e _ => ?_
+  have hi : e () = i := by rw [← e.apply_symm_apply i]
+  have h1 := GrOperad.one_comp (R := R) (P := FreeGrL R W) y
+  rw [GrOperad.comp_map_left e () i hi, show GrOperad.comp (R := R) () (GrOperad.one (R := R)) y
+      = GrOperad.map (R := R) (leftUnitEquiv B).symm y by
+        conv_rhs => rw [← h1]
+        rw [← GrOperad.map_trans, Equiv.self_trans_symm, GrOperad.map_refl],
+    ← GrOperad.map_trans]
+  refine gmap_congr ?_ y
+  intro b
+  rfl
+
+/-- **Grafting the root decomposition of a composite**, for factors whose root decompositions
+graft back. -/
+lemma graft_root_comp {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (i : A) {x : FreeGrL R W A} {y : FreeGrL R W B}
+    (hx : graft R W A (root R W A x) = secC R W A x)
+    (hy : graft R W B (root R W B y) = secC R W B y) :
+    graft R W _ (root R W _ (GrOperad.comp (R := R) i x y))
+      = secC R W _ (GrOperad.comp (R := R) i x y) := by
+  rw [root_comp, map_add, graft_act, hx, secC_apply, map_sub, map_smul, LinearMap.sub_apply,
+    LinearMap.smul_apply, comp_unitL, secC_apply, unitCoeffL_comp]
+  by_cases hA : Nonempty (Unit ≃ A)
+  · obtain ⟨e⟩ := hA
+    haveI : Subsingleton (Unit ≃ A) := ⟨fun e₁ e₂ => Equiv.ext fun u => by
+      rw [← e.apply_symm_apply (e₁ u), ← e.apply_symm_apply (e₂ u)]⟩
+    rw [lact_eq (aug R W) i x e, map_smul, graft_map, hy, secC_apply, Fintype.sum_subsingleton _ e,
+      map_sub, map_smul, map_unitL, aug_u, smul_sub, smul_smul, mul_comm]
+    abel
+  · have hu : unitCoeffL R W A x = 0 := unitCoeffL_eq_zero (not_nonempty_iff.1 hA) x
+    rw [lact_of_u (aug R W) i (by rw [aug_u, hu]), LinearMap.zero_apply, map_zero, add_zero, hu,
+      zero_smul, sub_zero, zero_mul, zero_smul, sub_zero]
+
+lemma par_comp_eq_sum {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (b : Bool) (i : A) (x : FreeGrL R W A) (y : FreeGrL R W B) :
+    GrOperad.par (R := R) b (GrOperad.comp (R := R) i x y)
+      = ∑ p : Bool, ∑ q : Bool, if xor p q = b then GrOperad.comp (R := R) i
+          (GrOperad.par (R := R) p x) (GrOperad.par (R := R) q y) else 0 := by
+  conv_lhs => rw [← GrOperad.par_add (R := R) x, ← GrOperad.par_add (R := R) y]
+  simp only [map_add, LinearMap.add_apply, Fintype.sum_bool]
+  have h : ∀ p q : Bool, GrOperad.par (R := R) b (GrOperad.comp (R := R) i
+      (GrOperad.par (R := R) p x) (GrOperad.par (R := R) q y))
+      = if xor p q = b then GrOperad.comp (R := R) i (GrOperad.par (R := R) p x)
+          (GrOperad.par (R := R) q y) else 0 := fun p q => by
+    rw [← GrOperad.comp_par i p q x y, GrOperad.par_par]
+    by_cases h : xor p q = b
+    · rw [if_pos h.symm, if_pos h, GrOperad.comp_par]
+    · rw [if_neg (Ne.symm h), if_neg h]
+  simp only [h]
+  abel
+
+variable (R W) in
+/-- The operations whose homogeneous parts are grafted back from their root decompositions. -/
+noncomputable def graftSub : GrSuboperad R (FreeGrL R W) where
+  sub A _ _ := ⨅ b : Bool, (LinearMap.ker ((graft R W A).comp (root R W A) - secC R W A)).comap
+    (GrOperad.par (R := R) b)
+  par_mem := by
+    intro A _ _ b x hx
+    simp only [Submodule.mem_iInf, Submodule.mem_comap] at hx ⊢
+    intro b'
+    rw [GrOperad.par_par]
+    split_ifs
+    · exact hx b
+    · exact zero_mem _
+  map_mem := by
+    intro A B _ _ _ _ e x hx
+    simp only [Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker, LinearMap.sub_apply,
+      LinearMap.comp_apply, sub_eq_zero] at hx ⊢
+    intro b
+    rw [← GrOperad.map_par, root_map, graft_map, hx b, secC_map]
+  one_mem := by
+    simp only [Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker, LinearMap.sub_apply,
+      LinearMap.comp_apply, sub_eq_zero]
+    intro b
+    cases b
+    · rw [GrOperad.par_one, root_one, map_zero, ← GrOperad.map_refl (R := R)
+        (GrOperad.one (R := R) (P := FreeGrL R W)), secC_unit]
+    · rw [← GrOperad.par_one (R := R) (P := FreeGrL R W), GrOperad.par_par, if_neg (by decide),
+        map_zero, map_zero, map_zero]
+  comp_mem := by
+    intro A B _ _ _ _ i x y hx hy
+    simp only [Submodule.mem_iInf, Submodule.mem_comap] at hx hy ⊢
+    intro b
+    rw [par_comp_eq_sum]
+    refine Submodule.sum_mem _ fun p _ => Submodule.sum_mem _ fun q _ => ?_
+    split_ifs
+    · have hx' := hx p
+      have hy' := hy q
+      simp only [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.comp_apply, sub_eq_zero]
+        at hx' hy' ⊢
+      exact graft_root_comp i hx' hy'
+    · exact zero_mem _
+
+/-- **`G ∘ ρ = 1 - ε`**: grafting the root decomposition of an operation gives it back, without its
+unit component. -/
+theorem graft_root {A : Type} [Fintype A] [DecidableEq A] (x : FreeGrL R W A) :
+    graft R W A (root R W A x) = secC R W A x := by
+  have hx := FreeGr.mem_of_presGen (graftSub R W) (fun k e => by
+    obtain ⟨⟨v, b⟩, hv⟩ := e
+    rw [← ι_app_hom hv]
+    simp only [graftSub, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker,
+      LinearMap.sub_apply, LinearMap.comp_apply, sub_eq_zero]
+    intro b'
+    rw [show GrOperad.par (R := R) b' ((ι R W).app (Fin k) v)
+        = (ι R W).app (Fin k) (GrSpecies.par (R := R) b' v) from ((ι R W).app_par b' v).symm,
+      root_ι, graft_corolla,
+      secC_of_unitCoeff (unitCoeffL_ι _)]) x
+  simp only [graftSub, Submodule.mem_iInf, Submodule.mem_comap, LinearMap.mem_ker,
+    LinearMap.sub_apply, LinearMap.comp_apply, sub_eq_zero] at hx
+  rw [← GrOperad.par_add (R := R) x, map_add, map_add, map_add, hx false, hx true]
+
 end FreeGrL
 
 end Operad
