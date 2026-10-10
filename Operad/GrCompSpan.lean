@@ -156,7 +156,7 @@ variable (Pr : ∀ (S : Type) [Fintype S] [DecidableEq S], GrComposite R V C S �
     (z : C Y) (x : GrComposite R V C S), Pr S x → Pr (Without S i ⊕ Y) (act R V i z x))
   (hcor : ∀ (A : Type) [Fintype A] [DecidableEq A] (w : V A), Pr A (corolla R C A w))
 
-include hsmul hmap hcor in
+include hmap hcor in
 /-- A generator with units at every input is a relabelled corolla. -/
 lemma induction_units {S A : Type} [Fintype S] [DecidableEq S] [Fintype A] [DecidableEq A]
     (L : LinOrd A) (w : V A) (f : S → A) (yy : ∀ a, C (Fib f a)) (e : ∀ a, Unit ≃ Fib f a)
@@ -177,7 +177,7 @@ lemma induction_units {S A : Type} [Fintype S] [DecidableEq S] [Fintype A] [Deci
     show t = (e a ((e a).symm ⟨t, ht⟩)).1
     rw [Equiv.apply_symm_apply]
 
-include h0 hadd hsmul hmap hact hcor in
+include hsmul hmap hact hcor in
 /-- **Induction on the positions holding operations other than units.** -/
 lemma induction_finset {A : Type} [Fintype A] [DecidableEq A] (L : LinOrd A) (w : V A)
     (F : Finset A) : ∀ (S : Type) [Fintype S] [DecidableEq S] (f : S → A)
@@ -188,7 +188,7 @@ lemma induction_finset {A : Type} [Fintype A] [DecidableEq A] (L : LinOrd A) (w 
   | empty =>
     intro S _ _ f yy c _ hu
     choose e he using fun a => hu a (Finset.notMem_empty a)
-    exact induction_units Pr hsmul hmap hcor L w f yy e he
+    exact induction_units Pr hmap hcor L w f yy e he
   | insert a₀ F ha₀ ih =>
     intro S _ _ f yy c hyy hu
     have h1 := ih (Ext f a₀) (extOwner f a₀) (extY (R := R) f yy a₀) (update c a₀ false)
@@ -223,7 +223,7 @@ theorem induction_act {S : Type} [Fintype S] [DecidableEq S] (x : GrComposite R 
     refine Finset.sum_induction _ (Pr S) (hadd S) (h0 S) fun p _ => ?_
     refine Finset.sum_induction _ (Pr S) (hadd S) (h0 S) fun c _ => ?_
     rw [mk_eq_ownGen (R := R) (parGen (R := R) g p c)]
-    refine induction_finset Pr h0 hadd hsmul hmap hact hcor _ _ Finset.univ S _ _ c (fun a => ?_)
+    refine induction_finset Pr hsmul hmap hact hcor _ _ Finset.univ S _ _ c (fun a => ?_)
       (fun a ha => absurd (Finset.mem_univ a) ha)
     show GrOperad.par (R := R) (c a) (GrOperad.map (R := R) _ (GrSpecies.par (R := R) (c a)
       (g.y a))) = _
