@@ -214,3 +214,4 @@ import Operad.AlgValues
 import Operad.BVModel
 import Operad.SymSuboperad
 import Operad.HyperComDim
+import Operad.GrComposite
