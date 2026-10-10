@@ -310,6 +310,219 @@ lemma total_op_reorder {x x' : SgnOp R P A} (hop : x.op = x'.op) (haft : x.dat.a
     SgnData.sigma_rL R _ _ _ _ (Finset.nodup_toList _), Finset.toList_toFinset]
   rfl
 
+/-! ### Corollas -/
+
+/-- The sign data of a corolla: an order of the inputs, no parity after them. -/
+def corData (L : LinOrd A) (p : Bool) : SgnData A := ⟨L, fun _ => false, p⟩
+
+/-- **The part of parity `p` of an operation, with the sign data of a corolla.** -/
+noncomputable def cor (L : LinOrd A) (p : Bool) (x : P A) : SgnOp R P A :=
+  mk (GrOperad.par (R := R) p x) (corData L p) (GrOperad.par_par_self (R := R) p x)
+
+@[simp] lemma cor_op (L : LinOrd A) (p : Bool) (x : P A) :
+    (cor (R := R) L p x).op = GrOperad.par (R := R) p x := rfl
+
+@[simp] lemma cor_dat (L : LinOrd A) (p : Bool) (x : P A) : (cor (R := R) L p x).dat = corData L p :=
+  rfl
+
+lemma total_cor_lin (L : LinOrd A) (p : Bool) (c₁ c₂ : R) (x₁ x₂ : P A)
+    (y : (a : A) → SgnOp R P (B a)) :
+    (SetOperad.total (cor L p (c₁ • x₁ + c₂ • x₂)) y).op
+      = c₁ • (SetOperad.total (cor L p x₁) y).op + c₂ • (SetOperad.total (cor L p x₂) y).op :=
+  total_op_lin (x := cor L p (c₁ • x₁ + c₂ • x₂)) (x₁ := cor L p x₁) (x₂ := cor L p x₂) c₁ c₂ rfl
+    rfl (by simp only [cor_op, map_add, map_smul]) y
+
+lemma total_cor_update (x : SgnOp R P A) (L : ∀ a, LinOrd (B a)) (c : A → Bool)
+    (y : (a : A) → P (B a)) (a : A) (c₁ c₂ : R) (v₁ v₂ : P (B a)) :
+    (SetOperad.total x fun b => cor (L b) (c b) (update y a (c₁ • v₁ + c₂ • v₂) b)).op
+      = c₁ • (SetOperad.total x fun b => cor (L b) (c b) (update y a v₁ b)).op
+        + c₂ • (SetOperad.total x fun b => cor (L b) (c b) (update y a v₂ b)).op := by
+  have e : ∀ v : P (B a), (fun b => cor (L b) (c b) (update y a v b))
+      = update (fun b => cor (R := R) (L b) (c b) (y b)) a (cor (L a) (c a) v) := fun v =>
+    funext fun b => apply_update (fun b => cor (R := R) (L b) (c b)) y a v b
+  rw [e, e, e]
+  exact total_op_update x _ a c₁ c₂ rfl rfl (by simp only [cor_op, map_add, map_smul])
+
+lemma total_cor_eq_zero (x : SgnOp R P A) (L : ∀ a, LinOrd (B a)) (c : A → Bool)
+    (y : (a : A) → P (B a)) {a : A} (h : GrOperad.par (R := R) (c a) (y a) = 0) :
+    (SetOperad.total x fun b => cor (L b) (c b) (y b)).op = 0 := by
+  have e : (fun b => cor (R := R) (L b) (c b) (y b))
+      = update (fun b => cor (R := R) (L b) (c b) (y b)) a (cor (L a) (c a) (y a)) :=
+    (update_eq_self a _).symm
+  rw [e, total_op_update x _ a (0 : R) 0 (v₁ := cor (L a) (c a) (y a))
+    (v₂ := cor (L a) (c a) (y a)) rfl rfl (by simp only [cor_op, h, smul_zero, add_zero])]
+  simp only [zero_smul, add_zero]
+
+lemma total_cor_add (L : LinOrd A) (p : Bool) (x₁ x₂ : P A) (y : (a : A) → SgnOp R P (B a)) :
+    (SetOperad.total (cor L p (x₁ + x₂)) y).op
+      = (SetOperad.total (cor L p x₁) y).op + (SetOperad.total (cor L p x₂) y).op := by
+  have h := total_cor_lin L p 1 1 x₁ x₂ y
+  simp only [one_smul] at h
+  exact h
+
+lemma total_cor_smul (L : LinOrd A) (p : Bool) (c : R) (x : P A)
+    (y : (a : A) → SgnOp R P (B a)) :
+    (SetOperad.total (cor L p (c • x)) y).op = c • (SetOperad.total (cor L p x) y).op := by
+  have h := total_cor_lin L p c 0 x x y
+  simp only [zero_smul, add_zero] at h
+  exact h
+
+lemma total_cor_update_add (x : SgnOp R P A) (L : ∀ a, LinOrd (B a)) (c : A → Bool)
+    (y : (a : A) → P (B a)) (a : A) (v₁ v₂ : P (B a)) :
+    (SetOperad.total x fun b => cor (L b) (c b) (update y a (v₁ + v₂) b)).op
+      = (SetOperad.total x fun b => cor (L b) (c b) (update y a v₁ b)).op
+        + (SetOperad.total x fun b => cor (L b) (c b) (update y a v₂ b)).op := by
+  have h := total_cor_update x L c y a 1 1 v₁ v₂
+  simp only [one_smul] at h
+  exact h
+
+lemma total_cor_update_smul (x : SgnOp R P A) (L : ∀ a, LinOrd (B a)) (c : A → Bool)
+    (y : (a : A) → P (B a)) (a : A) (r : R) (v : P (B a)) :
+    (SetOperad.total x fun b => cor (L b) (c b) (update y a (r • v) b)).op
+      = r • (SetOperad.total x fun b => cor (L b) (c b) (update y a v b)).op := by
+  have h := total_cor_update x L c y a r 0 v v
+  simp only [zero_smul, add_zero] at h
+  exact h
+
 end SgnOp
+
+/-! ## Total composition on graded composites -/
+
+namespace GrComposite
+
+variable {R : Type u} [CommRing R]
+  {M : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (M A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (M A)] [GrSpecies R M]
+  {P : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] [GrOperad R P]
+  (F : SymSpeciesHom R M P) {S : Type} [Fintype S] [DecidableEq S]
+
+open SgnOp
+
+
+/-- The part of a generator with outer parity `p` and inner parities `c`, totally composed after
+mapping the outer operation along `F`. -/
+noncomputable def totalGen (g : GrCompGen M P S) (p : Bool) (c : g.A → Bool) : P S :=
+  GrOperad.map (R := R) g.e (SetOperad.total (cor (R := R) g.L p (F.app g.A g.m))
+    fun a => cor (R := R) (ordOf (g.B a)) (c a) (g.y a)).op
+
+/-- **The total composite of a generator.** -/
+noncomputable def totalFun (g : GrCompGen M P S) : P S :=
+  ∑ p : Bool, ∑ c : g.A → Bool, totalGen F g p c
+
+lemma totalGen_add_m (g : GrCompGen M P S) (m' : M g.A) (p : Bool) (c : g.A → Bool) :
+    totalGen F { g with m := g.m + m' } p c = totalGen F g p c + totalGen F { g with m := m' } p c
+    := by
+  simp only [totalGen, map_add, total_cor_add]
+
+lemma totalGen_smul_m (g : GrCompGen M P S) (r : R) (p : Bool) (c : g.A → Bool) :
+    totalGen F { g with m := r • g.m } p c = r • totalGen F g p c := by
+  simp only [totalGen, map_smul, total_cor_smul]
+
+lemma totalGen_add_y (g : GrCompGen M P S) (a : g.A) (z z' : P (g.B a)) (p : Bool)
+    (c : g.A → Bool) :
+    totalGen F { g with y := update g.y a (z + z') } p c
+      = totalGen F { g with y := update g.y a z } p c
+        + totalGen F { g with y := update g.y a z' } p c := by
+  simp only [totalGen]
+  rw [total_cor_update_add, map_add]
+
+lemma totalGen_smul_y (g : GrCompGen M P S) (a : g.A) (r : R) (z : P (g.B a)) (p : Bool)
+    (c : g.A → Bool) :
+    totalGen F { g with y := update g.y a (r • z) } p c
+      = r • totalGen F { g with y := update g.y a z } p c := by
+  simp only [totalGen]
+  rw [total_cor_update_smul, map_smul]
+
+lemma cor_map {A A' : Type} [Fintype A] [DecidableEq A] [Fintype A'] [DecidableEq A']
+    (σ : A ≃ A') (L : LinOrd A') (p : Bool) (x : P A) :
+    cor (R := R) L p (GrOperad.map (R := R) σ x)
+      = SetOperad.map σ (cor (R := R) (LinOrd.map σ.symm L) p x) :=
+  SgnOp.ext (GrOperad.map_par (R := R) σ p x).symm
+    (SgnData.ext (LinOrd.ext fun a b => by simp [corData]) rfl rfl)
+
+lemma totalGen_outer (g : GrCompGen M P S) {A : Type} [Fintype A] [DecidableEq A] (σ : A ≃ g.A)
+    (m : M A) (p : Bool) (c : g.A → Bool) :
+    totalGen F { g with m := SymSpecies.map (R := R) σ m } p c
+      = totalGen F ⟨A, fun a => g.B (σ a), LinOrd.map σ.symm g.L, m, fun a => g.y (σ a),
+          (Equiv.sigmaCongrLeft σ).trans g.e⟩ p (c ∘ σ) := by
+  simp only [totalGen]
+  rw [F.app_map, show SymSpecies.map (R := R) σ (F.app A m) = GrOperad.map (R := R) σ (F.app A m)
+    from rfl, cor_map, ← SetOperad.total_map σ (fun a => Equiv.refl _) _
+      (fun a => cor (R := R) (ordOf (g.B (σ a))) (c (σ a)) (g.y (σ a))) _
+      (fun a => (SetOperad.map_refl _).symm), map_op, ← GrOperad.map_trans]
+  refine gmap_congr (fun _ => rfl) _
+
+lemma totalGen_inner (g : GrCompGen M P S) {B : g.A → Type} [∀ a, Fintype (B a)]
+    [∀ a, DecidableEq (B a)] (τ : ∀ a, g.B a ≃ B a) (p : Bool) (c : g.A → Bool) :
+    totalGen F ⟨g.A, B, g.L, g.m, fun a => SymSpecies.map (R := R) (τ a) (g.y a),
+        (Equiv.sigmaCongrRight τ).symm.trans g.e⟩ p c = totalGen F g p c := by
+  simp only [totalGen]
+  have h := SetOperad.total_map (Equiv.refl g.A) τ (cor (R := R) g.L p (F.app g.A g.m))
+    (fun a => cor (R := R) (ordOf (g.B a)) (c a) (g.y a))
+    (fun a => SetOperad.map (τ a) (cor (R := R) (ordOf (g.B a)) (c a) (g.y a))) fun _ => rfl
+  rw [SetOperad.map_refl] at h
+  rw [total_op_congr _ (y := fun a => cor (R := R) (ordOf (B a)) (c a)
+      (SymSpecies.map (R := R) (τ a) (g.y a)))
+      (y' := fun a => SetOperad.map (τ a) (cor (R := R) (ordOf (g.B a)) (c a) (g.y a)))
+      (fun a => (GrOperad.map_par (R := R) (τ a) (c a) (g.y a)).symm) (fun a => rfl),
+    ← h, map_op, ← GrOperad.map_trans]
+  refine gmap_congr (fun x => ?_) _
+  obtain ⟨a, b⟩ := x
+  show g.e ((Equiv.sigmaCongrRight τ).symm ⟨a, τ a b⟩) = g.e ⟨a, b⟩
+  rw [show (Equiv.sigmaCongrRight τ).symm ⟨a, τ a b⟩ = ⟨a, b⟩ from by
+    rw [Equiv.symm_apply_eq]
+    rfl]
+
+lemma totalFun_eq_single (g : GrCompGen M P S) (c₀ : g.A → Bool)
+    (hy : ∀ a, GrSpecies.par (R := R) (c₀ a) (g.y a) = g.y a) :
+    totalFun F g = ∑ p : Bool, totalGen F g p c₀ := by
+  refine Finset.sum_congr rfl fun p _ => Finset.sum_eq_single c₀ (fun c _ hc => ?_) (by simp)
+  obtain ⟨a, ha⟩ : ∃ a, c a ≠ c₀ a := by
+    by_contra h
+    exact hc (funext fun a => by_contra fun h' => h ⟨a, h'⟩)
+  simp only [totalGen]
+  rw [total_cor_eq_zero _ _ _ _ (a := a) (by
+    rw [← hy a]
+    exact (GrOperad.par_par (R := R) _ _ _).trans (if_neg ha)), map_zero]
+
+lemma totalFun_reorder (g : GrCompGen M P S) (L' : LinOrd g.A) (c₀ : g.A → Bool)
+    (hy : ∀ a, GrSpecies.par (R := R) (c₀ a) (g.y a) = g.y a) :
+    totalFun F g = GrEnd.rsg R g.L L' c₀ • totalFun F { g with L := L' } := by
+  rw [totalFun_eq_single F g c₀ hy, totalFun_eq_single F { g with L := L' } c₀ hy,
+    Finset.smul_sum]
+  refine Finset.sum_congr rfl fun p _ => ?_
+  simp only [totalGen]
+  rw [total_op_reorder (x := cor (R := R) g.L p (F.app g.A g.m))
+    (x' := cor (R := R) L' p (F.app g.A g.m)) rfl rfl, map_smul]
+  rfl
+
+lemma totalFun_respects : GrCompGen.Respects R (totalFun F (S := S)) where
+  add_m g m' := by
+    simp only [totalFun, totalGen_add_m, Finset.sum_add_distrib]
+  smul_m g r := by
+    simp only [totalFun, totalGen_smul_m, Finset.smul_sum]
+  add_y g a z z' := by
+    simp only [totalFun, totalGen_add_y, Finset.sum_add_distrib]
+  smul_y g a r z := by
+    simp only [totalFun, totalGen_smul_y, Finset.smul_sum]
+  outer g A _ _ σ m := by
+    simp only [totalFun, totalGen_outer]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    exact Fintype.sum_equiv (Equiv.arrowCongr σ.symm (Equiv.refl Bool)) _ _ fun c => rfl
+  inner g B _ _ τ := by
+    simp only [totalFun, totalGen_inner]
+  reorder g L' c hy := totalFun_reorder F g L' c hy
+
+variable (R) in
+/-- **Total composition** `M ∘ P → P` after a morphism `F : M → P`. -/
+noncomputable def total : GrComposite R M P S →ₗ[R] P S := lift (totalFun F) (totalFun_respects F)
+
+@[simp] lemma total_mk (g : GrCompGen M P S) : total R F (mk R g) = totalFun F g :=
+  lift_mk _ _ g
+
+end GrComposite
 
 end Operad
