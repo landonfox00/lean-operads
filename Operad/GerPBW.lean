@@ -703,6 +703,148 @@ theorem uv_ctx {A B : Finset ℕ} {f : SMono PE A → SMono PE B} (hf : IsSCtx f
     uv_subst_update hT'ok hu hbT hdT' hC, ← hin g hg hu]
   rfl
 
+/-! ## Sorting planar trees -/
+
+/-- **Sorting a tree**: the children of each vertex ordered by their least leaves, the vertex
+transposed when they are exchanged. -/
+def sortT : STree PE → STree PE
+  | leaf a => leaf a
+  | node (BinGen.op g, σ) c =>
+    if (sortT (c 0)).first < (sortT (c 1)).first then ndσ g σ (sortT (c 0)) (sortT (c 1))
+    else ndσ g (σ * Equiv.swap 0 1) (sortT (c 1)) (sortT (c 0))
+
+lemma sortT_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    sortT (ndσ g σ x y) = if (sortT x).first < (sortT y).first then ndσ g σ (sortT x) (sortT y)
+      else ndσ g (σ * Equiv.swap 0 1) (sortT y) (sortT x) := rfl
+
+lemma swap_mul_ne_one : (1 : Equiv.Perm (Fin 2)) * Equiv.swap 0 1 ≠ 1 := by decide
+
+lemma swap_mul_swap : (Equiv.swap (0 : Fin 2) 1) * Equiv.swap 0 1 = 1 := by decide
+
+/-- Sorting keeps the planar tree. -/
+theorem pl_sortT (t : STree PE) : pl (sortT t) = pl t := by
+  induction t with
+  | leaf a => rfl
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ, sortT_ndσ]
+    split_ifs
+    · rw [pl_ndσ, pl_ndσ, ih 0, ih 1]
+    · rcases perm2 σ with rfl | rfl
+      · rw [pl_ndσ, pl_ndσ, if_neg swap_mul_ne_one, if_pos rfl, ih 0, ih 1]
+      · rw [pl_ndσ, pl_ndσ, swap_mul_swap, if_pos rfl, if_neg swap_ne_one, ih 0, ih 1]
+
+/-- Sorting keeps the planar word. -/
+theorem pw_sortT (t : STree PE) : pw (sortT t) = pw t := by
+  induction t with
+  | leaf a => rfl
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ, sortT_ndσ]
+    split_ifs
+    · rw [pw_ndσ, pw_ndσ, ih 0, ih 1]
+    · rcases perm2 σ with rfl | rfl
+      · rw [pw_ndσ, pw_ndσ, if_neg swap_mul_ne_one, if_pos rfl, ih 0, ih 1]
+      · rw [pw_ndσ, pw_ndσ, swap_mul_swap, if_pos rfl, if_neg swap_ne_one, ih 0, ih 1]
+
+lemma labels_sortT (t : STree PE) : (sortT t).labels = t.labels := by
+  rw [← coe_pw, ← coe_pw, pw_sortT]
+
+lemma isShuffle_ndσ_of {g : PoisOp} {σ : Equiv.Perm (Fin 2)} {x y : STree PE}
+    (hx : x.IsShuffle) (hy : y.IsShuffle) (hxy : x.first < y.first) :
+    (ndσ g σ x y).IsShuffle := by
+  refine ⟨by norm_num, fun i => ?_, fun i j hij => ?_⟩
+  · fin_cases i
+    · exact hx
+    · exact hy
+  · fin_cases i <;> fin_cases j <;> simp_all
+
+/-- **A sorted tree with distinct leaves is a shuffle tree.** -/
+theorem isShuffle_sortT (t : STree PE) (hn : t.labels.Nodup) : (sortT t).IsShuffle := by
+  induction t with
+  | leaf a => trivial
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ] at hn ⊢
+    rw [sortT_ndσ]
+    rw [labels_ndσ] at hn
+    obtain ⟨h0, h1, hd⟩ := Multiset.nodup_add.1 hn
+    have s0 := ih 0 h0
+    have s1 := ih 1 h1
+    have hne : (sortT (c 0)).first ≠ (sortT (c 1)).first := fun e => by
+      have m0 := first_mem s0
+      have m1 := first_mem s1
+      rw [labels_sortT] at m0 m1
+      exact Multiset.disjoint_left.1 hd m0 (e ▸ m1)
+    split_ifs with h
+    · exact isShuffle_ndσ_of s0 s1 h
+    · exact isShuffle_ndσ_of s1 s0 (lt_of_le_of_ne (not_lt.1 h) (Ne.symm hne))
+
+/-! ## Planting planar trees -/
+
+/-- The Poisson generator of a Gerstenhaber generator. -/
+def pg : GerGen 2 → PoisOp
+  | .mul => .mul
+  | .br => .bracket
+
+lemma gg_pg (e : GerGen 2) : gg (pg e) = e := by cases e <;> rfl
+
+/-- **Planting a planar tree**: its leaves labelled by a word, its vertices untransposed. -/
+def plant : Tree GerGen → List ℕ → STree PE
+  | .leaf, w => leaf (w.headD 0)
+  | .node e (.cons X (.cons Y .nil)), w =>
+    ndσ (pg e) 1 (plant X (w.take X.arity)) (plant Y (w.drop X.arity))
+
+theorem pl_plant : ∀ (X : Tree GerGen) (w : List ℕ), pl (plant X w) = X
+  | .leaf, _ => rfl
+  | .node e (.cons X (.cons Y .nil)), w => by
+    rw [plant, pl_ndσ, if_pos rfl, pl_plant X, pl_plant Y, gg_pg]
+
+theorem pw_plant : ∀ (X : Tree GerGen) (w : List ℕ), w.length = X.arity → pw (plant X w) = w
+  | .leaf, w, h => by
+    obtain ⟨a, rfl⟩ : ∃ a, w = [a] := List.length_eq_one_iff.1 h
+    rfl
+  | .node e (.cons X (.cons Y .nil)), w, h => by
+    simp only [Tree.arity_node, Tree.arityF_cons, Tree.arityF_nil, Nat.add_zero] at h
+    rw [plant, pw_ndσ, if_pos rfl, pw_plant X _ (by rw [List.length_take]; omega),
+      pw_plant Y _ (by rw [List.length_drop]; omega), List.take_append_drop]
+
+/-- **Every planar operation is the unsorting of a shuffle monomial.** -/
+theorem uv_surjective (B : Finset ℕ) (x : Reg (TreeOfArity GerGen) ↥B) :
+    ∃ m : SMono PE B, ∀ h, uv m.1 B h = x := by
+  obtain ⟨L, ⟨⟨n, X, hX⟩, hn⟩⟩ := x
+  simp only at hn
+  set w : List ℕ := List.ofFn fun k : Fin (Fintype.card ↥B) => (L.toRank.symm k).1 with hw
+  have hwn : w.Nodup := List.nodup_ofFn.2 fun k k' e =>
+    L.toRank.symm.injective (Subtype.ext e)
+  have hwm : ∀ a, a ∈ B ↔ a ∈ w := fun a => by
+    rw [hw, List.mem_ofFn]
+    exact ⟨fun ha => ⟨L.toRank ⟨a, ha⟩, by rw [Equiv.symm_apply_apply]⟩,
+      fun ⟨k, e⟩ => e ▸ (L.toRank.symm k).2⟩
+  have hwl : w.length = X.arity := by rw [hw, List.length_ofFn, hX, hn]
+  have hpw : pw (sortT (plant X w)) = w := by rw [pw_sortT, pw_plant X w hwl]
+  have hlab : (sortT (plant X w)).labels = B.val := by
+    rw [← coe_pw, hpw]
+    have : B = w.toFinset := Finset.ext fun a => by rw [hwm, List.mem_toFinset]
+    rw [this, List.toFinset_val, List.Nodup.dedup hwn]
+  have hsh : (sortT (plant X w)).IsShuffle := isShuffle_sortT _ (by
+    rw [← coe_pw, pw_plant X w hwl]; exact Multiset.coe_nodup.2 hwn)
+  refine ⟨⟨sortT (plant X w), hsh, hlab⟩, fun h => Reg.ext ?_ ?_⟩
+  · refine Sym.LinOrd.ext fun a b => ?_
+    show (ordOf _ h).lt a b ↔ L.lt a b
+    have key : ∀ c : ↥B, w.idxOf c.1 = L.rank c := fun c => by
+      have hc : L.rank c < w.length := by rw [hw, List.length_ofFn]; exact L.rank_lt_card c
+      have e : w.get ⟨L.rank c, hc⟩ = c.1 := by
+        have e0 : w.get ⟨L.rank c, hc⟩ = (L.toRank.symm ⟨L.rank c, L.rank_lt_card c⟩).1 := by
+          simp only [w, List.get_eq_getElem, List.getElem_ofFn]
+        rw [e0, show (⟨L.rank c, _⟩ : Fin (Fintype.card ↥B)) = L.toRank c from
+          Fin.ext (Sym.LinOrd.toRank_apply L c).symm, Equiv.symm_apply_apply]
+      rw [← e, List.get_idxOf hwn]
+    rw [ordOf_lt, hpw, key, key, Sym.LinOrd.lt_iff_rank_lt]
+  · refine TreeOfArity.arr_ext ?_
+    show pl (sortT (plant X w)) = X
+    rw [pl_sortT, pl_plant]
+
 end GerDim
 
 end Operad
