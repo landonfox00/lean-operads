@@ -624,6 +624,127 @@ lemma map_act_one (i : S) (x : GrComposite R V C S) :
 
 end Unit
 
+/-! ## Parities -/
+
+section Parity
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype A] in
+lemma actY_par (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) (q : Bool)
+    (hz : GrOperad.par (R := R) q z = z) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) (a : A) :
+    GrOperad.par (R := R) (update c (f i) (xor (c (f i)) q) a) (actY (R := R) L f y i z q a)
+      = actY (R := R) L f y i z q a := by
+  rw [actY_hom L f y i z q c hy, map_smul, actY_false_par L f y i z q hz c hy]
+
+/-- **The action of a homogeneous operation adds its parity**, on homogeneous generators. -/
+lemma par_actGen (b : Bool) (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a))
+    (i : S) (z : C Y) {q : Bool} (hz : GrOperad.par (R := R) q z = z) {p : Bool}
+    (hm : GrSpecies.par (R := R) p m = m) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) :
+    par R V C b (mk R (actGen (R := R) L m f y i z q))
+      = if xor p (xor (GrEnd.tot c) q) = b then mk R (actGen (R := R) L m f y i z q) else 0 := by
+  rw [par_mk, parFun_hom (p := p) (c := update c (f i) (xor (c (f i)) q)) b _ hm
+    (actY_par L f y i z q hz c hy), tot_update]
+  congr 2
+  cases c (f i) <;> cases q <;> simp
+
+/-- **The action of a homogeneous operation of parity `q` shifts the parities by `q`.** -/
+lemma par_act (b : Bool) (i : S) (z : C Y) {q : Bool} (hz : GrOperad.par (R := R) q z = z)
+    (x : GrComposite R V C S) :
+    par R V C b (act R V i z x) = act R V i z (par R V C (xor b q) x) := by
+  have h : (par R V C (S := Without S i ⊕ Y) b).comp (act R V i z)
+      = (act R V i z).comp (par R V C (xor b q)) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply]
+    rw [mk_eq_sum (R := R) g]
+    simp only [map_sum]
+    refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun c _ => ?_
+    have hm : GrSpecies.par (R := R) p (parGen (R := R) g p c).m = (parGen (R := R) g p c).m := by
+      show GrSpecies.par (R := R) p (GrSpecies.par (R := R) p g.m) = _
+      rw [GrSpecies.par_par, if_pos rfl]
+    have hy : ∀ a, GrSpecies.par (R := R) (c a) ((parGen (R := R) g p c).y a)
+        = (parGen (R := R) g p c).y a := fun a => by
+      show GrSpecies.par (R := R) (c a) (GrSpecies.par (R := R) (c a) (g.y a)) = _
+      rw [GrSpecies.par_par, if_pos rfl]
+    have hy' : ∀ a, GrOperad.par (R := R) (c a) (ownY (R := R) (parGen (R := R) g p c) a)
+        = ownY (R := R) (parGen (R := R) g p c) a := fun a => by
+      show GrOperad.par (R := R) (c a) (GrOperad.map (R := R) _ _) = _
+      rw [← GrOperad.map_par]
+      exact congrArg _ (hy a)
+    rw [act_mk, actFun, actOwn_hom _ _ _ _ i z hz, par_actGen b _ _ _ _ i z hz hm c hy', par_mk,
+      parFun_hom _ _ hm hy]
+    split_ifs with h1 h2 h2
+    · rw [act_mk, actFun, actOwn_hom _ _ _ _ i z hz]
+    · exact absurd (by rw [← h1]; cases p <;> cases GrEnd.tot c <;> cases q <;> simp) h2
+    · exact absurd (by rw [← Bool.xor_assoc, h2, Bool.xor_assoc, Bool.xor_self, Bool.xor_false]) h1
+    · rw [map_zero]
+  exact LinearMap.congr_fun h x
+
+end Parity
+
+/-! ## Bilinearity -/
+
+section Bilin
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype A] in
+/-- The inner operations after the action only depend on the inserted operation at its owner. -/
+lemma actY_eq_update (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z z₀ : C Y)
+    (q : Bool) :
+    actY (R := R) L f y i z q = update (actY (R := R) L f y i z₀ q) (f i)
+      (actLin (R := R) L f i z q (f i) (y (f i))) := by
+  funext a
+  by_cases h : f i = a
+  · subst h
+    rw [update_self]
+    rfl
+  · rw [update_of_ne (Ne.symm h)]
+    show actLin (R := R) L f i z q a (y a) = actLin (R := R) L f i z₀ q a (y a)
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h]
+
+lemma actOwn_add_z (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z z' : C Y) : actOwn R L m f y i (z + z') = actOwn R L m f y i z + actOwn R L m f y i z' := by
+  unfold actOwn
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+    = mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+      + mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+  rw [actY_eq_update L f y i _ 0, actY_eq_update L f y i (GrOperad.par (R := R) q z) 0,
+    actY_eq_update L f y i (GrOperad.par (R := R) q z') 0, map_add,
+    actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, map_add,
+    map_add, MultilinearMap.map_update_add]
+
+lemma actOwn_smul_z (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (c : R) (z : C Y) : actOwn R L m f y i (c • z) = c • actOwn R L m f y i z := by
+  unfold actOwn
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+    = c • mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+  rw [actY_eq_update L f y i _ 0, actY_eq_update L f y i (GrOperad.par (R := R) q z) 0, map_smul,
+    actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, map_smul, map_smul,
+    MultilinearMap.map_update_smul]
+
+end Bilin
+
+variable (R V) in
+/-- **The right action**, bilinear. -/
+noncomputable def actL (i : S) :
+    C Y →ₗ[R] GrComposite R V C S →ₗ[R] GrComposite R V C (Without S i ⊕ Y) where
+  toFun z := act R V i z
+  map_add' z z' := hom_ext fun g => by
+    simp only [LinearMap.add_apply, act_mk, actFun]
+    exact actOwn_add_z _ _ _ _ i z z'
+  map_smul' c z := hom_ext fun g => by
+    simp only [LinearMap.smul_apply, act_mk, actFun, RingHom.id_apply]
+    exact actOwn_smul_z _ _ _ _ i c z
+
+@[simp] lemma actL_apply (i : S) (z : C Y) (x : GrComposite R V C S) :
+    actL R V i z x = act R V i z x := rfl
+
 end GrComposite
 
 end Operad
