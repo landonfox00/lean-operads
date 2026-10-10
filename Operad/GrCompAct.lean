@@ -229,7 +229,8 @@ lemma gmap_congr {X Z : Type} [Fintype X] [DecidableEq X] [Fintype Z] [Decidable
 omit [Fintype S] [DecidableEq S] [Fintype Y] [DecidableEq Y] in
 lemma gmap_comp_congr {X X' Z : Type} [Fintype X] [DecidableEq X] [Fintype X'] [DecidableEq X']
     [Fintype Z] [DecidableEq Z] (e : X ≃ X') (f : X' ≃ Z) (g : X ≃ Z) (h : ∀ a, f (e a) = g a)
-    (x : C X) : GrOperad.map (R := R) f (GrOperad.map (R := R) e x) = GrOperad.map (R := R) g x := by
+    (x : C X) :
+    GrOperad.map (R := R) f (GrOperad.map (R := R) e x) = GrOperad.map (R := R) g x := by
   rw [← GrOperad.map_trans]
   exact gmap_congr h x
 
@@ -352,7 +353,8 @@ lemma mk_actGen_reorder (L L' : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C 
   have hL : ∀ L₀ : LinOrd A, mk R (actGen (R := R) L₀ m f y i z q)
       = (∏ a, if ltB L₀ (f i) a then σ R (q && c a) else 1)
         • mk R (ownGen L₀ m (actOwner f i) (actY (R := R) L f y i z false)) := fun L₀ => by
-    have := (mkY (R := R) (ownGen L₀ m (actOwner f i) (actY (R := R) L f y i z false))).map_smul_univ
+    have := (mkY (R := R) (ownGen L₀ m (actOwner f i)
+      (actY (R := R) L f y i z false))).map_smul_univ
       (fun a => if ltB L₀ (f i) a then σ R (q && c a) else 1) (actY (R := R) L f y i z false)
     refine Eq.trans ?_ this
     show mk R (ownGen L₀ m (actOwner f i) (actY (R := R) L₀ f y i z q)) = mk R (ownGen L₀ m
