@@ -37,7 +37,8 @@ structure GrSuboperad where
     {x : P A} : x ∈ sub A → GrOperad.map (R := R) e x ∈ sub B
   one_mem : GrOperad.one (R := R) (P := P) ∈ sub Unit
   comp_mem {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
-    {x : P A} {y : P B} : x ∈ sub A → y ∈ sub B → GrOperad.comp (R := R) i x y ∈ sub (Without A i ⊕ B)
+    {x : P A} {y : P B} :
+    x ∈ sub A → y ∈ sub B → GrOperad.comp (R := R) i x y ∈ sub (Without A i ⊕ B)
 
 namespace GrSuboperad
 

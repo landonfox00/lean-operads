@@ -707,6 +707,16 @@ the rewriting system of `Pois` to the planar basis of the free graded operad, up
 (`GerDim.uv_ctx`, `GerDim.cert`), for the upper bound (`GerDim.finite_finrank_le`), so
 **`dim Ger(n) = n!`** (`GerDim.finrank_ger_eq`).
 
+**The dimensions of the BV operad.** The bracket of `BV` is the inner derivation `δ` of the product
+by the operator, and `δ² = 0`; so the Jacobi identity is `-δ` of the order relation, giving a
+morphism `Ger → BV` (`BVGer.gerToBV`, `Operad/BVGer.lean`). Every operation of `BV` is an
+operation of `Ger` with the operator inserted at a subset of the inputs (`BVGer.mem_SB`), by the
+induction principle of presented graded operads (`FreeGr.mem_of_presGen`, `Operad/GrSuboperad.lean`),
+so `dim BV(n) ≤ 2ⁿ n!` (`BVGer.finite_finrank_le`, `Operad/BVDim.lean`). The lower bound evaluates
+`BV` on the exterior algebra of noncommutative polynomials times Heisenberg markers, which record
+where the operator acted (`Operad/BVModel.lean`), so **`dim BV(n) = 2ⁿ n!`**
+(`BVGer.finrank_bv_eq`).
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable

@@ -1,7 +1,11 @@
 /-
-# The BV operad has `2ⁿ n!` operations of arity `n`
+# The BV operad has at most `2ⁿ n!` operations of arity `n`
 
-WIP
+Inserting the operator at the inputs of a list (`BVGer.Rl`) only depends on the set of inputs, up
+to a scalar (`BVGer.Rl_perm`, `BVGer.Rl_toFinset`): the insertions anticommute and square to
+zero. So every operation of `BV` is a sum over the subsets of the inputs of operations of `Ger`
+with the operator at the inputs of the subset (`BVGer.spanMap_surjective`), and
+`dim BV(n) ≤ 2ⁿ dim Ger(n) = 2ⁿ n!` (`BVGer.finite_finrank_le`).
 -/
 import Operad.BVGer
 import Operad.GerModel

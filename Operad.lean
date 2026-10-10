@@ -207,3 +207,8 @@ import Operad.PoisPBW
 import Operad.GerPBW
 import Operad.ExteriorBV
 import Operad.GerModel
+import Operad.GrSuboperad
+import Operad.BVGer
+import Operad.BVDim
+import Operad.AlgValues
+import Operad.BVModel

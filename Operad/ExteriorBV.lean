@@ -614,6 +614,61 @@ lemma sv_gerAlg_br :
     (⟨(mulOp R L, dvOp R L), isGer⟩ : {ml : EndOp R E (Fin 2) × EndOp R E (Fin 2) //
       Ger.IsGer ml.1 ml.2}))
 
+/-! ## The BV algebra -/
+
+variable (R L) in
+/-- The Chevalley–Eilenberg operator, as a unary operation. -/
+noncomputable def ΔOp : EndOp R E (Fin 1) := MultilinearMap.ofSubsingleton R E E 0 (Δ R L)
+
+lemma ΔOp_apply (x : E) : ΔOp R L ![x] = Δ R L x := rfl
+
+lemma BV_dv_eq {p : Bool} {x : E} (hx : x ∈ evenOdd Q₀ (bz p)) (y : E) :
+    BV.dv (mulOp R L) (ΔOp R L) p x y = dv R L x y := by
+  rw [BV.dv, dv_apply, involute_eq_σ hx, smul_mul_assoc]
+  rfl
+
+/-- **The exterior algebra of a Lie algebra is a BV algebra** under the wedge product and the
+Chevalley–Eilenberg operator. -/
+theorem isBV : BV.IsBV (mulOp R L) (ΔOp R L) where
+  par_m := isGer.par_m
+  par_d := by
+    refine ext_hom fun c v hv => ?_
+    rw [parML_apply_hom hv]
+    refine prZ_of_mem ?_
+    have h0 : v = ![v 0] := funext fun i => by fin_cases i; rfl
+    have hc : tot c = c 0 := by
+      have : c = ![c 0] := funext fun i => by fin_cases i; rfl
+      rw [this]
+      cases c 0 <;> rfl
+    rw [h0, ΔOp_apply, hc, Bool.true_xor, bz_not]
+    exact Δ_mem ((isP_iff _ _).1 (hv 0))
+  comm := isGer.comm
+  assoc := isGer.assoc
+  sq p x _ := by
+    rw [ΔOp_apply, ΔOp_apply, Δ_Δ]
+  order p q r x y z hx hy _ := by
+    have hx' := (isP_iff _ _).1 hx
+    have hy' := (isP_iff _ _).1 hy
+    rw [BV_dv_eq hx', BV_dv_eq hx', BV_dv_eq hx']
+    exact dv_mul_σ hx' hy' z
+
+variable (R L) in
+/-- **The exterior algebra of a Lie algebra is an algebra over the BV operad.** -/
+noncomputable def bvAlg : GrAlgebra R E (BVOp R) :=
+  BV.algebraEquiv.symm ⟨(mulOp R L, ΔOp R L), isBV⟩
+
+lemma sv_bvAlg_mul :
+    EndGr.sv ((bvAlg R L).app _ (FreeGr.presGen (BV.rel R) BVGen.mul)) = mulOp R L :=
+  congrArg (fun z => z.1.1) (BV.algebraEquiv.apply_symm_apply
+    (⟨(mulOp R L, ΔOp R L), isBV⟩ : {md : EndOp R E (Fin 2) × EndOp R E (Fin 1) //
+      BV.IsBV md.1 md.2}))
+
+lemma sv_bvAlg_op :
+    EndGr.sv ((bvAlg R L).app _ (FreeGr.presGen (BV.rel R) BVGen.op)) = ΔOp R L :=
+  congrArg (fun z => z.1.2) (BV.algebraEquiv.apply_symm_apply
+    (⟨(mulOp R L, ΔOp R L), isBV⟩ : {md : EndOp R E (Fin 2) × EndOp R E (Fin 1) //
+      BV.IsBV md.1 md.2}))
+
 end ExtBV
 
 end Operad

@@ -1,7 +1,25 @@
 /-
 # The Gerstenhaber operad inside the BV operad
 
-WIP
+In the BV operad, the operator `Δ` is odd with `Δ ∘ Δ = 0`, so its inner derivation
+`δ x = Δ ∘ x - σ(|x|) ∑_a x ∘_a Δ` squares to zero (`Operad.GrOperad.innerL_innerL`). The bracket of
+`BV`, the deviation `b = Δ ∘ m - m ∘₀ Δ - m ∘₁ Δ`, is the inner derivation of the product
+(`BVGer.bB_eq`).
+
+* **The Gerstenhaber relators vanish on the product and the bracket** (`BVGer.ger_relOf_eq_zero`):
+  the symmetry of `b` is `δ` of the commutativity of `m`, the Leibniz rule is the order relation,
+  and **the Jacobi identity is `-δ` of the order relation**, the terms `δ b = δ² m` vanishing — at
+  the level of operations, without signs to chase. Hence a morphism of graded operads
+  `Ger → BV` (`BVGer.gerToBV`).
+* **The image of `Ger` is stable under `δ`** (`BVGer.innerL_mem_range`), by induction on the
+  operations of `Ger` (`Operad.FreeGr.mem_of_presGen`).
+* **Spanning** (`BVGer.mem_SB`): every operation of `BV` is a combination of operations of `Ger`
+  with the operator inserted at some inputs (`BVGer.Rl`), since these form a graded suboperad
+  containing the generators: composing past an inserted operator moves it to the inner operation
+  (`Operad.GrOperad.comp_rcomp_self`), and `Δ ∘ x = δ x + ∑_a x ∘_a Δ` with `δ` preserving the
+  image of `Ger`.
+
+The positional forms of the inner derivation are `lcomp_eq_nsc`, `rcomp_eq_nsc` and `innerL_nsc`.
 -/
 import Operad.InnerDer
 import Operad.GerOperad
