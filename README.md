@@ -696,6 +696,17 @@ of products of Lie trees — that are determined by their reading words, so ther
 of them (`PoisDim.card_irr_le`). Normal monomials always span, without resolvability
 (`FreeSet.finrank_le_card_irr`), so **`dim Pois(n) = n!`** (`PoisDim.finrank_pois_eq`).
 
+**The dimensions of the Gerstenhaber operad.** `Operad/ExteriorBV.lean` puts the
+Chevalley–Eilenberg operator on the exterior algebra of a Lie algebra, `Δ (m ∧ x) = -D_m x - m ∧ Δ x`
+with `D_m` the derivation extending `ad m`, and proves it is a BV operator — `Δ² = 0`
+(`ExtBV.Δ_Δ`) and of order two (`ExtBV.dv_mul_even`, `ExtBV.dv_mul_odd`) — in any characteristic,
+so the exterior algebra is a Gerstenhaber algebra (`ExtBV.isGer`, `ExtBV.gerAlg`).
+`Operad/GerModel.lean` evaluates `Ger` on the exterior algebra of noncommutative polynomials and
+finds `n!` independent operations (`GerDim.factorial_le_finrank`). `Operad/GerPBW.lean` transports
+the rewriting system of `Pois` to the planar basis of the free graded operad, up to units
+(`GerDim.uv_ctx`, `GerDim.cert`), for the upper bound (`GerDim.finite_finrank_le`), so
+**`dim Ger(n) = n!`** (`GerDim.finrank_ger_eq`).
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable

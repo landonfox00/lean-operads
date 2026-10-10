@@ -1,7 +1,24 @@
 /-
 # The Gerstenhaber operad has at most `n!` operations of arity `n`
 
-Work in progress.
+The free graded operad on the Gerstenhaber generators is the twisted linearization of planar
+labelled trees: a basis vector is a planar tree with a linear order of its leaves, compositions
+carrying Koszul signs. We transport the rewriting system of the Poisson operad
+(`Operad.PoisDim.rules`) to it, up to units.
+
+* **Unsorting** (`GerDim.uv`): a shuffle monomial of `Pois` gives a planar tree (`GerDim.pl`),
+  the inputs of a transposed vertex exchanged, with the order of its planar word (`GerDim.pw`).
+  Substitution at a leaf is grafting (`GerDim.uv_subst_update`), and every basis vector is unsorted
+  from a shuffle monomial (`GerDim.uv_surjective`), by sorting and planting.
+* **Realizations** (`GerDim.Realizes`): linear maps preserving all graded operad ideals and sending
+  basis vectors to unit multiples of basis vectors. Relabellings and compositions are realizations,
+  and so is every shuffle context, on the unsorted monomials (`GerDim.uv_ctx`).
+* **Certificates in arity three** (`GerDim.cert`): for each rule of `Pois`, an element of the ideal
+  of `Ger` whose leading term is a unit multiple of the unsorted leading monomial, the rest being
+  unsorted smaller monomials.
+* **Spanning** (`GerDim.span_vG`): by well-founded induction on the order of `Pois`, the classes
+  of the unsorted normal monomials span `Ger`, so `dim Ger(n) ≤ n!`
+  (`GerDim.finite_finrank_le`).
 -/
 import Operad.PoisPBW
 import Operad.GerOperad

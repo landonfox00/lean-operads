@@ -5,8 +5,8 @@ For a Lie algebra `L`, the exterior algebra `Λ L` carries the **Chevalley–Eil
 `Δ (m₁ ∧ ⋯ ∧ m_k) = ∑_{i < j} ± [m_i, m_j] ∧ m₁ ∧ ⋯ m̂_i ⋯ m̂_j ⋯ ∧ m_k`, defined by the recursion
 `Δ (m ∧ x) = -D_m x - m ∧ Δ x` (`ExtBV.Δ_ι_mul`), where `D_m` is the even derivation extending
 `ad m` (`ExtBV.D`). It makes `Λ L` a **BV algebra**:
-* `Δ² = 0` (`ExtBV.Δ_Δ`), using `[D_m, D_n] = D_[m, n]` (`ExtBV.D_comm`) and `[Δ, D_m] = 0`
-  (`ExtBV.Δ_D`);
+* `Δ² = 0` (`ExtBV.Δ_Δ`), using `[D_m, D_n] = D_[m, n]` (`ExtBV.Dm_comm`) and `[Δ, D_m] = 0`
+  (`ExtBV.Δ_Dm`);
 * `Δ` is **of order at most two** (`ExtBV.dv_mul_even`, `ExtBV.dv_mul_odd`): its deviation
   `⟨x, y⟩ = Δ (x y) - (Δ x) y - x̂ (Δ y)` (`ExtBV.dv`, with `x̂` the grade involution) is a graded
   derivation in `y`. It is computed by `⟨m ∧ x, y⟩ = -x D_m y - m ∧ ⟨x, y⟩` (`ExtBV.dv_ι_mul`).

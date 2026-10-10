@@ -204,3 +204,6 @@ import Operad.PInfinity
 import Operad.KirillovKostant
 import Operad.PoisModel
 import Operad.PoisPBW
+import Operad.GerPBW
+import Operad.ExteriorBV
+import Operad.GerModel
