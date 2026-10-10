@@ -761,6 +761,106 @@ noncomputable def total : GrComposite R M P S →ₗ[R] P S := lift (totalFun F)
 @[simp] lemma total_mk (g : GrCompGen M P S) : total R F (mk R g) = totalFun F g :=
   lift_mk _ _ g
 
+/-! ### Total composition is a morphism of right modules -/
+
+section Act
+
+variable {A Y : Type} [Fintype A] [DecidableEq A] [Fintype Y] [DecidableEq Y]
+
+/-- **Total composition after the right action at `i` is composition at `i`**, on a homogeneous
+generator given by owners. -/
+lemma totalGen_act (L : LinOrd A) (m : M A) (f : S → A) (yy : ∀ a, P (Fib f a)) (c : A → Bool)
+    (hyy : ∀ a, GrOperad.par (R := R) (c a) (yy a) = yy a) (i : S) {q : Bool} (z : P Y)
+    (hz : GrOperad.par (R := R) q z = z) (p : Bool) :
+    totalGen F (actGen (R := R) L m f yy i z q) p (update c (f i) (xor (c (f i)) q))
+      = GrOperad.comp (R := R) i (totalGen F (ownGen L m f yy) p c) z := by
+  set x := cor (R := R) L p (F.app A m) with hx
+  set ys : (a : A) → SgnOp R P (Fib f a) := fun a => cor (R := R) (ordOf (Fib f a)) (c a) (yy a)
+    with hys
+  set Zs := cor (R := R) (ordOf Y) q z with hZs
+  set j : Σ a, Fib f a := ⟨f i, ⟨i, rfl⟩⟩ with hj
+  set T := SetOperad.total x ys with hT
+  set W : (a : A) → SgnOp R P (Σ b : Fib f a, Pad j Y ⟨a, b⟩) :=
+    fun a => SetOperad.total (ys a) fun b => May.padS j Zs ⟨a, b⟩ with hW
+  -- the right-hand side
+  have hR1 : GrOperad.comp (R := R) i (totalGen F (ownGen L m f yy) p c) z
+      = GrOperad.map (R := R) ((compEquiv (Equiv.sigmaFiberEquiv f) (Equiv.refl Y) j).trans
+          (slotEquiv (rfl : Equiv.sigmaFiberEquiv f j = i))) (GrOperad.comp (R := R) j T.op z) :=
+    GrOperad.comp_map_left (Equiv.sigmaFiberEquiv f) j i rfl T.op z
+  have hR2 : GrOperad.comp (R := R) j T.op z
+      = σ R (q && T.dat.aft j) • (SetOperad.comp j T Zs).op := by
+    rw [comp_op, smul_smul, show Zs.op = z from hz,
+      show SgnData.sgn j T.dat Zs.dat = (q && T.dat.aft j) from rfl, σ_mul_self, one_smul]
+  have hR3 := May.comp_total x ys j Zs
+  have hR4 := SetOperad.total_map (Equiv.refl A) (B' := Fib (actOwner (Y := Y) f i))
+    (actPad f i Y) x W (fun a => SetOperad.map (actPad f i Y a) (W a)) fun _ => rfl
+  rw [SetOperad.map_refl] at hR4
+  -- the inserted operations, untwisted
+  set c' := update c (f i) (xor (c (f i)) q) with hc'
+  set ys₀ : (a : A) → SgnOp R P (Fib (actOwner (Y := Y) f i) a) := fun a =>
+    cor (R := R) (ordOf (Fib (actOwner (Y := Y) f i) a)) (c' a) (actY (R := R) L f yy i z false a)
+    with hys₀
+  have hcomp : GrOperad.comp (R := R) (⟨i, rfl⟩ : Fib f (f i)) (yy (f i)) z
+      = GrOperad.par (R := R) (xor (c (f i)) q)
+          (GrOperad.comp (R := R) (⟨i, rfl⟩ : Fib f (f i)) (yy (f i)) z) :=
+    (GrOperad.par_comp_hom _ rfl (hyy (f i)) hz).symm
+  have hops : ∀ a, (SetOperad.map (actPad f i Y a) (W a)).op = (ys₀ a).op := by
+    intro a
+    by_cases h : f i = a
+    · subst h
+      rw [hW, total_padS_eq, map_op, comp_op]
+      simp only [hys₀, hys, hZs, cor_op, hc', update_self]
+      rw [actY, actLin_eq _ _ _ _ _ _ rfl, hyy, hz, ← GrOperad.map_par, ← hcomp]
+      show GrOperad.map (R := R) _ (σ R (q && false) • _) = _
+      rw [Bool.and_false, σ_false, one_smul]
+    · rw [hW, total_padS_ne f i h, map_op]
+      simp only [hys₀, hys, cor_op, hc', update_of_ne (Ne.symm h)]
+      rw [actY, actLin_ne _ _ _ _ _ _ h, Bool.false_and, GrOperad.tw_false, hyy,
+        ← GrOperad.map_par, hyy]
+  have htots : ∀ a, (SetOperad.map (actPad f i Y a) (W a)).dat.tot = (ys₀ a).dat.tot := by
+    intro a
+    by_cases h : f i = a
+    · subst h
+      rw [hW, total_padS_eq]
+      simp only [hys₀, hc', update_self]
+      rfl
+    · rw [hW, total_padS_ne f i h]
+      simp only [hys₀, hc', update_of_ne (Ne.symm h)]
+      rfl
+  -- the twists
+  have htw : (SetOperad.total x fun a => cor (R := R) (ordOf (Fib (actOwner (Y := Y) f i) a))
+        (c' a) (actY (R := R) L f yy i z q a)).op
+      = (∏ a, σ R ((q && ltB L (f i) a) && c a)) • (SetOperad.total x ys₀).op := by
+    refine total_op_smul x (y' := ys₀) _ (fun _ => rfl) fun a => ?_
+    simp only [hys₀, cor_op]
+    by_cases h : f i = a
+    · subst h
+      rw [actY, actY, actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, ltB_self,
+        Bool.and_false, Bool.false_and, σ_false, one_smul]
+    · have hv : GrOperad.par (R := R) (c a) (GrOperad.map (R := R) (actNe (Y := Y) f i a h) (yy a))
+          = GrOperad.map (R := R) (actNe (Y := Y) f i a h) (yy a) := by
+        rw [← GrOperad.map_par, hyy]
+      rw [actY, actY, actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h, Bool.false_and,
+        GrOperad.tw_false, hc', update_of_ne (Ne.symm h), GrOperad.tw_hom _ hv, map_smul, hv]
+  have hsign : (∏ a, σ R ((q && ltB L (f i) a) && c a)) = σ R (q && T.dat.aft j) := by
+    rw [hT, hj, total_aft, show (ys (f i)).dat.aft ⟨i, rfl⟩ = false from rfl,
+      show x.dat.aft (f i) = false from rfl, Bool.false_xor, Bool.false_xor,
+      show x.dat.ord = L from rfl, show (fun a => (ys a).dat.tot) = c from rfl,
+      SgnData.sigma_aftL₁ R _ _ _ _ _ (Finset.nodup_toList _), Finset.toList_toFinset]
+  -- assembling
+  show GrOperad.map (R := R) (Equiv.sigmaFiberEquiv (actOwner (Y := Y) f i)) (SetOperad.total x
+      fun a => cor (R := R) (ordOf (Fib (actOwner (Y := Y) f i) a)) (c' a)
+        (actY (R := R) L f yy i z q a)).op = _
+  rw [htw, hsign, hR1, hR2, hR3, map_op, map_smul, map_smul,
+    total_op_congr x (y := ys₀) (y' := fun a => SetOperad.map (actPad f i Y a) (W a))
+      (fun a => (hops a).symm) (fun a => (htots a).symm), ← hR4, map_op, ← GrOperad.map_trans,
+    ← GrOperad.map_trans]
+  congr 1
+  refine gmap_congr ?_ _
+  rintro ⟨a, b, ⟨u, hu⟩ | ⟨y, hy⟩⟩ <;> rfl
+
+end Act
+
 end GrComposite
 
 end Operad
