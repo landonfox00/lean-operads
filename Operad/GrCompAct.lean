@@ -835,6 +835,122 @@ lemma map_act_seq {D : Type} [Fintype D] [DecidableEq D] (i : S) (j : Y) (y : C 
   simp only [actL_apply, key]
   abel
 
+/-! ## Parallel associativity -/
+
+section Par
+
+variable {D : Type} [Fintype D] [DecidableEq D] {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [Fintype D] [Fintype A] [DecidableEq A] in
+lemma actOwner_par (f : S → A) {i k : S} (hik : i ≠ k) :
+    actOwner (Y := D) (actOwner (Y := Y) f i) (Sum.inl ⟨k, Ne.symm hik⟩)
+        ∘ (parEquiv hik Y D).symm
+      = actOwner (Y := Y) (actOwner (Y := D) f k) (Sum.inl ⟨i, hik⟩) := by
+  funext x
+  rcases x with ⟨(s | d), hs⟩ | y <;> rfl
+
+/-- **Parallel associativity of the action, untwisted**: composing two homogeneous operations at
+two inputs in either order, on generators given by owners, with the inner operations read after
+them not twisted. The Koszul sign appears when both inputs have the same owner. -/
+lemma map_mk_untwisted_par (L : LinOrd A) (m : V A) (f : S → A) (yy : ∀ a, C (Fib f a))
+    {i k : S} (hik : i ≠ k) {q r : Bool} (y : C Y) (z : C D)
+    (hy : GrOperad.par (R := R) q y = y) (hz : GrOperad.par (R := R) r z = z) :
+    map (parEquiv hik Y D) (mk R (ownGen L m _ (actY (R := R) L (actOwner f i)
+        (actY (R := R) L f yy i y false) (Sum.inl ⟨k, Ne.symm hik⟩) z false)))
+      = (if f i = f k then σ R (q && r) else 1) • mk R (ownGen L m _ (actY (R := R) L
+          (actOwner f k) (actY (R := R) L f yy k z false) (Sum.inl ⟨i, hik⟩) y false)) := by
+  rw [map_mk_ownGen, mk_ownGen_congr _ m (actOwner_par f hik)]
+  by_cases hfik : f i = f k
+  · rw [if_pos hfik]
+    set U := actY (R := R) L (actOwner (Y := D) f k) (actY (R := R) L f yy k z false)
+      (Sum.inl ⟨i, hik⟩) y false
+    have hU : mk R (ownGen L m (actOwner (Y := Y) (actOwner (Y := D) f k) (Sum.inl ⟨i, hik⟩))
+        (update U (f k) (σ R (q && r) • U (f k))))
+        = σ R (q && r) • mk R (ownGen L m _ U) := by
+      have := (mkY (R := R) (ownGen L m (actOwner (Y := Y) (actOwner (Y := D) f k)
+        (Sum.inl ⟨i, hik⟩)) U)).map_update_smul U (f k) (σ R (q && r)) (U (f k))
+      rw [update_eq_self] at this
+      exact this
+    rw [← hU]
+    congr 2
+    funext a
+    by_cases hka : f k = a
+    · subst hka
+      rw [update_self]
+      have hik' : (⟨i, hfik⟩ : Fib f (f k)) ≠ ⟨k, rfl⟩ := fun e => hik (congrArg Subtype.val e)
+      show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+          (Sum.inl ⟨k, Ne.symm hik⟩) z false (f k) (actLin (R := R) L f i y false (f k)
+            (yy (f k))))) = σ R (q && r) • actLin (R := R) L (actOwner f k) (Sum.inl ⟨i, hik⟩) y
+          false (f k) (actLin (R := R) L f k z false (f k) (yy (f k)))
+      rw [actLin_eq L f i y false (f k) hfik,
+        actLin_eq L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z false (f k) rfl,
+        actLin_eq L f k z false (f k) rfl,
+        actLin_eq L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false (f k) hfik,
+        GrOperad.comp_map_left (actEq (Y := Y) f i (f k) hfik)
+          (Sum.inl ⟨⟨k, rfl⟩, Ne.symm hik'⟩) ⟨Sum.inl ⟨k, Ne.symm hik⟩, rfl⟩ (Subtype.ext rfl),
+        GrOperad.comp_map_left (actEq (Y := D) f k (f k) rfl)
+          (Sum.inl ⟨⟨i, hfik⟩, hik'⟩) ⟨Sum.inl ⟨i, hik⟩, hfik⟩ (Subtype.ext rfl),
+        GrOperad.comp_assoc_par' hik' (yy (f k)) hy hz, map_smul, map_smul, map_smul,
+        map_smul]
+      congr 1
+      simp only [← GrOperad.map_trans]
+      apply gmap_congr
+      rintro (⟨(⟨⟨t, ht⟩, hne⟩ | d), hd⟩ | b) <;> rfl
+    · rw [update_of_ne (Ne.symm hka)]
+      have hia : f i ≠ a := fun e => hka (hfik.symm.trans e)
+      show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+          (Sum.inl ⟨k, Ne.symm hik⟩) z false a (actLin (R := R) L f i y false a (yy a))))
+        = actLin (R := R) L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a
+          (actLin (R := R) L f k z false a (yy a))
+      rw [actLin_ne L f i y false a hia,
+        actLin_ne L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z false a hka,
+        actLin_ne L f k z false a hka,
+        actLin_ne L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a hia]
+      simp only [Bool.false_and, GrOperad.tw_false, ← GrOperad.map_trans]
+      apply gmap_congr
+      intro b
+      exact Subtype.ext rfl
+  · rw [if_neg hfik, one_smul]
+    congr 2
+    funext a
+    show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+        (Sum.inl ⟨k, Ne.symm hik⟩) z false a (actLin (R := R) L f i y false a (yy a))))
+      = actLin (R := R) L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a
+        (actLin (R := R) L f k z false a (yy a))
+    by_cases hia : f i = a
+    · have hka : f k ≠ a := fun e => hfik (hia.trans e.symm)
+      rw [actLin_eq L f i y false a hia,
+        actLin_ne L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z false a hka,
+        actLin_ne L f k z false a hka,
+        actLin_eq L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a hia,
+        Bool.false_and, GrOperad.tw_false, Bool.false_and, GrOperad.tw_false,
+        GrOperad.comp_map_left (actNe (Y := D) f k a hka) ⟨i, hia⟩ ⟨Sum.inl ⟨i, hik⟩, hia⟩
+          (Subtype.ext rfl)]
+      simp only [← GrOperad.map_trans]
+      apply gmap_congr
+      rintro (⟨⟨t, ht⟩, hne⟩ | b) <;> rfl
+    · by_cases hka : f k = a
+      · rw [actLin_ne L f i y false a hia,
+          actLin_eq L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z false a hka,
+          actLin_eq L f k z false a hka,
+          actLin_ne L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a hia,
+          Bool.false_and, GrOperad.tw_false, Bool.false_and, GrOperad.tw_false,
+          GrOperad.comp_map_left (actNe (Y := Y) f i a hia) ⟨k, hka⟩
+            ⟨Sum.inl ⟨k, Ne.symm hik⟩, hka⟩ (Subtype.ext rfl)]
+        simp only [← GrOperad.map_trans]
+        apply gmap_congr
+        rintro (⟨⟨t, ht⟩, hne⟩ | d) <;> rfl
+      · rw [actLin_ne L f i y false a hia,
+          actLin_ne L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z false a hka,
+          actLin_ne L f k z false a hka,
+          actLin_ne L (actOwner f k) (Sum.inl ⟨i, hik⟩) y false a hia]
+        simp only [Bool.false_and, GrOperad.tw_false, ← GrOperad.map_trans]
+        apply gmap_congr
+        intro b
+        exact Subtype.ext rfl
+
+end Par
+
 end GrComposite
 
 end Operad
