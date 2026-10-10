@@ -203,3 +203,4 @@ import Operad.KoszulCriterion
 import Operad.PInfinity
 import Operad.KirillovKostant
 import Operad.PoisModel
+import Operad.PoisPBW

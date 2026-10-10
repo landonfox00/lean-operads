@@ -1,13 +1,26 @@
 /-
-# The Poisson operad has at most `n!` operations of arity `n`
+# The Poisson operad has `n!` operations of arity `n`
 
 The Poisson operad is presented by the commutative product `m` and the antisymmetric bracket `b`,
 so its underlying shuffle operad is presented by the four generators `m`, `b` and their
-transposed versions (`Operad.FreeSet.presEquiv`).
+transposed versions (`Operad.FreeSet.presEquiv`). We bound its dimensions above by a rewriting
+system and below by the Kirillov–Kostant model (`Operad.PoisDim.factorial_le_finrank`).
 
 * **Sorting the monomials of arity three** (`PoisDim.toSh_binR_one`, `PoisDim.toSh_binL_one`,
   `PoisDim.toSh_binL_021`): the monomials `g(x₀, h(x₁, x₂))`, `g(h(x₀, x₁), x₂)` and
   `g(h(x₀, x₂), x₁)` of the free operad are the shuffle trees with untransposed generators.
+* **The order** (`PoisDim.poisOrder`): the path order of the word order comparing first the
+  number of brackets, then (reversed) the number of products, then lexicographically. It is
+  admissible and well-founded.
+* **The rules** (`PoisDim.rules`): Jacobi, three forms of the Leibniz rule, two forms of
+  associativity, commutativity and antisymmetry, each with its leading monomial; their ideal lies in
+  the ideal of the Poisson operad (`PoisDim.rules_le`), by explicit certificates in arity three.
+* **Normal monomials** (`PoisDim.nf_of_normal`, `PoisDim.read_injective`): the monomials avoiding
+  the leading monomials are left combs of products of Lie trees, and their reading words — brackets
+  read left to right, products right to left — determine them. Hence there are at most `n!` of
+  them (`PoisDim.card_irr_le`), and they span (`Operad.FreeSet.finrank_le_card_irr`).
+* **The dimension** (`PoisDim.finrank_pois`, `PoisDim.finrank_pois_eq`):
+  `dim Pois(n) = n!`.
 -/
 import Operad.PoisModel
 import Operad.ShuffleSymPres
@@ -1005,6 +1018,513 @@ def RootOK : PoisOp → STree PE → STree PE → Prop
 def NF : STree PE → Prop
   | leaf _ => True
   | node (BinGen.op g, σ) c => σ = 1 ∧ NF (c 0) ∧ NF (c 1) ∧ RootOK g (c 0) (c 1)
+
+/-- A vertex with any permutation of its inputs. -/
+def ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) : STree PE :=
+  node (BinGen.op g, σ) ![x, y]
+
+lemma node_eq_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (c : Fin 2 → STree PE) :
+    node (E := PE) (BinGen.op g, σ) c = ndσ g σ (c 0) (c 1) := by
+  rw [ndσ]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+lemma subst_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) (xs : ℕ → STree PE) :
+    (ndσ g σ x y).subst xs = ndσ g σ (x.subst xs) (y.subst xs) := by
+  rw [ndσ, subst_node, ndσ]
+  congr 1
+  funext i
+  fin_cases i <;> rfl
+
+lemma nd_eq (g : PoisOp) (x y : STree PE) : nd g x y = ndσ g 1 x y := rfl
+
+@[simp] lemma first_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    (ndσ g σ x y).first = x.first := by
+  rw [ndσ, first_node _ _ (by norm_num)]
+  rfl
+
+@[simp] lemma labels_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    (ndσ g σ x y).labels = x.labels + y.labels := by
+  rw [ndσ, labels_node, Fin.sum_univ_two]
+  rfl
+
+lemma isShuffle_ndσ {g : PoisOp} {σ : Equiv.Perm (Fin 2)} {x y : STree PE}
+    (h : (ndσ g σ x y).IsShuffle) : x.IsShuffle ∧ y.IsShuffle ∧ x.first < y.first :=
+  ⟨h.child 0, h.child 1, h.mono (show (0 : Fin 2) < 1 by decide)⟩
+
+/-- Three inputs. -/
+def x3 (A B C : STree PE) : ℕ → STree PE := fun a => if a = 0 then A else if a = 1 then B else C
+
+/-- Two inputs. -/
+def x2 (A B : STree PE) : ℕ → STree PE := fun a => if a = 0 then A else B
+
+lemma mono3 {A B C : STree PE} (h₁ : A.first < B.first) (h₂ : B.first < C.first) :
+    StrictMonoOn (fun a => (x3 A B C a).first) (p3 : Set ℕ) := by
+  intro a ha b hb hab
+  have ha' : a < 3 := by simpa using ha
+  have hb' : b < 3 := by simpa using hb
+  interval_cases a <;> interval_cases b <;> first | omega | (simp only [x3]; simp_all; try omega)
+
+lemma mono2 {A B : STree PE} (h : A.first < B.first) :
+    StrictMonoOn (fun a => (x2 A B a).first) (p2 : Set ℕ) := by
+  intro a ha b hb hab
+  have ha' : a < 2 := by simpa using ha
+  have hb' : b < 2 := by simpa using hb
+  interval_cases a <;> interval_cases b
+  all_goals first | omega | simpa [x2] using h
+
+lemma subst_L₁ (g h : PoisOp) (A B C : STree PE) :
+    (tL₁ g h).subst (x3 A B C) = nd g (nd h A B) C := by
+  simp only [tL₁, nd_eq, subst_ndσ]
+  rfl
+
+lemma subst_L₂ (g h : PoisOp) (A B C : STree PE) :
+    (tL₂ g h).subst (x3 A C B) = nd g (nd h A B) C := by
+  simp only [tL₂, nd_eq, subst_ndσ]
+  rfl
+
+lemma subst_R (g h : PoisOp) (A B C : STree PE) :
+    (tR g h).subst (x3 A B C) = nd g A (nd h B C) := by
+  simp only [tR, nd_eq, subst_ndσ]
+  rfl
+
+lemma subst_cor (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (A B : STree PE) :
+    (cor g σ).1.subst (x2 A B) = ndσ g σ A B := by
+  show (node (E := PE) (BinGen.op g, σ) fun j : Fin 2 => leaf j.1).subst _ = _
+  rw [node_eq_ndσ, subst_ndσ]
+  rfl
+
+lemma kids_ndσ (g : PoisOp) (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    kids (ndσ g σ x y) = some (g, x, y) := rfl
+
+lemma NF_ndσ {g : PoisOp} {σ : Equiv.Perm (Fin 2)} {x y : STree PE} :
+    NF (ndσ g σ x y) ↔ σ = 1 ∧ NF x ∧ NF y ∧ RootOK g x y := Iff.rfl
+
+lemma eq_nd_of_kids {t A B : STree PE} {g : PoisOp} (ht : NF t)
+    (h : kids t = some (g, A, B)) : t = nd g A B := by
+  cases t with
+  | leaf _ => exact absurd h (by simp [kids])
+  | node e c =>
+    obtain ⟨⟨g'⟩, σ⟩ := e
+    rw [node_eq_ndσ] at ht h ⊢
+    rw [kids_ndσ, Option.some.injEq, Prod.mk.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl, rfl⟩ := h
+    rw [ht.1]
+    rfl
+
+lemma perm2 (σ : Equiv.Perm (Fin 2)) : σ = 1 ∨ σ = Equiv.swap 0 1 := by
+  revert σ
+  decide
+
+lemma first_ne {A B C : STree PE} {g h : PoisOp} (hs : (nd g (nd h A B) C).IsShuffle)
+    (hn : (nd g (nd h A B) C).labels.Nodup) : B.first ≠ C.first := by
+  obtain ⟨hAB, hC, -⟩ := isShuffle_ndσ hs
+  obtain ⟨-, hB, -⟩ := isShuffle_ndσ hAB
+  intro he
+  rw [nd_eq, labels_ndσ, nd_eq, labels_ndσ] at hn
+  have hd := (Multiset.nodup_add.1 hn).2.2
+  exact Multiset.disjoint_left.1 hd (Multiset.mem_add.2 (Or.inr (first_mem hB)))
+    (he ▸ first_mem hC)
+
+/-- **Normal monomials are structurally normal.** -/
+theorem nf_of_normal {B : Finset ℕ} {U : SMono PE B} (hU : (rules K).Normal U) :
+    ∀ (t : STree PE) (p : List ℕ), U.1.get? p = some t → NF t := by
+  intro t
+  induction t with
+  | leaf _ => intro _ _; trivial
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    intro p hp
+    have hc : ∀ i : Fin 2, U.1.get? (p ++ [i.1]) = some (c i) := fun i => by
+      rw [get?_append_of hp, get?_node_cons_fin, get?_nil]
+    have h0 := ih 0 _ (hc 0)
+    have h1 := ih 1 _ (hc 1)
+    have hs := isShuffle_get? U.isShuffle hp
+    have hn := Multiset.nodup_of_le (labels_get?_le hp) U.nodup
+    rw [node_eq_ndσ] at hp hs hn ⊢
+    have h01 := (isShuffle_ndσ hs).2.2
+    set X := c 0
+    set Y := c 1
+    rcases perm2 σ with rfl | rfl
+    swap
+    · exact absurd hU (not_normal (K := K) (if g = .mul then .cm else .an) (xs := x2 X Y)
+        (by cases g <;> (rw [hp]; exact congrArg some (subst_cor _ _ X Y).symm))
+        (by cases g <;> exact mono2 h01))
+    refine ⟨rfl, h0, h1, ?_⟩
+    have hX := (isShuffle_ndσ hs).1
+    have hY := (isShuffle_ndσ hs).2.1
+    cases g with
+    | bracket =>
+      refine ⟨fun g' A B hk => ?_, fun g' A B hk => ?_⟩
+      · have hXe := eq_nd_of_kids h0 hk
+        rw [hXe] at hp hs hn hX h01
+        have hAB := (isShuffle_ndσ hX).2.2
+        rw [nd_eq, first_ndσ] at h01
+        rcases lt_or_gt_of_ne (first_ne hs hn) with hlt | hgt
+        · exfalso
+          cases g'
+          · exact not_normal (K := K) .leib₃ (xs := x3 A B Y)
+              (by rw [hp]; exact congrArg some (subst_L₁ _ _ A B Y).symm) (mono3 hAB hlt) hU
+          · exact not_normal (K := K) .jac (xs := x3 A B Y)
+              (by rw [hp]; exact congrArg some (subst_L₁ _ _ A B Y).symm) (mono3 hAB hlt) hU
+        · cases g'
+          · exact absurd hU (not_normal (K := K) .leib₂ (xs := x3 A Y B)
+              (by rw [hp]; exact congrArg some (subst_L₂ _ _ A B Y).symm) (mono3 h01 hgt))
+          · exact ⟨rfl, hgt⟩
+      · have hYe := eq_nd_of_kids h1 hk
+        rw [hYe] at hp hY h01
+        have hAB := (isShuffle_ndσ hY).2.2
+        rw [nd_eq, first_ndσ] at h01
+        cases g'
+        · exact absurd hU (not_normal (K := K) .leib₁ (xs := x3 X A B)
+            (by rw [hp]; exact congrArg some (subst_R _ _ X A B).symm) (mono3 h01 hAB))
+        · rfl
+    | mul =>
+      refine ⟨fun A B hk => ?_, fun g' A B hk => ?_⟩
+      · have hXe := eq_nd_of_kids h0 hk
+        rw [hXe] at hp hs hn hX h01
+        have hAB := (isShuffle_ndσ hX).2.2
+        rw [nd_eq, first_ndσ] at h01
+        rcases lt_or_gt_of_ne (first_ne hs hn) with hlt | hgt
+        · exact hlt
+        · exact absurd hU (not_normal (K := K) .as₂ (xs := x3 A Y B)
+            (by rw [hp]; exact congrArg some (subst_L₂ _ _ A B Y).symm) (mono3 h01 hgt))
+      · have hYe := eq_nd_of_kids h1 hk
+        rw [hYe] at hp hY h01
+        have hAB := (isShuffle_ndσ hY).2.2
+        rw [nd_eq, first_ndσ] at h01
+        cases g'
+        · exact absurd hU (not_normal (K := K) .as₁ (xs := x3 X A B)
+            (by rw [hp]; exact congrArg some (subst_R _ _ X A B).symm) (mono3 h01 hAB))
+        · rfl
+
+/-! ## Splitting words -/
+
+lemma splitB_aux {u u' v v' m : List ℕ} {a a' : ℕ} (hu : u ≠ []) (h2 : ∀ x ∈ v, a < x)
+    (h1' : ∀ x ∈ u'.tail, a' < x) (hm : u' = u ++ m) (hm' : a :: v = m ++ a' :: v') : m = [] := by
+  cases m with
+  | nil => rfl
+  | cons b m' =>
+    exfalso
+    rw [List.cons_append, List.cons.injEq] at hm'
+    obtain ⟨rfl, rfl⟩ := hm'
+    have h₁ := h2 a' (by simp)
+    obtain ⟨c, u₀, rfl⟩ := List.exists_cons_of_ne_nil hu
+    have h₂ := h1' a (by rw [hm]; simp)
+    omega
+
+/-- **Splitting a bracket word** at the least letter of its tail. -/
+lemma splitB {u u' v v' : List ℕ} {a a' : ℕ} (hu : u ≠ []) (hu' : u' ≠ [])
+    (h1 : ∀ x ∈ u.tail, a < x) (h2 : ∀ x ∈ v, a < x) (h1' : ∀ x ∈ u'.tail, a' < x)
+    (h2' : ∀ x ∈ v', a' < x) (h : u ++ a :: v = u' ++ a' :: v') :
+    u = u' ∧ a :: v = a' :: v' := by
+  rcases List.append_eq_append_iff.1 h with ⟨m, hm, hm'⟩ | ⟨m, hm, hm'⟩
+  · obtain rfl := splitB_aux hu h2 h1' hm hm'
+    rw [List.append_nil] at hm
+    exact ⟨hm.symm, hm'⟩
+  · obtain rfl := splitB_aux hu' h2' h1 hm hm'
+    rw [List.append_nil] at hm
+    exact ⟨hm, hm'.symm⟩
+
+lemma splitM_aux {u u' v v' m : List ℕ} {a a' h : ℕ} (ha : a < h) (hu' : ∀ x ∈ u', h ≤ x)
+    (hm : u' = u ++ m) (hm' : a :: v = m ++ a' :: v') : m = [] := by
+  cases m with
+  | nil => rfl
+  | cons b m' =>
+    exfalso
+    rw [List.cons_append, List.cons.injEq] at hm'
+    obtain ⟨rfl, -⟩ := hm'
+    have := hu' a (by rw [hm]; simp)
+    omega
+
+/-- **Splitting a product word** at the first letter below its head. -/
+lemma splitM {u u' v v' : List ℕ} {h h' a a' : ℕ} (hu : ∀ x ∈ u, h ≤ x) (ha : a < h)
+    (hu' : ∀ x ∈ u', h' ≤ x) (ha' : a' < h') (e : (h :: u) ++ a :: v = (h' :: u') ++ a' :: v') :
+    h :: u = h' :: u' ∧ a :: v = a' :: v' := by
+  rw [List.cons_append, List.cons_append, List.cons.injEq] at e
+  obtain ⟨rfl, e⟩ := e
+  rcases List.append_eq_append_iff.1 e with ⟨m, hm, hm'⟩ | ⟨m, hm, hm'⟩
+  · obtain rfl := splitM_aux ha hu' hm hm'
+    rw [List.append_nil] at hm
+    exact ⟨by rw [hm], hm'⟩
+  · obtain rfl := splitM_aux ha' hu hm hm'
+    rw [List.append_nil] at hm
+    exact ⟨by rw [hm], hm'.symm⟩
+
+/-! ## The reading word -/
+
+/-- **The reading word**: the leaves under a bracket read left to right, under a product right
+to left. -/
+def read : STree PE → List ℕ
+  | leaf a => [a]
+  | node (BinGen.op .mul, _) c => read (c 1) ++ read (c 0)
+  | node (BinGen.op .bracket, _) c => read (c 0) ++ read (c 1)
+
+lemma read_mul (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    read (ndσ .mul σ x y) = read y ++ read x := rfl
+
+lemma read_bracket (σ : Equiv.Perm (Fin 2)) (x y : STree PE) :
+    read (ndσ .bracket σ x y) = read x ++ read y := rfl
+
+/-- **The reading word is an ordering of the leaves.** -/
+theorem coe_read (t : STree PE) : (read t : Multiset ℕ) = t.labels := by
+  induction t with
+  | leaf a => rfl
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ, labels_ndσ, ← ih 0, ← ih 1]
+    cases g
+    · rw [read_mul, ← Multiset.coe_add, add_comm]
+    · rw [read_bracket, ← Multiset.coe_add]
+
+lemma read_ne_nil (t : STree PE) : read t ≠ [] := by
+  induction t with
+  | leaf a => simp [read]
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ]
+    cases g
+    · rw [read_mul]
+      exact List.append_ne_nil_of_left_ne_nil (ih 1) _
+    · rw [read_bracket]
+      exact List.append_ne_nil_of_left_ne_nil (ih 0) _
+
+lemma first_le_read {t : STree PE} (hs : t.IsShuffle) {x : ℕ} (hx : x ∈ read t) :
+    t.first ≤ x :=
+  first_le hs x (by rw [← coe_read]; exact Multiset.mem_coe.2 hx)
+
+lemma nodup_read {t : STree PE} (hn : t.labels.Nodup) : (read t).Nodup := by
+  rw [← coe_read] at hn
+  exact Multiset.coe_nodup.1 hn
+
+/-- **A Lie tree**: no product at the root. -/
+def IsLie (t : STree PE) : Prop := ∀ g A B, kids t = some (g, A, B) → g = .bracket
+
+section NFParts
+
+variable {g : PoisOp} {σ : Equiv.Perm (Fin 2)} {x y : STree PE}
+
+lemma NF.one (h : NF (ndσ g σ x y)) : σ = 1 := h.1
+lemma NF.left (h : NF (ndσ g σ x y)) : NF x := h.2.1
+lemma NF.right (h : NF (ndσ g σ x y)) : NF y := h.2.2.1
+
+lemma NF.lie_right (h : NF (ndσ g σ x y)) : IsLie y := by
+  have := h.2.2.2
+  cases g
+  · exact this.2
+  · exact this.2
+
+lemma NF.br_left (h : NF (ndσ .bracket σ x y)) :
+    ∀ g A B, kids x = some (g, A, B) → g = .bracket ∧ y.first < B.first := h.2.2.2.1
+
+lemma NF.mul_left (h : NF (ndσ .mul σ x y)) :
+    ∀ A B, kids x = some (.mul, A, B) → B.first < y.first := h.2.2.2.1
+
+lemma isLie_bracket : IsLie (ndσ .bracket σ x y) := fun g A B h => by
+  rw [kids_ndσ, Option.some.injEq, Prod.mk.injEq] at h
+  exact h.1.symm
+
+lemma NF.lie_left (h : NF (ndσ .bracket σ x y)) : IsLie x := fun g A B hk => (h.br_left g A B hk).1
+
+end NFParts
+
+lemma read_lie (t : STree PE) (ht : NF t) (hL : IsLie t) : ∃ v, read t = t.first :: v := by
+  induction t with
+  | leaf a => exact ⟨[], rfl⟩
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ] at ht hL ⊢
+    obtain rfl := hL _ _ _ (kids_ndσ _ _ _ _)
+    obtain ⟨v, hv⟩ := ih 0 ht.left ht.lie_left
+    exact ⟨v ++ read (c 1), by rw [read_bracket, hv, first_ndσ]; rfl⟩
+
+lemma read_lie_strict {t : STree PE} (ht : NF t) (hs : t.IsShuffle) (hn : t.labels.Nodup)
+    (hL : IsLie t) : ∃ v, read t = t.first :: v ∧ ∀ x ∈ v, t.first < x := by
+  obtain ⟨v, hv⟩ := read_lie t ht hL
+  have hnd := nodup_read hn
+  rw [hv, List.nodup_cons] at hnd
+  refine ⟨v, hv, fun x hx => lt_of_le_of_ne (first_le_read hs (by rw [hv]; simp [hx])) ?_⟩
+  rintro rfl
+  exact hnd.1 hx
+
+/-- **The tail of the left input of a bracket** comes after its right input. -/
+lemma tail_bracket (X : STree PE) : ∀ Y : STree PE, NF (ndσ .bracket 1 X Y) →
+    (ndσ .bracket 1 X Y).IsShuffle → ∀ x ∈ (read X).tail, Y.first < x := by
+  induction X with
+  | leaf a => intro _ _ _ x hx; simp [read] at hx
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    intro Y ht hs x hx
+    rw [node_eq_ndσ] at ht hs hx
+    obtain ⟨rfl, hBY⟩ := ht.br_left _ _ _ (kids_ndσ _ _ _ _)
+    have hX := ht.left
+    obtain rfl := hX.one
+    have hXs := (isShuffle_ndσ hs).1
+    have ih' := ih 0 (c 1) hX hXs
+    rw [read_bracket, List.tail_append_of_ne_nil (read_ne_nil _), List.mem_append] at hx
+    rcases hx with hx | hx
+    · exact hBY.trans (ih' x hx)
+    · exact hBY.trans_le (first_le_read (isShuffle_ndσ hXs).2.1 hx)
+
+/-- **The left input of a product begins below its right input.** -/
+lemma head_mul (X Y : STree PE) (ht : NF (ndσ .mul 1 X Y)) (hs : (ndσ .mul 1 X Y).IsShuffle) :
+    ∃ a v, read X = a :: v ∧ a < Y.first := by
+  have hXY := (isShuffle_ndσ hs).2.2
+  cases X with
+  | leaf a => exact ⟨a, [], rfl, hXY⟩
+  | node e c =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    rw [node_eq_ndσ] at ht hs hXY ⊢
+    have hX := ht.left
+    cases g
+    · obtain ⟨v, hv⟩ := read_lie (c 1) hX.right hX.lie_right
+      exact ⟨(c 1).first, v ++ read (c 0), by rw [read_mul, hv]; rfl,
+        ht.mul_left _ _ (kids_ndσ _ _ _ _)⟩
+    · obtain ⟨v, hv⟩ := read_lie _ hX isLie_bracket
+      exact ⟨_, v, hv, hXY⟩
+
+lemma read_bracket_ne_mul {X Y X' Y' : STree PE} (ht : NF (ndσ .bracket 1 X Y))
+    (hs : (ndσ .bracket 1 X Y).IsShuffle) (ht' : NF (ndσ .mul 1 X' Y'))
+    (hs' : (ndσ .mul 1 X' Y').IsShuffle) (hn' : (ndσ .mul 1 X' Y').labels.Nodup) :
+    read (ndσ .bracket 1 X Y) ≠ read (ndσ .mul 1 X' Y') := by
+  intro h
+  obtain ⟨v, hv⟩ := read_lie _ ht isLie_bracket
+  rw [labels_ndσ] at hn'
+  have hn'' := Multiset.nodup_add.1 hn'
+  obtain ⟨w, hw, -⟩ := read_lie_strict ht'.right (isShuffle_ndσ hs').2.1 hn''.2.1 ht'.lie_right
+  have hX' := (isShuffle_ndσ hs').2.2
+  have hmem : X'.first ∈ read (ndσ .bracket 1 X Y) := by
+    rw [h, read_mul]
+    exact List.mem_append_right _ (Multiset.mem_coe.1 (by
+      rw [coe_read]; exact first_mem (isShuffle_ndσ hs').1))
+  have hle := first_le_read hs hmem
+  rw [h, read_mul, hw, List.cons_append, List.cons.injEq] at hv
+  rw [first_ndσ] at hle hv
+  omega
+
+/-- **The reading word determines a structurally normal shuffle tree.** -/
+theorem read_injective (t : STree PE) : ∀ t' : STree PE, NF t → NF t' → t.IsShuffle →
+    t'.IsShuffle → t.labels.Nodup → t'.labels.Nodup → read t = read t' → t = t' := by
+  induction t with
+  | leaf a =>
+    intro t' _ _ _ _ _ _ h
+    cases t' with
+    | leaf b => simpa [read] using h
+    | node e c =>
+      obtain ⟨⟨g⟩, σ⟩ := e
+      rw [node_eq_ndσ] at h
+      have := congrArg List.length h
+      have h0 := List.length_pos_of_ne_nil (read_ne_nil (c 0))
+      have h1 := List.length_pos_of_ne_nil (read_ne_nil (c 1))
+      cases g
+      · rw [read_mul, List.length_append] at this
+        simp only [read, List.length_singleton] at this
+        omega
+      · rw [read_bracket, List.length_append] at this
+        simp only [read, List.length_singleton] at this
+        omega
+  | node e c ih =>
+    obtain ⟨⟨g⟩, σ⟩ := e
+    intro t' ht ht' hs hs' hn hn' h
+    rw [node_eq_ndσ] at ht hs hn h ⊢
+    obtain rfl := ht.one
+    cases t' with
+    | leaf b =>
+      have := congrArg List.length h
+      have h0 := List.length_pos_of_ne_nil (read_ne_nil (c 0))
+      have h1 := List.length_pos_of_ne_nil (read_ne_nil (c 1))
+      cases g
+      · rw [read_mul, List.length_append] at this
+        simp only [read, List.length_singleton] at this
+        omega
+      · rw [read_bracket, List.length_append] at this
+        simp only [read, List.length_singleton] at this
+        omega
+    | node e' c' =>
+      obtain ⟨⟨g'⟩, σ'⟩ := e'
+      rw [node_eq_ndσ] at ht' hs' hn' h ⊢
+      obtain rfl := ht'.one
+      rw [labels_ndσ] at hn hn'
+      have hN := Multiset.nodup_add.1 hn
+      have hN' := Multiset.nodup_add.1 hn'
+      rw [← labels_ndσ (g := g) (σ := 1)] at hn
+      rw [← labels_ndσ (g := g') (σ := 1)] at hn'
+      have hS := isShuffle_ndσ hs
+      have hS' := isShuffle_ndσ hs'
+      have key : read (c 0) = read (c' 0) → read (c 1) = read (c' 1) →
+          ndσ g 1 (c 0) (c 1) = ndσ g 1 (c' 0) (c' 1) := fun e₀ e₁ => by
+        rw [ih 0 _ ht.left ht'.left hS.1 hS'.1 hN.1 hN'.1 e₀,
+          ih 1 _ ht.right ht'.right hS.2.1 hS'.2.1 hN.2.1 hN'.2.1 e₁]
+      obtain ⟨u, hu, hu'⟩ := read_lie_strict ht.right hS.2.1 hN.2.1 ht.lie_right
+      obtain ⟨u', hv, hv'⟩ := read_lie_strict ht'.right hS'.2.1 hN'.2.1 ht'.lie_right
+      cases g <;> cases g'
+      · obtain ⟨a, w, ha, ha'⟩ := head_mul _ _ ht hs
+        obtain ⟨a', w', hb, hb'⟩ := head_mul _ _ ht' hs'
+        rw [read_mul, read_mul, hu, hv, ha, hb] at h
+        obtain ⟨e₁, e₂⟩ := splitM (fun x hx => (hu' x hx).le) ha' (fun x hx => (hv' x hx).le)
+          hb' h
+        rw [← hu, ← hv] at e₁
+        rw [← ha, ← hb] at e₂
+        exact key e₂ e₁
+      · exact absurd h.symm (read_bracket_ne_mul ht' hs' ht hs hn)
+      · exact absurd h (read_bracket_ne_mul ht hs ht' hs' hn')
+      · have hX := tail_bracket _ _ ht hs
+        have hX' := tail_bracket _ _ ht' hs'
+        rw [read_bracket, read_bracket, hu, hv] at h
+        obtain ⟨e₁, e₂⟩ := splitB (read_ne_nil _) (read_ne_nil _) hX hu' hX' hv' h
+        rw [← hu, ← hv] at e₂
+        exact key e₁ e₂
+
+/-! ## The upper bound -/
+
+/-- **There are at most `n!` normal monomials on `n` leaves.** -/
+theorem card_irr_le (n : ℕ) : Finite ((rules K).rw (Finset.range n)).Irr ∧
+    Nat.card ((rules K).rw (Finset.range n)).Irr ≤ n.factorial := by
+  set L := (List.range n).permutations.toFinset
+  have hmem : ∀ U : SMono PE (Finset.range n), read U.1 ∈ L := fun U => by
+    rw [List.mem_toFinset, List.mem_permutations, ← Multiset.coe_eq_coe, coe_read, U.labels_eq]
+    rfl
+  let f : ((rules K).rw (Finset.range n)).Irr → L := fun U => ⟨read U.1.1, hmem U.1⟩
+  have hf : Function.Injective f := by
+    rintro ⟨U, hU⟩ ⟨U', hU'⟩ h
+    have h' : read U.1 = read U'.1 := congrArg Subtype.val h
+    rw [(rules K).mem_irr_iff] at hU hU'
+    exact Subtype.ext (Subtype.ext (read_injective U.1 U'.1
+      (nf_of_normal hU U.1 [] (get?_nil _)) (nf_of_normal hU' U'.1 [] (get?_nil _))
+      U.isShuffle U'.isShuffle U.nodup U'.nodup h'))
+  refine ⟨Finite.of_injective f hf, ?_⟩
+  have hL : Nat.card L = n.factorial := by
+    rw [Nat.card_eq_fintype_card, Fintype.card_coe, List.toFinset_card_of_nodup
+      (List.nodup_permutations _ List.nodup_range), List.length_permutations,
+      List.length_range]
+  exact (Nat.card_le_card_of_injective f hf).trans hL.le
+
+variable (K) in
+/-- **The Poisson operad has at most `n!` operations of arity `n`**, and finitely many: the normal
+monomials of the rules span. -/
+theorem finite_finrank_le (A : Type) [Fintype A] [LinearOrder A] :
+    Module.Finite K (Pois K A) ∧ Module.finrank K (Pois K A) ≤ (Fintype.card A).factorial := by
+  have := (card_irr_le (K := K) (Fintype.card A)).1
+  obtain ⟨h1, h2⟩ := FreeSet.finrank_le_card_irr (rel23 (r₂P K) (r₃P K)) (rules K) rules_le A
+  exact ⟨h1, h2.trans (card_irr_le _).2⟩
+
+variable (K) in
+/-- **The Poisson operad has exactly `n!` operations of arity `n`.** -/
+theorem finrank_pois {n : ℕ} (hn : 0 < n) :
+    Module.finrank K (Pois K (Finset.range n)) = n.factorial := by
+  obtain ⟨hfin, hle⟩ := finite_finrank_le K (Finset.range n)
+  rw [Fintype.card_coe, Finset.card_range] at hle
+  exact le_antisymm hle (@factorial_le_finrank K _ n hn hfin)
+
+variable (K) in
+/-- **The Poisson operad has exactly `n!` operations on `n` inputs**, on any nonempty finite set
+of inputs. -/
+theorem finrank_pois_eq (A : Type) [Fintype A] [DecidableEq A] [Nonempty A] :
+    Module.finrank K (Pois K A) = (Fintype.card A).factorial := by
+  let e : A ≃ Finset.range (Fintype.card A) := Fintype.equivOfCardEq (by simp)
+  rw [(SymOperad.mapEquiv (R := K) (P := Pois K) e).finrank_eq,
+    finrank_pois K Fintype.card_pos]
 
 end PoisDim
 

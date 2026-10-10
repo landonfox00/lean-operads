@@ -1703,3 +1703,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.PoisDim.killBad_comb
 #print axioms Operad.PoisDim.linearIndependent_lead
 #print axioms Operad.PoisDim.factorial_le_finrank
+#print axioms Operad.FreeSet.finrank_le_card_irr
+#print axioms Operad.PoisDim.poisOrder
+#print axioms Operad.PoisDim.rules
+#print axioms Operad.PoisDim.rules_le
+#print axioms Operad.PoisDim.nf_of_normal
+#print axioms Operad.PoisDim.read_injective
+#print axioms Operad.PoisDim.card_irr_le
+#print axioms Operad.PoisDim.finite_finrank_le
+#print axioms Operad.PoisDim.finrank_pois
+#print axioms Operad.PoisDim.finrank_pois_eq

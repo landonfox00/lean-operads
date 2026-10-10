@@ -685,6 +685,17 @@ planar composition at the standard orders (`EndGr.sv_nsc`) and the Koszul signs 
 graded antisymmetry, the Poisson rule and the graded Jacobi identity in the conventions of
 `Operad/GerBV.lean` (`Ger.IsGer.brk_jacobi`).
 
+**The dimensions of the Poisson operad.** `Operad/KirillovKostant.lean` builds the
+Kirillov–Kostant Poisson bracket on polynomials in words, `{X u, X v} = X (u ++ v) - X (v ++ u)`
+(`KK.wordPoisAlg`). `Operad/PoisModel.lean` evaluates the Poisson operad there and finds `n!`
+linearly independent operations of arity `n` (`PoisDim.factorial_le_finrank`).
+`Operad/PoisPBW.lean` proves the matching upper bound with a rewriting system on the shuffle
+presentation: a path order on words counting brackets and products (`PoisDim.poisOrder`), eight
+rules whose ideal lies in the Poisson ideal (`PoisDim.rules_le`), and normal monomials — left combs
+of products of Lie trees — that are determined by their reading words, so there are at most `n!`
+of them (`PoisDim.card_irr_le`). Normal monomials always span, without resolvability
+(`FreeSet.finrank_le_card_irr`), so **`dim Pois(n) = n!`** (`PoisDim.finrank_pois_eq`).
+
 **The diamond lemma and Gröbner bases in any arity.** `Operad/Diamond.lean` proves **Bergman's
 diamond lemma** for linear rewriting on a free module with a well-founded order: the irreducible
 monomials span a complement of the rewriting ideal if and only if every ambiguity is resolvable
