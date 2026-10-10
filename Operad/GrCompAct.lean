@@ -745,6 +745,68 @@ noncomputable def actL (i : S) :
 @[simp] lemma actL_apply (i : S) (z : C Y) (x : GrComposite R V C S) :
     actL R V i z x = act R V i z x := rfl
 
+/-! ## Sequential associativity -/
+
+section Seq
+
+variable {D : Type} [Fintype D] [DecidableEq D] {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [Fintype D] [DecidableEq D] [Fintype A] [DecidableEq A] in
+lemma actOwner_seq (f : S → A) (i : S) (j : Y) :
+    actOwner (Y := D) (actOwner (Y := Y) f i) (Sum.inr j) ∘ (seqEquiv i j D).symm
+      = actOwner f i := by
+  funext x
+  rcases x with s | (y | d) <;> rfl
+
+/-- **Sequential associativity of the action**, for homogeneous operations, on generators given
+by owners. -/
+lemma map_actOwn_seq (L : LinOrd A) (m : V A) (f : S → A) (yy : ∀ a, C (Fib f a)) (i : S)
+    (j : Y) {q r : Bool} (y : C Y) (z : C D) (hy : GrOperad.par (R := R) q y = y)
+    (hz : GrOperad.par (R := R) r z = z) :
+    map (seqEquiv i j D) (act R V (Sum.inr j) z (actOwn R L m f yy i y))
+      = actOwn R L m f yy i (GrOperad.comp (R := R) j y z) := by
+  have hyz : GrOperad.par (R := R) (xor q r) (GrOperad.comp (R := R) j y z)
+      = GrOperad.comp (R := R) j y z := by
+    rw [← hy, ← hz, GrOperad.comp_par]
+  rw [actOwn_hom L m f yy i y hy, act_mk_ownGen, actOwn_hom _ m _ _ _ z hz,
+    actOwn_hom L m f yy i _ hyz, map_mk_ownGen, mk_ownGen_congr _ m (actOwner_seq f i j)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+      (Sum.inr j) z r a (actLin (R := R) L f i y q a (yy a))))
+    = actLin (R := R) L f i (GrOperad.comp (R := R) j y z) (xor q r) a (yy a)
+  by_cases h : f i = a
+  · have h1 : actOwner (Y := Y) f i (Sum.inr j) = a := h
+    rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h1, actLin_eq _ _ _ _ _ _ h]
+    have hc := GrOperad.map_comp (R := R) (actEq (Y := Y) f i a h) (Equiv.refl D)
+      (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y)
+      (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y) z
+    rw [GrOperad.map_refl] at hc
+    have hc' : GrOperad.comp (R := R) (⟨Sum.inr j, h1⟩ : Fib (actOwner (Y := Y) f i) a)
+        (GrOperad.map (R := R) (actEq (Y := Y) f i a h)
+          (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y)) z
+        = GrOperad.map (R := R) (compEquiv (actEq (Y := Y) f i a h) (Equiv.refl D)
+            (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y))
+          (GrOperad.comp (R := R) (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y)
+            (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y) z) := hc.symm
+    have hs := GrOperad.comp_assoc_seq (R := R) (⟨i, h⟩ : Fib f a) j (yy a) y z
+    rw [hc', ← hs]
+    simp only [← GrOperad.map_trans]
+    refine gmap_comp_congr _ _ _ ?_ _
+    rintro (⟨(⟨⟨t, ht⟩, hne⟩ | t), hne'⟩ | d) <;> rfl
+  · have h1 : actOwner (Y := Y) f i (Sum.inr j) ≠ a := h
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h1, actLin_ne _ _ _ _ _ _ h]
+    simp only [GrOperad.map_tw]
+    rw [GrOperad.tw_tw', show actOwner (Y := Y) f i (Sum.inr j) = f i from rfl]
+    congr 1
+    · cases q <;> cases r <;> simp
+    · simp only [← GrOperad.map_trans]
+      apply gmap_congr
+      intro b
+      exact Subtype.ext rfl
+
+end Seq
+
 end GrComposite
 
 end Operad
