@@ -219,3 +219,6 @@ import Operad.GrCompOwn
 import Operad.GrCompAct
 import Operad.GrRoot
 import Operad.FreeGrRoot
+import Operad.GrTotal
+import Operad.GrCompSpan
+import Operad.FreeGrGraft

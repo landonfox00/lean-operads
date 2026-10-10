@@ -1780,3 +1780,10 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.rootHom
 #print axioms Operad.FreeGrL.root_comp
 #print axioms Operad.FreeGrL.root_ι
+#print axioms Operad.SgnOp.total_op_reorder
+#print axioms Operad.GrComposite.total
+#print axioms Operad.GrComposite.total_act
+#print axioms Operad.GrComposite.total_corGen
+#print axioms Operad.GrComposite.induction_act
+#print axioms Operad.FreeGrL.root_graft
+#print axioms Operad.FreeGrL.graft_root

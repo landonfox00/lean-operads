@@ -402,7 +402,8 @@ noncomputable def cor (L : LinOrd A) (p : Bool) (x : P A) : SgnOp R P A :=
 @[simp] lemma cor_op (L : LinOrd A) (p : Bool) (x : P A) :
     (cor (R := R) L p x).op = GrOperad.par (R := R) p x := rfl
 
-@[simp] lemma cor_dat (L : LinOrd A) (p : Bool) (x : P A) : (cor (R := R) L p x).dat = corData L p :=
+@[simp] lemma cor_dat (L : LinOrd A) (p : Bool) (x : P A) :
+    (cor (R := R) L p x).dat = corData L p :=
   rfl
 
 lemma total_cor_lin (L : LinOrd A) (p : Bool) (c₁ c₂ : R) (x₁ x₂ : P A)
@@ -507,7 +508,7 @@ theorem total_units {X : Type} [Fintype X] [DecidableEq X] (u : S X) {C : X → 
   rw [← SetOperad.map_trans, Equiv.self_trans_symm, SetOperad.map_refl]
 
 /-- Relabelling a padding along a map sending exactly one element to the slot. -/
-def padRel {X J : Type} [DecidableEq X] [DecidableEq J] {j₀ : X} {j : J} (κ : X → J)
+def padRel {X J : Type} {j₀ : X} {j : J} (κ : X → J)
     (hκ : ∀ b, κ b = j ↔ b = j₀) (b : X) : Pad j₀ Y b ≃ Pad j Y (κ b) where
   toFun
     | Sum.inl ⟨u, h⟩ => Sum.inl ⟨u, fun e => h ((hκ b).1 e)⟩
@@ -783,8 +784,8 @@ lemma total_map (σ : S ≃ S') (ω : GrComposite R M P S) :
 
 /-- **The total composite of a corolla** is its outer operation. -/
 lemma total_corGen {A : Type} [Fintype A] [DecidableEq A] (L : LinOrd A) (m : M A)
-    (e : A ≃ S) : total R F (mk R (corGen (C := P) (R := R) L m e)) = GrOperad.map (R := R) e (F.app A m)
-    := by
+    (e : A ≃ S) :
+    total R F (mk R (corGen (C := P) (R := R) L m e)) = GrOperad.map (R := R) e (F.app A m) := by
   rw [total_mk, totalFun_eq_single F _ (fun _ => false) fun _ => GrOperad.par_one]
   have h1 : ∀ p : Bool, totalGen F (corGen (C := P) (R := R) L m e) p (fun _ => false)
       = GrOperad.map (R := R) e (GrOperad.par (R := R) p (F.app A m)) := fun p => by
