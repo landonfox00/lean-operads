@@ -761,6 +761,52 @@ noncomputable def total : GrComposite R M P S →ₗ[R] P S := lift (totalFun F)
 @[simp] lemma total_mk (g : GrCompGen M P S) : total R F (mk R g) = totalFun F g :=
   lift_mk _ _ g
 
+/-! ### Relabelling and corollas -/
+
+section Basic
+
+variable {S' : Type} [Fintype S'] [DecidableEq S']
+
+/-- **Total composition commutes with relabelling.** -/
+lemma total_map (σ : S ≃ S') (ω : GrComposite R M P S) :
+    total R F (map σ ω) = GrOperad.map (R := R) σ (total R F ω) := by
+  induction ω using induction_on with
+  | h0 => simp only [map_zero]
+  | hadd x y hx hy => simp only [map_add, hx, hy]
+  | hsmul r x hx => simp only [map_smul, hx]
+  | hmk g =>
+    rw [map_mk, total_mk, total_mk, totalFun, totalFun, map_sum]
+    refine Finset.sum_congr rfl fun p _ => ?_
+    rw [map_sum]
+    refine Finset.sum_congr rfl fun c _ => ?_
+    exact GrOperad.map_trans (R := R) g.e σ _
+
+/-- **The total composite of a corolla** is its outer operation. -/
+lemma total_corGen {A : Type} [Fintype A] [DecidableEq A] (L : LinOrd A) (m : M A)
+    (e : A ≃ S) : total R F (mk R (corGen (C := P) (R := R) L m e)) = GrOperad.map (R := R) e (F.app A m)
+    := by
+  rw [total_mk, totalFun_eq_single F _ (fun _ => false) fun _ => GrOperad.par_one]
+  have h1 : ∀ p : Bool, totalGen F (corGen (C := P) (R := R) L m e) p (fun _ => false)
+      = GrOperad.map (R := R) e (GrOperad.par (R := R) p (F.app A m)) := fun p => by
+    simp only [totalGen]
+    have h2 : (SetOperad.total (cor (R := R) L p (F.app A m))
+          fun _ => cor (R := R) (ordOf Unit) false (GrOperad.one (R := R) (P := P))).op
+        = (SetOperad.total (cor (R := R) L p (F.app A m))
+          fun _ => (SetOperad.one : SgnOp R P Unit)).op :=
+      total_op_congr _ (fun _ => GrOperad.par_one) (fun _ => rfl)
+    have h3 : SetOperad.total (cor (R := R) L p (F.app A m)) (fun _ => (SetOperad.one :
+        SgnOp R P Unit)) = SetOperad.map (Equiv.sigmaPUnit A).symm (cor (R := R) L p (F.app A m))
+        := by
+      conv_rhs => rw [← SetOperad.total_one_right (cor (R := R) L p (F.app A m))]
+      rw [SetOperad.map_symm_map]
+    rw [h2, h3, map_op, ← GrOperad.map_trans]
+    refine gmap_congr (fun a => ?_) _
+    rfl
+  simp only [h1, ← map_sum, Fintype.sum_bool]
+  rw [add_comm, GrOperad.par_add]
+
+end Basic
+
 /-! ### Total composition is a morphism of right modules -/
 
 section Act
