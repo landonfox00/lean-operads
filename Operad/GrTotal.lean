@@ -181,6 +181,53 @@ lemma sigma_rL (R : Type u) [CommRing R] (L L' : LinOrd A) (c : A → Bool) (l :
         Bool.eq_false_iff.2 fun h => h2 ((GrComposite.ltB_eq_true _ _ _).1 h)]
       simp
 
+/-- **The parity after an input of an inserted operation**: its own in that operation, that of
+its owner, and the parities of the operations inserted after its owner. -/
+lemma fill_aft_inr (D : SgnData A) (d : (a : A) → SgnData (B a)) (l : List A) (hl : l.Nodup)
+    (a : {a : A // a ∈ l}) (b : B a.1) :
+    (fill (S := SgnD) D d l hl).aft (Sum.inr ⟨a, b⟩)
+      = xor ((d a.1).aft b) (xor (D.aft a.1) (aftL D.ord (fun a => (d a).tot) a.1 l)) := by
+  induction l with
+  | nil => exact absurd a.2 List.not_mem_nil
+  | cons a₀ l ih =>
+    obtain ⟨ha₀, hl'⟩ := List.nodup_cons.1 hl
+    rw [fill_cons]
+    show (SgnData.map _ (SgnData.comp _ _ _)).aft _ = _
+    rw [SgnData.map_aft]
+    by_cases h : a.1 = a₀
+    · obtain ⟨a, ha⟩ := a
+      simp only at h
+      subst h
+      rw [show (stepEquiv (B := B) a l ha₀).symm (Sum.inr ⟨⟨a, ha⟩, b⟩) = Sum.inr b from by
+          simp [stepEquiv],
+        SgnData.comp_aft_inr, fill_aft_inl D d l hl' ⟨a, ha₀⟩, aftL, GrComposite.ltB_self,
+        Bool.false_and, Bool.false_xor]
+    · have hal : a.1 ∈ l := (List.mem_cons.1 a.2).resolve_left h
+      rw [show (stepEquiv (B := B) a₀ l ha₀).symm (Sum.inr ⟨a, b⟩)
+          = Sum.inl ⟨Sum.inr ⟨⟨a.1, hal⟩, b⟩, Sum.inr_ne_inl⟩ from by
+          simp [stepEquiv, h],
+        SgnData.comp_aft_inl, ih hl' ⟨a.1, hal⟩ b, aftL]
+      have hord := fill_ord_inr_inl D d l hl' ⟨a.1, hal⟩ b ⟨a₀, ha₀⟩
+      by_cases h' : D.ord.lt a.1 a₀
+      · rw [if_pos (hord.2 h'), (GrComposite.ltB_eq_true _ _ _).2 h', Bool.true_and]
+        cases (d a.1).aft b <;> cases D.aft a.1 <;> cases (d a₀).tot <;>
+          cases aftL D.ord (fun a => (d a).tot) a.1 l <;> rfl
+      · rw [if_neg (fun h'' => h' (hord.1 h'')),
+          show GrComposite.ltB D.ord a.1 a₀ = false from Bool.eq_false_iff.2 fun h'' =>
+            h' ((GrComposite.ltB_eq_true _ _ _).1 h''), Bool.false_and, Bool.false_xor]
+
+omit [Fintype A] in
+lemma sigma_aftL₁ (R : Type u) [CommRing R] (L : LinOrd A) (c : A → Bool) (t : Bool) (a : A)
+    (l : List A) (hl : l.Nodup) :
+    σ R (t && aftL L c a l) = ∏ b ∈ l.toFinset, σ R (t && GrComposite.ltB L a b && c b) := by
+  induction l with
+  | nil => simp [aftL]
+  | cons b l ih =>
+    obtain ⟨hb, hl'⟩ := List.nodup_cons.1 hl
+    rw [List.toFinset_cons, Finset.prod_insert (by simpa using hb), ← ih hl', ← σ_xor, aftL]
+    congr 1
+    cases t <;> cases c b <;> cases GrComposite.ltB L a b <;> cases aftL L c a l <;> rfl
+
 end SgnData
 
 /-! ## Fillings of homogeneous operations with sign data -/
@@ -385,6 +432,82 @@ lemma total_cor_update_smul (x : SgnOp R P A) (L : ∀ a, LinOrd (B a)) (c : A �
   exact h
 
 end SgnOp
+
+/-! ## Composing into a total composite -/
+
+namespace May
+
+section CompTotal
+
+variable {S : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad S]
+  {A : Type} [Fintype A] [DecidableEq A] {B : A → Type} [∀ a, Fintype (B a)]
+  [∀ a, DecidableEq (B a)] {Y : Type} [Fintype Y] [DecidableEq Y]
+
+/-- **The padded family** in a set operad: `Z` at `j` and the unit elsewhere. -/
+def padS {J : Type} [DecidableEq J] (j : J) (Z : S Y) (p : J) : S (Pad j Y p) :=
+  if h : p = j then SetOperad.map (padIn h) Z else SetOperad.map (padOut h) SetOperad.one
+
+/-- **Composing into a total composite** composes into one of the inserted operations: the total
+composite with the padded family is that of the total composites of the inserted operations with
+their padded families. -/
+theorem comp_total (x : S A) (y : (a : A) → S (B a)) (j : Σ a, B a) (Z : S Y) :
+    SetOperad.comp j (SetOperad.total x y) Z
+      = SetOperad.map ((Equiv.sigmaAssoc fun a b => Pad j Y ⟨a, b⟩).symm.trans (padEquiv j Y))
+        (SetOperad.total x fun a => SetOperad.total (y a) fun b => padS j Z ⟨a, b⟩) := by
+  letI := SetOperad.toMaySetOperad S
+  rw [← MaySetOperad.comp_toMaySetOperad, MaySetOperad.comp_def,
+    ← SetOperad.total_assoc x y fun a b => padS j Z ⟨a, b⟩, ← SetOperad.map_trans,
+    ← Equiv.trans_assoc, Equiv.self_trans_symm, Equiv.refl_trans]
+  rfl
+
+/-- **A total composite with units** is a relabelling. -/
+theorem total_units {X : Type} [Fintype X] [DecidableEq X] (u : S X) {C : X → Type}
+    [∀ b, Fintype (C b)] [∀ b, DecidableEq (C b)] (w : (b : X) → S (C b)) (τ : ∀ b, Unit ≃ C b)
+    (hw : ∀ b, w b = SetOperad.map (τ b) SetOperad.one) :
+    SetOperad.total u w
+      = SetOperad.map ((Equiv.sigmaPUnit X).symm.trans (Equiv.sigmaCongrRight τ)) u := by
+  have h := SetOperad.total_map (Equiv.refl X) τ u (fun _ => SetOperad.one) w hw
+  rw [SetOperad.map_refl] at h
+  rw [← h, SetOperad.map_trans]
+  congr 1
+  conv_rhs => rw [← SetOperad.total_one_right u]
+  rw [← SetOperad.map_trans, Equiv.self_trans_symm, SetOperad.map_refl]
+
+/-- Relabelling a padding along a map sending exactly one element to the slot. -/
+def padRel {X J : Type} [DecidableEq X] [DecidableEq J] {j₀ : X} {j : J} (κ : X → J)
+    (hκ : ∀ b, κ b = j ↔ b = j₀) (b : X) : Pad j₀ Y b ≃ Pad j Y (κ b) where
+  toFun
+    | Sum.inl ⟨u, h⟩ => Sum.inl ⟨u, fun e => h ((hκ b).1 e)⟩
+    | Sum.inr ⟨z, h⟩ => Sum.inr ⟨z, (hκ b).2 h⟩
+  invFun
+    | Sum.inl ⟨u, h⟩ => Sum.inl ⟨u, fun e => h ((hκ b).2 e)⟩
+    | Sum.inr ⟨z, h⟩ => Sum.inr ⟨z, (hκ b).1 h⟩
+  left_inv := by rintro (⟨u, h⟩ | ⟨z, h⟩) <;> rfl
+  right_inv := by rintro (⟨u, h⟩ | ⟨z, h⟩) <;> rfl
+
+lemma padS_rel {X J : Type} [DecidableEq X] [DecidableEq J] {j₀ : X} {j : J} (κ : X → J)
+    (hκ : ∀ b, κ b = j ↔ b = j₀) (Z : S Y) (b : X) :
+    padS j Z (κ b) = SetOperad.map (padRel κ hκ b) (padS j₀ Z b) := by
+  by_cases h : b = j₀
+  · rw [padS, padS, dif_pos ((hκ b).2 h), dif_pos h, ← SetOperad.map_trans]
+    refine map_congr ?_ Z
+    intro z
+    rfl
+  · rw [padS, padS, dif_neg (fun e => h ((hκ b).1 e)), dif_neg h, ← SetOperad.map_trans]
+    refine map_congr ?_ (SetOperad.one : S Unit)
+    intro u
+    rfl
+
+/-- **A partial composite is a total composite with a padded family.** -/
+lemma comp_eq_total_padS {X : Type} [Fintype X] [DecidableEq X] (j₀ : X) (u : S X) (Z : S Y) :
+    SetOperad.comp j₀ u Z = SetOperad.map (padEquiv j₀ Y) (SetOperad.total u (padS j₀ Z)) := by
+  letI := SetOperad.toMaySetOperad S
+  rw [← MaySetOperad.comp_toMaySetOperad, MaySetOperad.comp_def]
+  rfl
+
+end CompTotal
+
+end May
 
 /-! ## Total composition on graded composites -/
 
