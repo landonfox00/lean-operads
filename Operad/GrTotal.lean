@@ -357,6 +357,39 @@ lemma total_op_reorder {x x' : SgnOp R P A} (hop : x.op = x'.op) (haft : x.dat.a
     SgnData.sigma_rL R _ _ _ _ (Finset.nodup_toList _), Finset.toList_toFinset]
   rfl
 
+/-- **A filling with rescaled inserted operations** is rescaled by the product of the scalars. -/
+lemma fill_op_smul (x : SgnOp R P A) {y y' : (a : A) → SgnOp R P (B a)} (s : A → R)
+    (hd : ∀ a, (y a).dat = (y' a).dat) (hop : ∀ a, (y a).op = s a • (y' a).op) (l : List A)
+    (hl : l.Nodup) :
+    (fill x y l hl).op = (l.map s).prod • (fill x y' l hl).op := by
+  induction l with
+  | nil => simp only [fill_nil, List.map_nil, List.prod_nil, one_smul]
+  | cons a₀ l ih =>
+    obtain ⟨ha₀, hl'⟩ := List.nodup_cons.1 hl
+    have hdat : (fill x y l hl').dat = (fill x y' l hl').dat := by
+      rw [fill_dat, fill_dat, show (fun a => (y a).dat) = fun a => (y' a).dat from funext hd]
+    rw [fill_cons, fill_cons, map_op, map_op, comp_op, comp_op, ih hl', hop a₀, hdat, hd a₀,
+      map_smul (GrOperad.comp (R := R) _), LinearMap.smul_apply, map_smul, map_smul, map_smul,
+      map_smul, smul_comm (σ R _), smul_smul, List.map_cons, List.prod_cons, mul_comm (s a₀),
+      map_smul, smul_smul, smul_smul]
+    ring_nf
+
+/-- **A total composite with rescaled inserted operations** is rescaled by the product of the
+scalars. -/
+lemma total_op_smul (x : SgnOp R P A) {y y' : (a : A) → SgnOp R P (B a)} (s : A → R)
+    (hd : ∀ a, (y a).dat = (y' a).dat) (hop : ∀ a, (y a).op = s a • (y' a).op) :
+    (SetOperad.total x y).op = (∏ a, s a) • (SetOperad.total x y').op := by
+  rw [SetOperad.total, SetOperad.total, map_op, map_op,
+    fill_op_smul x s hd hop _ (Finset.nodup_toList _), map_smul, Finset.prod_map_toList]
+
+/-- **The parity after an input of a total composite.** -/
+lemma total_aft (x : SgnOp R P A) (y : (a : A) → SgnOp R P (B a)) (a : A) (b : B a) :
+    (SetOperad.total x y).dat.aft ⟨a, b⟩
+      = xor ((y a).dat.aft b) (xor (x.dat.aft a) (SgnData.aftL x.dat.ord (fun a => (y a).dat.tot) a
+          (Finset.univ : Finset A).toList)) := by
+  rw [SetOperad.total, map_dat, SgnData.map_aft, fill_dat]
+  exact SgnData.fill_aft_inr _ _ _ _ ⟨a, Finset.mem_toList.2 (Finset.mem_univ a)⟩ b
+
 /-! ### Corollas -/
 
 /-- The sign data of a corolla: an order of the inputs, no parity after them. -/
@@ -508,6 +541,88 @@ lemma comp_eq_total_padS {X : Type} [Fintype X] [DecidableEq X] (j₀ : X) (u : 
 end CompTotal
 
 end May
+
+/-! ### Total composition and the right action -/
+
+namespace GrComposite
+
+section ActPad
+
+variable {S A : Type} [DecidableEq S] [DecidableEq A]
+
+/-- **The inputs owned after composing at `i`**, as the padded inputs of a total composite. -/
+def actPad (f : S → A) (i : S) (Y : Type) (a : A) :
+    (Σ b : Fib f a, Pad (⟨f i, ⟨i, rfl⟩⟩ : Σ a, Fib f a) Y ⟨a, b⟩)
+      ≃ Fib (actOwner (Y := Y) f i) a where
+  toFun x := match x with
+    | ⟨b, Sum.inl ⟨_, h⟩⟩ =>
+        ⟨Sum.inl ⟨b.1, fun e => h (by
+          obtain ⟨b, hb⟩ := b
+          simp only at e
+          subst e
+          subst hb
+          rfl)⟩, b.2⟩
+    | ⟨_, Sum.inr ⟨y, h⟩⟩ => ⟨Sum.inr y, (congrArg Sigma.fst h).symm⟩
+  invFun x := match x with
+    | ⟨Sum.inl t, ht⟩ => ⟨⟨t.1, ht⟩, Sum.inl ⟨(), fun e => t.2
+        (congrArg (fun p : (Σ a, Fib f a) => p.2.1) e)⟩⟩
+    | ⟨Sum.inr y, hy⟩ => ⟨⟨i, hy⟩, Sum.inr ⟨y, by subst hy; rfl⟩⟩
+  left_inv := by
+    rintro ⟨⟨b, hb⟩, ⟨u, h⟩ | ⟨y, h⟩⟩
+    · rfl
+    · have e : b = i := congrArg (fun p : (Σ a, Fib f a) => p.2.1) h
+      subst e
+      rfl
+  right_inv := by
+    rintro ⟨t | y, h⟩ <;> rfl
+
+end ActPad
+
+section PadTotal
+
+variable {T : (A : Type) → [Fintype A] → [DecidableEq A] → Type v} [SetOperad T]
+  {S A Y : Type} [Fintype S] [DecidableEq S] [Fintype A] [DecidableEq A] [Fintype Y]
+  [DecidableEq Y]
+
+omit [Fintype A] in
+/-- **Away from the owner of `i`**, the inserted operation of a total composite with the padded
+family is relabelled. -/
+lemma total_padS_ne (f : S → A) (i : S) {a : A} (h : f i ≠ a) (v : T (Fib f a)) (Z : T Y) :
+    SetOperad.map (actPad f i Y a)
+        (SetOperad.total v fun b => padS (⟨f i, ⟨i, rfl⟩⟩ : Σ a, Fib f a) Z ⟨a, b⟩)
+      = SetOperad.map (actNe f i a h) v := by
+  have hb : ∀ b : Fib f a, (⟨a, b⟩ : Σ a, Fib f a) ≠ ⟨f i, ⟨i, rfl⟩⟩ :=
+    fun b e => h (congrArg Sigma.fst e).symm
+  rw [total_units v _ (fun b => padOut (hb b)) (fun b => dif_neg (hb b)), ← SetOperad.map_trans]
+  refine May.map_congr ?_ v
+  intro b
+  rfl
+
+omit [Fintype A] in
+/-- **At the owner of `i`**, the inserted operation of a total composite with the padded family
+is the partial composite at `i`. -/
+lemma total_padS_eq (f : S → A) (i : S) (v : T (Fib f (f i))) (Z : T Y) :
+    SetOperad.map (actPad f i Y (f i))
+        (SetOperad.total v fun b => padS (⟨f i, ⟨i, rfl⟩⟩ : Σ a, Fib f a) Z ⟨f i, b⟩)
+      = SetOperad.map (actEq f i (f i) rfl) (SetOperad.comp (⟨i, rfl⟩ : Fib f (f i)) v Z) := by
+  have hκ : ∀ b : Fib f (f i), (⟨f i, b⟩ : Σ a, Fib f a) = ⟨f i, ⟨i, rfl⟩⟩ ↔ b = ⟨i, rfl⟩ :=
+    fun b => ⟨fun e => eq_of_heq (Sigma.mk.inj e).2, fun e => e ▸ rfl⟩
+  have h1 := SetOperad.total_map (Equiv.refl _)
+    (B' := fun b => Pad (⟨f i, ⟨i, rfl⟩⟩ : Σ a, Fib f a) Y ⟨f i, b⟩)
+    (padRel (Y := Y) (Sigma.mk (f i)) hκ) v
+    (padS (⟨i, rfl⟩ : Fib f (f i)) Z) (fun b => padS (⟨f i, ⟨i, rfl⟩⟩ : Σ a, Fib f a) Z ⟨f i, b⟩)
+    (fun b => padS_rel (Sigma.mk (f i)) hκ Z b)
+  rw [SetOperad.map_refl] at h1
+  rw [← h1, comp_eq_total_padS, ← SetOperad.map_trans, ← SetOperad.map_trans]
+  refine May.map_congr ?_ _
+  rintro ⟨b, ⟨u, hu⟩ | ⟨y, hy⟩⟩
+  · rfl
+  · obtain rfl : b = ⟨i, rfl⟩ := hy
+    rfl
+
+end PadTotal
+
+end GrComposite
 
 /-! ## Total composition on graded composites -/
 
