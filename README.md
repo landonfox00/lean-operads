@@ -662,6 +662,23 @@ Theorem A this gives **the Koszul criterion: `P` is Koszul iff `P^¡ → B(P, I)
 quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
 `Operad/KoszulCriterion.lean`).
 
+**Graded composite products and root decompositions.** `Operad/GrComposite.lean` builds **the
+graded composite** `M ∘ N` of graded linear species: generators `m ⊗ (y_a)_a` with an order in
+which the inner operations are read, modulo multilinearity, relabelling the outer and the inner
+inputs, and reordering the inner operations at the Koszul sign (`GrComposite`,
+`GrComposite.instGrSpecies`), with leaf maps applying an endomorphism of `N` to one inner operation
+at a time (`GrComposite.leafMap`). For a graded operad `C`, **`V ∘ C` is a right `C`-module**:
+composing at an input composes into the inner operation owning it, with the Koszul sign of moving
+across the inner operations read after it (`GrComposite.act`, `Operad/GrCompAct.lean`), equivariant,
+unital, and sequentially and parallel associative (`GrComposite.map_act`,
+`GrComposite.map_act_one`, `GrComposite.map_act_seq`, `GrComposite.map_act_par`). With the left
+action through an augmentation this gives **the square-zero extension** `C ⋉ (V ∘ C)`, a graded
+operad (`GrComposite.SqExt.instGrOperad`, `Operad/GrRoot.lean`), and the morphism
+`T(W) → T(W) ⋉ (W ∘ T(W))` sending a generator `w` to `(w, w ⊗ (1, …, 1))` gives **the root
+decomposition** `ρ : T(W) → W ∘ T(W)` of the free graded operad, with
+`ρ(x ∘ᵢ y) = ρ(x) ◁ᵢ y + ε(x) ρ(y)` (`FreeGrL.root`, `FreeGrL.root_comp`,
+`Operad/FreeGrRoot.lean`).
+
 **Homotopy algebras over a quadratic operad.** A `P∞`-algebra on a dg super module `V` is an
 algebra over `ΩP^¡`, a twisting morphism `P^¡ → End_V` (`Koszul.PInfAlgebra`). Every dg
 `P`-algebra is one, by restriction along `ΩP^¡ → P`, with twisting morphism `φ ∘ κ` sending a

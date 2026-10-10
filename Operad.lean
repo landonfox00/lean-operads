@@ -215,3 +215,7 @@ import Operad.BVModel
 import Operad.SymSuboperad
 import Operad.HyperComDim
 import Operad.GrComposite
+import Operad.GrCompOwn
+import Operad.GrCompAct
+import Operad.GrRoot
+import Operad.FreeGrRoot

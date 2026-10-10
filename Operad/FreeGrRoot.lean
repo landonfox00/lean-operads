@@ -61,7 +61,7 @@ lemma mk_corGen_outer {B : Type} [Fintype B] [DecidableEq B] (σ : A ≃ B) (L :
   congr 2
 
 /-- A linear order on a finite type. -/
-noncomputable def ordOf (A : Type) [Fintype A] [DecidableEq A] : LinOrd A :=
+noncomputable def ordOf (A : Type) [Fintype A] : LinOrd A :=
   LinOrd.map (Fintype.equivFin A).symm (LinOrd.std _)
 
 variable (R C) in
@@ -196,7 +196,8 @@ lemma root_map {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq
   rfl
 
 lemma root_par {A : Type} [Fintype A] [DecidableEq A] (b : Bool) (x : FreeGrL R W A) :
-    root R W A (GrOperad.par (R := R) b x) = GrComposite.par R W (FreeGrL R W) b (root R W A x) := by
+    root R W A (GrOperad.par (R := R) b x)
+      = GrComposite.par R W (FreeGrL R W) b (root R W A x) := by
   show SqExt.snd ((rootHom R W).app _ _) = _
   rw [(rootHom R W).app_par, rootHom_app]
   rfl

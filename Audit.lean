@@ -1768,3 +1768,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.HyperCom.finrank_one
 #print axioms Operad.HyperCom.finrank_two
 #print axioms Operad.HyperCom.finrank_three
+#print axioms Operad.GrComposite.instGrSpecies
+#print axioms Operad.GrComposite.leafMap
+#print axioms Operad.GrComposite.mk_eq_ownGen
+#print axioms Operad.GrComposite.act
+#print axioms Operad.GrComposite.map_act
+#print axioms Operad.GrComposite.map_act_one
+#print axioms Operad.GrComposite.map_act_seq
+#print axioms Operad.GrComposite.map_act_par
+#print axioms Operad.GrComposite.SqExt.instGrOperad
+#print axioms Operad.FreeGrL.rootHom
+#print axioms Operad.FreeGrL.root_comp
+#print axioms Operad.FreeGrL.root_ι
