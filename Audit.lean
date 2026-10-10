@@ -1755,3 +1755,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.BVDim.le_finrank
 #print axioms Operad.BVGer.finrank_bv
 #print axioms Operad.BVGer.finrank_bv_eq
+#print axioms Operad.SymSuboperad.instSymOperad
+#print axioms Operad.SymSuboperad.mem_of_presGen
+#print axioms Operad.HCAlg.scal
+#print axioms Operad.HyperCom.map_opGen
+#print axioms Operad.HyperCom.map_c22_eq
+#print axioms Operad.HyperCom.map_c22_eq_all
+#print axioms Operad.HyperCom.truncSub
+#print axioms Operad.HyperCom.mem_truncSp
+#print axioms Operad.HyperCom.subsingleton_of_card
+#print axioms Operad.HyperCom.linearIndependent_three
+#print axioms Operad.HyperCom.finrank_one
+#print axioms Operad.HyperCom.finrank_two
+#print axioms Operad.HyperCom.finrank_three

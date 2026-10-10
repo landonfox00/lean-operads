@@ -414,7 +414,13 @@ generator `mₙ` in each arity `n ≥ 2` and the **WDVV relations**
 (`HyperComOp.algebraEquiv`): totally symmetric operations satisfying the WDVV identities (`HCAlg`).
 In arity three the WDVV identity is associativity, so the binary operation is a commutative
 associative product (`HCAlg.mul_comm`, `HCAlg.mul_assoc`), and commutative algebras are
-hypercommutative, with no higher operations (`HCAlg.ofComm`).
+hypercommutative, with no higher operations (`HCAlg.ofComm`). `Operad/HyperComDim.lean` computes
+**`dim HyperCom(n) = 0, 1, 1, 2` for `n = 0, 1, 2, 3`** (`HyperCom.finrank_one`, `finrank_two`,
+`finrank_three`): by the induction principle of presented operads (`SymSuboperad.mem_of_presGen`,
+`Operad/SymSuboperad.lean`) every operation of arity at most three is spanned by `m₃` and the
+relabellings of `m₂ ∘ m₂`, all equal by the WDVV relations (`HyperCom.map_c22_eq_all`); the scalar
+algebras `μₙ = cₙ · product` (`HCAlg.scal`) separate `m₃` from `m₂ ∘ m₂`. Arity four (`dim = 7`)
+is not formalized.
 
 **Graded and dg operads.** `Operad/DGOperad.lean` defines graded operads in super modules, with a
 parity decomposition preserved by relabellings and compositions and parallel associativity up to

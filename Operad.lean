@@ -212,3 +212,5 @@ import Operad.BVGer
 import Operad.BVDim
 import Operad.AlgValues
 import Operad.BVModel
+import Operad.SymSuboperad
+import Operad.HyperComDim
