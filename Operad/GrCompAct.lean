@@ -453,6 +453,177 @@ noncomputable def act (i : S) (z : C Y) :
 
 end Act
 
+/-! ## Equivariance -/
+
+section Equivariance
+
+variable {S' Y' : Type} [Fintype S'] [DecidableEq S'] [Fintype Y'] [DecidableEq Y']
+  {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [DecidableEq Y] [Fintype S'] [Fintype Y'] [DecidableEq Y']
+  [Fintype A] [DecidableEq A] in
+lemma actOwner_compEquiv (σ : S ≃ S') (τ : Y ≃ Y') (f : S → A) (i : S) :
+    actOwner f i ∘ (compEquiv σ τ i).symm = actOwner (f ∘ σ.symm) (σ i) := by
+  funext x
+  rcases x with s | y
+  · rfl
+  · show f i = f (σ.symm (σ i))
+    rw [Equiv.symm_apply_apply]
+
+/-- **The action commutes with relabelling**, on generators given by owners. -/
+lemma map_actOwn (σ : S ≃ S') (τ : Y ≃ Y') (L : LinOrd A) (m : V A) (f : S → A)
+    (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) :
+    map (compEquiv σ τ i) (actOwn R L m f y i z)
+      = actOwn R L m (f ∘ σ.symm) (fun a => GrOperad.map (R := R) (fibMap σ f a) (y a)) (σ i)
+          (GrOperad.map (R := R) τ z) := by
+  unfold actOwn
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [map_mk_ownGen, mk_ownGen_congr _ m (actOwner_compEquiv σ τ f i)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _
+      (actLin (R := R) L f i (GrOperad.par (R := R) q z) q a (y a)))
+    = actLin (R := R) L (f ∘ σ.symm) (σ i) (GrOperad.par (R := R) q (GrOperad.map (R := R) τ z))
+        q a (GrOperad.map (R := R) (fibMap σ f a) (y a))
+  rw [← GrOperad.map_par]
+  by_cases h : f i = a
+  · have h' : (f ∘ σ.symm) (σ i) = a := by simp [h]
+    rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h']
+    have hc := GrOperad.map_comp (R := R) (fibMap σ f a) τ (⟨i, h⟩ : Fib f a) (y a)
+      (GrOperad.par (R := R) q z)
+    show _ = GrOperad.map (R := R) (actEq (f ∘ σ.symm) (σ i) a h')
+      (GrOperad.comp (R := R) ((fibMap σ f a) ⟨i, h⟩)
+        (GrOperad.map (R := R) (fibMap σ f a) (y a))
+        (GrOperad.map (R := R) τ (GrOperad.par (R := R) q z)))
+    rw [← hc]
+    simp only [← GrOperad.map_trans]
+    refine (gmap_comp_congr _ _ _ ?_ _).symm
+    rintro (⟨⟨t, ht⟩, hne⟩ | x) <;> rfl
+  · have h' : (f ∘ σ.symm) (σ i) ≠ a := by simpa using h
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h',
+      show (f ∘ σ.symm) (σ i) = f i by simp, GrOperad.map_tw, GrOperad.map_tw]
+    congr 1
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    intro b
+    exact Subtype.ext rfl
+
+/-- **The action commutes with relabelling.** -/
+lemma map_act (σ : S ≃ S') (τ : Y ≃ Y') (i : S) (z : C Y) (x : GrComposite R V C S) :
+    map (compEquiv σ τ i) (act R V i z x)
+      = act R V (σ i) (GrOperad.map (R := R) τ z) (map σ x) := by
+  have h : (map (R := R) (M := V) (N := C) (compEquiv σ τ i)).comp (act R V i z)
+      = (act R V (σ i) (GrOperad.map (R := R) τ z)).comp (map σ) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, act_mk, map_mk, actFun]
+    rw [map_actOwn]
+    congr 1
+    funext a
+    show _ = GrOperad.map (R := R) (fibEquiv (g.relabel σ) a) (g.y a)
+    simp only [ownY]
+    apply gmap_comp_congr
+    intro b
+    rfl
+  exact LinearMap.congr_fun h x
+
+end Equivariance
+
+/-! ## Homogeneous operations, the unit -/
+
+section Unit
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+lemma mk_actGen_zero (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (q : Bool) : mk R (actGen (R := R) L m f y i (0 : C Y) q) = 0 := by
+  refine mk_of_y_eq_zero _ (a := f i) ?_
+  show actLin (R := R) L f i 0 q (f i) (y (f i)) = 0
+  rw [actLin_eq _ _ _ _ _ _ rfl, map_zero, map_zero]
+
+/-- **The action of a homogeneous operation** has a single term. -/
+lemma actOwn_hom (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y)
+    {q : Bool} (hz : GrOperad.par (R := R) q z = z) :
+    actOwn R L m f y i z = mk R (actGen (R := R) L m f y i z q) := by
+  unfold actOwn
+  rw [Finset.sum_eq_single q]
+  · rw [hz]
+  · intro q' _ hq'
+    rw [← hz, GrOperad.par_par, if_neg hq']
+    exact mk_actGen_zero L m f y i q'
+  · intro h
+    exact absurd (Finset.mem_univ q) h
+
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrOperad R C] in
+lemma owner_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) :
+    owner (ownGen L m f y) = f := rfl
+
+/-- **The action on a generator given by owners.** -/
+lemma actFun_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : actFun R i z (ownGen L m f y) = actOwn R L m f y i z := by
+  unfold actFun
+  congr 1
+  funext a
+  show GrOperad.map (R := R) (fibEquiv (ownGen L m f y) a) (y a) = y a
+  rw [show fibEquiv (ownGen L m f y) a = Equiv.refl _ from Equiv.ext fun b => Subtype.ext rfl]
+  exact GrOperad.map_refl (R := R) _
+
+lemma act_mk_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : act R V i z (mk R (ownGen L m f y)) = actOwn R L m f y i z := by
+  rw [act_mk, actFun_ownGen]
+
+omit [Fintype S] [Fintype A] [DecidableEq A] in
+lemma actOwner_rightUnit (f : S → A) (i : S) :
+    actOwner (Y := Unit) f i ∘ (rightUnitEquiv i).symm = f := by
+  funext s
+  by_cases h : s = i
+  · subst h
+    simp [rightUnitEquiv, actOwner]
+  · simp [rightUnitEquiv, actOwner, h]
+
+/-- **The unit acts trivially**, on generators given by owners. -/
+lemma map_actOwn_one (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) :
+    map (rightUnitEquiv i) (actOwn R L m f y i (GrOperad.one (R := R) (P := C)))
+      = mk R (ownGen L m f y) := by
+  rw [actOwn_hom L m f y i _ (GrOperad.par_one (R := R) (P := C)), map_mk_ownGen,
+    mk_ownGen_congr _ m (actOwner_rightUnit f i)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _
+      (actLin (R := R) L f i (GrOperad.one (R := R)) false a (y a))) = y a
+  by_cases h : f i = a
+  · rw [actLin_eq _ _ _ _ _ _ h]
+    have hc := GrOperad.comp_one (R := R) (⟨i, h⟩ : Fib f a) (y a)
+    conv_rhs => rw [← hc]
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    rintro (⟨⟨t, ht⟩, hne⟩ | ⟨⟩)
+    · apply Subtype.ext
+      show t = t
+      rfl
+    · apply Subtype.ext
+      show (rightUnitEquiv i) (Sum.inr ()) = i
+      rfl
+  · rw [actLin_ne _ _ _ _ _ _ h, Bool.false_and, GrOperad.tw_false]
+    simp only [← GrOperad.map_trans]
+    conv_rhs => rw [← GrOperad.map_refl (R := R) (y a)]
+    apply gmap_congr
+    intro b
+    exact Subtype.ext rfl
+
+/-- **The unit acts trivially.** -/
+lemma map_act_one (i : S) (x : GrComposite R V C S) :
+    map (rightUnitEquiv i) (act R V i (GrOperad.one (R := R) (P := C)) x) = x := by
+  have h : (map (R := R) (M := V) (N := C) (rightUnitEquiv i)).comp
+      (act R V i (GrOperad.one (R := R) (P := C))) = LinearMap.id := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, LinearMap.id_apply]
+    rw [mk_eq_ownGen (R := R) g, act_mk_ownGen, map_actOwn_one]
+  exact LinearMap.congr_fun h x
+
+end Unit
+
 end GrComposite
 
 end Operad
