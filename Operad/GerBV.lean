@@ -138,12 +138,12 @@ lemma IsBV.dev_comm (h : IsBV ε μ Δ) {p q : Bool} {x y : V} (hx : IsPar ε p 
 
 /-- **The Jacobi identity for the deviation**:
 `⟨x, ⟨y, z⟩⟩ = -σ|x| ⟨⟨x, y⟩, z⟩ - σ(|x| + (|x| + 1)|y|) ⟨y, ⟨x, z⟩⟩`. It needs only `Δ² = 0` and
-the order condition. -/
-theorem dev_jacobi (hΔ : ∀ x, Δ (Δ x) = 0)
-    (hord : ∀ p q x y z, IsPar ε p x → IsPar ε q y →
+the order condition, for any notion `H` of homogeneity. -/
+theorem dev_jacobi {H : Bool → V → Prop} (hΔ : ∀ x, Δ (Δ x) = 0)
+    (hord : ∀ p q x y z, H p x → H q y →
       dev μ Δ p x (μ y z) = μ (dev μ Δ p x y) z + σ R ((!p) && q) • μ y (dev μ Δ p x z))
-    (hpΔ : ∀ p x, IsPar ε p x → IsPar ε (!p) (Δ x)) {p q : Bool} {x y : V} (z : V)
-    (hx : IsPar ε p x) (hy : IsPar ε q y) :
+    (hpΔ : ∀ p x, H p x → H (!p) (Δ x)) {p q : Bool} {x y : V} (z : V)
+    (hx : H p x) (hy : H q y) :
     dev μ Δ p x (dev μ Δ q y z)
       = -σ R p • dev μ Δ (!(xor p q)) (dev μ Δ p x y) z
         - σ R (xor p ((!p) && q)) • dev μ Δ q y (dev μ Δ p x z) := by
