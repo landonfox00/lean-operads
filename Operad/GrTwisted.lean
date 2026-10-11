@@ -53,7 +53,8 @@ variable {R : Type u} [CommRing R]
 
 lemma app_actLin (ψ : GrOperadHom R C C') {A : Type} [DecidableEq A] (L : LinOrd A) (f : S → A)
     (i : S) (z : C Y) (q : Bool) (a : A) (y : C (Fib f a)) :
-    ψ.app _ (actLin (R := R) L f i z q a y) = actLin (R := R) L f i (ψ.app Y z) q a (ψ.app _ y) := by
+    ψ.app _ (actLin (R := R) L f i z q a y)
+      = actLin (R := R) L f i (ψ.app Y z) q a (ψ.app _ y) := by
   by_cases h : f i = a
   · rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h, ψ.app_map, ψ.app_comp]
   · rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h, GrOperad.tw_apply, GrOperad.tw_apply,
@@ -220,7 +221,8 @@ variable {R' : Type u} [CommRing R']
 /-- **Two families of linear maps of `V ∘ N` commuting with the relabellings and the action agree
 as soon as they agree on the corollas.** -/
 theorem eq_of_corolla
-    (T T' : ∀ (S : Type) [Fintype S] [DecidableEq S], GrComposite R' V N S →ₗ[R'] GrComposite R' V N S)
+    (T T' : ∀ (S : Type) [Fintype S] [DecidableEq S],
+      GrComposite R' V N S →ₗ[R'] GrComposite R' V N S)
     (hT : ∀ (S S' : Type) [Fintype S] [DecidableEq S] [Fintype S'] [DecidableEq S'] (σ : S ≃ S')
       (w : GrComposite R' V N S), T S' (map σ w) = map σ (T S w))
     (hT' : ∀ (S S' : Type) [Fintype S] [DecidableEq S] [Fintype S'] [DecidableEq S'] (σ : S ≃ S')

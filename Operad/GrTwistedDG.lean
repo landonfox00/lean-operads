@@ -49,7 +49,8 @@ lemma isPar_corFam : GrOperad.Inv.IsPar false (corFam (C := C) ε) := fun A _ _ 
     rw [Bool.xor_false, par_corolla]
 
 /-- **The extension of a homogeneous family shifts parities.** -/
-theorem twF_par {F : GrOperad.Inv R (ConvOp R C (SqExt R C P ε))} {p : Bool} (hF : GrOperad.Inv.IsPar p F)
+theorem twF_par {F : GrOperad.Inv R (ConvOp R C (SqExt R C P ε))} {p : Bool}
+    (hF : GrOperad.Inv.IsPar p F)
     {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
     ∀ b : Bool, twF ε F S (par R C P b w) = par R C P (xor b p) (twF ε F S w) := by
   refine induction_act (fun S _ _ w => ∀ b : Bool,
@@ -205,7 +206,8 @@ theorem leafD_snd_star {X : Type} [Fintype X] [DecidableEq X] {α : GrOperad.Inv
     simp only [map_zero, add_zero]
     rw [show ∀ v, SqExt.snd (toLin ((corFam (C := C) ε).1 (SOut S)) v) = corolla R P _ v
       from fun v => rfl, show SqExt.snd (toLin ((corFam (C := C) ε).1 (SOut S))
-        (GrSpecies.tw (R := R) (xor true true) x)) = corolla R P _ _ from rfl, leafD_act, leafD_corolla, map_zero, zero_add, tw_corolla, GrSpecies.tw_tw, Bool.xor_self,
+        (GrSpecies.tw (R := R) (xor true true) x)) = corolla R P _ _ from rfl, leafD_act,
+      leafD_corolla, map_zero, zero_add, tw_corolla, GrSpecies.tw_tw, Bool.xor_self,
       GrSpecies.tw_false]
   | add a b ha hb => simp only [map_add, ha, hb]
 

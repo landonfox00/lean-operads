@@ -61,7 +61,8 @@ lemma mk_reorder_of (g : GrCompGen M N S) (L' : LinOrd g.A) (c : g.A → Bool) (
     (hy : ∀ a, ¬ U a → GrSpecies.par (R := R) (c a) (g.y a) = g.y a) :
     mk R g = GrEnd.rsg R g.L L' c • mk R { g with L := L' } := by
   let v : ∀ a, Bool → N (g.B a) := fun a j =>
-    if U a then (GrSpecies.par (R := R) j : N (g.B a) →ₗ[R] N (g.B a)) (g.y a) else if j = c a then g.y a else 0
+    if U a then (GrSpecies.par (R := R) j : N (g.B a) →ₗ[R] N (g.B a)) (g.y a)
+    else if j = c a then g.y a else 0
   have hv : g.y = fun a => ∑ j, v a j := by
     funext a
     simp only [v, Fintype.sum_bool]
@@ -92,7 +93,8 @@ lemma mk_reorder_of (g : GrCompGen M N S) (L' : LinOrd g.A) (c : g.A → Bool) (
     have h0 : v a (r a) = 0 := by
       simp only [v]
       rw [if_neg ha, if_neg hra]
-    rw [(mkY (R := R) g).map_coord_zero a h0, (mkY (R := R) { g with L := L' }).map_coord_zero a h0, smul_zero]
+    rw [(mkY (R := R) g).map_coord_zero a h0,
+      (mkY (R := R) { g with L := L' }).map_coord_zero a h0, smul_zero]
 
 end ReorderOf
 
@@ -640,7 +642,8 @@ section PlugReorder
 
 variable {S : Type} [Fintype S] [DecidableEq S] {A : Type} [Fintype A] [DecidableEq A]
 
-lemma mk_plugGen_m_zero {A' : Type} [Fintype A'] [DecidableEq A'] (L : LinOrd A) (m : P A) (f : S → A)
+lemma mk_plugGen_m_zero {A' : Type} [Fintype A'] [DecidableEq A'] (L : LinOrd A) (m : P A)
+    (f : S → A)
     (yy : ∀ a, C (Fib f a)) (a₀ : A) (L' : LinOrd A') (f' : Fib f a₀ → A')
     (yy' : ∀ a', C (Fib f' a')) (q : Bool) :
     mk R (plugGen (R := R) L m f yy a₀ L' 0 f' yy' q) = 0 := by

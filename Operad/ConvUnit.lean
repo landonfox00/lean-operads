@@ -113,7 +113,8 @@ theorem star_counit_left (G q : Inv R (ConvOp R C Q)) (g₀ : Q Unit)
       | tmul x y =>
         simp only [TensorProduct.map_tmul, LinearMap.comp_apply, mu_tmul,
           LinearMap.rTensor_tmul, TensorProduct.lid_tmul, map_smul, SymSpecies.map_refl]
-        rw [← GrSpecies.map_tw, hG _ (univOut (X := X)), ← SymSpecies.map_trans, Equiv.self_trans_symm,
+        rw [← GrSpecies.map_tw, hG _ (univOut (X := X)), ← SymSpecies.map_trans,
+          Equiv.self_trans_symm,
           SymSpecies.map_refl, counit_tw, LinearMap.map_smul₂, GrOperad.map_comp,
           GrOperad.map_refl]
         rfl
