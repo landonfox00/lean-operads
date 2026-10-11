@@ -100,49 +100,50 @@ end Par
 
 section Leaf
 
-variable [DGOperad R P] (ε : GrAug R P)
+variable [GrOperad R P] (D : GrDer (GrOperadHom.id R P) true)
 
-variable (R C P) in
-/-- **The differential of `P` at the inner operations** of `C ∘ P`. -/
+variable (R C) in
+/-- **An odd derivation of `P` at the inner operations** of `C ∘ P`. -/
 noncomputable abbrev leafD (S : Type) [Fintype S] [DecidableEq S] :
     GrComposite R C P S →ₗ[R] GrComposite R C P S :=
-  leafMap R C (DGOperad.toDer (R := R) (P := P)).toSpEnd
+  leafMap R C D.toSpEnd
 
 lemma leafD_corolla {A : Type} [Fintype A] [DecidableEq A] (c : C A) :
-    leafD R C P A (corolla R P A c) = 0 := by
+    leafD R C D A (corolla R P A c) = 0 := by
   rw [corolla_apply, leafD, leafMap_mk]
   refine Finset.sum_eq_zero fun j _ => mk_of_y_eq_zero _ (a := j) ?_
   show leafLin _ _ j j _ = 0
   unfold leafLin
   rw [if_pos rfl]
-  exact DGOperad.d_one
+  exact D.app_one
 
 lemma leafD_act {S Y : Type} [Fintype S] [DecidableEq S] [Fintype Y] [DecidableEq Y] (i : S)
     (z : P Y) (w : GrComposite R C P S) :
-    leafD R C P _ (act R C i z w)
-      = act R C i z (leafD R C P S w)
-        + act R C i (DGOperad.d (R := R) z) (GrSpecies.tw (R := R) true w) :=
+    leafD R C D _ (act R C i z w)
+      = act R C i z (leafD R C D S w)
+        + act R C i (D.app Y z) (GrSpecies.tw (R := R) true w) :=
   leafMap_act _ i z w
 
 lemma leafD_tw {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
-    leafD R C P S (GrSpecies.tw (R := R) true w) = -GrSpecies.tw (R := R) true (leafD R C P S w)
+    leafD R C D S (GrSpecies.tw (R := R) true w) = -GrSpecies.tw (R := R) true (leafD R C D S w)
     := by
-  have h : ∀ b, leafD R C P S (GrSpecies.par (R := R) b w)
-      = GrSpecies.par (R := R) (!b) (leafD R C P S w) := fun b => by
-    have := par_leafMap (M := C) (DGOperad.toDer (R := R) (P := P)).toSpEnd (xor b true) w
+  have h : ∀ b, leafD R C D S (GrSpecies.par (R := R) b w)
+      = GrSpecies.par (R := R) (!b) (leafD R C D S w) := fun b => by
+    have := par_leafMap (M := C) D.toSpEnd (xor b true) w
     rw [Bool.xor_assoc, Bool.xor_self, Bool.xor_false, Bool.xor_true] at this
     exact this.symm
   rw [GrSpecies.tw_apply, GrSpecies.tw_apply, map_add, map_smul, h, h, σ_true, neg_one_smul,
     neg_one_smul, Bool.not_false, Bool.not_true, neg_add, neg_neg, add_comm]
 
-/-- **The differential at the inner operations squares to zero.** -/
-theorem leaf_sq {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
-    leafD R C P S (leafD R C P S w) = 0 :=
-  eq_of_corolla (fun S _ _ => leafD R C P S ∘ₗ leafD R C P S) (fun S _ _ => 0)
+/-- **A differential at the inner operations squares to zero.** -/
+theorem leaf_sq (hD : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P A), D.app A (D.app A x) = 0)
+    {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
+    leafD R C D S (leafD R C D S w) = 0 :=
+  eq_of_corolla (fun S _ _ => leafD R C D S ∘ₗ leafD R C D S) (fun S _ _ => 0)
     (fun S S' _ _ _ _ σ w => by simp only [LinearMap.comp_apply, ← leafMap_map])
     (fun S S' _ _ _ _ σ w => by simp)
     (fun S Y _ _ _ _ i z w => by
-      simp only [LinearMap.comp_apply, leafD_act, map_add, leafD_tw, DGOperad.d_d]
+      simp only [LinearMap.comp_apply, leafD_act, map_add, leafD_tw, hD]
       rw [show act R C i (0 : P Y) = 0 from (actL R C i).map_zero, LinearMap.zero_apply,
         map_neg, add_zero]
       abel)
@@ -155,7 +156,7 @@ end Leaf
 
 section Total
 
-variable [DGOperad R P] (ε : GrAug R P)
+variable [GrOperad R P] (ε : GrAug R P) (D : GrDer (GrOperadHom.id R P) true)
 
 lemma tw_corolla {A : Type} [Fintype A] [DecidableEq A] (e : Bool) (c : C A) :
     GrSpecies.tw (R := R) e (corolla R P A c) = corolla R P A (GrSpecies.tw (R := R) e c) := by
@@ -172,15 +173,15 @@ lemma twD_tw {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true
   rw [twD_par ε hα, twD_par ε hα, σ_true, neg_one_smul, neg_one_smul, Bool.false_xor,
     Bool.true_xor, Bool.not_true, neg_add, neg_neg, add_comm]
 
-/-- The derivative of a family, by the differential of `P`. -/
+/-- The derivative of a family, by a derivation of `P`. -/
 noncomputable abbrev dFam (α : GrOperad.Inv R (ConvOp R C P)) : GrOperad.Inv R (ConvOp R C P) :=
-  GrOperad.Inv.appDer (ConvOp.postDer (C := C) (DGOperad.toDer (R := R) (P := P))) α
+  GrOperad.Inv.appDer (ConvOp.postDer (C := C) D) α
 
 /-- **The differential at the inner operations on a product with the corollas.** -/
 theorem leafD_snd_star {X : Type} [Fintype X] [DecidableEq X] {α : GrOperad.Inv R (ConvOp R C P)}
     (hα : GrOperad.Inv.IsPar true α) (c : C X) :
-    leafD R C P X (SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε) (liftFam ε α)).1 X) c))
-      = SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε) (liftFam ε (dFam α))).1 X) c) := by
+    leafD R C D X (SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε) (liftFam ε α)).1 X) c))
+      = SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε) (liftFam ε (dFam D α))).1 X) c) := by
   rw [toLin_star, toLin_star, map_sum, map_sum, map_sum]
   refine Finset.sum_congr rfl fun S _ => ?_
   rw [toLin_term, toLin_term, SqExt.map_def, SqExt.map_def, SqExt.snd_mapE, SqExt.snd_mapE,
@@ -190,7 +191,7 @@ theorem leafD_snd_star {X : Type} [Fintype X] [DecidableEq X] {α : GrOperad.Inv
     (SymSpecies.map (R := R) (splitEquiv S).symm c) = t
   have hα' := isParC_of_isPar (isPar_liftFam ε hα) (SIn S)
   have hdα := isParC_of_isPar (isPar_liftFam ε (GrOperad.Inv.isPar_appDer
-    (ConvOp.postDer (C := C) (DGOperad.toDer (R := R) (P := P))) hα)) (SIn S)
+    (ConvOp.postDer (C := C) D) hα)) (SIn S)
   rw [kap_hom _ hα', kap_hom _ hdα]
   induction t using TensorProduct.induction_on with
   | zero => simp
@@ -198,8 +199,8 @@ theorem leafD_snd_star {X : Type} [Fintype X] [DecidableEq X] {α : GrOperad.Inv
     simp only [TensorProduct.map_tmul, mu_tmul, LinearMap.comp_apply, SqExt.comp_def,
       SqExt.snd_compE, fst_corFam]
     rw [show toLin ((liftFam ε α).1 (SIn S)) y = (inclHom C ε).app _ (toLin (α.1 (SIn S)) y)
-      from rfl, show toLin ((liftFam ε (dFam α)).1 (SIn S)) y
-        = (inclHom C ε).app _ (DGOperad.d (R := R) (toLin (α.1 (SIn S)) y)) from rfl,
+      from rfl, show toLin ((liftFam ε (dFam D α)).1 (SIn S)) y
+        = (inclHom C ε).app _ (D.app _ (toLin (α.1 (SIn S)) y)) from rfl,
       fst_inclHom, fst_inclHom, snd_inclHom, snd_inclHom]
     simp only [map_zero, add_zero]
     rw [show ∀ v, SqExt.snd (toLin ((corFam (C := C) ε).1 (SOut S)) v) = corolla R P _ v
@@ -212,9 +213,9 @@ theorem leafD_snd_star {X : Type} [Fintype X] [DecidableEq X] {α : GrOperad.Inv
 operations** is the twisted differential of the derivative of the family. -/
 theorem twD_leaf_anticomm {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true α)
     {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
-    twD ε α S (leafD R C P S w) + leafD R C P S (twD ε α S w) = twD ε (dFam α) S w :=
-  eq_of_corolla (fun S _ _ => twD ε α S ∘ₗ leafD R C P S + leafD R C P S ∘ₗ twD ε α S)
-    (fun S _ _ => twD ε (dFam α) S)
+    twD ε α S (leafD R C D S w) + leafD R C D S (twD ε α S w) = twD ε (dFam D α) S w :=
+  eq_of_corolla (fun S _ _ => twD ε α S ∘ₗ leafD R C D S + leafD R C D S ∘ₗ twD ε α S)
+    (fun S _ _ => twD ε (dFam D α) S)
     (fun S S' _ _ _ _ σ w => by
       simp only [LinearMap.add_apply, LinearMap.comp_apply, ← leafMap_map, twD, twF_map, map_add])
     (fun S S' _ _ _ _ σ w => twF_map ε _ σ w)
@@ -228,30 +229,32 @@ theorem twD_leaf_anticomm {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.I
     (fun A _ _ c => by
       rw [LinearMap.add_apply, LinearMap.comp_apply, LinearMap.comp_apply, leafD_corolla,
         map_zero, zero_add, twD_corolla, twD_corolla]
-      exact leafD_snd_star ε hα c)
+      exact leafD_snd_star ε D hα c)
     w
 
-variable (R C P) in
+variable (R C) in
 /-- **The differential of the twisted composite product** `C ∘_α P`: `d_α + 1 ∘' d_P`. -/
 noncomputable def twDiff (α : GrOperad.Inv R (ConvOp R C P)) (S : Type) [Fintype S]
     [DecidableEq S] : GrComposite R C P S →ₗ[R] GrComposite R C P S :=
-  twD ε α S + leafD R C P S
+  twD ε α S + leafD R C D S
 
 /-- **The square of the differential of a twisted composite product** is the twisted differential
 of `α ⋆ α + d_P ∘ α`. -/
-theorem twDiff_sq_eq {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true α)
+theorem twDiff_sq_eq (hD : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P A),
+    D.app A (D.app A x) = 0) {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true α)
     {S : Type} [Fintype S] [DecidableEq S] (w : GrComposite R C P S) :
-    twDiff R C P ε α S (twDiff R C P ε α S w)
-      = twD ε (dFam α + GrOperad.Inv.star R _ α α) S w := by
+    twDiff R C ε D α S (twDiff R C ε D α S w)
+      = twD ε (dFam D α + GrOperad.Inv.star R _ α α) S w := by
   simp only [twDiff, LinearMap.add_apply, map_add]
-  rw [twD_add, twD_sq ε hα, leaf_sq, add_zero, ← twD_leaf_anticomm ε hα]
+  rw [twD_add, twD_sq ε hα, leaf_sq D hD, add_zero, ← twD_leaf_anticomm ε D hα]
   abel
 
 /-- **The twisted composite product of a twisting morphism is a complex.** -/
-theorem twDiff_sq {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true α)
-    (hmc : dFam α + GrOperad.Inv.star R _ α α = 0) {S : Type} [Fintype S] [DecidableEq S]
-    (w : GrComposite R C P S) : twDiff R C P ε α S (twDiff R C P ε α S w) = 0 := by
-  rw [twDiff_sq_eq ε hα, hmc, twD_zero]
+theorem twDiff_sq (hD : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P A),
+    D.app A (D.app A x) = 0) {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv.IsPar true α)
+    (hmc : dFam D α + GrOperad.Inv.star R _ α α = 0) {S : Type} [Fintype S] [DecidableEq S]
+    (w : GrComposite R C P S) : twDiff R C ε D α S (twDiff R C ε D α S w) = 0 := by
+  rw [twDiff_sq_eq ε D hD hα, hmc, twD_zero]
 
 end Total
 
