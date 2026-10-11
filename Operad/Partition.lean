@@ -34,6 +34,7 @@ def finsetOrderIso (e : α ≃ β) : Finset α ≃o Finset β where
 
 variable [Fintype α] [Fintype β] [Fintype γ] [DecidableEq α] [DecidableEq β] [DecidableEq γ]
 
+omit [DecidableEq α] [DecidableEq β] in
 lemma map_univ_equiv (e : α ≃ β) : (univ : Finset α).map e.toEmbedding = univ := by
   ext b
   simp only [Finset.mem_map, Finset.mem_univ, true_and, iff_true]
@@ -47,6 +48,7 @@ def partMap (e : α ≃ β) (P : Finpartition (univ : Finset α)) :
 @[simp] lemma partMap_parts (e : α ≃ β) (P : Finpartition (univ : Finset α)) :
     (partMap e P).parts = P.parts.map (finsetOrderIso e).toEquiv.toEmbedding := rfl
 
+omit [Fintype α] [Fintype β] [DecidableEq α] [DecidableEq β] in
 lemma finsetOrderIso_toEquiv (e : α ≃ β) : (finsetOrderIso e).toEquiv = e.finsetCongr := rfl
 
 /-- Transport along the identity is the identity. -/

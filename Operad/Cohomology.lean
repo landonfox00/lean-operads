@@ -54,17 +54,20 @@ lemma incS_injective {i : ℕ} : Function.Injective (incS (R := R) (P := P) i) :
 lemma brT_incS (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m) :
     brT 1 m (incS 1 T) (incS m x) = incS (1 + m) (dLin T m x) := by
   rw [brT, incS_mul_incS, incS_mul_incS,
-    incS_reindex (show m + 1 = 1 + m by omega) (sstar (R := R) (P := P) (j := m) (k := 1) x T), smul_incS, ← map_sub]
+    incS_reindex (show m + 1 = 1 + m by omega)
+      (sstar (R := R) (P := P) (j := m) (k := 1) x T), smul_incS, ← map_sub]
   rfl
 
 /-- The Maurer–Cartan equation, transported to the total space. -/
-lemma incS_mul_self_eq_zero {T : PieceS R P 1} (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0) :
+lemma incS_mul_self_eq_zero {T : PieceS R P 1}
+    (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0) :
     (incS 1 T : TotS R P) * incS 1 T = 0 := by
   rw [incS_mul_incS, hMC]
   exact map_zero _
 
 /-- **The differential squares to zero on the pieces.** -/
-theorem dLin_dLin [Invertible (2 : R)] (T : PieceS R P 1) (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0)
+theorem dLin_dLin [Invertible (2 : R)] (T : PieceS R P 1)
+    (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0)
     (m : ℕ) (x : PieceS R P m) : dLin T (1 + m) (dLin T m x) = 0 := by
   apply incS_injective (i := 1 + (1 + m))
   rw [map_zero, ← brT_incS, ← brT_incS]
@@ -81,7 +84,8 @@ def coboundaries (T : PieceS R P 1) (m : ℕ) : Submodule R (PieceS R P (1 + m))
   LinearMap.range (dLin T m)
 
 theorem coboundaries_le_cocycles [Invertible (2 : R)] (T : PieceS R P 1)
-    (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0) (m : ℕ) : coboundaries T m ≤ cocycles T m := by
+    (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0) (m : ℕ) :
+    coboundaries T m ≤ cocycles T m := by
   rintro y ⟨x, rfl⟩
   exact dLin_dLin T hMC m x
 

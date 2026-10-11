@@ -36,11 +36,13 @@ lemma mul_def (A : Algebra R (Ass R) V) (x y : V) :
 
 /-! ### Computing the two tuple operations in arity 3 -/
 
+omit [AddCommGroup V] in
 lemma midTuple_left (v : Fin 3 → V) :
     End.midTuple (V := V) 0 1 (n := 2) v = ![v 0, v 1] := by
   funext j
   fin_cases j <;> rfl
 
+omit [AddCommGroup V] in
 lemma insTuple_left (w : V) (v : Fin 3 → V) :
     End.insTuple (V := V) 0 1 (n := 2) w v = ![w, v 2] := by
   funext i
@@ -51,11 +53,13 @@ lemma insTuple_left (w : V) (v : Fin 3 → V) :
     rw [End.insTuple_of_gt (n := 2) 0 1 w v ⟨1, by omega⟩ (by norm_num)]
     rfl
 
+omit [AddCommGroup V] in
 lemma midTuple_right (v : Fin 3 → V) :
     End.midTuple (V := V) 1 0 (n := 2) v = ![v 1, v 2] := by
   funext j
   fin_cases j <;> rfl
 
+omit [AddCommGroup V] in
 lemma insTuple_right (w : V) (v : Fin 3 → V) :
     End.insTuple (V := V) 1 0 (n := 2) w v = ![v 0, w] := by
   funext i
