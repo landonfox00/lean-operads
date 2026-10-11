@@ -323,6 +323,27 @@ lemma relabel_mem_outerSpanP {P : ℕ → Prop} {S' : Type} [Fintype S'] [Decida
     rw [map_mk]
     exact mk_mem_outerSpanP _ hg) hx
 
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (M A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (N A)] [DecidableEq S] in
+lemma card_fib_le (g : GrCompGen M N S) (a : g.A) : Fintype.card (g.B a) ≤ Fintype.card S := by
+  rw [← Fintype.card_congr g.e, Fintype.card_sigma]
+  exact Finset.single_le_sum (f := fun a => Fintype.card (g.B a)) (fun _ _ => Nat.zero_le _)
+    (Finset.mem_univ a)
+
+/-- **Morphisms agreeing in the arities at most `|S|` agree at the inner operations in arity
+`S`.** -/
+lemma map₂_eq_of_card_le (ψ₁ ψ₂ : GrSpeciesHom R N N')
+    (h : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ Fintype.card S →
+      ∀ y : N B, ψ₁.app B y = ψ₂.app B y) (x : GrComposite R M N S) :
+    (map₂ idSpHom ψ₁).app S x = (map₂ idSpHom ψ₂).app S x := by
+  have h' : (map₂ (idSpHom (M := M)) ψ₁).app S = (map₂ idSpHom ψ₂).app S := hom_ext fun g => by
+    rw [map₂_mk, map₂_mk]
+    show mk R ⟨g.A, g.B, g.L, g.m, fun a => ψ₁.app _ (g.y a), g.e⟩
+      = mk R ⟨g.A, g.B, g.L, g.m, fun a => ψ₂.app _ (g.y a), g.e⟩
+    simp only [fun a => h _ (card_fib_le g a) (g.y a)]
+  rw [h']
+
+
 end OuterSpan
 
 section Act
@@ -675,12 +696,12 @@ lemma TwCompareData.filtData :
   top := by rw [Nat.sub_self, outerLt_zero]
   top' := by rw [Nat.sub_self, outerLt_zero]
 
-/-- **The comparison lemma, forward**: if `g` is a quasi-isomorphism in every arity, so is
-`1 ∘ g : C ∘_β' P' → C ∘_β P`, over a field of characteristic zero. -/
+/-- **The comparison lemma, forward**: if `g` is a quasi-isomorphism in the arities at most `|S|`,
+then `1 ∘ g : C ∘_β' P' → C ∘_β P` is one in arity `S`, over a field of characteristic zero. -/
 theorem TwCompareData.qiso
-    (hs : ∀ (A : Type) [Fintype A] [DecidableEq A],
+    (hs : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
       FreeGrL.SurjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A)
-    (hi : ∀ (A : Type) [Fintype A] [DecidableEq A],
+    (hi : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
       FreeGrL.InjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A) :
     QIso.Surj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
         ((map₂ idSpHom g.toGrSpeciesHom).app S)
@@ -689,7 +710,8 @@ theorem TwCompareData.qiso
   obtain ⟨s'⟩ := Splitting.exists_of_field D'.toSpEnd (fun A _ _ x => hd.hD' A x)
   obtain ⟨s⟩ := Splitting.exists_of_field D.toSpEnd (fun A _ _ x => hd.hD A x)
   obtain ⟨k, hk⟩ := exists_compat g.toGrSpeciesHom (fun A _ _ x => (hd.hg A x).symm) s' s
-    (fun _ => True) (fun n _ => hs (Fin n)) (fun n _ => hi (Fin n))
+    (· ≤ Fintype.card S) (fun n hn => hs (Fin n) (by simpa using hn))
+    (fun n hn => hi (Fin n) (by simpa using hn))
   have hpiece : ∀ p, QIso.Surj (filtX P' S p) (filtX P S p) (leafD R C D' S) (leafD R C D S)
         ((map₂ idSpHom g.toGrSpeciesHom).app S)
       ∧ QIso.Inj (filtX P' S p) (filtX P S p) (leafD R C D' S) (leafD R C D S)
@@ -703,10 +725,12 @@ theorem TwCompareData.qiso
       rw [hX, hX']
       refine qiso_leaf s' s g.toGrSpeciesHom (fun A _ _ y => hd.hg A y) k _
         (fun x _ => ?_) (fun y _ => ?_)
-      · rw [map₂_map₂ k (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)) s'.p.toHom
-          (fun A _ _ y => (hk A trivial).1 y)]
-      · rw [map₂_map₂ (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)) k s.p.toHom
-          (fun A _ _ y => (hk A trivial).2 y)]
+      · rw [map₂_map₂ k (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom))
+          (k.comp (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom))) (fun _ _ _ _ => rfl)]
+        exact map₂_eq_of_card_le _ _ (fun B _ _ hB y => (hk B hB).1 y) x
+      · rw [map₂_map₂ (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)) k
+          ((s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)).comp k) (fun _ _ _ _ => rfl)]
+        exact map₂_eq_of_card_le _ _ (fun B _ _ hB y => (hk B hB).2 y) y
     · exact ⟨QIso.surj_bot _ _ _, QIso.inj_bot _ _ _⟩
   have h := QIso.qiso_filt hd.filtData (fun p => (hpiece p).1) (fun p => (hpiece p).2) 0
   rw [Nat.sub_zero, outerLt_eq_top hd.hP0', outerLt_eq_top hd.hP0] at h
