@@ -333,6 +333,94 @@ theorem inj_of_sup_right (hU : ∀ u ∈ U, D₁ u = 0)
     (by linear_combination (norm := module) hdz)).2
   linear_combination (norm := module) this
 
+include hs' in
+/-- **Two out of three for the subcomplex, surjectivity**: a quasi-isomorphism on the quotient
+which is surjective on the homology of the extension is surjective on the homology of the
+subcomplex. -/
+theorem surj_sub (hUs : Surj U U' D₀ D₀' F) (hUi : Inj U U' D₀ D₀' F)
+    (hTs : Surj (U ⊔ W) (U' ⊔ W') (D₀ + D₁) (D₀' + D₁') F) :
+    Surj W W' (D₀ + D₁) (D₀' + D₁') F := by
+  intro y' hy' hdy
+  obtain ⟨x, hx, hdx, z', hz', hxz⟩ := hTs y' (Submodule.mem_sup_right hy') hdy
+  obtain ⟨u, hu, w, hw, rfl⟩ := Submodule.mem_sup.1 hx
+  obtain ⟨a', ha', b', hb', rfl⟩ := Submodule.mem_sup.1 hz'
+  have hdu := (hs.comps hu hw hdx).1
+  simp only [LinearMap.add_apply, map_add] at hxz
+  have hFu : F u - D₀' a' = 0 := (eq_zero_of_add hs'.disj
+    (U'.sub_mem (hF.memU u hu) (hs'.mem₀ a' ha'))
+    (W'.sub_mem (W'.sub_mem (W'.sub_mem (hF.memW w hw) hy') (hs'.mem₁ a' ha')) (hs'.memW' hb'))
+    (by linear_combination (norm := module) hxz)).1
+  obtain ⟨c, hc, hdc⟩ := hUi u hu hdu a' ha' (sub_eq_zero.1 hFu)
+  have hda : D₀' (a' - F c) = 0 := by
+    rw [map_sub, ← hF.comm₀, hdc]
+    linear_combination (norm := module) -hFu
+  obtain ⟨e, he, hde, f', hf', hef⟩ := hUs (a' - F c) (U'.sub_mem ha' (hF.memU c hc)) hda
+  refine ⟨u + w - (D₀ + D₁) c - (D₀ + D₁) e, ?_, ?_, D₁' f' + b', W'.add_mem (hs'.mem₁ f' hf') hb',
+    ?_⟩
+  · have : u + w - (D₀ + D₁) c - (D₀ + D₁) e = w - D₁ c - D₁ e := by
+      simp only [LinearMap.add_apply]
+      rw [hdc, hde]
+      abel
+    rw [this]
+    exact W.sub_mem (W.sub_mem hw (hs.mem₁ c hc)) (hs.mem₁ e he)
+  · rw [map_sub, map_sub, hdx, hs.dd, hs.dd, sub_zero, sub_zero]
+  · have c0c := hF.comm₀ c
+    have c1c := hF.comm₁ c
+    have c0e := hF.comm₀ e
+    have c1e := hF.comm₁ e
+    have hdd₀ := hs'.d₀_d₀ hf'
+    have hdd₁ := hs'.d_d₁ hf'
+    have hf2 := congrArg (D₀' + D₁') hef
+    simp only [LinearMap.add_apply, map_sub, map_add] at hf2 ⊢
+    linear_combination (norm := module) hxz - c0c - c1c - c0e - c1e - hf2 - hdd₀ - hdd₁
+
+include hs' in
+/-- **Two out of three for the subcomplex, injectivity**. -/
+theorem inj_sub (hUi : Inj U U' D₀ D₀' F)
+    (hTs : Surj (U ⊔ W) (U' ⊔ W') (D₀ + D₁) (D₀' + D₁') F)
+    (hTi : Inj (U ⊔ W) (U' ⊔ W') (D₀ + D₁) (D₀' + D₁') F) :
+    Inj W W' (D₀ + D₁) (D₀' + D₁') F := by
+  intro w hw hdw z' hz' hFw
+  obtain ⟨v, hv, hdv⟩ := hTi w (Submodule.mem_sup_right hw) hdw z' (Submodule.mem_sup_right hz')
+    hFw
+  obtain ⟨c, hc, d, hd, rfl⟩ := Submodule.mem_sup.1 hv
+  simp only [LinearMap.add_apply, map_add] at hdv
+  have hdc : D₀ c = 0 := (eq_zero_of_add hs.disj (hs.mem₀ c hc)
+    (W.sub_mem (W.add_mem (hs.mem₁ c hc) (hs.memW' hd)) hw)
+    (by linear_combination (norm := module) hdv)).1
+  have hcyc : (D₀' + D₁') (F c + F d - z') = 0 := by
+    have c0c := hF.comm₀ c
+    have c1c := hF.comm₁ c
+    have c0d := hF.comm₀ d
+    have c1d := hF.comm₁ d
+    have eFv := congrArg F hdv
+    simp only [LinearMap.add_apply, map_sub, map_add] at hFw eFv ⊢
+    linear_combination (norm := module) -c0c - c1c - c0d - c1d + eFv + hFw
+  obtain ⟨x, hx, hdx, q', hq', hxq⟩ := hTs _ (Submodule.sub_mem _ (Submodule.add_mem _
+    (Submodule.mem_sup_left (hF.memU c hc)) (Submodule.mem_sup_right (hF.memW d hd)))
+    (Submodule.mem_sup_right hz')) hcyc
+  obtain ⟨xu, hxu, xw, hxw, rfl⟩ := Submodule.mem_sup.1 hx
+  obtain ⟨qu, hqu, qw, hqw, rfl⟩ := Submodule.mem_sup.1 hq'
+  have hdxu := (hs.comps hxu hxw hdx).1
+  simp only [LinearMap.add_apply, map_add] at hxq
+  have hU : F xu - F c - D₀' qu = 0 := (eq_zero_of_add hs'.disj
+    (U'.sub_mem (U'.sub_mem (hF.memU xu hxu) (hF.memU c hc)) (hs'.mem₀ qu hqu))
+    (W'.sub_mem (W'.add_mem (W'.sub_mem (hF.memW xw hxw) (hF.memW d hd)) hz')
+      (W'.add_mem (hs'.mem₁ qu hqu) (hs'.memW' hqw)))
+    (by linear_combination (norm := module) hxq)).1
+  obtain ⟨e, he, hde⟩ := hUi (xu - c) (U.sub_mem hxu hc) (by rw [map_sub, hdxu, hdc, sub_zero])
+    qu hqu (by rw [map_sub]; linear_combination (norm := module) hU)
+  refine ⟨c + d - (xu + xw) + (D₀ + D₁) e, ?_, ?_⟩
+  · have : c + d - (xu + xw) + (D₀ + D₁) e = d - xw + D₁ e := by
+      simp only [LinearMap.add_apply]
+      rw [hde]
+      abel
+    rw [this]
+    exact W.add_mem (W.sub_mem hd hxw) (hs.mem₁ e he)
+  · have hdde := hs.dd e
+    simp only [LinearMap.add_apply, map_add, map_sub] at hdx hdde ⊢
+    linear_combination (norm := module) hdv - hdx + hdde
+
 end Extension
 
 /-! ## Finite filtrations -/
