@@ -733,6 +733,14 @@ variable {M' : (A : Type) → [Fintype A] → [DecidableEq A] → Type x}
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (N' A)] [GrSpecies R N']
   {S : Type} [Fintype S] [DecidableEq S]
 
+/-- The identity of a linear species. -/
+def idSpHom : SymSpeciesHom R M M where
+  app _ _ _ := LinearMap.id
+  app_map _ _ := rfl
+
+@[simp] lemma idSpHom_app {A : Type} [Fintype A] [DecidableEq A] (m : M A) :
+    (idSpHom (R := R) (M := M)).app A m = m := rfl
+
 /-- A generator, with its operations replaced by their images. -/
 abbrev genMap₂ (φ : SymSpeciesHom R M M') (ψ : GrSpeciesHom R N N') (g : GrCompGen M N S) :
     GrCompGen M' N' S :=

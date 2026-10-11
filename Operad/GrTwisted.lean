@@ -164,11 +164,6 @@ noncomputable def famHom (F : GrOperad.Inv R (ConvOp R C 𝒬)) : SymSpeciesHom 
     rw [mapC_apply, ← SymSpecies.map_trans, Equiv.self_trans_symm, SymSpecies.map_refl]
     rfl
 
-/-- The identity of a linear species. -/
-def idSpHom : SymSpeciesHom R C C where
-  app _ _ _ := LinearMap.id
-  app_map _ _ := rfl
-
 variable {S : Type} [Fintype S] [DecidableEq S]
 
 /-- **The extension of a family** `F` with values in `𝒬` to `C ∘ P`: the inner operations
