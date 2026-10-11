@@ -176,6 +176,130 @@ lemma outerLt_eq_top
       rw [mk_of_y_eq_zero g (hN0 _ ha (g.y a))]
       exact zero_mem _
 
+
+/-! ### Projections -/
+
+variable (R M N) in
+/-- **The projection onto the generators whose outer operation has a number of inputs satisfying
+`P`.** -/
+noncomputable def outerProj (S : Type) [Fintype S] [DecidableEq S] (P : ℕ → Prop)
+    [DecidablePred P] : GrComposite R M N S →ₗ[R] GrComposite R M N S :=
+  lift (fun g => if P (Fintype.card g.A) then mk R g else 0)
+    { add_m := fun g m' => by
+        dsimp only
+        split_ifs
+        · exact mk_add_m g m'
+        · rw [add_zero]
+      smul_m := fun g c => by
+        dsimp only
+        split_ifs
+        · exact mk_smul_m g c
+        · rw [smul_zero]
+      add_y := fun g a z z' => by
+        dsimp only
+        split_ifs
+        · exact mk_add_y g a z z'
+        · rw [add_zero]
+      smul_y := fun g a c z => by
+        dsimp only
+        split_ifs
+        · exact mk_smul_y g a c z
+        · rw [smul_zero]
+      outer := fun g A _ _ σ m => by
+        dsimp only
+        rw [show Fintype.card A = Fintype.card g.A from Fintype.card_congr σ]
+        split_ifs
+        · exact mk_outer g σ m
+        · rfl
+      inner := fun g B _ _ τ => by
+        dsimp only
+        split_ifs
+        · exact mk_inner g τ
+        · rfl
+      reorder := fun g L' c hy => by
+        dsimp only
+        split_ifs
+        · exact mk_reorder g L' c hy
+        · rw [smul_zero] }
+
+lemma outerProj_mk (P : ℕ → Prop) [DecidablePred P] (g : GrCompGen M N S) :
+    outerProj R M N S P (mk R g) = if P (Fintype.card g.A) then mk R g else 0 :=
+  lift_mk _ _ g
+
+lemma outerProj_mem (P : ℕ → Prop) [DecidablePred P] (x : GrComposite R M N S) :
+    outerProj R M N S P x ∈ outerSpanP R M N S P := by
+  induction x using induction_on with
+  | h0 => rw [map_zero]; exact zero_mem _
+  | hadd x y hx hy => rw [map_add]; exact add_mem hx hy
+  | hsmul c x hx => rw [map_smul]; exact Submodule.smul_mem _ c hx
+  | hmk g =>
+    rw [outerProj_mk]
+    split_ifs with h
+    · exact mk_mem_outerSpanP g h
+    · exact zero_mem _
+
+lemma outerProj_of_mem (P : ℕ → Prop) [DecidablePred P] {x : GrComposite R M N S}
+    (hx : x ∈ outerSpanP R M N S P) : outerProj R M N S P x = x := by
+  have h : outerSpanP R M N S P ≤ LinearMap.ker (outerProj R M N S P - LinearMap.id) :=
+    Submodule.span_le.2 fun _ ⟨g, hg, hx⟩ => by
+      rw [hx, SetLike.mem_coe, LinearMap.mem_ker, LinearMap.sub_apply, outerProj_mk, if_pos hg,
+        LinearMap.id_apply, sub_self]
+  have := h hx
+  rwa [LinearMap.mem_ker, LinearMap.sub_apply, LinearMap.id_apply, sub_eq_zero] at this
+
+lemma outerProj_eq_zero (P Q : ℕ → Prop) [DecidablePred P] (hPQ : ∀ k, Q k → ¬ P k)
+    {x : GrComposite R M N S} (hx : x ∈ outerSpanP R M N S Q) : outerProj R M N S P x = 0 := by
+  have h : outerSpanP R M N S Q ≤ LinearMap.ker (outerProj R M N S P) :=
+    Submodule.span_le.2 fun _ ⟨g, hg, hx⟩ => by
+      rw [hx, SetLike.mem_coe, LinearMap.mem_ker, outerProj_mk, if_neg (hPQ _ hg)]
+  exact h hx
+
+lemma outerProj_add_compl (P : ℕ → Prop) [DecidablePred P] (x : GrComposite R M N S) :
+    outerProj R M N S P x + outerProj R M N S (fun k => ¬ P k) x = x := by
+  induction x using induction_on with
+  | h0 => simp
+  | hadd x y hx hy => rw [map_add, map_add, add_add_add_comm, hx, hy]
+  | hsmul c x hx => rw [map_smul, map_smul, ← smul_add, hx]
+  | hmk g =>
+    rw [outerProj_mk, outerProj_mk]
+    by_cases h : P (Fintype.card g.A)
+    · rw [if_pos h, if_neg (not_not.2 h), add_zero]
+    · rw [if_neg h, if_pos h, zero_add]
+
+lemma outerProj_map₂ (P : ℕ → Prop) [DecidablePred P] (ψ : GrSpeciesHom R N N')
+    (x : GrComposite R M N S) :
+    outerProj R M N' S P ((map₂ idSpHom ψ).app S x)
+      = (map₂ idSpHom ψ).app S (outerProj R M N S P x) := by
+  have h : (outerProj R M N' S P).comp ((map₂ idSpHom ψ).app S)
+      = ((map₂ idSpHom ψ).app S).comp (outerProj R M N S P) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, map₂_mk, outerProj_mk]
+    split_ifs
+    · rw [map₂_mk]
+    · rw [map_zero]
+  exact LinearMap.congr_fun h x
+
+lemma outerProj_leafMap (P : ℕ → Prop) [DecidablePred P] {q : Bool} (gm : GrSpEnd R N q)
+    (x : GrComposite R M N S) :
+    outerProj R M N S P (leafMap R M gm x) = leafMap R M gm (outerProj R M N S P x) := by
+  have h : (outerProj R M N S P).comp (leafMap R M gm)
+      = (leafMap R M gm).comp (outerProj R M N S P) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, leafMap_mk, leafFun, map_sum, outerProj_mk]
+    split_ifs with hg
+    · rw [leafMap_mk]
+      rfl
+    · rw [map_zero]
+      exact Finset.sum_eq_zero fun j _ => rfl
+  exact LinearMap.congr_fun h x
+
+/-- Without generators with no inputs, there are none with an outer operation without inputs. -/
+lemma outerLt_one_eq_bot (h : Nonempty S) : outerLt R M N S 1 = ⊥ := by
+  rw [eq_bot_iff]
+  apply Submodule.span_le.2
+  rintro _ ⟨g, hg, rfl⟩
+  have hA : IsEmpty g.A := Fintype.card_eq_zero_iff.1 (by omega)
+  obtain ⟨s⟩ := h
+  exact hA.elim (g.e.symm s).1
+
 /-! ### Preservation -/
 
 lemma map₂_mem_outerSpanP {P : ℕ → Prop} (ψ : GrSpeciesHom R N N') {x : GrComposite R M N S}
