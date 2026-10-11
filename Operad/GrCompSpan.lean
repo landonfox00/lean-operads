@@ -181,7 +181,8 @@ lemma induction_units {S A : Type} [Fintype S] [DecidableEq S] [Fintype A] [Deci
 include hsmul hmap hact in
 /-- **Induction on the positions holding operations other than units.** -/
 lemma induction_finset {A : Type} [Fintype A] [DecidableEq A]
-    (hcorA : ∀ w : V A, Pr A (corolla R C A w)) (L : LinOrd A) (w : V A) (F : Finset A) : ∀ (S : Type) [Fintype S] [DecidableEq S] (f : S → A)
+    (hcorA : ∀ w : V A, Pr A (corolla R C A w)) (L : LinOrd A) (w : V A) (F : Finset A) :
+    ∀ (S : Type) [Fintype S] [DecidableEq S] (f : S → A)
     (yy : ∀ a, C (Fib f a)) (c : A → Bool), (∀ a, GrOperad.par (R := R) (c a) (yy a) = yy a) →
     (∀ a ∉ F, ∃ e : Unit ≃ Fib f a, yy a = GrOperad.map (R := R) e (GrOperad.one (R := R))) →
     Pr S (mk R (ownGen L w f yy)) := by

@@ -600,7 +600,7 @@ lemma ownY_ownGen {B : Type} [Fintype B] [DecidableEq B] (L' : LinOrd A') (m' : 
   rw [show fibEquiv (ownGen (M := P) L' m' f' yy') a' = Equiv.refl _ from
     Equiv.ext fun _ => rfl, GrOperad.map_refl]
 
-@[simp] lemma plug_mk_ownGen (L : LinOrd A) (m : P A) (f : S → A) (yy : ∀ a, C (Fib f a))
+lemma plug_mk_ownGen (L : LinOrd A) (m : P A) (f : S → A) (yy : ∀ a, C (Fib f a))
     (a₀ : A) (L' : LinOrd A') (m' : P A') (f' : Fib f a₀ → A') (yy' : ∀ a', C (Fib f' a')) :
     plug R L m f yy a₀ (mk R (ownGen L' m' f' yy')) = plugOwn R L m f yy a₀ L' m' f' yy' := by
   rw [plug_mk, plugFun, ownY_ownGen]

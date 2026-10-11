@@ -222,3 +222,14 @@ import Operad.FreeGrRoot
 import Operad.GrTotal
 import Operad.GrCompSpan
 import Operad.FreeGrGraft
+import Operad.ConvUnit
+import Operad.GrCompPlug
+import Operad.GrCompDer
+import Operad.GrTwisted
+import Operad.GrLeafAct
+import Operad.GrTwistedDG
+import Operad.GrTwistedCobar
+import Operad.GrLeafKunneth
+import Operad.GrTwistedCompare
+import Operad.GrTwistedConverse
+import Operad.KoszulComplex

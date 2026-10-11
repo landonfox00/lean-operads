@@ -687,6 +687,33 @@ Koszul sign of the reordering; it is **a morphism of right modules**, `μ(ω ◁
 inverse to the root decomposition: `ρ ∘ G = 1` and `G ∘ ρ = 1 - ε` (`FreeGrL.root_graft`,
 `FreeGrL.graft_root`, `Operad/FreeGrGraft.lean`).
 
+**Twisted composite products and the Koszul complex.** For a graded cooperad `C`, an augmented
+graded operad `P` and an invariant family `β` of the convolution operad, **the twisted
+differential** `d_β` of `C ∘ P` is the extension of `cor ⋆ β` by the total composition of
+`P ⋉ (C ∘ P)`, a morphism of right `P`-modules (`GrComposite.twD`, `GrComposite.twF_act`,
+`Operad/GrTwisted.lean`), with `d_α ∘ d_α` the extension of `cor ⋆ (α ⋆ α)`
+(`GrComposite.twD_sq`). For a dg operad `P`, **the twisted composite product `C ∘_α P`** has the
+differential `D_α = d_α + (1 ∘' d_P)`, squaring to zero for a twisting morphism
+(`GrComposite.twDiff`, `GrComposite.twDiff_sq`, `Operad/GrTwistedDG.lean`, with the Leibniz rule
+of `1 ∘' d_P` against the action, `Operad/GrLeafAct.lean`). For a reduced cooperad, **`C ∘_ι ΩC`
+is acyclic**: `h = (s ∘ 1) ∘ ρ ∘ (ε ∘ 1)` is a contracting homotopy onto the unit
+(`GrComposite.cobar_contraction`, `GrComposite.cobar_acyclic`, `Operad/GrTwistedCobar.lean`).
+Over a field of characteristic zero, with the graded commutator `[1 ∘' a, 1 ∘' b] = 1 ∘' [a, b]`
+(`GrComposite.leafMap_comm`) and equivariant splittings, `1 ∘ g : M ∘ N → M ∘ N'`, with the
+differentials at the inner operations, is a quasi-isomorphism when `g` is one
+(`GrComposite.qiso_leaf`, `Operad/GrLeafKunneth.lean`); filtering by the number of inputs of
+the outer cooperation, which the twisted differential lowers, gives **the comparison lemma**: for a morphism `g : P' → P`,
+`1 ∘ g : C ∘_β' P' → C ∘_β P` is a quasi-isomorphism in arity `S` when `g` is one in the arities
+at most `|S|` (`GrComposite.TwCompareData.qiso`, `Operad/GrTwistedCompare.lean`), and **`g` is a
+quasi-isomorphism as soon as `1 ∘ g` is one** (`GrComposite.TwCompareData.qiso_converse`,
+`Operad/GrTwistedConverse.lean`). So: **the fundamental theorem of twisting morphisms**, for a
+reduced cooperad `C` and a dg operad `P` without operations without inputs, a morphism
+`f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one (`Cobar.fundamental`,
+`Operad/KoszulComplex.lean`); and for quadratic data without generators with at most one input
+presenting `P` with a free unit, augmented by the coefficient of the unit (`Koszul.presAug`),
+**the Koszul complex criterion: `P` is Koszul iff the Koszul complex `P^¡ ∘_κ P` is acyclic in the
+arities at least two** (`Koszul.isKoszul_iff_acyclic`).
+
 **Homotopy algebras over a quadratic operad.** A `P∞`-algebra on a dg super module `V` is an
 algebra over `ΩP^¡`, a twisting morphism `P^¡ → End_V` (`Koszul.PInfAlgebra`). Every dg
 `P`-algebra is one, by restriction along `ΩP^¡ → P`, with twisting morphism `φ ∘ κ` sending a

@@ -38,7 +38,8 @@ noncomputable def Tsp (s : Finset ℕ) : Submodule K V :=
 variable {φ w}
 
 lemma val_mem_Tsp {s : Finset ℕ} {q : (GrOperadIdeal.span K r).Quot ↥s} {b : Bool}
-    (hq : GrOperad.par (R := K) b q = q) (L : LinOrd ↥s) : ((φ.app ↥s q).fam L fun a => w a.1) ∈ Tsp φ w s :=
+    (hq : GrOperad.par (R := K) b q = q) (L : LinOrd ↥s) :
+    ((φ.app ↥s q).fam L fun a => w a.1) ∈ Tsp φ w s :=
   Submodule.subset_span ⟨q, b, L, hq, rfl⟩
 
 variable (hw : ∀ a, SuperMod.pr (R := K) true (w a) = w a)
@@ -59,7 +60,8 @@ lemma Tsp_le (s : Finset ℕ) : Tsp φ w s ≤ LinearMap.range (ev φ w s) := by
 omit hw in
 /-- **The value of a unary operation** at the input of a letter. -/
 lemma unary_mem_Tsp {g : (GrOperadIdeal.span K r).Quot (Fin 1)} {b : Bool}
-    (hg : GrOperad.par (R := K) b g = g) (β : V →ₗ[K] V) (hβ : ∀ x, EndGr.sv (φ.app _ g) ![x] = β x) (a : ℕ) :
+    (hg : GrOperad.par (R := K) b g = g) (β : V →ₗ[K] V)
+    (hβ : ∀ x, EndGr.sv (φ.app _ g) ![x] = β x) (a : ℕ) :
     β (w a) ∈ Tsp φ w {a} := by
   let e : Fin 1 ≃ ({a} : Finset ℕ) :=
     ⟨fun _ => ⟨a, Finset.mem_singleton_self a⟩, fun _ => 0, fun i => Subsingleton.elim _ _,
@@ -89,7 +91,8 @@ lemma input_mem_Tsp (a : ℕ) : w a ∈ Tsp φ w {a} := by
 
 /-- **The values are closed under a binary operation**, on disjoint letters. -/
 theorem binop_mem_Tsp {g : (GrOperadIdeal.span K r).Quot (Fin 2)} {b₀ : Bool}
-    (hg : GrOperad.par (R := K) b₀ g = g) (β : V →ₗ[K] V →ₗ[K] V) (hβ : ∀ y z, EndGr.sv (φ.app _ g) ![y, z] = β y z)
+    (hg : GrOperad.par (R := K) b₀ g = g) (β : V →ₗ[K] V →ₗ[K] V)
+    (hβ : ∀ y z, EndGr.sv (φ.app _ g) ![y, z] = β y z)
     {s t : Finset ℕ} (h : Disjoint s t) {y z : V} (hy : y ∈ Tsp φ w s) (hz : z ∈ Tsp φ w t) :
     β y z ∈ Tsp φ w (s ∪ t) := by
   have hm := Submodule.apply_mem_map₂ β hy hz

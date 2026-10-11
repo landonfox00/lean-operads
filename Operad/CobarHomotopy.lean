@@ -381,7 +381,8 @@ private lemma xiM_unit_left (e : Unit ≃ A) (i : A) (Y : CobarGr R 𝒞 B) :
   simp only [add_zero]
 
 /-- The algebra of the commutator of a composite, merged at the outer factor. -/
-private lemma alg_outer {M N P P' : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N] [Module R N]
+private lemma alg_outer {M N P P' : Type*} [AddCommGroup M] [Module R M] [AddCommGroup N]
+    [Module R N]
     [AddCommGroup P] [Module R P] [AddCommGroup P'] [Module R P'] (S : P →ₗ[R] P')
     (c : M →ₗ[R] N →ₗ[R] P) (a b e t f : M) (q q' : N) (h : t = -f) :
     S (c a q + c t q') + S (c b q) + (S (c e q) + S (c f q')) = S (c (a + b + e) q) := by
@@ -650,7 +651,8 @@ theorem unitCoeffL_d (hV0 : ∀ v : V (Fin 0), v = 0) (Y : CobarGr R 𝒞 A) :
 /-! ### The commutator on trees -/
 
 /-- A relabelled composite of trees with vertices has vertices. -/
-private lemma isLeaf_map_comp {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁] [DecidableEq B₁]
+private lemma isLeaf_map_comp {A₁ B₁ : Type} [Fintype A₁] [DecidableEq A₁] [Fintype B₁]
+    [DecidableEq B₁]
     {T : ℕ → Type v} {r : A₁} {p : Reg (TreeOfArity T) A₁} (q : Reg (TreeOfArity T) B₁)
     (e : Without A₁ r ⊕ B₁ ≃ X) (hp : (treeOf p).isLeaf = false) :
     (treeOf (SetOperad.map e (SetOperad.comp r p q))).isLeaf = false := by
@@ -816,7 +818,8 @@ private lemma xiM_bas_corolla (hV0 : ∀ v : V (Fin 0), v = 0) {k : ℕ} (g : Gr
         (comp_map_left e j _ _))
   exact hL.trans hR.symm
 
-private lemma map_inj_eq {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A') {a b : CobarGr R 𝒞 A}
+private lemma map_inj_eq {A' : Type} [Fintype A'] [DecidableEq A'] (e : A ≃ A')
+    {a b : CobarGr R 𝒞 A}
     (h : GrOperad.map (R := R) e a = GrOperad.map (R := R) e b) : a = b :=
   (map_symm_map e a).symm.trans ((congrArg (GrOperad.map (R := R) e.symm) h).trans
     (map_symm_map e b))

@@ -436,7 +436,8 @@ omit [CharZero R] [GrCooperad.Coaug R C] in
 lemma filtSU_sup (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
     [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P₀ A)]
     [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P₀ A)] [GrOperad R P₀] (p : ℕ) :
-    filtSU (R := R) (C := C) P₀ S p = filtXU (R := R) (C := C) P₀ S p ⊔ filtSU (R := R) (C := C) P₀ S (p + 1) := by
+    filtSU (R := R) (C := C) P₀ S p
+      = filtXU (R := R) (C := C) P₀ S p ⊔ filtSU (R := R) (C := C) P₀ S (p + 1) := by
   unfold filtXU
   split_ifs with hp
   · refine le_antisymm ?_ (sup_le (outerSpanP_mono fun k hk => by omega)

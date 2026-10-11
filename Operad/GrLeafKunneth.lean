@@ -79,7 +79,8 @@ lemma leafLin_comm_ne (gm : GrSpEnd R N q) (gn : GrSpEnd R N q') {A : Type} [Dec
       · rw [if_neg hl, if_neg (show ¬((a = k ∧ ltB L k a = true) ∨ (a = a ∧ ltB L a k = true))
           from fun h => h.elim (fun h' => hak h'.1) (fun h' => hl h'.2)), one_smul]
         rfl
-    · rw [if_neg hak, if_neg haj, if_neg (show ¬((a = k ∧ ltB L k j = true) ∨ (a = j ∧ ltB L j k = true))
+    · rw [if_neg hak, if_neg haj,
+        if_neg (show ¬((a = k ∧ ltB L k j = true) ∨ (a = j ∧ ltB L j k = true))
         from fun h => h.elim (fun h' => hak h'.1) (fun h' => haj h'.1)), one_smul]
       by_cases h1 : ltB L a k = true <;> by_cases h2 : ltB L a j = true <;>
         simp only [h1, h2, ↓reduceIte, Bool.false_eq_true, LinearMap.id_apply, GrSpecies.tw_tw,
@@ -377,7 +378,8 @@ lemma map₂_toHom_mk (g : GrCompGen M N S) :
 operations outside the image of the projection. -/
 theorem sub_map₂_mem (x : GrComposite R M N S) :
     x - (map₂ idSpHom π.toHom).app S x
-      ∈ ⨆ j : ℕ, Module.End.eigenspace (leafMap R M (FreeGrL.GrSpEnd.compl R N π)) ((j + 1 : ℕ) : R) := by
+      ∈ ⨆ j : ℕ, Module.End.eigenspace (leafMap R M (FreeGrL.GrSpEnd.compl R N π))
+        ((j + 1 : ℕ) : R) := by
   induction x using induction_on with
   | h0 => simp
   | hadd x y hx hy =>
@@ -428,7 +430,8 @@ noncomputable def outerN (S : Type) [Fintype S] [DecidableEq S] :
     GrComposite R M N S →ₗ[R] GrComposite R M N S :=
   (map₂ (cardHom R M) (GrSpEnd.id R N).toHom).app S
 
-lemma outerN_mk (g : GrCompGen M N S) : outerN R M N S (mk R g) = (Fintype.card g.A : R) • mk R g := by
+lemma outerN_mk (g : GrCompGen M N S) :
+    outerN R M N S (mk R g) = (Fintype.card g.A : R) • mk R g := by
   rw [outerN, map₂_mk, ← mk_smul_m]
   rfl
 
