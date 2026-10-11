@@ -14,6 +14,7 @@ suspension of the root vertex back into `C` (`GrComposite.cobarSusp`).
 import Operad.GrTwistedDG
 import Operad.ConvUnit
 import Operad.Twisting
+import Operad.FreeGrGraft
 
 universe u v
 
@@ -221,6 +222,143 @@ lemma total_snd_star (F : SymSpeciesHom R C P) {p : Bool} {β : GrOperad.Inv R (
     rw [corolla_apply, total_corGen, GrOperad.map_refl]
     rfl
   | add a b ha hb => simp only [map_add, ha, hb]
+
+omit [GrCooperad.Coaug R C] in
+/-- A morphism into `C ∘ P`, into the second factor of the square-zero extension. -/
+noncomputable def sndHom (Ψ : SymSpeciesHom R C (GrComposite R C P)) :
+    SymSpeciesHom R C (SqExt R C P ε) where
+  app A _ _ :=
+    { toFun := fun x => SqExt.mk 0 (Ψ.app A x)
+      map_add' := fun x y => SqExt.ext (by simp) (by simp)
+      map_smul' := fun r x => SqExt.ext (by simp) (by simp) }
+  app_map {A B} _ _ _ _ σ x := by
+    refine SqExt.ext ?_ ?_
+    · show (0 : P B) = GrOperad.map (R := R) σ 0
+      exact (map_zero _).symm
+    · show Ψ.app B (SymSpecies.map (R := R) σ x) = map σ (Ψ.app A x)
+      exact Ψ.app_map σ x
+
+omit [GrCooperad.Coaug R C] in
+lemma star_add_left_apply {Q : (A : Type) → [Fintype A] → [DecidableEq A] → Type*}
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (Q A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (Q A)] [GrOperad R Q]
+    (G G' H : GrOperad.Inv R (ConvOp R C Q)) {X : Type} [Fintype X] [DecidableEq X] (c : C X) :
+    ConvOp.toLin ((GrOperad.Inv.star R _ (G + G') H).1 X) c
+      = ConvOp.toLin ((GrOperad.Inv.star R _ G H).1 X) c
+        + ConvOp.toLin ((GrOperad.Inv.star R _ G' H).1 X) c := by
+  rw [map_add, LinearMap.add_apply]
+  rfl
+
+omit [GrCooperad.Coaug R C] in
+/-- **A product of a family of elements of `C ∘ P` given by a derivation-like map.** -/
+lemma snd_star_sndHom (Ψ : SymSpeciesHom R C (GrComposite R C P))
+    (Φ : ∀ (A : Type) [Fintype A] [DecidableEq A], P A →ₗ[R] GrComposite R C P A)
+    (hΦmap : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (σ : A ≃ B)
+      (x : P A), Φ B (GrOperad.map (R := R) σ x) = map σ (Φ A x))
+    (hΦcomp : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+      (x : P A) (y : P B),
+      Φ _ (GrOperad.comp (R := R) i x y) = act R C i y (Φ A x) + lact R C ε i x (Φ B y))
+    (G : GrOperad.Inv R (ConvOp R C P))
+    (hGu : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      ε.u A (ConvOp.toLin (G.1 A) x) = 0)
+    (hΨ : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      Ψ.app A x = Φ A (ConvOp.toLin (G.1 A) x))
+    {p : Bool} {β : GrOperad.Inv R (ConvOp R C P)} (hβ : GrOperad.Inv.IsPar p β)
+    {X : Type} [Fintype X] [DecidableEq X] (c : C X) :
+    SqExt.snd (ConvOp.toLin ((GrOperad.Inv.star R _ (famOf (sndHom ε Ψ)) (liftFam ε β)).1 X) c)
+      = Φ X (ConvOp.toLin ((GrOperad.Inv.star R _ G β).1 X) c) := by
+  rw [toLin_star, toLin_star, map_sum, map_sum]
+  refine Finset.sum_congr rfl fun S _ => ?_
+  rw [toLin_term, toLin_term, SqExt.map_def, SqExt.snd_mapE, hΦmap]
+  congr 1
+  generalize GrCooperad.decomp (R := R) (C := C) none
+    (SymSpecies.map (R := R) (splitEquiv S).symm c) = t
+  have hβ' := isParC_of_isPar (isPar_liftFam ε hβ) (SIn S)
+  rw [ConvOp.kap_hom _ hβ', ConvOp.kap_hom _ (isParC_of_isPar hβ (SIn S))]
+  induction t using TensorProduct.induction_on with
+  | zero => simp
+  | tmul x y =>
+    simp only [TensorProduct.map_tmul, ConvOp.mu_tmul, LinearMap.comp_apply, SqExt.comp_def,
+      SqExt.snd_compE]
+    rw [show ConvOp.toLin ((liftFam ε β).1 (SIn S)) y
+        = (inclHom C ε).app _ (ConvOp.toLin (β.1 (SIn S)) y) from rfl,
+      fst_inclHom, snd_inclHom, map_zero, add_zero, hΦcomp, lact_of_u ε _ (hGu _ _),
+      LinearMap.zero_apply, add_zero]
+    congr 1
+    exact hΨ _ _
+  | add a b ha hb => simp only [map_add, ha, hb]
+
+/-- **A product with a family supported in arity one**, in the second factor of the square-zero
+extension. -/
+lemma snd_star_unit (G : GrOperad.Inv R (ConvOp R C (SqExt R C P ε)))
+    (hG : ∀ (A : Type) [Fintype A] [DecidableEq A] (e : Unit ≃ A) (x : C A),
+      ConvOp.toLin (G.1 A) x = GrCooperad.counit (R := R) (SymSpecies.map (R := R) e.symm x)
+        • SqExt.mk 0 (corolla R P A (SymSpecies.map (R := R) e (Coaug.one (R := R) (C := C)))))
+    (hG0 : ∀ (A : Type) [Fintype A] [DecidableEq A], IsEmpty (Unit ≃ A) → G.1 A = 0)
+    {p : Bool} {β : GrOperad.Inv R (ConvOp R C P)} (hβ : GrOperad.Inv.IsPar p β)
+    {X : Type} [Fintype X] [DecidableEq X] [Nonempty X] (c : C X) :
+    SqExt.snd (ConvOp.toLin ((GrOperad.Inv.star R _ G (liftFam ε β)).1 X) c)
+      = map (leftUnitEquiv X) (act R C () (ConvOp.toLin (β.1 X) c)
+          (corolla R P Unit (Coaug.one (R := R) (C := C)))) := by
+  rw [GrOperad.Inv.star_counit_left G (liftFam ε β)
+    (SqExt.mk 0 (corolla R P Unit (Coaug.one (R := R) (C := C)))) (fun A _ _ e x => ?_) hG0
+    (isPar_liftFam ε hβ) c]
+  · rw [SqExt.map_def, SqExt.snd_mapE, SqExt.comp_def, SqExt.snd_compE]
+    show map _ (act R C () (ConvOp.toLin (β.1 X) c) (corolla R P Unit _)
+      + lact R C ε () 0 0) = _
+    rw [map_zero, add_zero]
+  · rw [hG A e x]
+    congr 1
+    refine SqExt.ext ?_ ?_
+    · show (0 : P A) = GrOperad.map (R := R) e 0
+      exact (map_zero _).symm
+    · show _ = map e (corolla R P Unit _)
+      rw [map_corolla]
+      rfl
+
+/-- **The twisted differential of a corolla**, split into the part of a derivation-like map and
+the part of the coaugmentation. -/
+lemma snd_star_corFam (Ψ : SymSpeciesHom R C (GrComposite R C P))
+    (Φ : ∀ (A : Type) [Fintype A] [DecidableEq A], P A →ₗ[R] GrComposite R C P A)
+    (hΦmap : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (σ : A ≃ B)
+      (x : P A), Φ B (GrOperad.map (R := R) σ x) = map σ (Φ A x))
+    (hΦcomp : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+      (x : P A) (y : P B),
+      Φ _ (GrOperad.comp (R := R) i x y) = act R C i y (Φ A x) + lact R C ε i x (Φ B y))
+    (G : GrOperad.Inv R (ConvOp R C P))
+    (hGu : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      ε.u A (ConvOp.toLin (G.1 A) x) = 0)
+    (hΨ : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      Ψ.app A x = Φ A (ConvOp.toLin (G.1 A) x))
+    (hΨ1 : ∀ (A : Type) [Fintype A] [DecidableEq A] (e : Unit ≃ A) (x : C A),
+      corolla R P A x - Ψ.app A x = GrCooperad.counit (R := R) (SymSpecies.map (R := R) e.symm x)
+        • corolla R P A (SymSpecies.map (R := R) e (Coaug.one (R := R) (C := C))))
+    (hΨ0 : ∀ (A : Type) [Fintype A] [DecidableEq A], IsEmpty (Unit ≃ A) →
+      ∀ x : C A, Ψ.app A x = corolla R P A x)
+    {p : Bool} {β : GrOperad.Inv R (ConvOp R C P)} (hβ : GrOperad.Inv.IsPar p β)
+    {X : Type} [Fintype X] [DecidableEq X] [Nonempty X] (c : C X) :
+    SqExt.snd (ConvOp.toLin ((GrOperad.Inv.star R _ (corFam (C := C) ε) (liftFam ε β)).1 X) c)
+      = Φ X (ConvOp.toLin ((GrOperad.Inv.star R _ G β).1 X) c)
+        + map (leftUnitEquiv X) (act R C () (ConvOp.toLin (β.1 X) c)
+          (corolla R P Unit (Coaug.one (R := R) (C := C)))) := by
+  have hsplit : corFam (C := C) ε
+      = famOf (sndHom ε Ψ) + (corFam (C := C) ε - famOf (sndHom ε Ψ)) := by abel
+  rw [hsplit, star_add_left_apply, map_add,
+    snd_star_sndHom ε Ψ Φ hΦmap hΦcomp G hGu hΨ hβ c]
+  congr 1
+  refine snd_star_unit ε _ (fun A _ _ e x => ?_) (fun A _ _ h => ?_) hβ c
+  · refine SqExt.ext ?_ ?_
+    · show SqExt.fst (corLin ε A x - (sndHom ε Ψ).app A x) = _
+      rw [map_sub, map_smul]
+      show (0 : P A) - 0 = _ • (0 : P A)
+      rw [sub_zero, smul_zero]
+    · show SqExt.snd (corLin ε A x - (sndHom ε Ψ).app A x) = _
+      rw [map_sub, map_smul]
+      exact hΨ1 A e x
+  · refine ConvOp.ext fun x => ?_
+    show corLin ε A x - (sndHom ε Ψ).app A x = 0
+    refine sub_eq_zero.2 (SqExt.ext rfl ?_)
+    exact (hΨ0 A h x).symm
 
 end TotalStar
 
@@ -622,6 +760,230 @@ lemma cobarE_cobarD_corolla {A : Type} [Fintype A] [DecidableEq A] [Nonempty A] 
   · ext x
     show (cobarEps R C).app A x = 0
     rw [cobarEps_apply, Finset.univ_eq_empty, Finset.sum_empty]
+
+/-! ### The cycle `1 ⊗ 1` -/
+
+variable (R C) in
+/-- **The cycle `1 ⊗ 1`**, zero outside the arities of one element. -/
+noncomputable abbrev unitTerm (B : Type) [Fintype B] [DecidableEq B] : GrComposite R C Ω B :=
+  unitCor R C B (FreeGrL.unitL R 𝒲 B)
+
+lemma unitTerm_map {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (σ : A ≃ B) : map σ (unitTerm R C A) = unitTerm R C B := by
+  rw [unitTerm, ← unitCor_map, FreeGrL.map_unitL]
+
+lemma par_corolla_one (r : Bool) :
+    par R C Ω r (corolla R Ω Unit (Coaug.one (R := R) (C := C)))
+      = if r = false then corolla R Ω Unit (Coaug.one (R := R) (C := C)) else 0 := by
+  rw [par_corolla]
+  cases r
+  · rw [Coaug.par_one, if_pos rfl]
+  · rw [if_neg (by decide), ← Coaug.par_one (R := R) (C := C), GrSpecies.par_par,
+      if_neg (by decide), map_zero]
+
+lemma unitCor_par {B : Type} [Fintype B] [DecidableEq B] (b : Bool) (z : Ω B) :
+    unitCor R C B (GrOperad.par (R := R) b z) = par R C Ω b (unitCor R C B z) := by
+  rw [unitCor_apply, unitCor_apply, ← map_par']
+  congr 1
+  have key : ∀ r : Bool, par R C Ω b (act R C () (GrOperad.par (R := R) r z)
+      (corolla R Ω Unit (Coaug.one (R := R) (C := C))))
+      = if b = r then act R C () (GrOperad.par (R := R) r z)
+          (corolla R Ω Unit (Coaug.one (R := R) (C := C))) else 0 := fun r => by
+    rw [par_act b () _ (GrOperad.par_par_self (R := R) r z), par_corolla_one]
+    cases b <;> cases r <;> simp
+  have hadd : ∀ z z' : Ω B, act R C () (z + z') = act R C () z + act R C () z' := fun z z' =>
+    (actL R C ()).map_add z z'
+  conv_rhs => rw [← GrOperad.par_add (R := R) z, hadd, LinearMap.add_apply, map_add, key, key]
+  cases b <;> simp
+
+lemma par_smul_unitTerm {B : Type} [Fintype B] [DecidableEq B] (b : Bool) (z : Ω B) :
+    (εΩ).u B (GrOperad.par (R := R) b z) • unitTerm R C B
+      = par R C Ω b ((εΩ).u B z • unitTerm R C B) := by
+  have hL : ∀ r : Bool, GrOperad.par (R := R) r (FreeGrL.unitL R 𝒲 B)
+      = if r = false then FreeGrL.unitL R 𝒲 B else 0 := fun r => by
+    rw [FreeGrL.unitL, map_sum]
+    cases r
+    · rw [if_pos rfl]
+      refine Finset.sum_congr rfl fun e _ => ?_
+      rw [← GrOperad.map_par, GrOperad.par_one]
+    · rw [if_neg (by decide)]
+      refine Finset.sum_eq_zero fun e _ => ?_
+      rw [← GrOperad.map_par, ← GrOperad.par_one (R := R) (P := Ω), GrOperad.par_par,
+        if_neg (by decide), map_zero]
+  rw [map_smul, unitTerm, ← unitCor_par, hL]
+  cases b
+  · rw [GrAug.u_par_false, if_pos rfl]
+  · rw [(εΩ).u_par, zero_smul, if_neg (by decide), map_zero, smul_zero]
+
+/-- `x ∘ᵢ (1 ⊗ y) = ε(x) (1 ⊗ x ∘ᵢ y)` -/
+lemma lact_unitCor {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+    (x : Ω A) (y : Ω B) :
+    lact R C εΩ i x (unitCor R C B y) = (εΩ).u A x • act R C i y (unitTerm R C A) := by
+  by_cases h : IsEmpty (Unit ≃ A)
+  · rw [lact_of_isEmpty εΩ h, (εΩ).u_eq_zero h, zero_smul]
+    rfl
+  · obtain ⟨e⟩ := not_isEmpty_iff.1 h
+    haveI := subsingleton_of_unit e
+    rw [lact_eq εΩ i x e, unitTerm, ← unitCor_comp, FreeGrL.comp_unitL,
+      Fintype.sum_subsingleton _ e, unitCor_map]
+
+lemma lact_unitTerm {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+    (x : Ω A) :
+    lact R C εΩ i x (unitTerm R C B) = (εΩ).u A x • unitTerm R C (Without A i ⊕ B) := by
+  by_cases h : IsEmpty (Unit ≃ A)
+  · rw [lact_of_isEmpty εΩ h, (εΩ).u_eq_zero h, zero_smul]
+    rfl
+  · obtain ⟨e⟩ := not_isEmpty_iff.1 h
+    rw [lact_eq εΩ i x e, unitTerm_map]
+
+/-! ### The suspended root decomposition of a generator -/
+
+variable (R C) in
+/-- **The suspended root decomposition of the universal twisting morphism**:
+`c ↦ c̄ ⊗ (1, …, 1)`. -/
+noncomputable def corBarHom : SymSpeciesHom R C (GrComposite R C Ω) where
+  app A _ _ := cobarHs R C A ∘ₗ Cobar.ιL R C A
+  app_map {A B} _ _ _ _ σ x := by
+    show cobarHs R C B (Cobar.ιL R C B (SymSpecies.map (R := R) σ x))
+      = map σ (cobarHs R C A (Cobar.ιL R C A x))
+    rw [Cobar.ιL_map, cobarHs_map]
+
+lemma card_eq_one_of_unit {A : Type} [Fintype A] (e : Unit ≃ A) : Fintype.card A = 1 := by
+  rw [← Fintype.card_congr e, Fintype.card_unit]
+
+/-- **The differential of the corolla of a reduced cooperation**:
+`d(c̄ ⊗ 1) = ρ̃((ι ⋆ ι)(c)) + 1 ⊗ ι(c)`. -/
+theorem cobarD_corolla_eq
+    (hred : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ 1 →
+      ∀ x : C A, x ∈ unitSpan R C A) {A : Type} [Fintype A] [DecidableEq A] (c : C A) :
+    cobarD R C A (corolla R Ω A (Red.sec A (Red.proj R C A c)))
+      = cobarHs R C A (ConvOp.toLin ((Cobar.ιι R C).1 A) c)
+        + unitCor R C A (Cobar.ιL R C A c) := by
+  by_cases hA : Fintype.card A ≤ 1
+  · have hc := hred A hA c
+    rw [show Red.proj R C A c = 0 from (Submodule.Quotient.mk_eq_zero _).2 hc,
+      Cobar.star_ι_ι_unit R C hc, Cobar.ιL_unitSpan R C hc]
+    simp only [map_zero, add_zero]
+  · have hE : IsEmpty (Unit ≃ A) := ⟨fun e => hA (by rw [card_eq_one_of_unit e])⟩
+    haveI : Nonempty A := Fintype.card_pos_iff.1 (by omega)
+    rw [Red.sec_proj hE, unitCor_apply, cobarD_corolla]
+    have h1 : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+        (σ : A ≃ B) (x : Ω A), cobarHs R C B (GrOperad.map (R := R) σ x)
+          = map σ (cobarHs R C A x) := fun A B _ _ _ _ σ x => cobarHs_map σ x
+    have h2 : ∀ (A B : Type) [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+        (x : Ω A) (y : Ω B), cobarHs R C _ (GrOperad.comp (R := R) i x y)
+          = act R C i y (cobarHs R C A x) + lact R C εΩ i x (cobarHs R C B y) :=
+      fun A B _ _ _ _ i x y => cobarHs_comp i x y
+    have h3 := snd_star_corFam εΩ (corBarHom R C) (fun A _ _ => cobarHs R C A) h1 h2
+      (Cobar.ι R C) (fun A _ _ x => u_ιL x) (fun A _ _ x => rfl)
+    refine h3 (fun A _ _ e x => ?_) (fun A _ _ h x => ?_) (Cobar.isPar_ι R C) c
+    · show corolla R Ω A x - cobarHs R C A (Cobar.ιL R C A x) = _
+      rw [cobarHs_ιL, Red.sec_of_nonempty ⟨e⟩, map_zero, sub_zero]
+      conv_lhs => rw [eq_counit_smul (hred A (by rw [card_eq_one_of_unit e])) e x]
+      rw [map_smul]
+    · show cobarHs R C A (Cobar.ιL R C A x) = corolla R Ω A x
+      rw [cobarHs_ιL, Red.sec_proj h]
+
+/-! ### The homotopy on the inner operations -/
+
+variable (R C) in
+/-- The defect `d ρ̃ + ρ̃ d - (1 ⊗ ·) + ε (1 ⊗ 1)` of the suspended root decomposition. -/
+noncomputable def cobarΦ (B : Type) [Fintype B] [DecidableEq B] :
+    Ω B →ₗ[R] GrComposite R C Ω B :=
+  cobarD R C B ∘ₗ cobarHs R C B + cobarHs R C B ∘ₗ (Cobar.d R C).app B
+    - unitCor R C B + LinearMap.smulRight ((εΩ).u B) (unitTerm R C B)
+
+lemma cobarΦ_apply {B : Type} [Fintype B] [DecidableEq B] (z : Ω B) :
+    cobarΦ R C B z = cobarD R C B (cobarHs R C B z) + cobarHs R C B ((Cobar.d R C).app B z)
+      - unitCor R C B z + (εΩ).u B z • unitTerm R C B := rfl
+
+lemma cobarΦ_par {B : Type} [Fintype B] [DecidableEq B] (b : Bool) (z : Ω B) :
+    cobarΦ R C B (GrOperad.par (R := R) b z) = par R C Ω b (cobarΦ R C B z) := by
+  rw [cobarΦ_apply, cobarΦ_apply, cobarHs_par, cobarD_par, (Cobar.d R C).app_par, cobarHs_par,
+    unitCor_par, par_smul_unitTerm]
+  simp only [Bool.xor_true, Bool.not_not, map_add, map_sub]
+
+lemma cobarΦ_map {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B]
+    (σ : A ≃ B) (z : Ω A) :
+    cobarΦ R C B (GrOperad.map (R := R) σ z) = map σ (cobarΦ R C A z) := by
+  rw [cobarΦ_apply, cobarΦ_apply, cobarHs_map, cobarD_map, (Cobar.d R C).app_map, cobarHs_map,
+    unitCor_map, (εΩ).u_map, ← unitTerm_map σ]
+  simp only [map_add, map_sub, map_smul]
+
+lemma cobarΦ_one : cobarΦ R C Unit (GrOperad.one (R := R)) = 0 := by
+  rw [cobarΦ_apply, cobarHs_one, map_zero, zero_add, (Cobar.d R C).app_one, map_zero, zero_sub,
+    (εΩ).u_one, one_smul, unitTerm, FreeGrL.unitL_eq (Equiv.refl Unit), GrOperad.map_refl,
+    neg_add_cancel]
+
+set_option maxHeartbeats 1000000 in
+lemma cobarΦ_comp {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (i : A)
+    {x : Ω A} {y : Ω B} (hx : cobarΦ R C A x = 0) (hy : cobarΦ R C B y = 0) :
+    cobarΦ R C _ (GrOperad.comp (R := R) i x y) = 0 := by
+  rw [cobarΦ_apply] at hx hy
+  have hx' : cobarD R C A (cobarHs R C A x) + cobarHs R C A ((Cobar.d R C).app A x)
+      = unitCor R C A x - (εΩ).u A x • unitTerm R C A := by
+    rw [eq_sub_iff_add_eq, ← sub_eq_zero, ← hx]
+    abel
+  have hy' : cobarD R C B (cobarHs R C B y) + cobarHs R C B ((Cobar.d R C).app B y)
+      = unitCor R C B y - (εΩ).u B y • unitTerm R C B := by
+    rw [eq_sub_iff_add_eq, ← sub_eq_zero, ← hy]
+    abel
+  have e1 : act R C i y (cobarD R C A (cobarHs R C A x))
+      + act R C i y (cobarHs R C A ((Cobar.d R C).app A x))
+      = act R C i y (unitCor R C A x) - (εΩ).u A x • act R C i y (unitTerm R C A) := by
+    rw [← map_add, hx', map_sub, map_smul]
+  have e2 : lact R C εΩ i x (cobarD R C B (cobarHs R C B y))
+      + lact R C εΩ i x (cobarHs R C B ((Cobar.d R C).app B y))
+      = (εΩ).u A x • act R C i y (unitTerm R C A)
+        - (εΩ).u B y • ((εΩ).u A x • unitTerm R C (Without A i ⊕ B)) := by
+    rw [← map_add, hy', map_sub, map_smul, lact_unitCor, lact_unitTerm]
+  rw [cobarΦ_apply, cobarHs_comp, map_add, cobarD_act, cobarD_lact, (Cobar.d R C).app_comp,
+    GrOperadHom.id_app, GrOperadHom.id_app, map_add, cobarHs_comp, cobarHs_comp,
+    lact_of_u εΩ _ (u_d x), LinearMap.zero_apply, add_zero, cobarHs_tw, lact_tw,
+    unitCor_comp, (εΩ).u_comp, map_neg]
+  linear_combination (norm := module) e1 + e2
+
+lemma cobarΦ_ιL
+    (hred : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ 1 →
+      ∀ x : C A, x ∈ unitSpan R C A) {A : Type} [Fintype A] [DecidableEq A] (c : C A) :
+    cobarΦ R C A (Cobar.ιL R C A c) = 0 := by
+  rw [cobarΦ_apply, cobarHs_ιL, Cobar.d_ιL, map_neg, cobarD_corolla_eq hred, u_ιL, zero_smul,
+    add_zero]
+  abel
+
+variable (R C) in
+/-- The suboperad on which the defect vanishes. -/
+noncomputable def cobarΦSub : GrSuboperad R Ω where
+  sub B _ _ := LinearMap.ker (cobarΦ R C B)
+  par_mem := by
+    intro B _ _ b x hx
+    rw [LinearMap.mem_ker] at hx ⊢
+    rw [cobarΦ_par, hx, map_zero]
+  map_mem := by
+    intro A B _ _ _ _ σ x hx
+    rw [LinearMap.mem_ker] at hx ⊢
+    rw [cobarΦ_map, hx, map_zero]
+  one_mem := cobarΦ_one
+  comp_mem := by
+    intro A B _ _ _ _ i x y hx hy
+    exact cobarΦ_comp i hx hy
+
+/-- **The suspended root decomposition is a homotopy from `1 ⊗ ·` to `ε (1 ⊗ 1)`**:
+`d(ρ̃ z) + ρ̃(d z) = 1 ⊗ z - ε(z) (1 ⊗ 1)`. -/
+theorem cobarD_cobarHs
+    (hred : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ 1 →
+      ∀ x : C A, x ∈ unitSpan R C A) {B : Type} [Fintype B] [DecidableEq B] (z : Ω B) :
+    cobarD R C B (cobarHs R C B z) + cobarHs R C B ((Cobar.d R C).app B z)
+      = unitCor R C B z - (εΩ).u B z • unitTerm R C B := by
+  have h : cobarΦ R C B z = 0 := LinearMap.mem_ker.1 (FreeGrL.mem_of_ι (cobarΦSub R C)
+    (fun k v b _ => by
+      obtain ⟨c, hc⟩ := exists_ιL (R := R) (C := C) v
+      show _ ∈ LinearMap.ker (cobarΦ R C (Fin k))
+      rw [hc, LinearMap.mem_ker]
+      exact cobarΦ_ιL hred c) z)
+  rw [cobarΦ_apply] at h
+  rw [eq_sub_iff_add_eq, ← sub_eq_zero, ← h]
+  abel
 
 end Homotopy
 
