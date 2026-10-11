@@ -10,6 +10,7 @@ operads (`GrComposite.map₂_twD`).
 -/
 import Operad.GrTwistedDG
 import Operad.GrLeafKunneth
+import Operad.FreeGrCompare
 
 universe u v w
 
@@ -98,18 +99,82 @@ lemma outerLt_le_iSup (k : ℕ) :
   rintro _ ⟨g, hg, rfl⟩
   exact Submodule.mem_iSup_of_mem (⟨_, hg⟩ : Fin k) (mk_mem_outerEig g)
 
-/-- **The composites with an outer operation of `k` inputs and of fewer inputs are independent.**
--/
-lemma disjoint_outerSpan_outerLt [IsDomain R] [CharZero R] [NoZeroSMulDivisors R (GrComposite R M N S)]
-    (k : ℕ) : Disjoint (outerSpan R M N S k) (outerLt R M N S k) := by
-  refine Disjoint.mono (outerSpanP_le_outerEig k) (outerLt_le_iSup k) ?_
-  have hind := Module.End.eigenspaces_iSupIndep (outerN R M N S)
-  have h := hind.disjoint_biSup (x := (k : R)) (y := Set.range fun j : Fin k => ((j : ℕ) : R))
+/-- **The composites with an outer operation of `k` inputs and of fewer inputs are independent**,
+over a `ℚ`-algebra. -/
+lemma disjoint_outerSpan_outerLt [Algebra ℚ R] (k : ℕ) :
+    Disjoint (outerSpan R M N S k) (outerLt R M N S k) := by
+  have hind := iSupIndep_eigenspace_nat (R := R) (outerN R M N S)
+  have h := hind.disjoint_biSup (x := k) (y := {j | j < k}) (by simp)
+  refine h.mono (outerSpanP_le_outerEig k) ?_
+  apply Submodule.span_le.2
+  rintro _ ⟨g, hg, rfl⟩
+  exact (le_biSup (fun j : ℕ => outerEig R M N S j) (show Fintype.card g.A ∈ {j | j < k} from hg))
+    (mk_mem_outerEig g)
+
+lemma mem_iSup_outerSpan (x : GrComposite R M N S) : x ∈ ⨆ j : ℕ, outerSpan R M N S j := by
+  induction x using induction_on with
+  | h0 => exact zero_mem _
+  | hadd x y hx hy => exact add_mem hx hy
+  | hsmul c x hx => exact Submodule.smul_mem _ c hx
+  | hmk g => exact Submodule.mem_iSup_of_mem (Fintype.card g.A) (mk_mem_outerSpanP g rfl)
+
+/-- **The eigenspaces of the number of inputs of the outer operation are the spans of the
+generators**, over a `ℚ`-algebra. -/
+theorem outerEig_le_outerSpan [Algebra ℚ R] (k : ℕ) :
+    outerEig R M N S k ≤ outerSpan R M N S k := by
+  intro x hx
+  have hind := iSupIndep_eigenspace_nat (R := R) (outerN R M N S)
+  obtain ⟨f, hf, rfl⟩ := (Submodule.mem_iSup_iff_exists_finsupp _ x).1 (mem_iSup_outerSpan x)
+  let φ : GrComposite R M N S →ₗ[R] GrComposite R M N S :=
+    outerN R M N S - (k : R) • LinearMap.id
+  have hφ : ∀ j, φ (f j) = ((j : R) - k) • f j := fun j => by
+    simp only [φ, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.id_apply,
+      Module.End.mem_eigenspace_iff.1 (outerSpanP_le_outerEig j (hf j)), sub_smul]
+  have h0 : ∀ j, φ (f j) = 0 := iSupIndep_finsupp_eq_zero hind (f.mapRange φ (map_zero φ))
+    (fun j => by
+      rw [Finsupp.mapRange_apply, hφ]
+      exact Submodule.smul_mem _ _ (outerSpanP_le_outerEig j (hf j)))
     (by
-      rintro ⟨j, hj⟩
-      exact absurd (Nat.cast_injective hj) (Nat.ne_of_lt j.2))
-  refine h.mono_right (iSup_le fun j => ?_)
-  exact le_iSup₂_of_le ((j : ℕ) : R) ⟨j, rfl⟩ le_rfl
+      rw [Finsupp.sum_mapRange_index (fun _ => rfl), ← map_finsuppSum]
+      simp only [φ, LinearMap.sub_apply, LinearMap.smul_apply, LinearMap.id_apply,
+        Module.End.mem_eigenspace_iff.1 hx, sub_self])
+  have hz : ∀ j, j ≠ k → f j = 0 := fun j hj => by
+    have h1 := h0 j
+    rw [hφ] at h1
+    have hu : IsUnit ((j : R) - k) := by
+      have : ((j : ℚ) - k) ≠ 0 := sub_ne_zero.2 (Nat.cast_injective.ne hj)
+      have h2 := (isUnit_iff_ne_zero.2 this).map (algebraMap ℚ R)
+      rwa [map_sub, map_natCast, map_natCast] at h2
+    exact hu.smul_eq_zero.1 h1
+  rw [Finsupp.sum_eq_single k (fun j _ hj => hz j hj) (fun _ => rfl)]
+  exact hf k
+
+/-- **Generators with more outer inputs than inputs vanish**, without inner operations with no
+inputs. -/
+lemma outerLt_eq_top
+    (hN0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : N B, y = 0) :
+    outerLt R M N S (Fintype.card S + 1) = ⊤ := by
+  refine eq_top_iff.2 fun x _ => ?_
+  clear ‹x ∈ ⊤›
+  induction x using induction_on with
+  | h0 => exact zero_mem _
+  | hadd x y hx hy => exact add_mem hx hy
+  | hsmul c x hx => exact Submodule.smul_mem _ c hx
+  | hmk g =>
+    by_cases hg : Fintype.card g.A < Fintype.card S + 1
+    · exact mk_mem_outerSpanP g hg
+    · have hex : ∃ a, IsEmpty (g.B a) := by
+        by_contra hne
+        simp only [not_exists, not_isEmpty_iff] at hne
+        have h1 : Fintype.card g.A ≤ Fintype.card S := by
+          rw [← Fintype.card_congr g.e, Fintype.card_sigma]
+          calc Fintype.card g.A = ∑ _a : g.A, 1 := by simp
+            _ ≤ ∑ a, Fintype.card (g.B a) := Finset.sum_le_sum fun a _ =>
+              Fintype.card_pos_iff.2 (hne a)
+        omega
+      obtain ⟨a, ha⟩ := hex
+      rw [mk_of_y_eq_zero g (hN0 _ ha (g.y a))]
+      exact zero_mem _
 
 /-! ### Preservation -/
 
@@ -345,6 +410,187 @@ theorem map₂_twD {β : GrOperad.Inv R (ConvOp R C P')} {p : Bool} (hβ : GrOpe
     | add a b ha hb => simp only [map_add, ha, hb]
 
 end Natural
+
+/-! ## Quasi-isomorphisms of twisted composite products -/
+
+section Compare
+
+variable {R : Type u} [Field R] [CharZero R]
+  {C : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrCooperad R C]
+  {P : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P A)] [GrOperad R P]
+  {P' : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P' A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P' A)] [GrOperad R P']
+  (ε : GrAug R P) (ε' : GrAug R P')
+  (D : GrDer (GrOperadHom.id R P) true) (D' : GrDer (GrOperadHom.id R P') true)
+  (g : GrOperadHom R P' P)
+
+/-- **The data of a comparison of twisted composite products** `C ∘_β' P' → C ∘_β P` along a
+morphism `g : P' → P` of graded operads with differentials: odd families vanishing in the arities
+of one element, related by `g`, with differentials squaring to zero, and no operations without
+inputs. -/
+structure TwCompareData (β : GrOperad.Inv R (ConvOp R C P))
+    (β' : GrOperad.Inv R (ConvOp R C P')) : Prop where
+  hD : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P A), D.app A (D.app A x) = 0
+  hD' : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P' A), D'.app A (D'.app A x) = 0
+  hg : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P' A),
+    g.app A (D'.app A x) = D.app A (g.app A x)
+  hβ : GrOperad.Inv.IsPar true β
+  hβ' : GrOperad.Inv.IsPar true β'
+  hβ1 : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A = 1 →
+    ∀ x : C A, toLin (β.1 A) x = 0
+  hβ1' : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A = 1 →
+    ∀ x : C A, toLin (β'.1 A) x = 0
+  nat : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P' S),
+    (map₂ idSpHom g.toGrSpeciesHom).app S (twD ε' β' S w)
+      = twD ε β S ((map₂ idSpHom g.toGrSpeciesHom).app S w)
+  dd : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P S),
+    twDiff R C ε D β S (twDiff R C ε D β S w) = 0
+  dd' : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P' S),
+    twDiff R C ε' D' β' S (twDiff R C ε' D' β' S w) = 0
+  hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0
+  hP0' : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P' B, y = 0
+
+variable {ε ε' D D' g} {β : GrOperad.Inv R (ConvOp R C P)} {β' : GrOperad.Inv R (ConvOp R C P')}
+  (hd : TwCompareData ε ε' D D' g β β') {S : Type} [Fintype S] [DecidableEq S]
+
+include hd
+
+omit [CharZero R] in
+lemma TwCompareData.leaf_comm (x : GrComposite R C P' S) :
+    (map₂ idSpHom g.toGrSpeciesHom).app S (leafD R C D' S x)
+      = leafD R C D S ((map₂ idSpHom g.toGrSpeciesHom).app S x) :=
+  map₂_leafMap idSpHom (fun _ _ _ _ => rfl) g.toGrSpeciesHom D'.toSpEnd D.toSpEnd
+    (fun A _ _ y => hd.hg A y) x
+
+/-- The graded pieces of the filtration by the number of outer inputs, from the most. -/
+noncomputable def filtX (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P₀ A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P₀ A)] [GrOperad R P₀]
+    (S : Type) [Fintype S] [DecidableEq S] (p : ℕ) : Submodule R (GrComposite R C P₀ S) :=
+  if p ≤ Fintype.card S then outerSpan R C P₀ S (Fintype.card S - p) else ⊥
+
+omit hd [CharZero R] in
+lemma filt_sup (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
+    [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P₀ A)]
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P₀ A)] [GrOperad R P₀] (p : ℕ) :
+    outerLt R C P₀ S (Fintype.card S + 1 - p)
+      = filtX P₀ S p ⊔ outerLt R C P₀ S (Fintype.card S + 1 - (p + 1)) := by
+  unfold filtX
+  split_ifs with hp
+  · rw [show Fintype.card S + 1 - p = (Fintype.card S - p) + 1 by omega,
+      show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega, outerLt_succ]
+  · rw [show Fintype.card S + 1 - p = 0 by omega, show Fintype.card S + 1 - (p + 1) = 0 by omega,
+      bot_sup_eq]
+
+lemma TwCompareData.filtData :
+    QIso.FiltData (filtX P' S) (fun p => outerLt R C P' S (Fintype.card S + 1 - p))
+      (filtX P S) (fun p => outerLt R C P S (Fintype.card S + 1 - p)) (Fintype.card S + 1)
+      (leafD R C D' S) (twD ε' β' S) (leafD R C D S) (twD ε β S)
+      ((map₂ idSpHom g.toGrSpeciesHom).app S) where
+  split p := by
+    refine ⟨?_, fun x => ?_, fun u hu => ?_, fun u hu => ?_, fun w hw => ?_⟩
+    · unfold filtX
+      split_ifs with hp
+      · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
+        exact disjoint_outerSpan_outerLt _
+      · exact disjoint_bot_left
+    · have := hd.dd' S x
+      rwa [twDiff, add_comm] at this
+    · unfold filtX at hu ⊢
+      split_ifs at hu ⊢ with hp
+      · exact leafMap_mem_outerSpanP _ hu
+      · rw [Submodule.mem_bot] at hu ⊢
+        rw [hu, map_zero]
+    · unfold filtX at hu
+      split_ifs at hu with hp
+      · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
+        exact twD_mem_outerLt ε' hd.hβ' hd.hβ1' hu
+      · rw [Submodule.mem_bot] at hu
+        rw [hu, map_zero]
+        exact zero_mem _
+    · rw [LinearMap.add_apply]
+      exact add_mem (leafMap_mem_outerSpanP _ hw) (twD_mem_outerLt_of_lt ε' hd.hβ' hd.hβ1' hw)
+  split' p := by
+    refine ⟨?_, fun x => ?_, fun u hu => ?_, fun u hu => ?_, fun w hw => ?_⟩
+    · unfold filtX
+      split_ifs with hp
+      · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
+        exact disjoint_outerSpan_outerLt _
+      · exact disjoint_bot_left
+    · have := hd.dd S x
+      rwa [twDiff, add_comm] at this
+    · unfold filtX at hu ⊢
+      split_ifs at hu ⊢ with hp
+      · exact leafMap_mem_outerSpanP _ hu
+      · rw [Submodule.mem_bot] at hu ⊢
+        rw [hu, map_zero]
+    · unfold filtX at hu
+      split_ifs at hu with hp
+      · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
+        exact twD_mem_outerLt ε hd.hβ hd.hβ1 hu
+      · rw [Submodule.mem_bot] at hu
+        rw [hu, map_zero]
+        exact zero_mem _
+    · rw [LinearMap.add_apply]
+      exact add_mem (leafMap_mem_outerSpanP _ hw) (twD_mem_outerLt_of_lt ε hd.hβ hd.hβ1 hw)
+  hom p := by
+    refine ⟨fun u hu => ?_, fun w hw => map₂_mem_outerSpanP _ hw, fun x => hd.leaf_comm x,
+      fun x => hd.nat S x⟩
+    unfold filtX at hu ⊢
+    split_ifs at hu ⊢ with hp
+    · exact map₂_mem_outerSpanP _ hu
+    · rw [Submodule.mem_bot] at hu ⊢
+      rw [hu, map_zero]
+  sup p := filt_sup P' p
+  sup' p := filt_sup P p
+  top := by rw [Nat.sub_self, outerLt_zero]
+  top' := by rw [Nat.sub_self, outerLt_zero]
+
+/-- **The comparison lemma, forward**: if `g` is a quasi-isomorphism in every arity, so is
+`1 ∘ g : C ∘_β' P' → C ∘_β P`, over a field of characteristic zero. -/
+theorem TwCompareData.qiso
+    (hs : ∀ (A : Type) [Fintype A] [DecidableEq A],
+      FreeGrL.SurjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A)
+    (hi : ∀ (A : Type) [Fintype A] [DecidableEq A],
+      FreeGrL.InjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A) :
+    QIso.Surj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S)
+      ∧ QIso.Inj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S) := by
+  obtain ⟨s'⟩ := Splitting.exists_of_field D'.toSpEnd (fun A _ _ x => hd.hD' A x)
+  obtain ⟨s⟩ := Splitting.exists_of_field D.toSpEnd (fun A _ _ x => hd.hD A x)
+  obtain ⟨k, hk⟩ := exists_compat g.toGrSpeciesHom (fun A _ _ x => (hd.hg A x).symm) s' s
+    (fun _ => True) (fun n _ => hs (Fin n)) (fun n _ => hi (Fin n))
+  have hpiece : ∀ p, QIso.Surj (filtX P' S p) (filtX P S p) (leafD R C D' S) (leafD R C D S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S)
+      ∧ QIso.Inj (filtX P' S p) (filtX P S p) (leafD R C D' S) (leafD R C D S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S) := fun p => by
+    unfold filtX
+    split_ifs with hp
+    · have hX := le_antisymm (outerSpanP_le_outerEig (R := R) (M := C) (N := P') (S := S)
+        (Fintype.card S - p)) (outerEig_le_outerSpan _)
+      have hX' := le_antisymm (outerSpanP_le_outerEig (R := R) (M := C) (N := P) (S := S)
+        (Fintype.card S - p)) (outerEig_le_outerSpan _)
+      rw [hX, hX']
+      refine qiso_leaf s' s g.toGrSpeciesHom (fun A _ _ y => hd.hg A y) k _
+        (fun x _ => ?_) (fun y _ => ?_)
+      · rw [map₂_map₂ k (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)) s'.p.toHom
+          (fun A _ _ y => (hk A trivial).1 y)]
+      · rw [map₂_map₂ (s.p.toHom.comp (g.toGrSpeciesHom.comp s'.p.toHom)) k s.p.toHom
+          (fun A _ _ y => (hk A trivial).2 y)]
+    · exact ⟨QIso.surj_bot _ _ _, QIso.inj_bot _ _ _⟩
+  have h := QIso.qiso_filt hd.filtData (fun p => (hpiece p).1) (fun p => (hpiece p).2) 0
+  rw [Nat.sub_zero, outerLt_eq_top hd.hP0', outerLt_eq_top hd.hP0] at h
+  have e1 : leafD R C D' S + twD ε' β' S = twDiff R C ε' D' β' S := add_comm _ _
+  have e2 : leafD R C D S + twD ε β S = twDiff R C ε D β S := add_comm _ _
+  rwa [e1, e2] at h
+
+end Compare
 
 end GrComposite
 
