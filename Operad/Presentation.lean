@@ -92,8 +92,11 @@ the presented operad. -/
 noncomputable def lift {p : Presentation R E} (ρ : p.Rep Q) : NSOperadHom R p.Op Q :=
   p.ideal.liftHom ρ.free (fun _ _ hx => apply_eq_zero_of_isGenerated ρ.free p.rel ρ.kills hx)
 
-@[simp] lemma lift_proj {p : Presentation R E} (ρ : p.Rep Q) (n : ℕ) (x : Free R E n) :
+lemma lift_proj {p : Presentation R E} (ρ : p.Rep Q) (n : ℕ) (x : Free R E n) :
     (lift ρ).app n (p.ideal.proj n x) = ρ.free.app n x := rfl
+
+@[simp] lemma lift_mk {p : Presentation R E} (ρ : p.Rep Q) (n : ℕ) (x : Free R E n) :
+    (lift ρ).app n (Submodule.Quotient.mk x) = ρ.free.app n x := rfl
 
 /-- The lift does on generators what it was asked to do. -/
 @[simp] theorem lift_gen {p : Presentation R E} (ρ : p.Rep Q) {k : ℕ} (e : E k) :

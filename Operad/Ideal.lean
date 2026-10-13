@@ -56,8 +56,12 @@ lemma proj_surjective (n : ℕ) : Function.Surjective (I.proj n) :=
 def compRight (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) : I.Quot n →ₗ[R] I.Quot (a + n + b) :=
   Submodule.mapQ _ _ (comp (R := R) a b α) fun _ hx => I.comp_mem_right a b α hx
 
-@[simp] lemma compRight_proj (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
+lemma compRight_proj (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
     I.compRight a b α (I.proj n β) = I.proj (a + n + b) (comp (R := R) a b α β) := rfl
+
+@[simp] lemma compRight_mk (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
+    I.compRight a b α (Submodule.Quotient.mk β) =
+      Submodule.Quotient.mk (comp (R := R) a b α β) := rfl
 
 /-- Partial composition on the quotient. -/
 def compQ (a b : ℕ) {n : ℕ} : I.Quot (a + 1 + b) →ₗ[R] I.Quot n →ₗ[R] I.Quot (a + n + b) :=
@@ -78,8 +82,13 @@ def compQ (a b : ℕ) {n : ℕ} : I.Quot (a + 1 + b) →ₗ[R] I.Quot n →ₗ[R
       simpa only [compRight_proj, LinearMap.zero_apply, proj_apply] using
         (Submodule.Quotient.mk_eq_zero _).2 (I.comp_mem_left a b hα y))
 
-@[simp] lemma compQ_proj (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
-    I.compQ a b (I.proj (a + 1 + b) α) (I.proj n β) = I.proj (a + n + b) (comp (R := R) a b α β) := rfl
+lemma compQ_proj (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
+    I.compQ a b (I.proj (a + 1 + b) α) (I.proj n β) =
+      I.proj (a + n + b) (comp (R := R) a b α β) := rfl
+
+@[simp] lemma compQ_mk (a b : ℕ) {n : ℕ} (α : P (a + 1 + b)) (β : P n) :
+    I.compQ a b (Submodule.Quotient.mk α) (Submodule.Quotient.mk β) =
+      Submodule.Quotient.mk (comp (R := R) a b α β) := rfl
 
 /-- Reindexing commutes with the quotient map. -/
 lemma proj_reindex {m n : ℕ} (h : m = n) (x : P m) :
@@ -209,9 +218,13 @@ noncomputable def OperadIdeal.liftHom (I : OperadIdeal R P) (φ : NSOperadHom R 
     obtain ⟨y, rfl⟩ := I.proj_surjective _ β
     exact φ.app_comp a b x y
 
-@[simp] lemma OperadIdeal.liftHom_proj (I : OperadIdeal R P) (φ : NSOperadHom R P Q)
+lemma OperadIdeal.liftHom_proj (I : OperadIdeal R P) (φ : NSOperadHom R P Q)
     (h : ∀ (n : ℕ), ∀ x ∈ I.carrier n, φ.app n x = 0) (n : ℕ) (x : P n) :
     (I.liftHom φ h).app n (I.proj n x) = φ.app n x := rfl
+
+@[simp] lemma OperadIdeal.liftHom_mk (I : OperadIdeal R P) (φ : NSOperadHom R P Q)
+    (h : ∀ (n : ℕ), ∀ x ∈ I.carrier n, φ.app n x = 0) (n : ℕ) (x : P n) :
+    (I.liftHom φ h).app n (Submodule.Quotient.mk x) = φ.app n x := rfl
 
 end Lift
 

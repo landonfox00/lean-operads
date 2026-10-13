@@ -84,36 +84,50 @@ lemma compFin_assoc_par {m n p : ℕ} (i i' : Fin m) (hlt : (i : ℕ) < (i' : �
   -- reindex bookkeeping can be collapsed without destroying the axiom's shape.
   rw [← reindex_reindex
       (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega)
-      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)
+          = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
   rw [← reindex_reindex
       (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega)
-      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i' : ℕ) + 1 + (m - (i' : ℕ) - 1) by omega)]
-  set A := reindex R P (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega) α with hA
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)
+          = (i' : ℕ) + 1 + (m - (i' : ℕ) - 1) by omega)]
+  set A := reindex R P
+    (show m = (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) by omega) α with hA
   -- Left side, inner: trailing index `m - i - 1` becomes `b + 1 + c`.
   rw [← reindex_reindex
-      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) by omega)
-      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
-  rw [comp_index_congr (i : ℕ) (show ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = m - (i : ℕ) - 1 by omega)]
+      (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)
+          = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1))
+          = (i : ℕ) + 1 + (m - (i : ℕ) - 1) by omega)]
+  rw [comp_index_congr (i : ℕ)
+    (show ((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1) = m - (i : ℕ) - 1 by omega)]
   simp only [reindex_reindex]
   -- Left side, outer: trailing index becomes `c`.
   rw [← reindex_reindex
-      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1)) = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - (i' : ℕ) - 1) by omega)
+      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + 1 + (m - (i' : ℕ) - 1))
+          = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - (i' : ℕ) - 1) by omega)
       (show ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - (i' : ℕ) - 1)
-          = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1 + (m - 1 + n - ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) - 1) by omega)]
+          = ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + 1
+            + (m - 1 + n - ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) - 1) by omega)]
   rw [comp_index_congr ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1))
       (show (m - (i' : ℕ) - 1) = m - 1 + n - ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) - 1 by omega)]
   -- Right side: leading index `i'` becomes `a + 1 + b`, trailing becomes `b + p + c`.
-  rw [comp_leading_congr (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) = (i' : ℕ) by omega) (m - (i' : ℕ) - 1)]
+  rw [comp_leading_congr (show (i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1) = (i' : ℕ) by omega)
+    (m - (i' : ℕ) - 1)]
   simp only [reindex_reindex]
   rw [← reindex_reindex
-      (show ((i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1) = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
-      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) = (i : ℕ) + 1 + (m - 1 + p - (i : ℕ) - 1) by omega)]
-  rw [comp_index_congr (i : ℕ) (show ((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1) = m - 1 + p - (i : ℕ) - 1 by omega)]
+      (show ((i : ℕ) + 1 + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1)
+          = (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + 1 + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1))
+          = (i : ℕ) + 1 + (m - 1 + p - (i : ℕ) - 1) by omega)]
+  rw [comp_index_congr (i : ℕ)
+    (show ((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1) = m - 1 + p - (i : ℕ) - 1 by omega)]
   simp only [reindex_reindex]
   -- Split off exactly the transport the axiom carries, then apply it.
   rw [← reindex_reindex
-      (show ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1) = (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
-      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) = m - 1 + n - 1 + p by omega)]
+      (show ((i : ℕ) + n + ((i' : ℕ) - (i : ℕ) - 1)) + p + (m - (i' : ℕ) - 1)
+          = (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1)) by omega)
+      (show (i : ℕ) + n + (((i' : ℕ) - (i : ℕ) - 1) + p + (m - (i' : ℕ) - 1))
+          = m - 1 + n - 1 + p by omega)]
   rw [comp_assoc_par]
 
 end Operad

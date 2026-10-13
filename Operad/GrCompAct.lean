@@ -1,0 +1,995 @@
+/-
+# The right action of a graded operad on a graded composite
+
+For a graded linear species `V` and a graded operad `C`, the graded composite `V ∘ C` is a right
+module over `C`: an operation `z` composes into an input `i` of `v ⊗ y₁ ⊗ ⋯ ⊗ yₖ` by composing it
+into the inner operation `y_a` owning `i`, after moving it across the inner operations read after
+`y_a`, with the Koszul sign (`GrComposite.act`):
+
+  `(v ⊗ y₁ ⊗ ⋯ ⊗ yₖ) ◁ᵢ z = ± v ⊗ y₁ ⊗ ⋯ ⊗ (y_a ∘ᵢ z) ⊗ ⋯ ⊗ yₖ`.
+
+It is computed on generators given by owners (`GrComposite.ownGen`): the inputs of the result are
+owned as before, the inputs of `z` by `a`.
+-/
+import Operad.GrCompOwn
+
+universe u v w
+
+namespace Operad
+
+open Function Sym GerBV
+
+/-! ## Reordering signs, after an input -/
+
+namespace GrComposite
+
+section RsgAfter
+
+variable {R : Type u} [CommRing R] {A : Type} [Fintype A] [DecidableEq A]
+
+open Classical in
+/-- **The Koszul signs of an operation composed after the input `j`** in two orders, and the
+reordering signs before and after it is composed. -/
+lemma rsg_update_mul_after (L L' : LinOrd A) (c : A → Bool) (j : A) (q : Bool) :
+    (∏ a, if ltB L j a then σ R (q && c a) else 1) * GrEnd.rsg R L L' (update c j (xor (c j) q))
+      = GrEnd.rsg R L L' c * ∏ a, if ltB L' j a then σ R (q && c a) else 1 := by
+  simp only [ltB_eq_true]
+  rw [rsg_update, ← Finset.prod_mul_distrib, mul_left_comm, ← Finset.prod_mul_distrib]
+  congr 1
+  refine Finset.prod_congr rfl fun a _ => ?_
+  have hs : σ R (q && c a) * σ R (q && c a) = 1 := σ_mul_self R _
+  by_cases haj : a = j
+  · subst haj
+    simp only [L.irrefl, L'.irrefl, and_false, if_false, mul_one]
+  rcases L.total a j haj with h1 | h1 <;> rcases L'.total a j haj with h2 | h2 <;>
+    simp only [h1, h2, GrEnd.lt_asymm _ h1, GrEnd.lt_asymm _ h2, and_true, and_false, if_true,
+      if_false, mul_one, one_mul, hs]
+
+end RsgAfter
+
+end GrComposite
+
+variable {R : Type u} [CommRing R]
+  {V : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
+  {C : (A : Type) → [Fintype A] → [DecidableEq A] → Type w}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrOperad R C]
+
+namespace GrComposite
+
+section Owners
+
+variable {S : Type} [DecidableEq S] {Y : Type} {A : Type} [DecidableEq A]
+
+/-- **The owners after composing at the input `i`**: the inputs of the inserted operation are
+owned by the owner of `i`. -/
+def actOwner (f : S → A) (i : S) : Without S i ⊕ Y → A :=
+  Sum.elim (fun s => f s.1) fun _ => f i
+
+/-- The inputs owned by another input of the outer operation are unchanged. -/
+def actNe (f : S → A) (i : S) (a : A) (h : f i ≠ a) : Fib f a ≃ Fib (actOwner (Y := Y) f i) a where
+  toFun s := ⟨Sum.inl ⟨s.1, fun e => h (by rw [← s.2, e])⟩, s.2⟩
+  invFun s := match s with
+    | ⟨Sum.inl t, ht⟩ => ⟨t.1, ht⟩
+    | ⟨Sum.inr _, ht⟩ => absurd ht h
+  left_inv _ := rfl
+  right_inv := by
+    rintro ⟨t | t, ht⟩
+    · rfl
+    · exact absurd ht h
+
+/-- The inputs owned by the owner of `i`: those other than `i`, and the inputs of the inserted
+operation. -/
+def actEq (f : S → A) (i : S) (a : A) (h : f i = a) :
+    Without (Fib f a) ⟨i, h⟩ ⊕ Y ≃ Fib (actOwner (Y := Y) f i) a where
+  toFun x := match x with
+    | Sum.inl t => ⟨Sum.inl ⟨t.1.1, fun e => t.2 (Subtype.ext e)⟩, t.1.2⟩
+    | Sum.inr y => ⟨Sum.inr y, h⟩
+  invFun x := match x with
+    | ⟨Sum.inl t, ht⟩ => Sum.inl ⟨⟨t.1, ht⟩, fun e => t.2 (congrArg Subtype.val e)⟩
+    | ⟨Sum.inr y, _⟩ => Sum.inr y
+  left_inv := by
+    rintro (t | y) <;> rfl
+  right_inv := by
+    rintro ⟨t | y, ht⟩ <;> rfl
+
+end Owners
+
+variable {S : Type} [Fintype S] [DecidableEq S] {Y : Type} [Fintype Y] [DecidableEq Y]
+
+section ActGen
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+/-- **The inner operations after composing `z` at the input `i`**: `z` composed into the inner
+operation owning `i`, the inner operations read after it twisted by the parity `q` of `z`. -/
+noncomputable def actLin (L : LinOrd A) (f : S → A) (i : S) (z : C Y) (q : Bool) (a : A) :
+    C (Fib f a) →ₗ[R] C (Fib (actOwner (Y := Y) f i) a) :=
+  if h : f i = a then
+      (GrOperad.map (R := R) (actEq f i a h)).comp
+        ((GrOperad.comp (R := R) (P := C) (⟨i, h⟩ : Fib f a)).flip z)
+    else (GrOperad.tw (R := R) (P := C) (q && ltB L (f i) a)).comp
+      (GrOperad.map (R := R) (actNe f i a h))
+
+/-- **The inner operations after composing `z` at the input `i`**: `z` composed into the inner
+operation owning `i`, the inner operations read after it twisted by the parity `q` of `z`. -/
+noncomputable def actY (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y)
+    (q : Bool) : ∀ a, C (Fib (actOwner (Y := Y) f i) a) :=
+  fun a => actLin (R := R) L f i z q a (y a)
+
+omit [Fintype A] in
+lemma actLin_eq (L : LinOrd A) (f : S → A) (i : S) (z : C Y) (q : Bool) (a : A) (h : f i = a)
+    (x : C (Fib f a)) :
+    actLin (R := R) L f i z q a x
+      = GrOperad.map (R := R) (actEq f i a h) (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) x z) := by
+  rw [actLin, dif_pos h]
+  rfl
+
+omit [Fintype A] in
+lemma actLin_ne (L : LinOrd A) (f : S → A) (i : S) (z : C Y) (q : Bool) (a : A) (h : f i ≠ a)
+    (x : C (Fib f a)) :
+    actLin (R := R) L f i z q a x = GrOperad.tw (R := R) (P := C) (q && ltB L (f i) a)
+      (GrOperad.map (R := R) (actNe f i a h) x) := by
+  rw [actLin, dif_neg h]
+  rfl
+
+omit [Fintype A] in
+lemma actY_update (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y)
+    (q : Bool) (b : A) (w : C (Fib f b)) :
+    actY (R := R) L f (update y b w) i z q
+      = update (actY (R := R) L f y i z q) b (actLin (R := R) L f i z q b w) :=
+  funext fun a => apply_update (fun a => ⇑(actLin (R := R) L f i z q a)) y b w a
+
+/-- The generator obtained by composing `z` of parity `q` at the input `i`. -/
+noncomputable abbrev actGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) (q : Bool) : GrCompGen V C (Without S i ⊕ Y) :=
+  ownGen L m (actOwner f i) (actY (R := R) L f y i z q)
+
+end ActGen
+
+/-! ## The action on generators -/
+
+section ActFun
+
+/-- The inner operations of a generator, on the inputs they own. -/
+noncomputable abbrev ownY (g : GrCompGen V C S) (a : g.A) : C (Fib (owner g) a) :=
+  GrOperad.map (R := R) (fibEquiv g a) (g.y a)
+
+variable (R) in
+/-- The action of `z` at `i` on the data of a generator given by owners. -/
+noncomputable def actOwn {A : Type} [Fintype A] [DecidableEq A] (L : LinOrd A) (m : V A)
+    (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) : GrComposite R V C (Without S i ⊕ Y) :=
+  ∑ q : Bool, mk R (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+
+variable (R) in
+/-- **The action of `z` at `i` on a generator.** -/
+noncomputable def actFun (i : S) (z : C Y) (g : GrCompGen V C S) :
+    GrComposite R V C (Without S i ⊕ Y) :=
+  actOwn R g.L g.m (owner g) (ownY (R := R) g) i z
+
+end ActFun
+
+/-! ## Linearity -/
+
+section Lin
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+lemma actOwn_add_m (L : LinOrd A) (m m' : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : actOwn R L (m + m') f y i z = actOwn R L m f y i z + actOwn R L m' f y i z := by
+  unfold actOwn
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  exact mk_add_m (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q) m'
+
+lemma actOwn_smul_m (L : LinOrd A) (c : R) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : actOwn R L (c • m) f y i z = c • actOwn R L m f y i z := by
+  unfold actOwn
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  exact mk_smul_m (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q) c
+
+lemma actOwn_update_add (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) (b : A) (w w' : C (Fib f b)) :
+    actOwn R L m f (update y b (w + w')) i z
+      = actOwn R L m f (update y b w) i z + actOwn R L m f (update y b w') i z := by
+  unfold actOwn
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+      (actY (R := R) L f (update y b (w + w')) i (GrOperad.par (R := R) q z) q)
+    = mkY (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+        (actY (R := R) L f (update y b w) i (GrOperad.par (R := R) q z) q)
+      + mkY (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+        (actY (R := R) L f (update y b w') i (GrOperad.par (R := R) q z) q)
+  rw [actY_update, actY_update, actY_update, map_add, MultilinearMap.map_update_add]
+
+lemma actOwn_update_smul (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) (b : A) (c : R) (w : C (Fib f b)) :
+    actOwn R L m f (update y b (c • w)) i z = c • actOwn R L m f (update y b w) i z := by
+  unfold actOwn
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+      (actY (R := R) L f (update y b (c • w)) i (GrOperad.par (R := R) q z) q)
+    = c • mkY (actGen (R := R) L m f y i (GrOperad.par (R := R) q z) q)
+        (actY (R := R) L f (update y b w) i (GrOperad.par (R := R) q z) q)
+  rw [actY_update, actY_update, map_smul, MultilinearMap.map_update_smul]
+
+end Lin
+
+omit [Fintype S] [DecidableEq S] [Fintype Y] [DecidableEq Y] in
+lemma gmap_congr {X Z : Type} [Fintype X] [DecidableEq X] [Fintype Z] [DecidableEq Z]
+    {e e' : X ≃ Z} (h : ∀ a, e a = e' a) (x : C X) :
+    GrOperad.map (R := R) e x = GrOperad.map (R := R) e' x := by
+  rw [Equiv.ext h]
+
+omit [Fintype S] [DecidableEq S] [Fintype Y] [DecidableEq Y] in
+lemma gmap_comp_congr {X X' Z : Type} [Fintype X] [DecidableEq X] [Fintype X'] [DecidableEq X']
+    [Fintype Z] [DecidableEq Z] (e : X ≃ X') (f : X' ≃ Z) (g : X ≃ Z) (h : ∀ a, f (e a) = g a)
+    (x : C X) :
+    GrOperad.map (R := R) f (GrOperad.map (R := R) e x) = GrOperad.map (R := R) g x := by
+  rw [← GrOperad.map_trans]
+  exact gmap_congr h x
+
+/-! ## Relabelling the outer operation -/
+
+section Outer
+
+variable {A A' : Type} [Fintype A] [DecidableEq A] [Fintype A'] [DecidableEq A']
+
+omit [Fintype S] [Fintype Y] [DecidableEq Y] [Fintype A] [DecidableEq A] [Fintype A']
+  [DecidableEq A'] in
+lemma actOwner_comp (σ : A' ≃ A) (f : S → A) (i : S) :
+    σ.symm ∘ actOwner (Y := Y) f i = actOwner (σ.symm ∘ f) i :=
+  funext fun x => by cases x <;> rfl
+
+omit [Fintype A] [DecidableEq A] [Fintype A'] [DecidableEq A'] in
+lemma ltB_map (e : A ≃ A') (L : LinOrd A) (b b' : A') :
+    ltB (LinOrd.map e L) b b' = ltB L (e.symm b) (e.symm b') := rfl
+
+/-- **The action commutes with relabelling the outer operation.** -/
+lemma actOwn_outer (σ : A' ≃ A) (L : LinOrd A) (m : V A') (f : S → A) (y : ∀ a, C (Fib f a))
+    (i : S) (z : C Y) :
+    actOwn R L (SymSpecies.map (R := R) σ m) f y i z
+      = actOwn R (LinOrd.map σ.symm L) m (σ.symm ∘ f)
+          (fun a' => GrOperad.map (R := R) (fibOuter σ f a') (y (σ a'))) i z := by
+  unfold actOwn
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [mk_ownGen_outer σ L m (actOwner f i), mk_ownGen_congr _ m (actOwner_comp σ f i)]
+  congr 2
+  funext a'
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) (fibOuter σ (actOwner f i) a')
+      (actLin (R := R) L f i (GrOperad.par (R := R) q z) q (σ a') (y (σ a'))))
+    = actLin (R := R) (LinOrd.map σ.symm L) (σ.symm ∘ f) i (GrOperad.par (R := R) q z) q a'
+        (GrOperad.map (R := R) (fibOuter σ f a') (y (σ a')))
+  by_cases h : f i = σ a'
+  · have h' : (σ.symm ∘ f) i = a' := by simp [h]
+    rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h']
+    have hc := GrOperad.map_comp (R := R) (fibOuter σ f a') (Equiv.refl Y) (⟨i, h⟩ : Fib f (σ a'))
+      (y (σ a')) (GrOperad.par (R := R) q z)
+    rw [GrOperad.map_refl] at hc
+    show _ = GrOperad.map (R := R) (actEq (σ.symm ∘ f) i a' h')
+      (GrOperad.comp (R := R) ((fibOuter σ f a') ⟨i, h⟩)
+        (GrOperad.map (R := R) (fibOuter σ f a') (y (σ a'))) (GrOperad.par (R := R) q z))
+    rw [← hc]
+    simp only [← GrOperad.map_trans]
+    refine (gmap_comp_congr _ _ _ ?_ _).symm
+    rintro (⟨⟨t, ht⟩, hne⟩ | x) <;> rfl
+  · have h' : (σ.symm ∘ f) i ≠ a' := fun e => h (by rw [← e]; simp)
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h', ltB_map, Equiv.symm_symm,
+      show σ ((σ.symm ∘ f) i) = f i by simp]
+    rw [GrOperad.map_tw, GrOperad.map_tw]
+    congr 1
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    intro x
+    exact Subtype.ext rfl
+
+end Outer
+
+/-! ## Owners, reordering -/
+
+section Reorder
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+lemma actOwn_congr (L : LinOrd A) (m : V A) {f f' : S → A} (hf : f = f')
+    (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) :
+    actOwn R L m f y i z = actOwn R L m f' (fun a =>
+      GrOperad.map (R := R) (Equiv.subtypeEquivRight fun s => by rw [hf]) (y a)) i z := by
+  subst hf
+  congr 1
+  funext a
+  rw [show (Equiv.subtypeEquivRight _ : Fib f a ≃ Fib f a) = Equiv.refl _ from
+    Equiv.ext fun _ => rfl, GrOperad.map_refl]
+
+omit [Fintype A] in
+/-- **The twists of a homogeneous family of inner operations** are signs. -/
+lemma actY_hom (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) (q : Bool)
+    (c : A → Bool) (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) (a : A) :
+    actY (R := R) L f y i z q a
+      = (if ltB L (f i) a then σ R (q && c a) else 1) • actY (R := R) L f y i z false a := by
+  unfold actY
+  by_cases h : f i = a
+  · subst h
+    rw [actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, ltB_self, if_neg Bool.false_ne_true,
+      one_smul]
+  · rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h, Bool.false_and, GrOperad.tw_false,
+      GrOperad.tw_hom _ (c := c a) (by rw [← GrOperad.map_par, hy])]
+    by_cases hl : ltB L (f i) a
+    · simp [hl]
+    · simp [hl]
+
+omit [Fintype A] in
+lemma actY_false_indep (L L' : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) :
+    actY (R := R) L f y i z false = actY (R := R) L' f y i z false := by
+  funext a
+  unfold actY actLin
+  split_ifs <;> simp
+
+omit [Fintype A] in
+lemma actY_false_par (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y)
+    (q : Bool) (hz : GrOperad.par (R := R) q z = z) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) (a : A) :
+    GrOperad.par (R := R) (update c (f i) (xor (c (f i)) q) a) (actY (R := R) L f y i z false a)
+      = actY (R := R) L f y i z false a := by
+  unfold actY
+  by_cases h : f i = a
+  · subst h
+    rw [actLin_eq _ _ _ _ _ _ rfl, update_self, ← GrOperad.map_par, ← hy, ← hz,
+      GrOperad.comp_par, hy, hz]
+  · rw [actLin_ne _ _ _ _ _ _ h, update_of_ne (Ne.symm h), Bool.false_and, GrOperad.tw_false,
+      ← GrOperad.map_par, hy]
+
+/-- **Reordering the inner operations before the action.** -/
+lemma mk_actGen_reorder (L L' : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) (q : Bool) (hz : GrOperad.par (R := R) q z = z) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) :
+    mk R (actGen (R := R) L m f y i z q)
+      = GrEnd.rsg R L L' c • mk R (actGen (R := R) L' m f y i z q) := by
+  have hL : ∀ L₀ : LinOrd A, mk R (actGen (R := R) L₀ m f y i z q)
+      = (∏ a, if ltB L₀ (f i) a then σ R (q && c a) else 1)
+        • mk R (ownGen L₀ m (actOwner f i) (actY (R := R) L f y i z false)) := fun L₀ => by
+    have := (mkY (R := R) (ownGen L₀ m (actOwner f i)
+      (actY (R := R) L f y i z false))).map_smul_univ
+      (fun a => if ltB L₀ (f i) a then σ R (q && c a) else 1) (actY (R := R) L f y i z false)
+    refine Eq.trans ?_ this
+    show mk R (ownGen L₀ m (actOwner f i) (actY (R := R) L₀ f y i z q)) = mk R (ownGen L₀ m
+      (actOwner f i) fun a => (if ltB L₀ (f i) a then σ R (q && c a) else 1)
+        • actY (R := R) L f y i z false a)
+    rw [actY_false_indep L L₀]
+    congr 2
+    funext a
+    exact actY_hom L₀ f y i z q c hy a
+  rw [hL L, hL L', mk_reorder (ownGen L m (actOwner f i) (actY (R := R) L f y i z false)) L' _
+    (actY_false_par L f y i z q hz c hy), smul_smul, smul_smul]
+  congr 1
+  exact rsg_update_mul_after L L' c (f i) q
+
+end Reorder
+
+/-! ## The action -/
+
+section Act
+
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V] in
+lemma ownY_update (g : GrCompGen V C S) (a : g.A) (w : C (g.B a)) :
+    ownY (R := R) { g with y := update g.y a w }
+      = update (ownY (R := R) g) a (GrOperad.map (R := R) (fibEquiv g a) w) :=
+  funext fun a' => apply_update (fun a' => ⇑(GrOperad.map (R := R) (P := C) (fibEquiv g a'))) g.y
+    a w a'
+
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrOperad R C]
+  [Fintype S] [DecidableEq S] in
+lemma owner_outer (g : GrCompGen V C S) {A : Type} [Fintype A] [DecidableEq A] (σ : A ≃ g.A)
+    (m : V A) :
+    owner (⟨A, fun a => g.B (σ a), LinOrd.map σ.symm g.L, m, fun a => g.y (σ a),
+      (Equiv.sigmaCongrLeft σ).trans g.e⟩ : GrCompGen V C S) = σ.symm ∘ owner g := by
+  funext s
+  show ((Equiv.sigmaCongrLeft σ).symm (g.e.symm s)).1 = σ.symm (g.e.symm s).1
+  generalize g.e.symm s = p
+  obtain ⟨⟨a', b⟩, rfl⟩ := (Equiv.sigmaCongrLeft σ).surjective p
+  rw [Equiv.symm_apply_apply]
+  show a' = σ.symm (σ a')
+  rw [Equiv.symm_apply_apply]
+
+lemma actFun_respects (i : S) (z : C Y) :
+    GrCompGen.Respects R (actFun (V := V) R i z) where
+  add_m g m' := actOwn_add_m g.L g.m m' (owner g) (ownY (R := R) g) i z
+  smul_m g c := actOwn_smul_m g.L c g.m (owner g) (ownY (R := R) g) i z
+  add_y g a w w' := by
+    show actOwn R g.L g.m (owner g) (ownY (R := R) { g with y := update g.y a (w + w') }) i z
+      = actOwn R g.L g.m (owner g) (ownY (R := R) { g with y := update g.y a w }) i z
+        + actOwn R g.L g.m (owner g) (ownY (R := R) { g with y := update g.y a w' }) i z
+    rw [ownY_update, ownY_update, ownY_update, map_add, actOwn_update_add]
+  smul_y g a c w := by
+    show actOwn R g.L g.m (owner g) (ownY (R := R) { g with y := update g.y a (c • w) }) i z
+      = c • actOwn R g.L g.m (owner g) (ownY (R := R) { g with y := update g.y a w }) i z
+    rw [ownY_update, ownY_update, map_smul, actOwn_update_smul]
+  outer := @fun g A _ _ σ m => by
+    show actOwn R g.L (SymSpecies.map (R := R) σ m) (owner g) (ownY (R := R) g) i z = _
+    rw [actOwn_outer, actFun, actOwn_congr _ m (owner_outer g σ m).symm]
+    congr 1
+    funext a'
+    simp only [ownY, ← GrOperad.map_trans]
+    apply gmap_congr
+    intro b
+    rfl
+  inner := @fun g B _ _ τ => by
+    show actOwn R g.L g.m _ (ownY (R := R) (⟨g.A, B, g.L, g.m,
+      fun a => SymSpecies.map (R := R) (τ a) (g.y a),
+      (Equiv.sigmaCongrRight τ).symm.trans g.e⟩ : GrCompGen V C S)) i z = actFun R i z g
+    unfold actFun
+    congr 1
+    funext a
+    apply gmap_comp_congr
+    intro b
+    exact Subtype.ext (show g.e ⟨a, (τ a).symm (τ a b)⟩ = g.e ⟨a, b⟩ by
+      rw [Equiv.symm_apply_apply])
+  reorder g L' c hy := by
+    unfold actFun actOwn
+    rw [Finset.smul_sum]
+    refine Finset.sum_congr rfl fun q _ => ?_
+    exact mk_actGen_reorder g.L L' g.m (owner g) (ownY (R := R) g) i (GrOperad.par (R := R) q z) q
+      (by rw [GrOperad.par_par, if_pos rfl]) c fun a => by
+        show GrOperad.par (R := R) (c a) (GrOperad.map (R := R) _ (g.y a)) = _
+        rw [← GrOperad.map_par]
+        exact congrArg _ (hy a)
+
+variable (R V) in
+/-- **The right action of `C` on `V ∘ C`**: composing `z` at the input `i`. -/
+noncomputable def act (i : S) (z : C Y) :
+    GrComposite R V C S →ₗ[R] GrComposite R V C (Without S i ⊕ Y) :=
+  lift (actFun R i z) (actFun_respects i z)
+
+@[simp] lemma act_mk (i : S) (z : C Y) (g : GrCompGen V C S) :
+    act R V i z (mk R g) = actFun R i z g :=
+  lift_mk _ _ g
+
+end Act
+
+/-! ## Equivariance -/
+
+section Equivariance
+
+variable {S' Y' : Type} [Fintype S'] [DecidableEq S'] [Fintype Y'] [DecidableEq Y']
+  {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [DecidableEq Y] [Fintype S'] [Fintype Y'] [DecidableEq Y']
+  [Fintype A] [DecidableEq A] in
+lemma actOwner_compEquiv (σ : S ≃ S') (τ : Y ≃ Y') (f : S → A) (i : S) :
+    actOwner f i ∘ (compEquiv σ τ i).symm = actOwner (f ∘ σ.symm) (σ i) := by
+  funext x
+  rcases x with s | y
+  · rfl
+  · show f i = f (σ.symm (σ i))
+    rw [Equiv.symm_apply_apply]
+
+/-- **The action commutes with relabelling**, on generators given by owners. -/
+lemma map_actOwn (σ : S ≃ S') (τ : Y ≃ Y') (L : LinOrd A) (m : V A) (f : S → A)
+    (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) :
+    map (compEquiv σ τ i) (actOwn R L m f y i z)
+      = actOwn R L m (f ∘ σ.symm) (fun a => GrOperad.map (R := R) (fibMap σ f a) (y a)) (σ i)
+          (GrOperad.map (R := R) τ z) := by
+  unfold actOwn
+  rw [map_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  rw [map_mk_ownGen, mk_ownGen_congr _ m (actOwner_compEquiv σ τ f i)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _
+      (actLin (R := R) L f i (GrOperad.par (R := R) q z) q a (y a)))
+    = actLin (R := R) L (f ∘ σ.symm) (σ i) (GrOperad.par (R := R) q (GrOperad.map (R := R) τ z))
+        q a (GrOperad.map (R := R) (fibMap σ f a) (y a))
+  rw [← GrOperad.map_par]
+  by_cases h : f i = a
+  · have h' : (f ∘ σ.symm) (σ i) = a := by simp [h]
+    rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h']
+    have hc := GrOperad.map_comp (R := R) (fibMap σ f a) τ (⟨i, h⟩ : Fib f a) (y a)
+      (GrOperad.par (R := R) q z)
+    show _ = GrOperad.map (R := R) (actEq (f ∘ σ.symm) (σ i) a h')
+      (GrOperad.comp (R := R) ((fibMap σ f a) ⟨i, h⟩)
+        (GrOperad.map (R := R) (fibMap σ f a) (y a))
+        (GrOperad.map (R := R) τ (GrOperad.par (R := R) q z)))
+    rw [← hc]
+    simp only [← GrOperad.map_trans]
+    refine (gmap_comp_congr _ _ _ ?_ _).symm
+    rintro (⟨⟨t, ht⟩, hne⟩ | x) <;> rfl
+  · have h' : (f ∘ σ.symm) (σ i) ≠ a := by simpa using h
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h',
+      show (f ∘ σ.symm) (σ i) = f i by simp, GrOperad.map_tw, GrOperad.map_tw]
+    congr 1
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    intro b
+    exact Subtype.ext rfl
+
+/-- **The action commutes with relabelling.** -/
+lemma map_act (σ : S ≃ S') (τ : Y ≃ Y') (i : S) (z : C Y) (x : GrComposite R V C S) :
+    map (compEquiv σ τ i) (act R V i z x)
+      = act R V (σ i) (GrOperad.map (R := R) τ z) (map σ x) := by
+  have h : (map (R := R) (M := V) (N := C) (compEquiv σ τ i)).comp (act R V i z)
+      = (act R V (σ i) (GrOperad.map (R := R) τ z)).comp (map σ) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, act_mk, map_mk, actFun]
+    rw [map_actOwn]
+    congr 1
+    funext a
+    show _ = GrOperad.map (R := R) (fibEquiv (g.relabel σ) a) (g.y a)
+    simp only [ownY]
+    apply gmap_comp_congr
+    intro b
+    rfl
+  exact LinearMap.congr_fun h x
+
+end Equivariance
+
+/-! ## Homogeneous operations, the unit -/
+
+section Unit
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+lemma mk_actGen_zero (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (q : Bool) : mk R (actGen (R := R) L m f y i (0 : C Y) q) = 0 := by
+  refine mk_of_y_eq_zero _ (a := f i) ?_
+  show actLin (R := R) L f i 0 q (f i) (y (f i)) = 0
+  rw [actLin_eq _ _ _ _ _ _ rfl, map_zero, map_zero]
+
+/-- **The action of a homogeneous operation** has a single term. -/
+lemma actOwn_hom (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y)
+    {q : Bool} (hz : GrOperad.par (R := R) q z = z) :
+    actOwn R L m f y i z = mk R (actGen (R := R) L m f y i z q) := by
+  unfold actOwn
+  rw [Finset.sum_eq_single q]
+  · rw [hz]
+  · intro q' _ hq'
+    rw [← hz, GrOperad.par_par, if_neg hq']
+    exact mk_actGen_zero L m f y i q'
+  · intro h
+    exact absurd (Finset.mem_univ q) h
+
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (V A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (V A)] [GrSpecies R V]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrOperad R C] in
+lemma owner_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) :
+    owner (ownGen L m f y) = f := rfl
+
+/-- **The action on a generator given by owners.** -/
+lemma actFun_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : actFun R i z (ownGen L m f y) = actOwn R L m f y i z := by
+  unfold actFun
+  congr 1
+  funext a
+  show GrOperad.map (R := R) (fibEquiv (ownGen L m f y) a) (y a) = y a
+  rw [show fibEquiv (ownGen L m f y) a = Equiv.refl _ from Equiv.ext fun b => Subtype.ext rfl]
+  exact GrOperad.map_refl (R := R) _
+
+lemma act_mk_ownGen (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z : C Y) : act R V i z (mk R (ownGen L m f y)) = actOwn R L m f y i z := by
+  rw [act_mk, actFun_ownGen]
+
+omit [Fintype S] [Fintype A] [DecidableEq A] in
+lemma actOwner_rightUnit (f : S → A) (i : S) :
+    actOwner (Y := Unit) f i ∘ (rightUnitEquiv i).symm = f := by
+  funext s
+  by_cases h : s = i
+  · subst h
+    simp [rightUnitEquiv, actOwner]
+  · simp [rightUnitEquiv, actOwner, h]
+
+/-- **The unit acts trivially**, on generators given by owners. -/
+lemma map_actOwn_one (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) :
+    map (rightUnitEquiv i) (actOwn R L m f y i (GrOperad.one (R := R) (P := C)))
+      = mk R (ownGen L m f y) := by
+  rw [actOwn_hom L m f y i _ (GrOperad.par_one (R := R) (P := C)), map_mk_ownGen,
+    mk_ownGen_congr _ m (actOwner_rightUnit f i)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _
+      (actLin (R := R) L f i (GrOperad.one (R := R)) false a (y a))) = y a
+  by_cases h : f i = a
+  · rw [actLin_eq _ _ _ _ _ _ h]
+    have hc := GrOperad.comp_one (R := R) (⟨i, h⟩ : Fib f a) (y a)
+    conv_rhs => rw [← hc]
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    rintro (⟨⟨t, ht⟩, hne⟩ | ⟨⟩)
+    · apply Subtype.ext
+      show t = t
+      rfl
+    · apply Subtype.ext
+      show (rightUnitEquiv i) (Sum.inr ()) = i
+      rfl
+  · rw [actLin_ne _ _ _ _ _ _ h, Bool.false_and, GrOperad.tw_false]
+    simp only [← GrOperad.map_trans]
+    conv_rhs => rw [← GrOperad.map_refl (R := R) (y a)]
+    apply gmap_congr
+    intro b
+    exact Subtype.ext rfl
+
+/-- **The unit acts trivially.** -/
+lemma map_act_one (i : S) (x : GrComposite R V C S) :
+    map (rightUnitEquiv i) (act R V i (GrOperad.one (R := R) (P := C)) x) = x := by
+  have h : (map (R := R) (M := V) (N := C) (rightUnitEquiv i)).comp
+      (act R V i (GrOperad.one (R := R) (P := C))) = LinearMap.id := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, LinearMap.id_apply]
+    rw [mk_eq_ownGen (R := R) g, act_mk_ownGen, map_actOwn_one]
+  exact LinearMap.congr_fun h x
+
+end Unit
+
+/-! ## Parities -/
+
+section Parity
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype A] in
+lemma actY_par (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z : C Y) (q : Bool)
+    (hz : GrOperad.par (R := R) q z = z) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) (a : A) :
+    GrOperad.par (R := R) (update c (f i) (xor (c (f i)) q) a) (actY (R := R) L f y i z q a)
+      = actY (R := R) L f y i z q a := by
+  rw [actY_hom L f y i z q c hy, map_smul, actY_false_par L f y i z q hz c hy]
+
+/-- **The action of a homogeneous operation adds its parity**, on homogeneous generators. -/
+lemma par_actGen (b : Bool) (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a))
+    (i : S) (z : C Y) {q : Bool} (hz : GrOperad.par (R := R) q z = z) {p : Bool}
+    (hm : GrSpecies.par (R := R) p m = m) (c : A → Bool)
+    (hy : ∀ a, GrOperad.par (R := R) (c a) (y a) = y a) :
+    par R V C b (mk R (actGen (R := R) L m f y i z q))
+      = if xor p (xor (GrEnd.tot c) q) = b then mk R (actGen (R := R) L m f y i z q) else 0 := by
+  rw [par_mk, parFun_hom (p := p) (c := update c (f i) (xor (c (f i)) q)) b _ hm
+    (actY_par L f y i z q hz c hy), tot_update]
+  congr 2
+  cases c (f i) <;> cases q <;> simp
+
+/-- **The action of a homogeneous operation of parity `q` shifts the parities by `q`.** -/
+lemma par_act (b : Bool) (i : S) (z : C Y) {q : Bool} (hz : GrOperad.par (R := R) q z = z)
+    (x : GrComposite R V C S) :
+    par R V C b (act R V i z x) = act R V i z (par R V C (xor b q) x) := by
+  have h : (par R V C (S := Without S i ⊕ Y) b).comp (act R V i z)
+      = (act R V i z).comp (par R V C (xor b q)) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply]
+    rw [mk_eq_sum (R := R) g]
+    simp only [map_sum]
+    refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun c _ => ?_
+    have hm : GrSpecies.par (R := R) p (parGen (R := R) g p c).m = (parGen (R := R) g p c).m := by
+      show GrSpecies.par (R := R) p (GrSpecies.par (R := R) p g.m) = _
+      rw [GrSpecies.par_par, if_pos rfl]
+    have hy : ∀ a, GrSpecies.par (R := R) (c a) ((parGen (R := R) g p c).y a)
+        = (parGen (R := R) g p c).y a := fun a => by
+      show GrSpecies.par (R := R) (c a) (GrSpecies.par (R := R) (c a) (g.y a)) = _
+      rw [GrSpecies.par_par, if_pos rfl]
+    have hy' : ∀ a, GrOperad.par (R := R) (c a) (ownY (R := R) (parGen (R := R) g p c) a)
+        = ownY (R := R) (parGen (R := R) g p c) a := fun a => by
+      show GrOperad.par (R := R) (c a) (GrOperad.map (R := R) _ _) = _
+      rw [← GrOperad.map_par]
+      exact congrArg _ (hy a)
+    rw [act_mk, actFun, actOwn_hom _ _ _ _ i z hz, par_actGen b _ _ _ _ i z hz hm c hy', par_mk,
+      parFun_hom _ _ hm hy]
+    split_ifs with h1 h2 h2
+    · rw [act_mk, actFun, actOwn_hom _ _ _ _ i z hz]
+    · exact absurd (by rw [← h1]; cases p <;> cases GrEnd.tot c <;> cases q <;> simp) h2
+    · exact absurd (by rw [← Bool.xor_assoc, h2, Bool.xor_assoc, Bool.xor_self, Bool.xor_false]) h1
+    · rw [map_zero]
+  exact LinearMap.congr_fun h x
+
+end Parity
+
+/-! ## Bilinearity -/
+
+section Bilin
+
+variable {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype A] in
+/-- The inner operations after the action only depend on the inserted operation at its owner. -/
+lemma actY_eq_update (L : LinOrd A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S) (z z₀ : C Y)
+    (q : Bool) :
+    actY (R := R) L f y i z q = update (actY (R := R) L f y i z₀ q) (f i)
+      (actLin (R := R) L f i z q (f i) (y (f i))) := by
+  funext a
+  by_cases h : f i = a
+  · subst h
+    rw [update_self]
+    rfl
+  · rw [update_of_ne (Ne.symm h)]
+    show actLin (R := R) L f i z q a (y a) = actLin (R := R) L f i z₀ q a (y a)
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h]
+
+lemma actOwn_add_z (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (z z' : C Y) : actOwn R L m f y i (z + z') = actOwn R L m f y i z + actOwn R L m f y i z' := by
+  unfold actOwn
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+    = mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+      + mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+  rw [actY_eq_update L f y i _ 0, actY_eq_update L f y i (GrOperad.par (R := R) q z) 0,
+    actY_eq_update L f y i (GrOperad.par (R := R) q z') 0, map_add,
+    actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, map_add,
+    map_add, MultilinearMap.map_update_add]
+
+lemma actOwn_smul_z (L : LinOrd A) (m : V A) (f : S → A) (y : ∀ a, C (Fib f a)) (i : S)
+    (c : R) (z : C Y) : actOwn R L m f y i (c • z) = c • actOwn R L m f y i z := by
+  unfold actOwn
+  rw [Finset.smul_sum]
+  refine Finset.sum_congr rfl fun q _ => ?_
+  show mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+    = c • mkY (actGen (R := R) L m f y i 0 q) (actY (R := R) L f y i _ q)
+  rw [actY_eq_update L f y i _ 0, actY_eq_update L f y i (GrOperad.par (R := R) q z) 0, map_smul,
+    actLin_eq _ _ _ _ _ _ rfl, actLin_eq _ _ _ _ _ _ rfl, map_smul, map_smul,
+    MultilinearMap.map_update_smul]
+
+end Bilin
+
+variable (R V) in
+/-- **The right action**, bilinear. -/
+noncomputable def actL (i : S) :
+    C Y →ₗ[R] GrComposite R V C S →ₗ[R] GrComposite R V C (Without S i ⊕ Y) where
+  toFun z := act R V i z
+  map_add' z z' := hom_ext fun g => by
+    simp only [LinearMap.add_apply, act_mk, actFun]
+    exact actOwn_add_z _ _ _ _ i z z'
+  map_smul' c z := hom_ext fun g => by
+    simp only [LinearMap.smul_apply, act_mk, actFun, RingHom.id_apply]
+    exact actOwn_smul_z _ _ _ _ i c z
+
+@[simp] lemma actL_apply (i : S) (z : C Y) (x : GrComposite R V C S) :
+    actL R V i z x = act R V i z x := rfl
+
+/-! ## Sequential associativity -/
+
+section Seq
+
+variable {D : Type} [Fintype D] [DecidableEq D] {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [Fintype D] [DecidableEq D] [Fintype A] [DecidableEq A] in
+lemma actOwner_seq (f : S → A) (i : S) (j : Y) :
+    actOwner (Y := D) (actOwner (Y := Y) f i) (Sum.inr j) ∘ (seqEquiv i j D).symm
+      = actOwner f i := by
+  funext x
+  rcases x with s | (y | d) <;> rfl
+
+/-- **Sequential associativity of the action**, for homogeneous operations, on generators given
+by owners. -/
+lemma map_actOwn_seq (L : LinOrd A) (m : V A) (f : S → A) (yy : ∀ a, C (Fib f a)) (i : S)
+    (j : Y) {q r : Bool} (y : C Y) (z : C D) (hy : GrOperad.par (R := R) q y = y)
+    (hz : GrOperad.par (R := R) r z = z) :
+    map (seqEquiv i j D) (act R V (Sum.inr j) z (actOwn R L m f yy i y))
+      = actOwn R L m f yy i (GrOperad.comp (R := R) j y z) := by
+  have hyz : GrOperad.par (R := R) (xor q r) (GrOperad.comp (R := R) j y z)
+      = GrOperad.comp (R := R) j y z := by
+    rw [← hy, ← hz, GrOperad.comp_par]
+  rw [actOwn_hom L m f yy i y hy, act_mk_ownGen, actOwn_hom _ m _ _ _ z hz,
+    actOwn_hom L m f yy i _ hyz, map_mk_ownGen, mk_ownGen_congr _ m (actOwner_seq f i j)]
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+      (Sum.inr j) z r a (actLin (R := R) L f i y q a (yy a))))
+    = actLin (R := R) L f i (GrOperad.comp (R := R) j y z) (xor q r) a (yy a)
+  by_cases h : f i = a
+  · have h1 : actOwner (Y := Y) f i (Sum.inr j) = a := h
+    rw [actLin_eq _ _ _ _ _ _ h, actLin_eq _ _ _ _ _ _ h1, actLin_eq _ _ _ _ _ _ h]
+    have hc := GrOperad.map_comp (R := R) (actEq (Y := Y) f i a h) (Equiv.refl D)
+      (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y)
+      (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y) z
+    rw [GrOperad.map_refl] at hc
+    have hc' : GrOperad.comp (R := R) (⟨Sum.inr j, h1⟩ : Fib (actOwner (Y := Y) f i) a)
+        (GrOperad.map (R := R) (actEq (Y := Y) f i a h)
+          (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y)) z
+        = GrOperad.map (R := R) (compEquiv (actEq (Y := Y) f i a h) (Equiv.refl D)
+            (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y))
+          (GrOperad.comp (R := R) (Sum.inr j : Without (Fib f a) ⟨i, h⟩ ⊕ Y)
+            (GrOperad.comp (R := R) (⟨i, h⟩ : Fib f a) (yy a) y) z) := hc.symm
+    have hs := GrOperad.comp_assoc_seq (R := R) (⟨i, h⟩ : Fib f a) j (yy a) y z
+    rw [hc', ← hs]
+    simp only [← GrOperad.map_trans]
+    refine gmap_comp_congr _ _ _ ?_ _
+    rintro (⟨(⟨⟨t, ht⟩, hne⟩ | t), hne'⟩ | d) <;> rfl
+  · have h1 : actOwner (Y := Y) f i (Sum.inr j) ≠ a := h
+    rw [actLin_ne _ _ _ _ _ _ h, actLin_ne _ _ _ _ _ _ h1, actLin_ne _ _ _ _ _ _ h]
+    simp only [GrOperad.map_tw]
+    rw [GrOperad.tw_tw', show actOwner (Y := Y) f i (Sum.inr j) = f i from rfl]
+    congr 1
+    · cases q <;> cases r <;> simp
+    · simp only [← GrOperad.map_trans]
+      apply gmap_congr
+      intro b
+      exact Subtype.ext rfl
+
+end Seq
+
+/-- **Sequential associativity of the action.** -/
+lemma map_act_seq {D : Type} [Fintype D] [DecidableEq D] (i : S) (j : Y) (y : C Y) (z : C D)
+    (x : GrComposite R V C S) :
+    map (seqEquiv i j D) (act R V (Sum.inr j) z (act R V i y x))
+      = act R V i (GrOperad.comp (R := R) j y z) x := by
+  have key : ∀ q r : Bool, map (seqEquiv i j D) (act R V (Sum.inr j) (GrOperad.par (R := R) r z)
+      (act R V i (GrOperad.par (R := R) q y) x))
+      = act R V i (GrOperad.comp (R := R) j (GrOperad.par (R := R) q y)
+          (GrOperad.par (R := R) r z)) x := fun q r => by
+    have h : (map (R := R) (M := V) (N := C) (seqEquiv i j D)).comp
+        ((act R V (Sum.inr j) (GrOperad.par (R := R) r z)).comp
+          (act R V i (GrOperad.par (R := R) q y)))
+        = act R V i (GrOperad.comp (R := R) j (GrOperad.par (R := R) q y)
+            (GrOperad.par (R := R) r z)) := hom_ext fun g => by
+      simp only [LinearMap.comp_apply, act_mk, actFun]
+      exact map_actOwn_seq _ _ _ _ i j _ _ (GrOperad.par_par_self (R := R) q y)
+        (GrOperad.par_par_self (R := R) r z)
+    exact LinearMap.congr_fun h x
+  have hy : y = GrOperad.par (R := R) false y + GrOperad.par (R := R) true y :=
+    (GrOperad.par_add (R := R) y).symm
+  have hz : z = GrOperad.par (R := R) false z + GrOperad.par (R := R) true z :=
+    (GrOperad.par_add (R := R) z).symm
+  conv_lhs => rw [hy, hz]
+  conv_rhs => rw [hy, hz]
+  simp only [← actL_apply, map_add, LinearMap.add_apply]
+  simp only [actL_apply, key]
+  abel
+
+/-! ## Parallel associativity -/
+
+section Par
+
+variable {D : Type} [Fintype D] [DecidableEq D] {A : Type} [Fintype A] [DecidableEq A]
+
+omit [Fintype S] [Fintype Y] [Fintype D] [Fintype A] [DecidableEq A] in
+lemma actOwner_par (f : S → A) {i k : S} (hik : i ≠ k) :
+    actOwner (Y := D) (actOwner (Y := Y) f i) (Sum.inl ⟨k, Ne.symm hik⟩)
+        ∘ (parEquiv hik Y D).symm
+      = actOwner (Y := Y) (actOwner (Y := D) f k) (Sum.inl ⟨i, hik⟩) := by
+  funext x
+  rcases x with ⟨(s | d), hs⟩ | y <;> rfl
+
+omit [Fintype A] [DecidableEq A] in
+lemma ltB_swap (L : LinOrd A) {a b : A} (h : a ≠ b) : ltB L b a = !ltB L a b := by
+  rcases L.total a b h with h1 | h1
+  · have h2 : ltB L b a = false := by
+      rw [Bool.eq_false_iff, ne_eq, ltB_eq_true]
+      exact GrEnd.lt_asymm L h1
+    rw [h2, (ltB_eq_true L a b).2 h1]
+    rfl
+  · have h2 : ltB L a b = false := by
+      rw [Bool.eq_false_iff, ne_eq, ltB_eq_true]
+      exact GrEnd.lt_asymm L h1
+    rw [h2, (ltB_eq_true L b a).2 h1]
+    rfl
+
+omit [Fintype S] [DecidableEq S] [Fintype Y] [DecidableEq Y] [Fintype D] [DecidableEq D]
+  [Fintype A] [DecidableEq A] in
+/-- A twisted operation composed with a homogeneous one. -/
+lemma comp_tw_left {X B : Type} [Fintype X] [DecidableEq X] [Fintype B] [DecidableEq B]
+    (e : Bool) (j : X) (x : C X) {q : Bool} {y : C B} (hy : GrOperad.par (R := R) q y = y) :
+    GrOperad.comp (R := R) j (GrOperad.tw (R := R) e x) y
+      = σ R (e && q) • GrOperad.tw (R := R) e (GrOperad.comp (R := R) j x y) := by
+  rw [GrOperad.tw_comp, GrOperad.tw_hom e hy, map_smul, smul_smul, σ_mul_self, one_smul]
+
+/-- **Parallel associativity of the action**, for homogeneous operations, on generators given
+by owners. -/
+lemma map_actOwn_par (L : LinOrd A) (m : V A) (f : S → A) (yy : ∀ a, C (Fib f a))
+    {i k : S} (hik : i ≠ k) {q r : Bool} (y : C Y) (z : C D)
+    (hy : GrOperad.par (R := R) q y = y) (hz : GrOperad.par (R := R) r z = z) :
+    map (parEquiv hik Y D) (act R V (Sum.inl ⟨k, Ne.symm hik⟩) z (actOwn R L m f yy i y))
+      = σ R (q && r) • act R V (Sum.inl ⟨i, hik⟩) y (actOwn R L m f yy k z) := by
+  rw [actOwn_hom L m f yy i y hy, act_mk_ownGen, actOwn_hom _ m _ _ _ z hz,
+    actOwn_hom L m f yy k z hz, act_mk_ownGen, actOwn_hom _ m _ _ _ y hy, map_mk_ownGen,
+    mk_ownGen_congr _ m (actOwner_par f hik)]
+  set U := actY (R := R) L (actOwner (Y := D) f k) (actY (R := R) L f yy k z r)
+    (Sum.inl ⟨i, hik⟩) y q
+  set a₀ := if ltB L (f k) (f i) then f i else f k with ha₀
+  have hS := (mkY (R := R) (ownGen L m (actOwner (Y := Y) (actOwner (Y := D) f k)
+    (Sum.inl ⟨i, hik⟩)) U)).map_smul_univ (fun a => if a = a₀ then σ R (q && r) else 1) U
+  rw [Finset.prod_ite_eq' Finset.univ a₀, if_pos (Finset.mem_univ _)] at hS
+  refine Eq.trans ?_ hS
+  show mk R (ownGen L m _ _) = mk R (ownGen L m _ fun a =>
+    (if a = a₀ then σ R (q && r) else 1) • U a)
+  congr 2
+  funext a
+  show GrOperad.map (R := R) _ (GrOperad.map (R := R) _ (actLin (R := R) L (actOwner f i)
+      (Sum.inl ⟨k, Ne.symm hik⟩) z r a (actLin (R := R) L f i y q a (yy a))))
+    = (if a = a₀ then σ R (q && r) else 1) • actLin (R := R) L (actOwner f k)
+      (Sum.inl ⟨i, hik⟩) y q a (actLin (R := R) L f k z r a (yy a))
+  by_cases hia : f i = a <;> by_cases hka : f k = a
+  · subst hka
+    have hik' : (⟨i, hia⟩ : Fib f (f k)) ≠ ⟨k, rfl⟩ := fun e => hik (congrArg Subtype.val e)
+    rw [if_pos (show f k = a₀ by rw [ha₀, hia]; simp),
+      actLin_eq L f i y q (f k) hia,
+      actLin_eq L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z r (f k) rfl,
+      actLin_eq L f k z r (f k) rfl,
+      actLin_eq L (actOwner f k) (Sum.inl ⟨i, hik⟩) y q (f k) hia,
+      GrOperad.comp_map_left (actEq (Y := Y) f i (f k) hia)
+        (Sum.inl ⟨⟨k, rfl⟩, Ne.symm hik'⟩) ⟨Sum.inl ⟨k, Ne.symm hik⟩, rfl⟩ (Subtype.ext rfl),
+      GrOperad.comp_map_left (actEq (Y := D) f k (f k) rfl)
+        (Sum.inl ⟨⟨i, hia⟩, hik'⟩) ⟨Sum.inl ⟨i, hik⟩, hia⟩ (Subtype.ext rfl),
+      GrOperad.comp_assoc_par' hik' (yy (f k)) hy hz, map_smul, map_smul, map_smul,
+      map_smul]
+    congr 1
+    simp only [← GrOperad.map_trans]
+    apply gmap_congr
+    rintro (⟨(⟨⟨t, ht⟩, hne⟩ | d), hd⟩ | b) <;> rfl
+  · have hs : (if a = a₀ then σ R (q && r) else 1) * σ R ((r && ltB L (f k) a) && q) = 1 := by
+      subst hia
+      by_cases hl : ltB L (f k) (f i)
+      · rw [if_pos (by rw [ha₀, if_pos hl]), hl, Bool.and_true, Bool.and_comm r q, σ_mul_self]
+      · rw [if_neg (by rw [ha₀, if_neg hl]; exact fun e => hka e.symm), Bool.eq_false_iff.2 hl]
+        simp
+    rw [actLin_eq L f i y q a hia,
+      actLin_ne L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z r a hka,
+      actLin_ne L f k z r a hka,
+      actLin_eq L (actOwner f k) (Sum.inl ⟨i, hik⟩) y q a hia,
+      comp_tw_left _ _ _ hy,
+      GrOperad.comp_map_left (actNe (Y := D) f k a hka) ⟨i, hia⟩ ⟨Sum.inl ⟨i, hik⟩, hia⟩
+        (Subtype.ext rfl)]
+    simp only [GrOperad.map_tw, map_smul, smul_smul]
+    rw [show actOwner (Y := Y) f i (Sum.inl ⟨k, Ne.symm hik⟩) = f k from rfl, hs, one_smul]
+    simp only [← GrOperad.map_trans]
+    congr 1
+    apply gmap_congr
+    rintro (⟨⟨t, ht⟩, hne⟩ | b) <;> rfl
+  · have hs : σ R ((q && ltB L (f i) a) && r) = if a = a₀ then σ R (q && r) else 1 := by
+      subst hka
+      by_cases hl : ltB L (f k) (f i)
+      · rw [if_neg (by rw [ha₀, if_pos hl]; exact fun e => hia e.symm), ltB_swap L
+          (Ne.symm hia), hl]
+        simp
+      · rw [if_pos (by rw [ha₀, if_neg hl]), ltB_swap L (Ne.symm hia), Bool.eq_false_iff.2 hl]
+        simp
+    rw [actLin_ne L f i y q a hia,
+      actLin_eq L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z r a hka,
+      actLin_eq L f k z r a hka,
+      actLin_ne L (actOwner f k) (Sum.inl ⟨i, hik⟩) y q a hia,
+      comp_tw_left _ _ _ hz,
+      GrOperad.comp_map_left (actNe (Y := Y) f i a hia) ⟨k, hka⟩
+        ⟨Sum.inl ⟨k, Ne.symm hik⟩, hka⟩ (Subtype.ext rfl)]
+    simp only [GrOperad.map_tw, map_smul]
+    rw [hs, show actOwner (Y := D) f k (Sum.inl ⟨i, hik⟩) = f i from rfl]
+    simp only [← GrOperad.map_trans]
+    congr 1
+    congr 1
+    apply gmap_congr
+    rintro (⟨⟨t, ht⟩, hne⟩ | d) <;> rfl
+  · have ha : a ≠ a₀ := by
+      rw [ha₀]
+      split_ifs
+      · exact Ne.symm hia
+      · exact Ne.symm hka
+    rw [actLin_ne L f i y q a hia,
+      actLin_ne L (actOwner f i) (Sum.inl ⟨k, Ne.symm hik⟩) z r a hka,
+      actLin_ne L f k z r a hka,
+      actLin_ne L (actOwner f k) (Sum.inl ⟨i, hik⟩) y q a hia, if_neg ha, one_smul]
+    simp only [GrOperad.map_tw, GrOperad.tw_tw', ← GrOperad.map_trans]
+    rw [show actOwner (Y := Y) f i (Sum.inl ⟨k, Ne.symm hik⟩) = f k from rfl,
+      show actOwner (Y := D) f k (Sum.inl ⟨i, hik⟩) = f i from rfl, Bool.xor_comm]
+    congr 1
+    apply gmap_congr
+    intro b
+    exact Subtype.ext rfl
+
+end Par
+
+/-- **Parallel associativity of the action**, for homogeneous operations. -/
+lemma map_act_par {D : Type} [Fintype D] [DecidableEq D] {i k : S} (hik : i ≠ k) {q r : Bool}
+    {y : C Y} {z : C D} (hy : GrOperad.par (R := R) q y = y)
+    (hz : GrOperad.par (R := R) r z = z) (x : GrComposite R V C S) :
+    map (parEquiv hik Y D) (act R V (Sum.inl ⟨k, Ne.symm hik⟩) z (act R V i y x))
+      = σ R (q && r) • act R V (Sum.inl ⟨i, hik⟩) y (act R V k z x) := by
+  have h : (map (R := R) (M := V) (N := C) (parEquiv hik Y D)).comp
+      ((act R V (Sum.inl ⟨k, Ne.symm hik⟩) z).comp (act R V i y))
+      = σ R (q && r) • (act R V (Sum.inl ⟨i, hik⟩) y).comp (act R V k z) := hom_ext fun g => by
+    simp only [LinearMap.comp_apply, LinearMap.smul_apply, act_mk, actFun]
+    exact map_actOwn_par _ _ _ _ hik y z hy hz
+  exact LinearMap.congr_fun h x
+
+end GrComposite
+
+end Operad

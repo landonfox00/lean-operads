@@ -1,0 +1,47 @@
+name: Mathlib master
+
+# Builds the library against the current Mathlib master, weekly and on demand,
+# so that upstream changes are noticed before the next toolchain bump.
+
+on:
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build against Mathlib master
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Point the build at Mathlib master
+        run: |
+          set -euo pipefail
+          sha=$(git ls-remote https://github.com/leanprover-community/mathlib4 refs/heads/master | cut -f1)
+          echo "Mathlib master: $sha"
+          curl -fsSL "https://raw.githubusercontent.com/leanprover-community/mathlib4/$sha/lean-toolchain" -o lean-toolchain
+          echo "Toolchain: $(cat lean-toolchain)"
+          sed -i "s/^rev = .*/rev = \"$sha\"/" lakefile.toml
+
+      - name: Install elan
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Update and build
+        run: |
+          set -euo pipefail
+          lake update mathlib
+          lake exe cache get
+          lake build
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### lean-operads against Mathlib master"
+            echo
+            echo "Toolchain \`$(cat lean-toolchain)\`, Mathlib \`$(grep -o 'rev = \"[0-9a-f]*\"' lakefile.toml)\`."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -218,7 +218,8 @@ lemma insTuple_of_gt (a b : ℕ) {n : ℕ} (x : V) (v : Fin (a + n + b) → V)
 /-! ### How the tuple operations interact with `Function.update` -/
 
 lemma midTuple_update_outIdx (a b : ℕ) {n : ℕ} [DecidableEq (Fin (a + n + b))]
-    (v : Fin (a + n + b) → V) (k : Fin (a + b)) (z : V) : midTuple a b (Function.update v (outIdx a b k) z) = midTuple a b v := by
+    (v : Fin (a + n + b) → V) (k : Fin (a + b)) (z : V) :
+    midTuple a b (Function.update v (outIdx a b k) z) = midTuple a b v := by
   funext j
   rw [midTuple_apply, midTuple_apply, Function.update_apply,
     if_neg (midIdx_ne_outIdx a b j k)]
@@ -234,7 +235,8 @@ lemma midTuple_update_midIdx (a b : ℕ) {n : ℕ} [DecidableEq (Fin (a + n + b)
   · rw [if_neg h, if_neg (fun hh => h (midIdx_injective a b hh)), midTuple_apply]
 
 lemma insTuple_update_midIdx (a b : ℕ) {n : ℕ} [DecidableEq (Fin (a + n + b))]
-    (x : V) (v : Fin (a + n + b) → V) (j : Fin n) (z : V) : insTuple a b x (Function.update v (midIdx a b j) z) = insTuple a b x v := by
+    (x : V) (v : Fin (a + n + b) → V) (j : Fin n) (z : V) :
+    insTuple a b x (Function.update v (midIdx a b j) z) = insTuple a b x v := by
   funext i
   rcases posCases a b i with rfl | ⟨k, rfl⟩
   · rw [insTuple_slotPos, insTuple_slotPos]

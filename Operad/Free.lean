@@ -134,7 +134,7 @@ noncomputable instance : NSOperad R (Free R E) where
       | single s r' =>
         induction γ using Finsupp.induction_linear with
         | zero => simp
-        | add f g hf hg => simp only [map_add, LinearMap.add_apply, hf, hg]
+        | add f g hf hg => simp only [map_add, hf, hg]
         | single w r'' =>
           simp only [compL_single, reindex_single]
           congr 1

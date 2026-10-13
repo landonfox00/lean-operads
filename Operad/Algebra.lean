@@ -28,7 +28,7 @@ variable {R : Type u} [CommRing R]
 /-- The `n`-ary operation on `V` determined by `α : P n`. -/
 def act (A : Algebra R P V) {n : ℕ} (α : P n) (v : Fin n → V) : V := A.app n α v
 
-@[simp] lemma act_def (A : Algebra R P V) {n : ℕ} (α : P n) (v : Fin n → V) :
+lemma act_def (A : Algebra R P V) {n : ℕ} (α : P n) (v : Fin n → V) :
     A.act α v = A.app n α v := rfl
 
 /-- The identity operation of `P` acts as the identity. -/

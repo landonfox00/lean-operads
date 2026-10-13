@@ -57,11 +57,11 @@ lemma compFin_add_right {m n : ℕ} (i : Fin m) (α : P m) (β β' : P n) :
 
 lemma compFin_smul_left {m n : ℕ} (i : Fin m) (r : R) (α : P m) (β : P n) :
     compFin (R := R) i (r • α) β = r • compFin (R := R) i α β := by
-  simp only [compFin, map_smul, LinearMap.smul_apply, RingHom.id_apply]
+  simp only [compFin, map_smul, LinearMap.smul_apply]
 
 lemma compFin_smul_right {m n : ℕ} (i : Fin m) (r : R) (α : P m) (β : P n) :
     compFin (R := R) i α (r • β) = r • compFin (R := R) i α β := by
-  simp only [compFin, map_smul, RingHom.id_apply]
+  simp only [compFin, map_smul]
 
 @[simp] lemma compFin_zero_left {m n : ℕ} (i : Fin m) (β : P n) :
     compFin (R := R) i (0 : P m) β = 0 := by

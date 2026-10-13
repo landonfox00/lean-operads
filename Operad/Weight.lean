@@ -25,7 +25,7 @@ variable {R : Type u} [CommRing R] {E : ℕ → Type v}
 /-- The weight of a tree of specified arity. -/
 def TreeOfArity.weight {n : ℕ} (t : TreeOfArity E n) : ℕ := t.val.weight
 
-@[simp] lemma TreeOfArity.weight_def {n : ℕ} (t : TreeOfArity E n) :
+lemma TreeOfArity.weight_def {n : ℕ} (t : TreeOfArity E n) :
     t.weight = t.val.weight := rfl
 
 /-- **Grafting adds weights**, at the level of arity-indexed trees. -/

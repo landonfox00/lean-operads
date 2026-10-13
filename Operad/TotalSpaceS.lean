@@ -26,6 +26,7 @@ namespace Operad
 open NSOperad DirectSum
 
 /-- The degree-`k` piece of the signed total space. -/
+@[nolint unusedArguments]
 def PieceS (R : Type u) [CommRing R] (P : ℕ → Type v) (k : ℕ) : Type v := P (k + 1)
 
 section
@@ -50,6 +51,7 @@ instance : DirectSum.GNonUnitalNonAssocSemiring (PieceS R P) where
   add_mul a b c := sstar_add_left (R := R) a b c
 
 /-- The total space carrying the signed product. -/
+@[nolint unusedArguments]
 abbrev TotS (R : Type u) [CommRing R] (P : ℕ → Type v)
     [∀ n, AddCommGroup (P n)] [∀ n, Module R (P n)] [NSOperad R P] : Type v :=
   ⨁ k : ℕ, PieceS R P k
@@ -136,8 +138,7 @@ private lemma jacobi_regroup (i j k : ℕ) (x y z : TotS R P) :
     ← pow_add]
   match_scalars
   all_goals ring_nf
-  all_goals try simp only [neg_one_mul_two, neg_one_two_mul, mul_one, one_mul]
-  all_goals try ring
+  all_goals try simp only [neg_one_mul_two, one_mul]
 
 /-- **The graded Jacobi identity.** Each of the three regrouped brackets is one instance of the
 graded pre-Lie identity, so all three vanish. -/
@@ -190,8 +191,7 @@ theorem dsq_eq (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
       smul_smul, ← pow_add]
     match_scalars
     all_goals ring_nf
-    all_goals try simp only [neg_one_mul_two, neg_one_two_mul, mul_one, one_mul]
-    all_goals try ring
+    all_goals try simp only [neg_one_mul_two]
   rw [expand, hA, smul_smul, ← pow_add, show m + m = 2 * m from by ring, neg_one_two_mul,
     one_smul, hMC]
   simp
