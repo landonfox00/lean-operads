@@ -5,7 +5,7 @@ occurs exactly twice in the whole library, both times in a bibliography entry. F
 attempts to add operads were opened and closed (mathlib4 #20133, #20134, #20138, #20141, #23459),
 with maintainers noting that "operads will be a challenge to get working in the right generality."
 
-This is a local library, so it is free to make a definite choice and build on it.
+This library is not part of Mathlib, so it is free to make a definite choice and build on it.
 
 ## Build
 
@@ -54,9 +54,11 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-Roughly 7,000 lines, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 157 headline results
+About 115,000 lines in 235 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,564
+declarations
 and confirms every one rests only on Lean's three standard axioms — `propext`, `Quot.sound`, and
-(wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`.
+(wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every
+`Operad` module, about 14,000 of them, and CI runs both.
 
 | Item | Where | Status |
 |---|---|---|
@@ -164,7 +166,7 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | **The associated graded of the Koszul dual cooperad**: a weight on a basis grades the free module (`Graded.wproj`), and the associated graded of a subspace for the filtration by weight, the span of its top components (`Graded.grW`), has its dimension (`Graded.finrank_grW`); a weight on the generators weighs bar trees additively, kept by the differential (`ShuffleBar.d_wproj`) and added by substitution (`ShuffleBar.wdegB_substBar`); if `R₀` is spanned by top components of relators of `R`, the relator subcomplex of `R₀` is the associated graded of that of `R` (`ShuffleBar.J_inf_C_eq_grW`) and **the Koszul dual cooperad of `R₀` is the associated graded of that of `R`** (`ShuffleBar.KD_eq_grW`), as soon as the dimensions agree, for instance for two quadratic Gröbner bases with the same leading monomials (`ShuffleBar.finrank_J_inf_C_add`, `ShuffleBar.KD_eq_grW_of_isGroebner`): the Rees family of the Koszul dual cooperad is flat | `ShuffleGraded.lean` | **proved** |
 | **Signs of the fully cut bar trees**: the inversions of a list and their sign (`ListInv.sgn`), moving an entry to the front (`ListInv.sgn_move`) and exchanging two values (`ListInv.sgn_swap`); the key and the right label of each vertex of a shuffle monomial (`LTree.vlist`), kept outside a replaced subtree (`LTree.vlist_replaceAt`); the three monomials of arity three (`LTree.mono3_cases`) and their sign `chi3 = (+1, -1, -1)`; the orientation sign of a monomial (`LTree.tauS`, the sign of its right labels in the order of the keys) and the sign of an edge in the bar differential (`LTree.topSgn`): **substituting the monomials `σ` of arity three at an edge, the sign of the new edge times the orientation sign is `± chi3(σ)`, the sign `±` depending only on the edge** (`LTree.topSgn_mul_tauS_substAt`) | `ListInv.lean`, `ShuffleVData.lean` | **proved** |
 | **Bar trees with one uncut edge**: on a monomial with distinct labels the key of a vertex determines its path (`LTree.eq_of_key_subtreeAt`) and a flag says whether the key is cut (`ShuffleBar.flagAt_eq`), so such a bar tree has one uncut vertex below the root (`ShuffleBar.eq_of_flagAt_eq_false`); a plugged monomial of arity three determines the monomial and its inputs (`LTree.plug_inj`); the substitutions at the uncut edges sort these bar trees into classes (`ShuffleBar.substBar_eq_substBar`, `ShuffleBar.substBar_eq_iff`, `ShuffleBar.substBar_injective`), and **a chain of degree `n - 2` lies in the relator subcomplex exactly when its coefficients along the substitutions at every uncut edge form a relator** (`ShuffleBar.mem_J_iff_winCoef`) | `ShuffleBarEdge.lean` | **proved** |
-| **The Koszul dual operad of a shuffle operad**: the Koszul dual relators, orthogonal to `R` for the pairing twisted by `chi3` (`ShuffleBar.dualRel`, `dualRel_dualRel`, `finrank_dualRel`); the fully cut bar trees are the monomials, twisted by the orientation sign (`ShuffleBar.toMono`, `ShuffleBar.ofMono`), and by the coherence of the signs the differential of a chain of top degree has coefficients `± chi3(σ)` times its values along every edge (`ShuffleBar.d_ofMono_substBar`, `ShuffleBar.winCoef_d_ofMono`): **the Koszul dual cooperad is the space of functions on the monomials whose twisted values at the substitutions at each edge form a relator** (`ShuffleBar.KD_equiv_KDmono`), **the orthogonal of the ideal of the Koszul dual relators** (`ShuffleBar.KDmono_eq_orthogonal`); so **the Koszul dual operad has the dimension of the Koszul dual cooperad in every arity** (`ShuffleBar.finrank_quotient_dualRel`), and for a quadratic Gröbner basis **the number of monomials all of whose windows are leading** (`ShuffleBar.finrank_quotient_dualRel_eq_ncard`) | `ShuffleKoszulOperad.lean` | **proved** |
+| **The Koszul dual operad of a shuffle operad**: the Koszul dual relators, orthogonal to `R` for the pairing twisted by `chi3` (`ShuffleBar.dualRel`, `dualRel_dualRel`, `finrank_dualRel`); the fully cut bar trees are the monomials, twisted by the orientation sign (`ShuffleBar.toMono`, `ShuffleBar.ofMono`), and by the coherence of the signs the differential of a chain of top degree has coefficients `± chi3(σ)` times its values along every edge (`ShuffleBar.d_ofMono_substBar`, `ShuffleBar.winCoef_d_ofMono`): **the Koszul dual cooperad is the space of functions on the monomials whose twisted values at the substitutions at each edge form a relator** (`ShuffleBar.kdEquivKDmono`), **the orthogonal of the ideal of the Koszul dual relators** (`ShuffleBar.KDmono_eq_orthogonal`); so **the Koszul dual operad has the dimension of the Koszul dual cooperad in every arity** (`ShuffleBar.finrank_quotient_dualRel`), and for a quadratic Gröbner basis **the number of monomials all of whose windows are leading** (`ShuffleBar.finrank_quotient_dualRel_eq_ncard`) | `ShuffleKoszulOperad.lean` | **proved** |
 | **The associated graded of the Koszul dual operad**: the associated graded of a space of functions on a finite set (`Graded.grF`, `Graded.finrank_grF`); for a diagonal pairing, **the orthogonal of the associated graded is the associated graded of the orthogonal for the reversed weight** (`Graded.orthogonal_grF`); the fully cut bar trees keep the weight (`ShuffleBar.map_toMono_grW`), so if the Koszul dual cooperad of `R₀` is the associated graded of that of `R`, **the ideal of the Koszul dual relators of `R₀` is the associated graded of that of `R` for the dual filtration** (`ShuffleBar.idealOf_dualRel_eq_grF`, a PBW property of the Koszul dual operad), and in arity three **the Koszul dual relators of `R₀` are the leading forms of those of `R`** (`ShuffleBar.idealOf_three`, `ShuffleBar.dualRel_eq_grF`); both hold for two quadratic Gröbner bases with the same leading monomials (`ShuffleBar.idealOf_dualRel_eq_grF_of_isGroebner`) | `ShuffleGradedDual.lean` | **proved** |
 | **The Rees module of a weight filtration** and **the Rees family of the Koszul dual cooperad**: for a subspace `V` of `K^α` filtered by a weight, its Rees module over `K[X]` (`Graded.rees`), spanned by the homogenizations (`Graded.homog_mem_rees`, `Graded.eq_sum_homog`); **its fibers** are `V` at `X = 1`, its associated graded at `X = 0` and `V` rescaled by `c^{-W}` at `X = c ≠ 0` (`Graded.evalAt_rees_one`, `Graded.evalAt_rees_zero`, `Graded.evalAt_rees_of_ne_zero`); **it is flat**, an element vanishing at `X = c` being divisible by `X - c` (`Graded.exists_eq_smul_of_evalAt_eq_zero`), **free of rank the dimension of every fiber** (`Graded.free_rees`, `Graded.finrank_rees`), and over an infinite field **the module of polynomial sections of its fibers** (`Graded.mem_rees_iff_evalAt`, `Graded.sections_fiber`); for shuffle operads, the Koszul dual cooperad of the relators rescaled by `c^{-w}` is the rescaled Koszul dual cooperad (`ShuffleBar.KDmono_rescale_pow`), so if the Koszul dual cooperad of `R₀` is the associated graded of that of `R`, **the Rees module of the Koszul dual cooperad of `R` is the family of the Koszul dual cooperads of the rescalings of `R`, degenerating to that of `R₀`** (`ShuffleBar.fiber_rees_KDmono_of_ne_zero`, `ShuffleBar.fiber_rees_KDmono_zero`, `ShuffleBar.finrank_rees_KDmono`, `ShuffleBar.sections_KDmono_eq_rees`) | `ReesModule.lean`, `ShuffleReesKD.lean` | **proved** |
 | **The Koszul dual of a shuffle operad with a quadratic Gröbner basis is Koszul**: in arity three every monomial outside the leading monomials `L` is the least monomial of a Koszul dual relator (`ShuffleBar.exists_dualRel_lead`); for the reversed key the monomials with a window outside `L` lead vectors of the ideal of the Koszul dual relators and the monomials all of whose windows lie in `L` span a complement of it (`ShuffleBar.isLeading_dual`, `ShuffleBar.isCompl_dual`, by reduction and the dimension of the Koszul dual operad); so the Koszul dual relators have Gröbner data (`ShuffleBar.dualData`) and **the Koszul dual operad is Koszul** (`ShuffleBar.isKoszul_dualRel`) | `ShuffleDualKoszul.lean` | **proved** |
@@ -184,6 +186,17 @@ and confirms every one rests only on Lean's three standard axioms — `propext`,
 | `sum_split3`, `permComp_apply_lt/mid/ge` — the three ranges | `Perm.lean` | proved |
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
+
+**Three notions of Koszul.** The library has three Koszul predicates, and no theorem relates
+them: `Koszul.IsKoszul` (`GrKoszulDual.lean`: `ΩP^¡ → P` is a quasi-isomorphism, the textbook
+notion), `ShuffleBar.IsKoszul` (`ShuffleKoszul.lean`: the bar homology of a binary shuffle
+operad vanishes below the diagonal) and `Rules.IsKoszul` (`ShuffleAnyKoszul.lean`: the same for
+shuffle operads with generators of any arity). The Gröbner and PBW criteria in the table conclude
+the shuffle notions, for the shuffle operad, so they do not yet reach `Koszul.IsKoszul` or the
+symmetric operad. Nor are they instantiated: no concrete Gröbner basis is constructed, so no
+particular operad (`Ass`, `Com`, `Lie`, `Pois`) is proved Koszul in any of the three senses.
+Likewise "quadratic data" means data whose relators are *arbitrary* sets; weight two is not
+enforced, and `P^¡ = C(sE, s²R)` is not proved.
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -651,7 +664,9 @@ shows that **the cobar construction preserves and reflects quasi-isomorphisms of
 coaugmented dg cooperads**: `Ωf` is a quasi-isomorphism iff `f` is one in the arities at least
 two (`CobarDG.map_bijective_iff`, and `CobarZero.map_bijective_iff` for a source with the zero
 differential, `Operad/CobarQIso.lean`). The cut cooperad is functorial (`FreeGrL.mapCoop`,
-`Operad/CutFunctor.lean`) and cofree: an element with at least `k ≥ 2` vertices whose convolution
+`Operad/CutFunctor.lean`) and has the uniqueness half of cofreeness (the universal property of the
+cofree cooperad is proved only for the ungraded `Cofree.homEquiv`): an element with at least
+`k ≥ 2` vertices whose convolution
 square has weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
 `Operad/CofreeVanish.lean`), so a morphism into the bar construction whose composite with `π` is
 killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
@@ -982,9 +997,9 @@ are kept as the history of how the library got here.
    `decomp_assoc_seq` against `comp_assoc_seq`, and the disjoint part is symmetric in the last two
    arguments by `decomp_assoc_par` against `comp_assoc_par`. The one new difficulty is that the
    cooperad axioms are equalities of *linear maps* rather than of elements, so the bookkeeping
-   cannot be done pointwise, and `swapLast` is what the parallel case will need. With it, the
-   Maurer–Cartan elements of `Conv` are twisting morphisms `C → P`, which is what the whole dg
-   layer of this library was built to say.
+   cannot be done pointwise, and `swapLast` is what the parallel case will need. `Conv` is
+   ungraded, so its Maurer–Cartan elements are not twisting morphisms; those live on the graded
+   convolution operad `ConvOp` (`Operad/Twisting.lean`, `Operad/TwistingDG.lean`).
 3. **The common operads.** `Ass`, `End`, `Mag`, `AssPres` and now **`Perm`** are in. `Lie` and
    `Pois` are *symmetric*, so they are blocked on item 1 rather than on effort. `Com` is **not** a
    gap: non-symmetrically it *is* `Ass`, since one generator per arity is one planar way to combine
@@ -1017,12 +1032,11 @@ are kept as the history of how the library got here.
    stated elementwise — a tensor product has no description by elements — so each is an equality
    of linear maps, and parallel coassociativity needs a braiding (`swapLast`) because the two
    orders of decomposing produce the same three pieces transposed. `instNSCooperadAss` is the
-   first example and doubles as validation: a mis-stated coassociativity would have shown up
-   there as an unprovable goal.
+   first example. It is a weak check: on `R ⊗ R` every index-shuffled form of coassociativity
+   holds, so a mis-stated axiom would not show up there.
 
-   What bar–cobar still needs on top of this is the bar construction itself — the cofree cooperad
-   on the suspension of an augmented operad's ideal, with the differential induced by composition
-   — which in turn wants augmentations and a suspension. Model structures need limits and
+   The bar and cobar constructions now exist (`Operad/Bar.lean`, `Operad/Cobar.lean`,
+   `Operad/BarCobar.lean`). Model structures need limits and
    colimits in the category of operads, a separate and larger gap; ∞-operads need dendroidal
    machinery and are far off.
 

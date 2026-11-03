@@ -474,9 +474,11 @@ end SymOperadHom
 
 /-! ## The commutative operad
 
-`Com R A = R` for every input set: one operation in each arity, invariant under relabelling, with
-composition the product. It is the terminal object among operads with one-dimensional components,
-and the target of every "evaluation". -/
+`Com R A = R` for every input set, the empty one included: one operation in each arity,
+invariant under relabelling, with composition the product. Its algebras are the unital
+commutative algebras. It is the target of every "evaluation". It is not terminal, even among
+operads with one-dimensional components: for a unit `λ ≠ 1` of `R`, `x ↦ λ ^ (|A| - 1) • x` is an
+endomorphism other than the identity. -/
 
 namespace Sym
 

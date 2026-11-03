@@ -5,7 +5,9 @@ The cobar construction `ΩC` of a coaugmented graded cooperad `C` is the free gr
 desuspension `s⁻¹ C̄` of its reduced part (`CobarGen`, `CobarGr`), with the odd derivation
 extending `s⁻¹ c̄ ↦ -(ι ⋆ ι)(c)` (`Cobar.d`). Here `ι : C → ΩC`, `c ↦ s⁻¹ c̄`, is **the universal
 twisting morphism** (`Cobar.ι`), an odd invariant family of the convolution operad of `C` and
-`ΩC`, and `⋆` is the convolution product.
+`ΩC`, and `⋆` is the convolution product. That product sums only over decompositions whose inner
+operation has at least one input (`GrOperad.Inv.starF`), so when `C ∅ ≠ 0` this `ΩC` can differ
+from the textbook one.
 
 * `ι ⋆ ι` vanishes on the coaugmentation, whose decompositions are tensors of relabellings of `1`
   (`Cobar.star_ι_ι_unit`), so the derivation is well defined, and `d ∘ ι = -(ι ⋆ ι)`

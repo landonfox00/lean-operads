@@ -9,7 +9,7 @@ on the left of the convolution product through `g₀` alone (`GrOperad.Inv.star_
 
 the only term of the product being the one plugging all of `c` into `g₀`, by the left counit law
 of `C`. For `g₀ = 1` this is the left unit law of the convolution product
-(`GrOperad.Inv.oneInv_star`).
+(a special case of `GrOperad.Inv.star_counit_left`).
 -/
 import Operad.InvPreLie
 import Operad.ConvOperad

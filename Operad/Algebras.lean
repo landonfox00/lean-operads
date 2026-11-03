@@ -261,7 +261,8 @@ variable {R V}
 
 open EndOp
 
-/-- **Algebras over the commutative operad are commutative associative algebras.** -/
+/-- **Algebras over the non-unital commutative operad `Lin R ComSet` are commutative
+associative algebras**, without unit. -/
 noncomputable def Com.algebraEquiv : SymAlgebra R (Lin R ComSet) V ≃ ComAlg R V :=
   (linHomEquiv R).symm.trans <| ComSet.homEquiv.trans
     { toFun := fun m => ⟨m.1, (isComm_iff m.1).1 m.2.1, (isAssoc_iff m.1).1 m.2.2⟩

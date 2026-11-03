@@ -10,6 +10,9 @@ comb (`Arr.pres_isRComb`), and there is one right comb in each arity (`PAss.pres
 presented by one binary operation, without symmetries, and associativity with all its relabellings
 (`AssSet.presIso`), and a morphism of operads in modules out of `Ass` is an associative binary
 operation (`Ass.homEquiv`).
+
+Here `Ass` is the *non-unital* associative operad: `AssSet` has no element on the empty set. The
+symmetric `Sym.Ass` of `Operad.SymAss` has the empty order on `∅` and is unital.
 -/
 import Operad.Regular
 import Operad.ComSet

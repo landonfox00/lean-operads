@@ -4,7 +4,7 @@
 A morphism of graded operads between twisted linearizations may send every basis element to a
 basis element up to sign, `Φ (bas x) = σ(c x) bas (ψ x)`. This is the case of the morphisms out
 of a free graded operad sending each generator to a signed basis element
-(`FreeGr.signedBasis`): such values form a set operad, **the signed basis elements**
+(`FreeGr.SBVal`): such values form a set operad, **the signed basis elements**
 (`SgnBas`), triples `(b, y, d)` standing for `σ(b) y` with sign data `d` of the parity of `y`,
 composed with the signs of both `d` and the sign data of `y` — their discrepancies in parallel
 compositions cancel, the parities being equal. The underlying map `ψ` is then a morphism of set

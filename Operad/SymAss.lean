@@ -6,7 +6,9 @@ the input `i` of a linear order `r` on `A` puts the block `B`, ordered by `s`, w
 inputs from `A ∖ i` compare as in `r`, two from `B` as in `s`, and an input `a` of `A ∖ i` comes
 before every input of `B` exactly when `a` comes before `i` (`Sym.LinOrd.comp`). This is a set
 operad (`Sym.instSetOperadLinOrd`), and its linearization is **the symmetric associative operad**
-`Sym.Ass R` (`Sym.Ass R A` has a basis indexed by the linear orders on `A`).
+`Sym.Ass R` (`Sym.Ass R A` has a basis indexed by the linear orders on `A`). The empty set has
+one linear order, so `Sym.Ass` is the operad of *unital* associative algebras, unlike the
+presented `Ass` of `Operad.AssPres`.
 
 Forgetting the order is a morphism of set operads onto the commutative operad, and its
 linearization is the augmentation `Sym.Ass.toCom : Ass → Com` (`Sym.Ass.toCom_single`). The

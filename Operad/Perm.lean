@@ -5,8 +5,13 @@ Chapoton's operad, non-symmetrically: `Perm R n = Fin n → R`, with
 
 `(α ∘ β)_j = (Σβ)·α_j` outside the inserted block and `α_a · β_{j-a}` inside it,
 
-where `a` is the slot. Its algebras are permutative algebras, and it is the target of every
-"value" in the game-theoretic application this library was started for.
+where `a` is the slot. It is the target of every "value" in the game-theoretic application this
+library was started for.
+
+As a non-symmetric operad its algebras are *not* permutative algebras. An algebra over the
+underlying non-symmetric operad of a symmetric operad `Q` is an algebra over `Q ⊗ Ass`, and
+`Perm ⊗ Ass` is the diassociative operad: two binary operations, since `Perm R 2` is
+two-dimensional. Permutative algebras are the algebras of the symmetric operad `Sym.Perm`.
 
 ## Why this one is different
 

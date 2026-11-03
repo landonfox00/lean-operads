@@ -1,8 +1,9 @@
 /-
 # The commutative set operad, and generalized associativity and commutativity
 
-`ComSet A` has one element when `A` is nonempty and none otherwise. It is the set operad whose
-linearization is `Com`, the operad of commutative associative algebras without unit.
+`ComSet A` has one element when `A` is nonempty and none otherwise. Its linearization is the
+operad of commutative associative algebras *without* unit. That is `Sym.Com` in every nonempty
+arity, but not in arity `∅`: `Sym.Com R ∅ = R`, and `Sym.Com` is the unital operad.
 
 The theorem of this file is that `ComSet` is presented by one binary operation, commutative and
 associative (`comPresIso`). Equivalently, a commutative and associative binary element `m` of any

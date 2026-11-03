@@ -18,7 +18,7 @@ datum of the composition: a bijection `e : Without A i ⊕ B ≃ C` onto an orde
   composing and then relabelling along the shuffle; the axioms hold for any bijections, not only
   shuffles. Morphisms (`SymOperadHom.toShuffle`) and ideals (`SymOperadIdeal.toShuffle`) are
   transported, and the quotient of the forgetful image by a transported ideal is the forgetful
-  image of the quotient (`SymOperadIdeal.toShuffle_quot`).
+  image of the quotient (`SymOperadIdeal.toShuffleQuot`).
 -/
 import Operad.SymQuot
 

@@ -17,7 +17,7 @@ operad, so the operations of `Pois` evaluate on the variables `X [a]` of the one
   is recovered: distinct permutations give distinct monomials.
 
 Hence the values of the operations of arity `n` span a space of dimension at least `n!`
-(`PoisDim.le_finrank_Tsp`).
+(`PoisDim.factorial_le_finrank`).
 -/
 import Mathlib.Data.List.TakeWhile
 import Mathlib.Data.List.Permutation

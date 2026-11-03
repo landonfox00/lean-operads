@@ -11,7 +11,7 @@ commuting with relabellings, vanishing on the unit, which is a derivation of the
 **The homology of a dg operad is a graded operad** (`DGOperad.instGrOperadHomology`): a composite
 of cycles is a cycle, and a composite with a boundary is a boundary, so the relabellings, the
 unit, the compositions and the parity decomposition descend to homology
-(`DGOperad.hcomp_mk`), and the axioms hold on representatives — homogeneous ones for parallel
+(`DGOperad.hcomp_cls`), and the axioms hold on representatives — homogeneous ones for parallel
 associativity, which exist because the parity projections act on homology.
 -/
 import Operad.Perturbation

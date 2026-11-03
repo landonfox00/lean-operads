@@ -20,7 +20,7 @@ It is filtered by the same weight (`TwLin.filtration`), and its three instances 
   module `⊕ₚ Fₚ Xᵖ` the composition is exactly this one. Its specialization at `X = c`
   (`TwLin.specialize`) is a morphism of the underlying set operads onto `TwLin R W c`,
   semilinear along `Polynomial.eval c`, whose kernel is `(X - c)` times the family
-  (`TwLin.specialize_eq_zero_iff`): the fiber at `c = 1` is the linearization and the fiber at
+  (`TwLin.specializeL_eq_zero_iff`): the fiber at `c = 1` is the linearization and the fiber at
   `c = 0` is the associated graded.
 
 Morphisms out of a twisted linearization are built from their values on the basis

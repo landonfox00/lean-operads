@@ -11,7 +11,7 @@ original one; at the level of the bar construction:
   (`d_scaleBar`);
 * substituting a monomial at a window multiplies the weight of the context by that of the
   monomial (`wt_substBar`), so the rescaling carries the relator subcomplex of `R` onto that of
-  the rescaled relators (`map_scaleBar_J`);
+  the rescaled relators (`map_scaleBar_J_le`, an inclusion);
 * hence **the Koszul dual cooperads of `R` and of its rescaling are isomorphic in every arity**
   (`map_scaleBar_KD`, `finrank_KD_rescale`), and **`R` is Koszul exactly when its rescaling is**
   (`isKoszul_rescale`).

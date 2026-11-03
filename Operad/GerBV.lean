@@ -9,6 +9,8 @@ the **deviation** of `Δ` from being a derivation is
 
 A **BV algebra** (`GerBV.IsBV`) is a graded commutative product with an odd operator `Δ` with
 `Δ² = 0` which is of order at most two: `⟨x, -⟩` is a graded derivation of the product.
+Associativity is *not* assumed, so `GerBV.IsBV` is weaker than `BV.IsBV` (`Operad.GerOperad`),
+and Koszul's theorem below holds in that generality.
 
 **Koszul's theorem**: the derived bracket of a BV algebra is a **Gerstenhaber bracket**:
 * graded antisymmetric, `[x, y] = -σ((|x| + 1)(|y| + 1)) [y, x]` (`GerBV.bracket_antisymm`);
@@ -52,8 +54,8 @@ def dev (p : Bool) (x y : V) : V := Δ (μ x y) - μ (Δ x) y - σ R p • μ x 
 /-- **The derived bracket** `[x, y] = σ p ⟨x, y⟩`, for `x` of parity `p`. -/
 def bracket (p : Bool) (x y : V) : V := σ R p • dev μ Δ p x y
 
-/-- **A BV algebra**: a graded commutative product and an odd operator `Δ` with `Δ² = 0`, of
-order at most two. -/
+/-- **A BV algebra**, without associativity: a graded commutative product and an odd operator
+`Δ` with `Δ² = 0`, of order at most two. `BV.IsBV` adds associativity. -/
 structure IsBV : Prop where
   /-- Graded commutativity. -/
   comm : ∀ p q x y, IsPar ε p x → IsPar ε q y → μ x y = σ R (p && q) • μ y x

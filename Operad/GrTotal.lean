@@ -6,8 +6,8 @@ The homogeneous operations of a graded operad `P` with sign data form a set oper
 corolla — an order `L` of the inputs and no parity after them — the total composite of `m` with
 operations `y a` inserted at its inputs is the Koszul composite `m ∘ (y_a)_a` read in the order
 `L`: **it does not depend on the sign data of the inserted operations beyond their parities**
-(`SgnOp.total_op_congr`), it is multilinear (`SgnOp.total_op_add_left`,
-`SgnOp.total_op_update_add`), and **changing the order `L` to `L'` costs the Koszul sign of the
+(`SgnOp.total_op_congr`), it is multilinear (`SgnOp.total_op_lin`,
+`SgnOp.total_op_update`), and **changing the order `L` to `L'` costs the Koszul sign of the
 reordering** (`SgnOp.total_op_reorder`).
 -/
 import Operad.MayClass

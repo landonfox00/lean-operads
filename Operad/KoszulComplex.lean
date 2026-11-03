@@ -263,7 +263,8 @@ include hred in
 /-- **The fundamental theorem of twisting morphisms**: for a reduced cooperad `C` and a dg operad
 `P` without operations with no inputs, over a field of characteristic zero, a morphism of dg
 operads `f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, `α = f ∘ ι`
-being its twisting morphism. -/
+being its twisting morphism. As stated it also takes an augmentation `ε : GrAug R P`, from which
+the twisted differential is built; whether that hypothesis is needed is open. -/
 theorem fundamental
     (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
     (φ : CobarHom R C P) :

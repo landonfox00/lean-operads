@@ -3,8 +3,8 @@
 
 For generators `T` without operations of arity zero, the underlying shuffle operad of the free
 symmetric operad `Lin R (FreeSet T)` is the free shuffle operad on the generators with a
-permutation of their inputs, `T k × Perm (Fin k)` (`Operad.FreeSet.shuffleIso`). So on every finite
-linear order the free symmetric operad has a basis indexed by the shuffle monomials
+permutation of their inputs, `T k × Perm (Fin k)` (`Operad.FreeSet.toSh`,
+`Operad.FreeSet.fromSh`, `Operad.FreeSet.shuffleEquiv`). So on every finite linear order the free symmetric operad has a basis indexed by the shuffle monomials
 (`Operad.FreeSet.shuffleBasis`).
 
 * **Labelled planar trees** (`Operad.PTree`) with leaves labelled by `A` form a monad, and those

@@ -429,7 +429,9 @@ open EndGr
 /-- **A Gerstenhaber algebra**, in the operadic normalization: an even graded commutative
 associative product `m` and an odd graded symmetric bracket `l`, a derivation of the product,
 satisfying the Jacobi identity; the signs are the Koszul signs of the operations and inputs moved.
-The usual bracket is `[x, y] = σ|x| l(x, y)` (`Ger.isGer_iff_bracket`). -/
+The usual bracket is `[x, y] = σ|x| l(x, y)`; a Gerstenhaber algebra's bracket is graded
+antisymmetric, a derivation and Jacobi (`Ger.IsGer.brk_antisymm`, `Ger.IsGer.brk_mul`,
+`Ger.IsGer.brk_jacobi`). -/
 structure IsGer (m l : EndOp R V (Fin 2)) : Prop where
   par_m : parML R V false m = m
   par_l : parML R V true l = l
