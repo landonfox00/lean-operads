@@ -150,16 +150,22 @@ theorem jacobiS (i j k : ℕ) (a : PieceS R P i) (b : PieceS R P j) (c : PieceS 
     associatorS_inc k i j c a b]
   simp
 
-/-! ### An obstruction at the prime 2
+/-! ### Two equal odd arguments
 
-Applying the graded pre-Lie identity with its last two arguments *equal and odd* gives
-`A(x, Θ, Θ) = -A(x, Θ, Θ)`, so that associator is 2-torsion but need not vanish. This is exactly
-what stands between the Maurer–Cartan equation and `d² = 0`: expanding `d = ⁅Θ, -⁆` for odd `Θ`
-with `Θ ⋆ₛ Θ = 0` leaves `d²(x) = -A(x, Θ, Θ)`, which the identity kills only after inverting 2.
-It is not an artefact of the formalisation — it is why the classical statement is made over a
-ring in which 2 is not a zero divisor. -/
+Applying the graded pre-Lie identity with its last two arguments *equal and odd* gives only
+`A(x, Θ, Θ) = -A(x, Θ, Θ)`, that is, `2 A(x, Θ, Θ) = 0` (`two_smul_associator_odd`). The
+associator in fact vanishes over any commutative ring (`associator_self_one`): its disjoint-slot
+terms cancel in pairs (`sstar_sstar_self_one`). -/
 
-/-- The associator with two equal odd arguments is annihilated by 2. -/
+/-- **The associator with two equal odd arguments vanishes**, over any commutative ring. -/
+lemma associator_self_one (m : ℕ) (x : PieceS R P m) (T : PieceS R P 1) :
+    associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) = 0 := by
+  simp only [associator, incS_mul_incS]
+  rw [incS_reindex (show m + (1 + 1) = m + 1 + 1 by omega), ← map_sub,
+    sstar_sstar_self_one x T, reindex_reindex, reindex_self, sub_self, map_zero]
+
+/-- The associator with two equal odd arguments is annihilated by 2. This is what the graded
+pre-Lie identity gives on its own; `associator_self_one` is the sharper statement. -/
 lemma two_smul_associator_odd (m : ℕ) (x : PieceS R P m) (T : PieceS R P 1) :
     (2 : ℕ) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) = 0 := by
   have h := associatorS_inc m 1 1 x T T
@@ -169,9 +175,8 @@ lemma two_smul_associator_odd (m : ℕ) (x : PieceS R P m) (T : PieceS R P 1) :
 
 /-! ### The differential
 
-For an odd `Θ` solving the Maurer–Cartan equation, `d = ⁅Θ, -⁆` squares to `-A(x, Θ, Θ)`. That
-term is 2-torsion by `two_smul_associator_odd` but not zero, so `d² = 0` is stated with `2`
-invertible. -/
+For an odd `Θ` solving the Maurer–Cartan equation, `d = ⁅Θ, -⁆` squares to `-A(x, Θ, Θ)`, which
+vanishes by `associator_self_one`. So `d² = 0` holds over any commutative ring. -/
 
 /-- `d²` collapses to a single associator: everything else cancels, using the graded pre-Lie
 identity once and the Maurer–Cartan equation twice. -/
@@ -196,22 +201,11 @@ theorem dsq_eq (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
     one_smul, hMC]
   simp
 
-/-- **The differential squares to zero**, once `2` is invertible. -/
-theorem dsq_eq_zero [Invertible (2 : R)] (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
+/-- **The differential squares to zero**, over any commutative ring. -/
+theorem dsq_eq_zero (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m)
     (hMC : (incS 1 T : TotS R P) * incS 1 T = 0) :
     brT 1 (1 + m) (incS 1 T) (brT 1 m (incS 1 T) (incS m x)) = 0 := by
-  rw [dsq_eq m T x hMC, neg_eq_zero]
-  have h2 : ((2 : R)) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) = 0 := by
-    have h := two_smul_associator_odd m x T
-    rw [two_smul] at h
-    rw [two_smul]
-    exact h
-  calc associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)
-      = (⅟(2 : R) * 2) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) := by
-        rw [invOf_mul_self, one_smul]
-    _ = ⅟(2 : R) • ((2 : R) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)) := by
-        rw [mul_smul]
-    _ = 0 := by rw [h2, smul_zero]
+  rw [dsq_eq m T x hMC, associator_self_one, neg_zero]
 
 end
 

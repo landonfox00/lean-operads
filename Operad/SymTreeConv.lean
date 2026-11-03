@@ -30,9 +30,9 @@ composite (`SymOperad.map_comp_map_left`, `SymOperad.map_comp_map_right`).
 
 Two general facts complete the picture, for any non-symmetric operad:
 
-* **the twisting identity** `⁅T, ⁅T, x⁆⁆ = ⁅T ⋆ₛ T, x⁆` for `T` of degree one, once `2` is
-  invertible (`gbracket_gbracket_eq`, from `brT_brT_eq` in the total space), so that `d_T² = 0`
-  exactly when `T ⋆ₛ T` is central;
+* **the twisting identity** `⁅T, ⁅T, x⁆⁆ = ⁅T ⋆ₛ T, x⁆` for `T` of degree one, over any
+  commutative ring (`gbracket_gbracket_eq`, from `brT_brT_eq` in the total space), so that
+  `d_T² = 0` exactly when `T ⋆ₛ T` is central;
 * **coefficients in an ideal**: a signed product or bracket with an element of an operad ideal,
   on either side, lies in the ideal (`OperadIdeal.sstar_mem_left`, `…_right`,
   `OperadIdeal.gbracket_mem_left`, `…_right`); an ideal of a symmetric operad, such as the kernel
@@ -1339,8 +1339,8 @@ lemma brT_incS_incS (i j : ℕ) (a : PieceS R P i) (b : PieceS R P j) :
   rfl
 
 /-- **The twisting identity in the total space**: for an odd `T`, `⁅T, ⁅T, x⁆⁆ = ⁅T ⋆ₛ T, x⁆`,
-once `2` is invertible. -/
-theorem brT_brT_eq [Invertible (2 : R)] (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m) :
+over any commutative ring. -/
+theorem brT_brT_eq (m : ℕ) (T : PieceS R P 1) (x : PieceS R P m) :
     brT 1 (1 + m) (incS 1 T) (brT 1 m (incS 1 T) (incS m x))
       = brT 2 m (incS 1 T * incS 1 T : TotS R P) (incS m x) := by
   have hA := associatorS_inc 1 m 1 T x T
@@ -1356,22 +1356,15 @@ theorem brT_brT_eq [Invertible (2 : R)] (m : ℕ) (T : PieceS R P 1) (x : PieceS
     match_scalars
     all_goals ring_nf
     all_goals try simp only [neg_one_pow_mul_two']
-  have h2 : associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) = 0 := by
-    have h := two_smul_associator_odd m x T
-    calc associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)
-        = (⅟(2 : R) * 2) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T) := by
-          rw [invOf_mul_self, one_smul]
-      _ = ⅟(2 : R) • ((2 : ℕ) • associator (incS m x : TotS R P) (incS 1 T) (incS 1 T)) := by
-          rw [mul_smul, ofNat_smul_eq_nsmul (R := R)]
-      _ = 0 := by rw [h, smul_zero]
+  have h2 := associator_self_one m x T
   rw [expand, hA, smul_smul, ← pow_add, show m + m = 2 * m from by ring, neg_one_pow_two_mul',
     one_smul, h2, brT, show 2 * m = m * 2 by ring, neg_one_pow_mul_two', one_smul]
   abel
 
 /-- **The twisting identity**: for a cochain `T` of degree one and any `x`,
-`⁅T, ⁅T, x⁆⁆ = ⁅T ⋆ₛ T, x⁆`, once `2` is invertible. In particular the twisted differential
+`⁅T, ⁅T, x⁆⁆ = ⁅T ⋆ₛ T, x⁆`, over any commutative ring. In particular the twisted differential
 `d_T = ⁅T, -⁆` squares to zero exactly when `T ⋆ₛ T` is central. -/
-theorem gbracket_gbracket_eq [Invertible (2 : R)] {m : ℕ} (T : P (1 + 1)) (x : P (m + 1)) :
+theorem gbracket_gbracket_eq {m : ℕ} (T : P (1 + 1)) (x : P (m + 1)) :
     gbracket (R := R) (j := 1) (k := 1 + m) T (gbracket (R := R) (j := 1) (k := m) T x)
       = reindex R P (by omega)
           (gbracket (R := R) (j := 2) (k := m) (sstar (R := R) (j := 1) (k := 1) T T) x) := by

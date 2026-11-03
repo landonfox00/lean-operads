@@ -66,7 +66,7 @@ lemma incS_mul_self_eq_zero {T : PieceS R P 1}
   exact map_zero _
 
 /-- **The differential squares to zero on the pieces.** -/
-theorem dLin_dLin [Invertible (2 : R)] (T : PieceS R P 1)
+theorem dLin_dLin (T : PieceS R P 1)
     (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0)
     (m : ℕ) (x : PieceS R P m) : dLin T (1 + m) (dLin T m x) = 0 := by
   apply incS_injective (i := 1 + (1 + m))
@@ -83,7 +83,7 @@ def cocycles (T : PieceS R P 1) (m : ℕ) : Submodule R (PieceS R P (1 + m)) :=
 def coboundaries (T : PieceS R P 1) (m : ℕ) : Submodule R (PieceS R P (1 + m)) :=
   LinearMap.range (dLin T m)
 
-theorem coboundaries_le_cocycles [Invertible (2 : R)] (T : PieceS R P 1)
+theorem coboundaries_le_cocycles (T : PieceS R P 1)
     (hMC : sstar (R := R) (P := P) (j := 1) (k := 1) T T = 0) (m : ℕ) :
     coboundaries T m ≤ cocycles T m := by
   rintro y ⟨x, rfl⟩
