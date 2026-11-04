@@ -234,3 +234,4 @@ import Operad.GrLeafKunneth
 import Operad.GrTwistedCompare
 import Operad.GrTwistedConverse
 import Operad.KoszulComplex
+import Operad.KoszulQuadratic

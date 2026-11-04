@@ -195,8 +195,11 @@ shuffle operads with generators of any arity). The Gröbner and PBW criteria in 
 the shuffle notions, for the shuffle operad, so they do not yet reach `Koszul.IsKoszul` or the
 symmetric operad. Nor are they instantiated: no concrete Gröbner basis is constructed, so no
 particular operad (`Ass`, `Com`, `Lie`, `Pois`) is proved Koszul in any of the three senses.
-Likewise "quadratic data" means data whose relators are *arbitrary* sets; weight two is not
-enforced, and `P^¡ = C(sE, s²R)` is not proved.
+Likewise the relators of "quadratic data" are *arbitrary* sets, and the theorems about
+`Koszul.IsKoszul` hold in that generality. Weight two is a separate hypothesis
+(`Koszul.IsQuadratic`), under which, over a field of characteristic zero, `P^¡ = C(sE, s²R)`
+(`Koszul.dualSub_eq_coquadSub`); there `s²R` is the preimage of `R` under `κ_T ⋆ κ_T` on the trees
+with two vertices, and that this map is a bijection `T^c(sE)^{(2)} → T(E)^{(2)}` is not proved.
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -589,8 +592,9 @@ arity and relators `r` presenting `P = T(E)/(r)` (`Koszul.Pres`), the desuspensi
 `κ_T : T^c(sE) → T(E)` out of the cut cooperad (`Koszul.kapT`), the `ε`-part of the morphism into
 the square-zero extension by an odd parameter sending `sv` to `εv`, and **the Koszul dual
 cooperad** `P^¡` (`Koszul.Dual`): the largest subcooperad of `T^c(sE)` on which `κ_T ⋆ κ_T` lands in
-the ideal of the relators (`Koszul.dualSub`, `Koszul.le_dualSub`), for quadratic relators the
-cooperad `C(sE, s²R)`. It contains the generators `sE` (`Koszul.ι_mem_dual`, through the
+the ideal of the relators (`Koszul.dualSub`, `Koszul.le_dualSub`), for quadratic relators over a
+field of characteristic zero the cooperad `C(sE, s²R)` (`Koszul.dualSub_eq_coquadSub`, below). It
+contains the generators `sE` (`Koszul.ι_mem_dual`, through the
 subcooperad of trees with at most one vertex, `FreeGrL.wtOneSub`). **The Koszul twisting morphism**
 `κ : P^¡ → P` (`Koszul.kappa`) satisfies the Maurer–Cartan equation (`Koszul.mc_kappa`), so the
 cobar adjunction gives **the morphism of dg operads `ΩP^¡ → P`** (`Koszul.cobarMor`), and `P` is
@@ -676,6 +680,23 @@ killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
 Theorem A this gives **the Koszul criterion: `P` is Koszul iff `P^¡ → B(P, I)` is a
 quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
 `Operad/KoszulCriterion.lean`).
+
+**Quadratic data.** `Operad/KoszulQuadratic.lean` spans the weight `n` part `T(V)^{(n)}` by the
+trees with `n` vertices (`FreeGrL.wtEqL`, `FreeGrL.iSup_wtEqL`), additive under decomposition
+(`FreeGrL.decomp_mem_wtEqL`), and calls relators **quadratic** when they lie in `T(E)^{(2)}`
+(`Koszul.IsQuadratic`), with relations `R` the graded subspecies they generate (`Koszul.relSp`).
+Over a field of characteristic zero, where the vertex count splits `T(E)`: **the weight two part
+of the ideal is `R`** (`Koszul.ideal_inf_vx_two`), `R` plus the trees with at least three vertices
+being an ideal (`Koszul.quadIdeal`); the desuspension map vanishes off the trees with one vertex
+(`Koszul.kapL_vx`), so **`κ_T ⋆ κ_T` only sees the trees with two vertices**
+(`Koszul.star_wtEqL`) and sends them into `T(E)^{(2)}` (`Koszul.star_mem_vx`). The corelations
+`s²R` are the trees with two vertices that `κ_T ⋆ κ_T` sends into `R` (`Koszul.coRel`), and
+`C(sE, s²R)` is the largest subcooperad of `T^c(sE)` killed by the projection onto
+`T^c(sE)^{(2)}/s²R` (`Koszul.coquadSub`). **For quadratic relators `P^¡ = C(sE, s²R)`**
+(`Koszul.dualSub_eq_coquadSub`, through `Koszul.admissible_eq`), and the trees with two vertices
+of `P^¡` are corelations (`Koszul.dual_inf_wtEqL_le`). Not proved: that `κ_T ⋆ κ_T` is a
+bijection `T^c(sE)^{(2)} → T(E)^{(2)}`, which would make `s²R` the image of `R`, and the reverse
+inclusion `s²R ⊆ P^¡`.
 
 **Graded composite products and root decompositions.** `Operad/GrComposite.lean` builds **the
 graded composite** `M ∘ N` of graded linear species: generators `m ⊗ (y_a)_a` with an order in
