@@ -1582,6 +1582,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ComGen.isKoszul
 #print axioms Operad.ComGen.basis
 #print axioms Operad.ComGen.finrank_eq_one
+#print axioms Operad.ComBin.rel_eq_span
+#print axioms Operad.ComBin.idealOf_le_ker
+#print axioms Operad.ComBin.normal_unique
+#print axioms Operad.ComBin.isGroebner
+#print axioms Operad.ComBin.isKoszul
+#print axioms Operad.ComBin.isKoszul_dualRel
+#print axioms Operad.ComBin.isKoszul_and
 #print axioms Operad.LInf.jac_two_three
 #print axioms Operad.LInf.jac_two_of_ge
 #print axioms Operad.LInf.isLInf_two_iff

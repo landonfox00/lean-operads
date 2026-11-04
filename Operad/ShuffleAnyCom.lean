@@ -25,7 +25,8 @@ least leaf of `y` is smaller than that of `z`, by the twisted left comb otherwis
   gives the PBW basis (`ComGen.basis`): the commutative operad is one-dimensional in every arity
   (`ComGen.finrank_eq_one`).
 * **The commutative operad is Koszul** (`ComGen.isKoszul`), by
-  `Operad.Rules.isKoszul_of_critical`.
+  `Operad.Rules.isKoszul_of_critical`. `Operad.ShuffleBinCom` proves it Koszul as a binary shuffle
+  operad too (`Operad.ComBin.isKoszul_and`), separately.
 
 The critical ambiguities are not resolved one at a time: their resolvability follows from the
 independence of the normal monomials (`Operad.Rules.Amb.res_of_isCompl`), which the count of the
