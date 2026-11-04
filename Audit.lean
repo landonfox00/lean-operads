@@ -1703,6 +1703,16 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Koszul.pi_toBar
 #print axioms Operad.Koszul.piL_d_toBar
 #print axioms Operad.Koszul.d_toBar
+#print axioms Operad.FreeGr.coefF_comp
+#print axioms Operad.FreeGr.ofCoef
+#print axioms Operad.FreeGr.shapeR
+#print axioms Operad.FreeGrL.coefFinite
+#print axioms Operad.FreeGrL.genCoef_lift
+#print axioms Operad.FreeGrL.exists_genLift
+#print axioms Operad.FreeGrL.app_eq_of_genCoef
+#print axioms Operad.FreeGrL.cofreeHomEquiv
+#print axioms Operad.FreeGrL.existsUnique_lift
+#print axioms Operad.FreeGrL.cofreeHomEquivRed
 #print axioms Operad.CobarZero.map_d
 #print axioms Operad.CobarZero.compareData
 #print axioms Operad.CobarZero.map_bijective_iff

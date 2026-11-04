@@ -668,17 +668,28 @@ shows that **the cobar construction preserves and reflects quasi-isomorphisms of
 coaugmented dg cooperads**: `Ωf` is a quasi-isomorphism iff `f` is one in the arities at least
 two (`CobarDG.map_bijective_iff`, and `CobarZero.map_bijective_iff` for a source with the zero
 differential, `Operad/CobarQIso.lean`). The cut cooperad is functorial (`FreeGrL.mapCoop`,
-`Operad/CutFunctor.lean`) and has the uniqueness half of cofreeness (the universal property of the
-cofree cooperad is proved only for the ungraded `Cofree.homEquiv`): an element with at least
-`k ≥ 2` vertices whose convolution
-square has weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
+`Operad/CutFunctor.lean`). An element with at least `k ≥ 2` vertices whose convolution square has
+weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
 `Operad/CofreeVanish.lean`), so a morphism into the bar construction whose composite with `π` is
 killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
-`Operad/BarWeights.lean`). For quadratic data `(E, r)` without generators with at most one input,
-**the comparison morphism `i : P^¡ → B(P, I)` commutes with the differentials** (`Koszul.d_toBar`,
-`Operad/KoszulBar.lean`), `ΩP^¡ → P` is the counit after `Ωi` (`Koszul.counit_comp`), and with
-Theorem A this gives **the Koszul criterion: `P` is Koszul iff `P^¡ → B(P, I)` is a
-quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
+`Operad/BarWeights.lean`). The same argument shows that a morphism of graded cooperads into the cut
+cooperad on a reduced graded linear species `V` is determined by its composite with the coefficient
+of the generators (`FreeGrL.app_eq_of_genCoef`), and `Operad/CutCofree.lean` proves **the universal
+property of the cut cooperad**: over a `ℚ`-algebra, for `V` reduced and a graded cooperad `C` of
+projective modules, as over a field, the morphisms of graded cooperads `C → T^c(V)` are the
+morphisms of graded linear species `C → V`, and for a coaugmented `C` those from the reduced part
+`C̄ → V` (`FreeGrL.cofreeHomEquiv`, `FreeGrL.cofreeHomEquivRed`, `FreeGrL.existsUnique_lift`). The
+morphism is built by transposition: a morphism of graded operads from the free graded operad on
+the homogeneous generators to the scalar-valued convolution operad of `C`, given by a lift of
+`φ : C → V` to the generators weighted by `1 / k!`, assigns each tree a functional on `C`, twisted
+by the sign `σ(C(n, 2))` of its `n` odd vertices to absorb the Koszul sign of the convolution
+product (`FreeGr.coefF_comp`), and these functionals are the coefficients of a morphism of graded
+cooperads (`FreeGr.ofCoef`, `FreeGrL.lift`). Species with elements of at most one input, over a
+conilpotent `C`, are not treated. For quadratic data `(E, r)` without generators with at most one
+input, **the comparison morphism `i : P^¡ → B(P, I)` commutes with the differentials**
+(`Koszul.d_toBar`, `Operad/KoszulBar.lean`), `ΩP^¡ → P` is the counit after `Ωi`
+(`Koszul.counit_comp`), and with Theorem A this gives **the Koszul criterion: `P` is Koszul iff
+`P^¡ → B(P, I)` is a quasi-isomorphism in the arities at least two** (`Koszul.isKoszul_iff`,
 `Operad/KoszulCriterion.lean`).
 
 **Quadratic data.** `Operad/KoszulQuadratic.lean` spans the weight `n` part `T(V)^{(n)}` by the

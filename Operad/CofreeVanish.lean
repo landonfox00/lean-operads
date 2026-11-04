@@ -10,8 +10,9 @@ identity `d h + h d = E - (1 - ε)` (`Cobar.dh_hd`) on a generator `ι y`, with 
 So **an element with at least `k ≥ 2` vertices whose convolution square has weight at least `k + 1`
 has at least `k + 1` vertices** (`Cobar.mem_vxGe_succ`): its part with `k` vertices has a
 convolution square of weight `k` and at least `k + 1`, which vanishes, so it is a multiple of the
-units, which have no vertices. This is the uniqueness part of the universal property of the cut
-cooperad, cofree among the conilpotent cooperads.
+units, which have no vertices. This gives the uniqueness half of the universal property of the
+cut cooperad on a reduced graded linear species (`FreeGrL.app_eq_of_genCoef`); the universal
+property itself is `FreeGrL.cofreeHomEquiv` (`Operad/CutCofree.lean`).
 -/
 import Operad.FreeGrCompare
 import Operad.BarCobarRes
