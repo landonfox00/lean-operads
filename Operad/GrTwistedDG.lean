@@ -7,7 +7,8 @@ convolution operad, the twisted composite product `C ∘_α P` is `C ∘ P` with
   `D_α = d_α + (1 ∘' d_P)`
 
 (`GrComposite.twDiff`), the twisted differential `d_α` (`GrComposite.twD`) and the differential
-of `P` at the inner operations (`GrComposite.leafMap`). The twisted differential is odd
+of `P` at the inner operations (`GrComposite.leafMap`), the same for every augmentation of `P`
+(`GrComposite.twDiff_indep_aug`). The twisted differential is odd
 (`GrComposite.twD_par`); with the Leibniz rule for `1 ∘' d_P` against the action, its
 anticommutator with `1 ∘' d_P` is again a morphism of right modules, the twisted differential of
 `d_P ∘ α` (`GrComposite.twD_leaf_anticomm`), and `(1 ∘' d_P)²` vanishes (`GrComposite.leaf_sq`).
@@ -239,6 +240,11 @@ variable (R C) in
 noncomputable def twDiff (α : GrOperad.Inv R (ConvOp R C P)) (S : Type) [Fintype S]
     [DecidableEq S] : GrComposite R C P S →ₗ[R] GrComposite R C P S :=
   twD ε α S + leafD R C D S
+
+/-- **The differential of `C ∘_α P` does not depend on the augmentation** of `P`. -/
+theorem twDiff_indep_aug (ε' : GrAug R P) (α : GrOperad.Inv R (ConvOp R C P)) (S : Type)
+    [Fintype S] [DecidableEq S] : twDiff R C ε D α S = twDiff R C ε' D α S := by
+  rw [twDiff, twDiff, twD_indep_aug ε ε' α S]
 
 /-- **The square of the differential of a twisted composite product** is the twisted differential
 of `α ⋆ α + d_P ∘ α`. -/

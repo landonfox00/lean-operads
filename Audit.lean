@@ -1821,6 +1821,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.root_graft
 #print axioms Operad.FreeGrL.graft_root
 #print axioms Operad.GrComposite.twDiff_sq
+#print axioms Operad.GrComposite.twD_indep_aug
+#print axioms Operad.GrComposite.twDiff_indep_aug
 #print axioms Operad.GrComposite.cobar_contraction
 #print axioms Operad.GrComposite.cobar_acyclic
 #print axioms Operad.GrComposite.leafMap_comm
@@ -1829,5 +1831,6 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.GrComposite.TwCompareData.qiso
 #print axioms Operad.GrComposite.TwCompareData.qiso_converse
 #print axioms Operad.Cobar.fundamental
+#print axioms Operad.Cobar.fundamental_of_nonempty
 #print axioms Operad.Koszul.presAug
 #print axioms Operad.Koszul.isKoszul_iff_acyclic
