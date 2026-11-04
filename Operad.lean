@@ -166,6 +166,7 @@ import Operad.ShuffleFreeSym
 import Operad.ShuffleSymPres
 import Operad.ShuffleFreeBin
 import Operad.ShuffleAnyInhom
+import Operad.ShuffleAnyCom
 import Operad.LInfinity
 import Operad.CInfinity
 import Operad.TreeMerge
