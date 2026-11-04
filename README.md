@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 115,000 lines in 235 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,564
+About 117,000 lines in 239 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,607
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about

@@ -19,7 +19,7 @@ Rees families; the endomorphism operad. Convolution operads of cochains on plana
 values in any operad, the Koszul dual of a binary quadratic presentation, twisting, and symmetric
 (swap-equivariant) cochains. Shuffle tree monomials, their count, normality for quadratic leading
 terms and right-comb normal forms; leading monomials of kernels. Sorry-free; `Audit.lean` covers
-1,564 declarations as of 2026-11-03.
+1,607 declarations as of 2026-11-03.
 
 ## Four design decisions
 
