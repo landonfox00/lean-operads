@@ -168,6 +168,8 @@ import Operad.ShuffleFreeBin
 import Operad.ShuffleAnyInhom
 import Operad.ShuffleAnyCom
 import Operad.ShuffleBinCom
+import Operad.ShuffleAnyAss
+import Operad.ShuffleBinAss
 import Operad.LInfinity
 import Operad.CInfinity
 import Operad.TreeMerge
