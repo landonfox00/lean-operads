@@ -173,6 +173,8 @@ import Operad.ShuffleBinAss
 import Operad.ShuffleKoszulDuals
 import Operad.ShuffleBridge
 import Operad.ShuffleBridgeBar
+import Operad.ShuffleAnyPois
+import Operad.ShuffleBinPois
 import Operad.LInfinity
 import Operad.CInfinity
 import Operad.TreeMerge
