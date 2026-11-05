@@ -173,6 +173,7 @@ import Operad.ShuffleBinAss
 import Operad.ShuffleKoszulDuals
 import Operad.ShuffleBridge
 import Operad.ShuffleBridgeBar
+import Operad.GrShuffle
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois

@@ -1997,3 +1997,15 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.PoisBin.quotDualEquiv
 #print axioms Operad.PoisBin.isKoszul_dualRel
 #print axioms Operad.PoisBin.finrank_quotient_dualRel
+#print axioms Operad.GrOperad.toSymOperad
+#print axioms Operad.GrOperad.evenSub
+#print axioms Operad.GrOperad.EvenOp.instSymOperad
+#print axioms Operad.GrOperad.evenEquiv
+#print axioms Operad.GrOperadHom.toEven
+#print axioms Operad.GrOperadHom.toEven_surjective
+#print axioms Operad.GrOperadIdeal.isEven_quot
+#print axioms Operad.FreeGrL.isEven
+#print axioms Operad.Koszul.isEven_pres
+#print axioms Operad.Koszul.presEvenEquiv
+#print axioms Operad.Koszul.presProjSh
+#print axioms Operad.Koszul.presProjSh_surjective
