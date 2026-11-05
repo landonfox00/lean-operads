@@ -30,9 +30,10 @@ dual relators are the relators rescaled by `x₂x₁ ↦ -x₂x₁` (`AssBin.dua
 presented operads are isomorphic in every arity (`AssBin.quotDualEquiv`). The self-duality of the
 symmetric binary presentation is `Operad.BinAss.dual`.
 
-The two shuffle notions are not compared: the bar trees `Operad.BarTree` and the trees
-`Operad.STree` are not translated into each other, so neither Koszulness is deduced from the
-other. The two proofs only run in parallel, on the same rules.
+The two proofs here run in parallel. `Operad.ShuffleBridge` connects them: the relators and the
+rules correspond (`Operad.AssBin.map_rel`), and the binary Gröbner basis alone gives both
+Koszulness predicates (`Operad.AssBin.isKoszul_and_bridge`). The bar complexes themselves are not
+compared.
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleDualKoszul

@@ -33,9 +33,10 @@ multiples of the Jacobi relator (`ComBin.dualRel_rel`), and the operad they pres
 `(n - 1)!` in arity `n ≥ 2` (`ComBin.finrank_quotient_jac`), that of `Lie`. It is not compared
 with the symmetric `Operad.Lie`.
 
-The two shuffle notions are not compared: the bar trees `Operad.BarTree` and the trees
-`Operad.STree` are not translated into each other, so neither Koszulness is deduced from the
-other. The two proofs only run in parallel, on the same relators.
+The two proofs here run in parallel. `Operad.ShuffleBridge` connects them: the relators and the
+rules correspond (`Operad.ComBin.map_rel`), and the binary Gröbner basis alone gives both
+Koszulness predicates (`Operad.ComBin.isKoszul_and_bridge`). The bar complexes themselves are not
+compared.
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleDualKoszul

@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 120,000 lines in 244 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,682
+About 122,000 lines in 245 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,704
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -187,18 +187,24 @@ declarations and confirms every one rests only on Lean's three standard axioms �
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
 
-**Three notions of Koszul.** The library has three Koszul predicates, and no theorem relates
-them: `Koszul.IsKoszul` (`GrKoszulDual.lean`: `ΩP^¡ → P` is a quasi-isomorphism, the textbook
-notion), `ShuffleBar.IsKoszul` (`ShuffleKoszul.lean`: the bar homology of a binary shuffle
-operad vanishes below the diagonal) and `Rules.IsKoszul` (`ShuffleAnyKoszul.lean`: the same for
-shuffle operads with generators of any arity). The two shuffle notions are the same construction
-on different trees, bar trees of binary monomials (`BarTree`) and bar trees of any arity
-(`STree (BE E)`), with differentials written separately; no translation between them is built,
-so neither is deduced from the other. They meet on two examples: the commutative operad is Koszul
-in both senses (`ComBin.isKoszul_and`), presented on both sides by the two left combs minus the
-right comb (`ComBin.rel_eq_span`, `ComGen.rules`), and so is the associative operad
-(`AssBin.isKoszul_and`), on the generators `x₁x₂` and `x₂x₁`, presented on both sides by the six
-rules `AssShGen.rules` (`AssBin.rel_eq_span`); the two proofs only run in parallel. The
+**Three notions of Koszul.** The library has three Koszul predicates: `Koszul.IsKoszul`
+(`GrKoszulDual.lean`: `ΩP^¡ → P` is a quasi-isomorphism, the textbook notion),
+`ShuffleBar.IsKoszul` (`ShuffleKoszul.lean`: the bar homology of a binary shuffle operad vanishes
+below the diagonal) and `Rules.IsKoszul` (`ShuffleAnyKoszul.lean`: the same for shuffle operads
+with generators of any arity). `ShuffleBridge.lean` translates the binary side into the any-arity
+side for generators of arity two only: binary shuffle monomials are any-arity shuffle monomials
+(`ShuffleBridge.monoEquiv`), edges are contexts and conversely, the ideal of binary relators is
+the ideal of the rules with the same leading monomials whose vectors span them, arity by arity
+(`ShuffleBridge.map_idealOf`, `ShuffleBridge.quotEquiv`), and the normal monomials correspond.
+So **a binary quadratic Gröbner basis gives `Rules.IsKoszul`**
+(`ShuffleBridge.isKoszul_of_isGroebner`), and both predicates at once
+(`ShuffleBridge.isKoszul_and_of_isGroebner`); conversely, resolvable rules give a binary Gröbner
+basis once its leading condition holds (`ShuffleBridge.isGroebner_of_resolvable`). The
+commutative and associative operads pass through it: `ComBin.isKoszul_and_bridge` and
+`AssBin.isKoszul_and_bridge` derive both predicates from the binary Gröbner bases alone, the
+relators and rules matching by `ComBin.map_rel` and `AssBin.map_rel`. `ShuffleBar.IsKoszul ↔
+Rules.IsKoszul` in general is open: the bar trees, their differentials, the relator subcomplex
+`ShuffleBar.J` and the ideal of the flagged rules `Rules.bar` are not compared. The
 comparison with `Koszul.IsKoszul` is open: Dotsenko and Khoroshkin deduce that a symmetric operad
 is Koszul exactly when its shuffle operad is, because the forgetful functor carries the symmetric
 bar complex to the shuffle one, and that comparison of bar complexes is not formalized. So the
