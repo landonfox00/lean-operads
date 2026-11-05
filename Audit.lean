@@ -1938,3 +1938,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.AssBin.map_rel
 #print axioms Operad.AssBin.map_idealOf_rel
 #print axioms Operad.AssBin.isKoszul_and_bridge
+#print axioms Operad.ShuffleBridge.cutKeys_toS
+#print axioms Operad.ShuffleBridge.toS_mergeK
+#print axioms Operad.ShuffleBridge.sgn_toS
+#print axioms Operad.ShuffleBridge.barMap_d
+#print axioms Operad.ShuffleBridge.C_le_map
+#print axioms Operad.ShuffleBridge.map_C_le

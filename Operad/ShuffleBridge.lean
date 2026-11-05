@@ -374,8 +374,8 @@ theorem exists_ctx_of_edge [BinaryGens F] {n : ℕ} (t : LTree.Mono (F 2) n) {p 
 /-- **The edge of a context**: a context of the shuffle monomials with binary generators, from
 those on `0, 1, 2`, is the substitution at an edge of a binary monomial, the edge whose window
 is the monomial it is applied to. -/
-theorem exists_edge_of_ctx [BinaryGens F] {n : ℕ}
-    {f : SMono F (Finset.range 3) → SMono F (Finset.range n)} (hf : IsSCtx f)
+theorem exists_edge_of_ctx [BinaryGens F] {B : Finset ℕ}
+    {f : SMono F (Finset.range 3) → SMono F B} (hf : IsSCtx f)
     (σ₀ : SMono F (Finset.range 3)) :
     ∃ p s, (ofS (f σ₀).1).IsEdge p s ∧ (ofS (f σ₀).1).windowAt p s = ofS σ₀.1 ∧
       ∀ g, ofS (f g).1 = (ofS (f σ₀).1).substAt p s (ofS g.1) := by

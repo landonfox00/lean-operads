@@ -1,0 +1,361 @@
+/-
+# The bridge between the binary and the any-arity bar constructions
+
+`Operad.ShuffleBridge` translates binary shuffle monomials into shuffle monomials with binary
+generators. A binary bar tree `ShuffleBar.BarTree (F 2)` is a binary tree on `F 2 × Bool`, and
+`BE F` again has binary generators, so the same translation `ShuffleBridge.toS` carries bar trees
+to the bar trees `STree (BE F)` of `Operad.ShuffleAnyBar`.
+
+* **Keys.** The binary key of a vertex, its least label and number of leaves, is the any-arity
+  key, its least leaf and number of vertices, with one added to the second entry
+  (`ShuffleBridge.kup`, `ShuffleBridge.key_toS`); so the cut edges correspond
+  (`ShuffleBridge.cutKeys_toS`), merging is clearing a flag (`ShuffleBridge.toS_mergeK`), and the
+  signs agree (`ShuffleBridge.sgn_toS`).
+* **The differentials agree** under the map of bar monomials to binary bar trees
+  (`ShuffleBridge.barMap`, `ShuffleBridge.barMap_d`), and the binary bar construction in arity
+  `n` and degree `s` is the image of the any-arity one on `0, …, n - 1`
+  (`ShuffleBridge.C_le_map`, `ShuffleBridge.map_C_le`).
+-/
+import Operad.ShuffleBridge
+
+universe v
+
+namespace Operad
+
+namespace ShuffleBridge
+
+open STree
+
+variable {F : ℕ → Type v}
+
+instance [BinaryGens F] : BinaryGens (BE F) :=
+  ⟨fun k hk => ⟨fun d => ((BinaryGens.isEmpty_of_ne k hk).false d.1).elim⟩⟩
+
+/-! ## Keys, cuts and merges -/
+
+/-- **The binary key of an any-arity key**: a vertex with `w` vertices below and including it has
+`w + 1` leaves. -/
+def kup (k : ℕ ×ₗ ℕ) : ℕ ×ₗ ℕ := toLex ((ofLex k).1, (ofLex k).2 + 1)
+
+lemma kup_injective : Function.Injective kup := fun a b h => by
+  have h' := congrArg ofLex h
+  simp only [kup, ofLex_toLex, Prod.mk.injEq, Nat.add_right_cancel_iff] at h'
+  exact ofLex.injective (Prod.ext h'.1 h'.2)
+
+lemma kup_lt_kup {a b : ℕ ×ₗ ℕ} : kup a < kup b ↔ a < b := by
+  rw [kup, kup, Prod.Lex.toLex_lt_toLex, ← toLex_ofLex a, ← toLex_ofLex b,
+    Prod.Lex.toLex_lt_toLex]
+  simp only [ofLex_toLex, Nat.add_lt_add_iff_right]
+
+lemma key_toS (t : LTree (F 2)) (ht : t.IsShuffle) : LTree.key t = kup (STree.key (toS t)) := by
+  have hw := weight_toS t
+  rw [LTree.key, STree.key, kup, ofLex_toLex, first_toS t ht, hw]
+
+lemma rootF_toS (x : ShuffleBar.BarTree (F 2)) :
+    rootF (toS (F := BE F) x) = ShuffleBar.rootFlag x := by
+  cases x <;> rfl
+
+lemma univ_fin_two : (Finset.univ : Finset (Fin 2)) = {0, 1} := by decide
+
+lemma cutKeys_toS : ∀ x : ShuffleBar.BarTree (F 2), x.IsShuffle →
+    ShuffleBar.cutKeys x = (cutKeys (toS (F := BE F) x)).image kup
+  | .leaf _, _ => rfl
+  | .node d l r, h => by
+    have hl := cutKeys_toS l h.2.1
+    have hr := cutKeys_toS r h.2.2
+    have hk := key_toS (F := BE F) (.node d l r) h
+    rw [ShuffleBar.cutKeys, toS_node, STree.cutKeys, univ_fin_two, Finset.biUnion_insert,
+      Finset.singleton_biUnion, Finset.image_union, Finset.image_union, hl, hr, ← toS_node]
+    congr 1
+    split_ifs <;> simp [hk]
+
+lemma toS_mergeK : ∀ x : ShuffleBar.BarTree (F 2), x.IsShuffle → ∀ k : ℕ ×ₗ ℕ,
+    toS (F := BE F) (ShuffleBar.mergeK x (kup k)) = setF k false (toS (F := BE F) x)
+  | .leaf _, _, _ => rfl
+  | .node d l r, h, k => by
+    have hkey := key_toS (F := BE F) (.node d l r) h
+    have hw := weight_toS (F := BE F) (.node d l r)
+    by_cases hk : STree.key (toS (F := BE F) (.node d l r)) = k
+    · have hkw : (ofLex k).2 + 1 = (LTree.node d l r).arity := by
+        rw [← hk, STree.key, ofLex_toLex]
+        exact hw
+      have hal : l.arity < (ofLex (kup k)).2 := by
+        simp only [kup, ofLex_toLex, LTree.arity] at hkw ⊢
+        have := LTree.arity_pos r
+        omega
+      have har : r.arity < (ofLex (kup k)).2 := by
+        simp only [kup, ofLex_toLex, LTree.arity] at hkw ⊢
+        have := LTree.arity_pos l
+        omega
+      have hwl : ∀ t : ShuffleBar.BarTree (F 2), t.IsShuffle → t.arity < (ofLex (kup k)).2 →
+          setF k false (toS (F := BE F) t) = toS t := fun t ht hlt => by
+        refine setF_of_notMem false fun hm => ?_
+        have h1 :=
+          (mem_vkeys (t := toS (F := BE F) t) ((isShuffle_toS_iff (F := BE F) t).2 ht) hm).2
+        have h2 := weight_toS (F := BE F) t
+        simp only [kup, ofLex_toLex] at hlt
+        omega
+      have hml := ShuffleBar.mergeK_of_not_mem l (ShuffleBar.not_mem_cutKeys_of_arity hal)
+      have hmr := ShuffleBar.mergeK_of_not_mem r (ShuffleBar.not_mem_cutKeys_of_arity har)
+      rw [toS_node, setF_node, ← toS_node, if_pos hk]
+      have hc : (fun i => setF k false ((![toS (F := BE F) l, toS r] : Fin 2 → _) i)) =
+          ![toS (F := BE F) l, toS r] := by
+        funext i
+        fin_cases i
+        · exact hwl l h.2.1 hal
+        · exact hwl r h.2.2 har
+      rw [hc]
+      by_cases hd : d.2 = true
+      · rw [ShuffleBar.mergeK, if_pos ⟨hd, by rw [hkey, hk]⟩]
+        rfl
+      · rw [ShuffleBar.mergeK, if_neg (fun h' => hd h'.1), hml, hmr, toS_node]
+        congr 1
+        exact Prod.ext rfl (by simpa using hd)
+    · rw [ShuffleBar.mergeK, if_neg (fun h' => hk (kup_injective (hkey ▸ h'.2))), toS_node,
+        toS_node, setF_node,
+        if_neg (show ¬ (STree.node d ![toS (F := BE F) l, toS (F := BE F) r]).key = k from hk),
+        toS_mergeK l h.2.1 k, toS_mergeK r h.2.2 k]
+      congr 1
+      funext i
+      fin_cases i <;> rfl
+
+lemma sgn_toS (K : Type*) [CommRing K] (x : ShuffleBar.BarTree (F 2)) (hx : x.IsShuffle)
+    (k : ℕ ×ₗ ℕ) :
+    ShuffleBar.sgn K x (kup k) = CutComplex.sgn K (cutKeys (toS (F := BE F) x)) k := by
+  rw [ShuffleBar.sgn, CutComplex.sgn, cutKeys_toS x hx, Finset.filter_image,
+    Finset.card_image_of_injective _ kup_injective]
+  simp only [kup_lt_kup]
+
+/-! ## The bar constructions -/
+
+variable (K : Type*) [CommRing K]
+
+/-- **Bar monomials as binary bar trees.** -/
+noncomputable def barMap (A : Finset ℕ) :
+    (SMono (BE F) A →₀ K) →ₗ[K] (ShuffleBar.BarTree (F 2) →₀ K) :=
+  Finsupp.lmapDomain K K fun X => ofS X.1
+
+lemma barMap_single {A : Finset ℕ} (X : SMono (BE F) A) (c : K) :
+    barMap K A (Finsupp.single X c) = Finsupp.single (ofS X.1) c := by
+  rw [barMap, Finsupp.lmapDomain_apply, Finsupp.mapDomain_single]
+
+variable [BinaryGens F]
+
+lemma barMap_injective (A : Finset ℕ) : Function.Injective (barMap (F := F) K A) :=
+  Finsupp.mapDomain_injective fun X Y h => Subtype.ext (by
+    rw [← toS_ofS X.1, ← toS_ofS Y.1]
+    exact congrArg toS h)
+
+lemma isShuffle_ofS {A : Finset ℕ} (X : SMono (BE F) A) : (ofS X.1).IsShuffle := by
+  rw [← isShuffle_toS_iff, toS_ofS]
+  exact X.isShuffle
+
+/-- **The differentials agree.** -/
+theorem barMap_d (A : Finset ℕ) (v : SMono (BE F) A →₀ K) :
+    barMap K A (Bar.d K v) = ShuffleBar.d K (barMap K A v) := by
+  induction v using Finsupp.induction_linear with
+  | zero => simp
+  | add v w hv hw => simp only [map_add, hv, hw]
+  | single X c =>
+    rw [Bar.d, CutComplex.d_single, barMap_single, ShuffleBar.d_single, map_smul,
+      CutComplex.dX, ShuffleBar.dTree, cutKeys_toS _ (isShuffle_ofS X), toS_ofS,
+      Finset.sum_image fun a _ b _ h => kup_injective h, map_sum]
+    congr 1
+    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [map_smul, barMap_single, sgn_toS K _ (isShuffle_ofS X), toS_ofS]
+    congr 2
+    apply toS_injective
+    rw [toS_mergeK _ (isShuffle_ofS X), toS_ofS, toS_ofS]
+    rfl
+
+/-! ## Flags -/
+
+omit [BinaryGens F] in
+lemma toS_unflag : ∀ m : LTree (F 2),
+    toS (F := BE F) (m.mapDec (·, false)) = allF (toS m)
+  | .leaf _ => rfl
+  | .node e l r => by
+    rw [LTree.mapDec_node, toS_node, toS_node, allF_node, toS_unflag l, toS_unflag r]
+    congr 1
+    funext i
+    fin_cases i <;> rfl
+
+omit [BinaryGens F] in
+lemma toS_liftW (b : Bool) : ∀ m : LTree (F 2),
+    toS (F := BE F) (ShuffleBar.liftW b m) = fl b (toS m)
+  | .leaf _ => rfl
+  | .node e l r => by
+    show STree.node (e, b) ![toS (F := BE F) (l.mapDec (·, false)), toS (r.mapDec (·, false))] = _
+    rw [toS_node, fl_node, toS_unflag, toS_unflag]
+    congr 1
+    funext i
+    fin_cases i <;> rfl
+
+lemma ofS_fl (b : Bool) (t : STree F) : ofS (F := BE F) (fl b t) = ShuffleBar.liftW b (ofS t) :=
+  toS_injective (by rw [toS_ofS, toS_liftW, toS_ofS])
+
+omit [BinaryGens F] in
+/-- **The flags of a window lifted from a monomial**: the upper vertex carries the flag of the
+lift, the lower one is not cut. -/
+lemma flags_of_windowRoot {E : Type*} : ∀ (u : ShuffleBar.BarTree E) (s : Bool), u.IsEdgeRoot s →
+    ∀ (b : Bool) (m : LTree E), u.windowRoot s = ShuffleBar.liftW b m →
+      ShuffleBar.rootFlag u = b ∧ ShuffleBar.rootFlag (u.subtreeAt [s]) = false
+  | .node (e, c) (.node (f, c') a a') d, false, _, b, m, h => by
+    cases m with
+    | leaf _ => simp [LTree.windowRoot, LTree.window, ShuffleBar.liftW] at h
+    | node e' l r =>
+      cases l with
+      | leaf _ => simp [LTree.windowRoot, LTree.window, ShuffleBar.liftW] at h
+      | node f' l' r' =>
+        simp only [LTree.windowRoot, LTree.window, ShuffleBar.liftW, LTree.mapDec_node,
+          Bool.false_eq_true, if_false, LTree.node.injEq, Prod.mk.injEq] at h
+        exact ⟨h.1.2, h.2.1.1.2⟩
+  | .node (e, c) d (.node (f, c') a a'), true, _, b, m, h => by
+    have hw : LTree.windowRoot (.node (e, c) d (.node (f, c') a a')) true =
+        LTree.window (e, c) (f, c') true a.minLabel a'.minLabel d.minLabel := by cases d <;> rfl
+    rw [hw] at h
+    cases m with
+    | leaf _ => simp [LTree.window, ShuffleBar.liftW] at h
+    | node e' l r =>
+      cases r with
+      | leaf _ => simp [LTree.window, ShuffleBar.liftW] at h
+      | node f' l' r' =>
+        simp only [LTree.window, ShuffleBar.liftW, LTree.mapDec_node, if_true,
+          LTree.node.injEq, Prod.mk.injEq] at h
+        exact ⟨h.1.2, h.2.2.1.2⟩
+  | .leaf _, false, he, _, _, _ => absurd he (by simp [LTree.IsEdgeRoot])
+  | .leaf _, true, he, _, _, _ => absurd he (by simp [LTree.IsEdgeRoot])
+  | .node _ (.leaf _) _, false, he, _, _, _ => absurd he (by simp [LTree.IsEdgeRoot])
+  | .node _ _ (.leaf _), true, he, _, _, _ =>
+    absurd he (by cases ‹LTree _› <;> simp [LTree.IsEdgeRoot])
+
+omit [BinaryGens F] in
+lemma rootF_subst_of_ne_leaf {E : ℕ → Type v} {t : STree (BE E)} (ht : ∀ a, t ≠ leaf a)
+    (xs : ℕ → STree (BE E)) : rootF (t.subst xs) = rootF t := by
+  cases t with
+  | leaf a => exact absurd rfl (ht a)
+  | node d c => rfl
+
+omit [BinaryGens F] in
+/-- **A context keeps the root flags equal.** -/
+lemma rootF_ctx {E : ℕ → Type v} {A B : Finset ℕ} {f : SMono (BE E) A → SMono (BE E) B}
+    (hf : IsSCtx f) {X Y : SMono (BE E) A} (hX : ∀ a, X.1 ≠ leaf a) (hY : ∀ a, Y.1 ≠ leaf a)
+    (h : rootF X.1 = rootF Y.1) : rootF (f X).1 = rootF (f Y).1 := by
+  obtain ⟨T, p, xs, -, -, hfe⟩ := hf
+  rw [hfe, hfe]
+  rcases p with _ | ⟨i, p⟩
+  · rw [replace_nil, replace_nil, rootF_subst_of_ne_leaf hX, rootF_subst_of_ne_leaf hY, h]
+  · rw [rootF_replace T (List.cons_ne_nil _ _), rootF_replace T (List.cons_ne_nil _ _)]
+
+/-! ## Projections onto a set of monomials -/
+
+section Proj
+
+variable {X : Type*} (P : X → Prop)
+
+open Classical in
+/-- **The projection onto the combinations of the monomials satisfying `P`.** -/
+noncomputable def proj : (X →₀ K) →ₗ[K] (X →₀ K) :=
+  Finsupp.linearCombination K fun x => if P x then Finsupp.single x 1 else 0
+
+omit [BinaryGens F] in
+lemma proj_of_supported {v : X →₀ K} (hv : v ∈ Finsupp.supported K K {x | P x}) :
+    proj K P v = v := by
+  rw [Finsupp.supported_eq_span_single] at hv
+  induction hv using Submodule.span_induction with
+  | mem _ h =>
+    obtain ⟨x, hx, rfl⟩ := h
+    rw [proj, Finsupp.linearCombination_single, if_pos (show P x from hx), one_smul]
+  | zero => rw [map_zero]
+  | add _ _ _ _ h₁ h₂ => rw [map_add, h₁, h₂]
+  | smul c _ _ h => rw [map_smul, h]
+
+omit [BinaryGens F] in
+lemma proj_of_supported_not {v : X →₀ K} (hv : v ∈ Finsupp.supported K K {x | ¬ P x}) :
+    proj K P v = 0 := by
+  rw [Finsupp.supported_eq_span_single] at hv
+  induction hv using Submodule.span_induction with
+  | mem _ h =>
+    obtain ⟨x, hx, rfl⟩ := h
+    rw [proj, Finsupp.linearCombination_single, if_neg (show ¬ P x from hx), smul_zero]
+  | zero => rw [map_zero]
+  | add _ _ _ _ h₁ h₂ => rw [map_add, h₁, h₂, add_zero]
+  | smul c _ _ h => rw [map_smul, h, smul_zero]
+
+end Proj
+
+omit [BinaryGens F] in
+lemma mapDomain_mem_supported {X Y : Type*} {f : X → Y} {S : Set Y} (v : X →₀ K)
+    (h : ∀ x ∈ v.support, f x ∈ S) : Finsupp.mapDomain f v ∈ Finsupp.supported K K S := by
+  classical
+  refine (Finsupp.mem_supported K _).2 fun y hy => ?_
+  obtain ⟨x, hx, rfl⟩ := Finset.mem_image.1 (Finsupp.mapDomain_support hy)
+  exact h x hx
+
+/-! ## Degrees -/
+
+section Degrees
+
+variable {K}
+
+lemma labels_ofS {A : Finset ℕ} (X : SMono (BE F) A) :
+    ((ofS X.1).labels : Multiset ℕ) = A.val := by
+  rw [← labels_toS, toS_ofS]
+  exact X.labels_eq
+
+lemma adm_ofS {n w s : ℕ} {X : SMono (BE F) (Finset.range n)}
+    (hX : X ∈ Bar.P (Finset.range n) w s) : ShuffleBar.Adm n s (ofS X.1) := by
+  have hl := labels_ofS X
+  refine ⟨⟨isShuffle_ofS X, ?_, ?_⟩, ?_, ?_⟩
+  · rw [← Multiset.coe_nodup, hl]
+    exact (Finset.range n).nodup
+  · rw [← rootF_toS, toS_ofS]
+    exact hX.1
+  · have hl' : ((ofS X.1).labels : Multiset ℕ) = (List.range n : Multiset ℕ) := by
+      rw [hl, Finset.range_val, Multiset.coe_range]
+    exact Multiset.coe_eq_coe.1 hl'
+  · rw [cutKeys_toS _ (isShuffle_ofS X), toS_ofS, Finset.card_image_of_injective _ kup_injective]
+    exact hX.2.2
+
+omit [BinaryGens F] in
+lemma exists_of_adm {n s : ℕ} {y : ShuffleBar.BarTree (F 2)} (hy : ShuffleBar.Adm n s y) :
+    ∃ X : SMono (BE F) (Finset.range n), X ∈ Bar.P (Finset.range n) (n - 1) s ∧ ofS X.1 = y := by
+  have hl : (toS (F := BE F) y).labels = (Finset.range n).val := by
+    rw [labels_toS, Finset.range_val, ← Multiset.coe_range]
+    exact Multiset.coe_eq_coe.2 hy.2.1
+  refine ⟨⟨toS y, (isShuffle_toS_iff _).2 hy.1.shuffle, hl⟩, ⟨?_, ?_, ?_⟩, ofS_toS (F := BE F) y⟩
+  · show rootF (toS (F := BE F) y) = false
+    rw [rootF_toS]
+    exact hy.1.root
+  · show (toS (F := BE F) y).weight = n - 1
+    have h1 := weight_toS (F := BE F) y
+    have h2 := hy.2.1.length_eq
+    rw [LTree.length_labels, List.length_range] at h2
+    omega
+  · show (cutKeys (toS (F := BE F) y)).card + 1 = s
+    have := hy.2.2
+    rwa [cutKeys_toS y hy.1.shuffle, Finset.card_image_of_injective _ kup_injective] at this
+
+variable (K : Type*) [Field K]
+
+omit [BinaryGens F] in
+lemma C_le_map (n s : ℕ) : ShuffleBar.C K n s ≤
+    (Bar.C K (Finset.range n) (n - 1) s).map (barMap (F := F) K (Finset.range n)) := by
+  rw [ShuffleBar.C, Finsupp.supported_eq_span_single, Submodule.span_le]
+  rintro _ ⟨y, hy, rfl⟩
+  obtain ⟨X, hX, rfl⟩ := exists_of_adm (F := F) hy
+  exact ⟨Finsupp.single X 1, Finsupp.single_mem_supported K _ hX, barMap_single K X 1⟩
+
+lemma map_C_le (n w s : ℕ) :
+    (Bar.C K (Finset.range n) w s).map (barMap (F := F) K (Finset.range n)) ≤
+      ShuffleBar.C K n s := by
+  rw [Bar.C, Finsupp.supported_eq_span_single, Submodule.map_span, Submodule.span_le]
+  rintro _ ⟨_, ⟨X, hX, rfl⟩, rfl⟩
+  rw [SetLike.mem_coe, barMap_single]
+  exact Finsupp.single_mem_supported K _ (adm_ofS hX)
+
+end Degrees
+
+end ShuffleBridge
+
+end Operad
