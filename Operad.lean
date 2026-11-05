@@ -237,3 +237,4 @@ import Operad.GrTwistedCompare
 import Operad.GrTwistedConverse
 import Operad.KoszulComplex
 import Operad.KoszulQuadratic
+import Operad.KoszulCorel

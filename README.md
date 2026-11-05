@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 117,000 lines in 239 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,607
+About 118,000 lines in 240 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,629
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -211,7 +211,9 @@ Likewise the relators of "quadratic data" are *arbitrary* sets, and the theorems
 `Koszul.IsKoszul` hold in that generality. Weight two is a separate hypothesis
 (`Koszul.IsQuadratic`), under which, over a field of characteristic zero, `P^¡ = C(sE, s²R)`
 (`Koszul.dualSub_eq_coquadSub`); there `s²R` is the preimage of `R` under `κ_T ⋆ κ_T` on the trees
-with two vertices, and that this map is a bijection `T^c(sE)^{(2)} → T(E)^{(2)}` is not proved.
+with two vertices, a map that is a bijection `T^c(sE)^{(2)} ≃ T(E)^{(2)}` when `E` has no elements
+without inputs (`Koszul.starEquiv`), and `s²R` is exactly the part of `P^¡` with two vertices
+(`Koszul.dual_inf_wtEqL`).
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -717,9 +719,20 @@ being an ideal (`Koszul.quadIdeal`); the desuspension map vanishes off the trees
 `C(sE, s²R)` is the largest subcooperad of `T^c(sE)` killed by the projection onto
 `T^c(sE)^{(2)}/s²R` (`Koszul.coquadSub`). **For quadratic relators `P^¡ = C(sE, s²R)`**
 (`Koszul.dualSub_eq_coquadSub`, through `Koszul.admissible_eq`), and the trees with two vertices
-of `P^¡` are corelations (`Koszul.dual_inf_wtEqL_le`). Not proved: that `κ_T ⋆ κ_T` is a
-bijection `T^c(sE)^{(2)} → T(E)^{(2)}`, which would make `s²R` the image of `R`, and the reverse
-inclusion `s²R ⊆ P^¡`.
+of `P^¡` are corelations (`Koszul.dual_inf_wtEqL_le`). `Operad/KoszulCorel.lean` proves the
+converse, **`s²R ⊆ P^¡`** (`Koszul.coRel_le_dual`): the trees with at most one vertex and the
+corelations form a subcooperad (`Koszul.coRelSub`), a corelation decomposing into a unit tensored
+with a relabelled corelation on either side, by the counit laws, plus parts with one vertex on
+each side; so **`P^¡ ∩ T^c(sE)^{(2)} = s²R`** (`Koszul.dual_inf_wtEqL`). When `E` has no elements
+without inputs, **`κ_T ⋆ κ_T` is a bijection `T^c(sE)^{(2)} ≃ T(E)^{(2)}`** (`Koszul.starEquiv`,
+`Koszul.bijOn_starKap`), so **`s²R` is the image of `R` under its inverse, and `s²R ≅ R`**
+(`Koszul.map_coRel`, `Koszul.coRelEquiv`). The proof compares with the cobar construction: `T(E)` is a retract of
+`ΩT^c(sE)` (`Koszul.kapHom_lamHom`), the retraction sends `ι ⋆ ι` to `κ_T ⋆ κ_T`
+(`Koszul.kapHom_ιι`), and the contraction identity `d h + h d = E - (1 - ε)` makes `ι ⋆ ι = -d ∘ ι`
+injective on the trees with two vertices and the image of a tree with two vertices of `T(E)` the
+boundary of a generator (`Koszul.eq_zero_of_starKap_eq_zero`, `Koszul.exists_starKap`). The
+hypothesis is needed: the convolution product sums over the decompositions whose inner operation
+has inputs, so `κ_T ⋆ κ_T` vanishes on a tree with two vertices whose top vertex has no inputs.
 
 **Graded composite products and root decompositions.** `Operad/GrComposite.lean` builds **the
 graded composite** `M ∘ N` of graded linear species: generators `m ⊗ (y_a)_a` with an order in
