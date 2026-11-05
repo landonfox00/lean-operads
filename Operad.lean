@@ -205,6 +205,7 @@ import Operad.ConvFilt
 import Operad.BarWeights
 import Operad.KoszulBar
 import Operad.CutCofree
+import Operad.CutCofreeConil
 import Operad.KoszulCriterion
 import Operad.PInfinity
 import Operad.KirillovKostant

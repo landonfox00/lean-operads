@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 120,000 lines in 243 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,670
+About 120,000 lines in 244 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,682
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -705,19 +705,28 @@ weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
 `Operad/CofreeVanish.lean`), so a morphism into the bar construction whose composite with `π` is
 killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
 `Operad/BarWeights.lean`). The same argument shows that a morphism of graded cooperads into the cut
-cooperad on a reduced graded linear species `V` is determined by its composite with the coefficient
-of the generators (`FreeGrL.app_eq_of_genCoef`), and `Operad/CutCofree.lean` proves **the universal
-property of the cut cooperad**: over a `ℚ`-algebra, for `V` reduced and a graded cooperad `C` of
-projective modules, as over a field, the morphisms of graded cooperads `C → T^c(V)` are the
-morphisms of graded linear species `C → V`, and for a coaugmented `C` those from the reduced part
-`C̄ → V` (`FreeGrL.cofreeHomEquiv`, `FreeGrL.cofreeHomEquivRed`, `FreeGrL.existsUnique_lift`). The
+cooperad on a graded linear species `V` without elements without inputs is determined by its
+composite with the coefficient of the generators, for any graded cooperad `C`
+(`FreeGrL.app_eq_of_genCoef₀`, `FreeGrL.app_eq_of_genCoef`), and `Operad/CutCofree.lean` proves
+**the universal property of the cut cooperad**: over a `ℚ`-algebra, for `V` reduced and a graded
+cooperad `C` such that in each arity `k ≥ 2` the module `C (Fin k)` or the module `V (Fin k)` is
+projective, as over a field, the morphisms of graded cooperads `C → T^c(V)` are the morphisms of
+graded linear species `C → V`, and for a coaugmented `C` those from the reduced part `C̄ → V`
+(`FreeGrL.cofreeHomEquiv'`, `FreeGrL.cofreeHomEquivRed'`, `FreeGrL.existsUnique_lift'`, and
+`FreeGrL.cofreeHomEquiv` for `C` projective in every arity). The
 morphism is built by transposition: a morphism of graded operads from the free graded operad on
 the homogeneous generators to the scalar-valued convolution operad of `C`, given by a lift of
 `φ : C → V` to the generators weighted by `1 / k!`, assigns each tree a functional on `C`, twisted
 by the sign `σ(C(n, 2))` of its `n` odd vertices to absorb the Koszul sign of the convolution
 product (`FreeGr.coefF_comp`), and these functionals are the coefficients of a morphism of graded
-cooperads (`FreeGr.ofCoef`, `FreeGrL.lift`). Species with elements of at most one input, over a
-conilpotent `C`, are not treated. For quadratic data `(E, r)` without generators with at most one
+cooperads (`FreeGr.ofCoef`, `FreeGrL.lift`). For `V` with elements of one input but none without
+inputs, `Operad/CutCofreeConil.lean` defines the graded coradical filtration and conilpotence
+(`GrCooperad.filt`, `GrCooperad.Conilpotent`) and proves that for a conilpotent coaugmented `C`,
+the reduced cooperations or the elements of `V` projective in each arity, the coaugmented morphisms
+`C → T^c(V)` are the morphisms `C̄ → V` (`FreeGrL.cofreeHomEquivConil`,
+`FreeGrL.existsUnique_liftConil`). Species with elements without inputs, and existence with
+neither side projective, are open: transposition sees a cooperation only through its scalar
+functionals. For quadratic data `(E, r)` without generators with at most one
 input, **the comparison morphism `i : P^¡ → B(P, I)` commutes with the differentials**
 (`Koszul.d_toBar`, `Operad/KoszulBar.lean`), `ΩP^¡ → P` is the counit after `Ωi`
 (`Koszul.counit_comp`), and with Theorem A this gives **the Koszul criterion: `P` is Koszul iff
