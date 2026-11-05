@@ -29,14 +29,25 @@ monomials in arity four instead of `24` (checked by a script, not in Lean), so t
 quadratic Gröbner basis for that key. Binary Koszulness comes from the any-arity Gröbner basis
 instead, by `Operad.ShuffleBridge.shuffleBar_isKoszul_of_isKoszul`.
 
-**Open: the Koszul dual relators.** The operad `Pois` is self-dual up to suspension, the dual of
-the product being a bracket and the dual of the bracket a product. On the binary side this reads
-`dualRel K (rel K) = (rel K)` with `x₁x₂` and `[x₁, x₂]` exchanged; a script confirms it in arity
-three (with or without signs on either generator, the relators being homogeneous), but it is not
-proved here, and neither is the Koszulness of the operad of the dual relators.
+**`Pois` is self-dual up to exchanging the product and the bracket** (`PoisBin.dualRel_rel`):
+the Koszul dual relators of `Pois` are its relators relabelled along the exchange `PoisBin.swap`
+of `x₁x₂` and `[x₁, x₂]` (`Operad.LTree.relabelVec`). The relators are spanned by explicit
+integer combinations of binary monomials (`PoisBin.relB`, `PoisBin.rel_eq_span_relB`, through
+`PoisBin.vecEquiv_relB`); their pairings with the exchanged ones, twisted by `chi3`, are integers
+(`PoisBin.pair_combo`), all zero (`PoisBin.pairZ_swap`, checked by `decide` on the thirty-six
+pairs of rules); and both spaces have dimension six (`PoisBin.finrank_rel`,
+`Operad.ShuffleBar.finrank_dualRel`). So the operad of the dual relators is that of `Pois` in
+every arity (`PoisBin.quotDualEquiv`, `PoisBin.finrank_quotient_dualRel`), and it is Koszul
+(`PoisBin.isKoszul_dualRel`), Koszulness being invariant under relabelling the generators
+(`Operad.ShuffleBar.isKoszul_relabel`). In the symmetric setting this is `Pois^! = Pois` up to
+suspension, the dual of the commutative product being a bracket and conversely; the comparison
+with the symmetric Koszul dual is not made.
 -/
 import Operad.ShuffleBridgeBar
 import Operad.ShuffleAnyPois
+import Operad.ShuffleRelabel
+import Operad.ShuffleKoszulDuals
+import Operad.ShuffleGradedDual
 
 namespace Operad
 
@@ -55,7 +66,7 @@ instance : BinaryGens PoisShGen := ⟨fun _ hk => ⟨fun e => by cases e <;> exa
 
 namespace PoisBin
 
-open LTree STree ShuffleBridge PoisShGen MvPolynomial
+open LTree STree ShuffleBridge PoisShGen MvPolynomial ShuffleBar
 
 variable (K : Type*) [Field K]
 
@@ -241,6 +252,223 @@ theorem finrank_quotient {n : ℕ} (hn : 0 < n) :
     Module.finrank K ((Mono (PoisShGen 2) n → K) ⧸ LTree.idealOf K (rel K) n) = n.factorial := by
   rw [(quotEquiv _ (src_rules K) _ map_rel n).finrank_eq,
     PoisShGen.finrank_eq_factorial ⟨0, Finset.mem_range.2 hn⟩, Finset.card_range]
+
+
+/-! ## The Koszul dual relators -/
+
+/-- **The exchange of the product and the bracket.** -/
+def swap : PoisShGen 2 ≃ PoisShGen 2 where
+  toFun e := match e with
+    | .mul => .br
+    | .br => .mul
+  invFun e := match e with
+    | .mul => .br
+    | .br => .mul
+  left_inv e := by cases e <;> rfl
+  right_inv e := by cases e <;> rfl
+
+/-- The left comb `e(f(0, 1), 2)`. -/
+def bL (e f : PoisShGen 2) : LTree (PoisShGen 2) := .node e (.node f (.leaf 0) (.leaf 1)) (.leaf 2)
+
+/-- The twisted left comb `e(f(0, 2), 1)`. -/
+def bT (e f : PoisShGen 2) : LTree (PoisShGen 2) := .node e (.node f (.leaf 0) (.leaf 2)) (.leaf 1)
+
+/-- The right comb `e(0, f(1, 2))`. -/
+def bR (e f : PoisShGen 2) : LTree (PoisShGen 2) := .node e (.leaf 0) (.node f (.leaf 1) (.leaf 2))
+
+/-- **The relators**, as integer combinations of binary monomials: each leading monomial minus
+its tail. -/
+def relList : Rule → List (ℤ × LTree (PoisShGen 2))
+  | .jac => [(1, bL .br .br), (-1, bT .br .br), (-1, bR .br .br)]
+  | .leib₁ => [(1, bR .br .mul), (-1, bL .mul .br), (-1, bT .mul .br)]
+  | .leib₂ => [(1, bT .br .mul), (-1, bL .mul .br), (1, bR .mul .br)]
+  | .leib₃ => [(1, bL .br .mul), (-1, bT .mul .br), (-1, bR .mul .br)]
+  | .as₁ => [(1, bR .mul .mul), (-1, bL .mul .mul)]
+  | .as₂ => [(1, bT .mul .mul), (-1, bL .mul .mul)]
+
+variable (K) in
+/-- **The vector of an integer combination** of monomials of arity three. -/
+noncomputable def combo (l : List (ℤ × LTree (PoisShGen 2))) : Mono (PoisShGen 2) 3 → K :=
+  (l.map fun x => (x.1 : K) • vecOf K 3 x.2).sum
+
+variable (K) in
+/-- **The binary relator of a rule.** -/
+noncomputable def relB (r : Rule) : Mono (PoisShGen 2) 3 → K := combo K (relList r)
+
+lemma three_eq : (three : Finset ℕ) = Finset.range 3 := rfl
+
+lemma bL_mem (e f : PoisShGen 2) : bL e f ∈ monomials 3 :=
+  (mem_monomials 3 _).2 ⟨by cases e <;> cases f <;> decide, by cases e <;> cases f <;> decide⟩
+
+lemma bT_mem (e f : PoisShGen 2) : bT e f ∈ monomials 3 :=
+  (mem_monomials 3 _).2 ⟨by cases e <;> cases f <;> decide, by cases e <;> cases f <;> decide⟩
+
+lemma bR_mem (e f : PoisShGen 2) : bR e f ∈ monomials 3 :=
+  (mem_monomials 3 _).2 ⟨by cases e <;> cases f <;> decide, by cases e <;> cases f <;> decide⟩
+
+lemma vecEquiv_bL (e f : PoisShGen 2) : vecEquiv PoisShGen K 3 (vecOf K 3 (bL e f)) =
+    Finsupp.single (SMono.cast three_eq (lcomb e f)) 1 := by
+  rw [vecEquiv_vecOf K (bL_mem e f)]
+  rfl
+
+lemma vecEquiv_bT (e f : PoisShGen 2) : vecEquiv PoisShGen K 3 (vecOf K 3 (bT e f)) =
+    Finsupp.single (SMono.cast three_eq (tcomb e f)) 1 := by
+  rw [vecEquiv_vecOf K (bT_mem e f)]
+  rfl
+
+lemma vecEquiv_bR (e f : PoisShGen 2) : vecEquiv PoisShGen K 3 (vecOf K 3 (bR e f)) =
+    Finsupp.single (SMono.cast three_eq (rcomb e f)) 1 := by
+  rw [vecEquiv_vecOf K (bR_mem e f)]
+  rfl
+
+/-- **The binary relator of a rule is its vector**, through the bridge. -/
+lemma ruleVec_eq' (r : Rule) : ruleVec (PoisShGen.rules K) (src_rules K) r =
+    Finsupp.lmapDomain K K (SMono.cast (E := PoisShGen) three_eq)
+      (Finsupp.single r.lead 1 - r.tail K) := rfl
+
+/-- **The binary relator of a rule is its vector**, through the bridge. -/
+lemma vecEquiv_relB (r : Rule) :
+    vecEquiv PoisShGen K 3 (relB K r) = ruleVec (PoisShGen.rules K) (src_rules K) r := by
+  rw [ruleVec_eq']
+  cases r <;>
+    simp only [relB, combo, relList, List.map_cons, List.map_nil, List.sum_cons, List.sum_nil,
+      Int.cast_one, Int.cast_neg, one_smul, neg_one_smul, map_add, map_neg, map_sub, add_zero,
+      vecEquiv_bL, vecEquiv_bT, vecEquiv_bR, Rule.lead, Rule.tail, Finsupp.lmapDomain_apply,
+      Finsupp.mapDomain_single] <;>
+    abel
+
+variable (K) in
+/-- **The relators are spanned by the binary relators of the rules.** -/
+theorem rel_eq_span_relB : rel K = Submodule.span K (Set.range (relB K)) := by
+  rw [rel_eq_span]
+  congr 1
+  ext v
+  simp only [Set.mem_range]
+  refine exists_congr fun r => ?_
+  rw [← vecEquiv_relB, LinearEquiv.symm_apply_apply]
+
+lemma combo_apply (l : List (ℤ × LTree (PoisShGen 2))) (τ : Mono (PoisShGen 2) 3) :
+    combo K l τ = (((l.map fun y => if τ.1 = y.2 then y.1 else 0).sum : ℤ) : K) := by
+  induction l with
+  | nil => simp [combo]
+  | cons y l ih =>
+    simp only [combo, List.map_cons, List.sum_cons, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+      vecOf, Int.cast_add] at ih ⊢
+    rw [ih]
+    split_ifs <;> simp
+
+/-- **The integer pairing** of two integer combinations, twisted by `chi3`. -/
+def pairZ (l l' : List (ℤ × LTree (PoisShGen 2))) : ℤ :=
+  (l.map fun x => x.1 * chi3 x.2 * (l'.map fun y => if x.2 = y.2 then y.1 else 0).sum).sum
+
+lemma pair_combo (l l' : List (ℤ × LTree (PoisShGen 2))) (hl : ∀ x ∈ l, x.2 ∈ monomials 3) :
+    ∑ σ, (chi3 σ.1 : K) * combo K l σ * combo K l' σ = (pairZ l l' : K) := by
+  induction l with
+  | nil => simp [combo, pairZ]
+  | cons x l ih =>
+    have hx := hl x (List.mem_cons_self ..)
+    have h1 : ∀ σ : Mono (PoisShGen 2) 3, (chi3 σ.1 : K) * combo K (x :: l) σ * combo K l' σ =
+        (x.1 : K) * (vecOf K 3 x.2 σ * ((chi3 σ.1 : K) * combo K l' σ)) +
+          (chi3 σ.1 : K) * combo K l σ * combo K l' σ := fun σ => by
+      simp only [combo, List.map_cons, List.sum_cons, Pi.add_apply, Pi.smul_apply, smul_eq_mul]
+      ring
+    rw [Finset.sum_congr rfl fun σ _ => h1 σ, Finset.sum_add_distrib, ← Finset.mul_sum,
+      sum_vecOf_mul' hx, ih fun y hy => hl y (List.mem_cons_of_mem _ hy), combo_apply, pairZ,
+      pairZ, List.map_cons, List.sum_cons]
+    push_cast
+    ring
+
+/-- The exchange of the product and the bracket in an integer combination. -/
+def swapList (l : List (ℤ × LTree (PoisShGen 2))) : List (ℤ × LTree (PoisShGen 2)) :=
+  l.map fun y => (y.1, y.2.mapDec swap)
+
+lemma relabelVec_combo (l : List (ℤ × LTree (PoisShGen 2))) :
+    relabelVec K swap 3 (combo K l) = combo K (swapList l) := by
+  induction l with
+  | nil => simp [combo, swapList]
+  | cons y l ih =>
+    simp only [combo, swapList, List.map_cons, List.sum_cons, map_add, map_smul,
+      relabelVec_vecOf] at ih ⊢
+    rw [ih]
+
+/-- **The relators pair to zero with the exchanged relators**, checked by the kernel on the
+thirty-six pairs of rules. -/
+lemma pairZ_swap : ∀ r r' : Rule, pairZ (relList r) (swapList (relList r')) = 0 := by
+  decide
+
+lemma relList_mem (r : Rule) : ∀ x ∈ relList r, x.2 ∈ monomials 3 := by
+  intro x hx
+  cases r <;> simp only [relList, List.mem_cons, List.not_mem_nil, or_false] at hx <;>
+    rcases hx with rfl | rfl | rfl <;>
+    first | exact bL_mem _ _ | exact bT_mem _ _ | exact bR_mem _ _
+
+variable (K) in
+/-- **The binary relators have dimension six.** -/
+lemma finrank_rel : Module.finrank K (rel K) = 6 := by
+  have h1 := Submodule.finrank_quotient_add_finrank (rel K)
+  have h2 := finrank_quotient K (n := 3) (by norm_num)
+  rw [ShuffleBar.idealOf_three] at h2
+  have h3 : Module.finrank K (Mono (PoisShGen 2) 3 → K) = 12 := by
+    rw [Module.finrank_fintype_fun_eq_card, Fintype.card_coe,
+      show (3 : ℕ) = 2 + 1 from rfl, card_monomials]
+    rfl
+  rw [h2, h3] at h1
+  simp only [Nat.factorial] at h1
+  omega
+
+variable (K) in
+/-- **The Poisson operad is self-dual up to exchanging the product and the bracket**: the Koszul
+dual relators of `Pois` are its relators with `x₁x₂` and `[x₁, x₂]` exchanged. -/
+theorem dualRel_rel :
+    dualRel K (rel K) = (rel K).map (relabelVec K swap 3).toLinearMap := by
+  symm
+  refine Submodule.eq_of_le_of_finrank_eq ?_ ?_
+  · rw [Submodule.map_le_iff_le_comap]
+    nth_rewrite 1 [rel_eq_span_relB]
+    rw [Submodule.span_le]
+    rintro _ ⟨r', rfl⟩
+    show relabelVec K swap 3 (relB K r') ∈ dualRel K (rel K)
+    rw [mem_dualRel, relB, relabelVec_combo]
+    intro y hy
+    rw [rel_eq_span_relB] at hy
+    induction hy using Submodule.span_induction with
+    | mem y hy =>
+      obtain ⟨r, rfl⟩ := hy
+      rw [relB, pair_combo _ _ (relList_mem r), pairZ_swap, Int.cast_zero]
+    | zero => simp
+    | add a b _ _ ha hb =>
+      simp only [Pi.add_apply, mul_add, add_mul, Finset.sum_add_distrib, ha, hb, add_zero]
+    | smul c a _ ha =>
+      simp only [Pi.smul_apply, smul_eq_mul]
+      rw [← mul_zero c, ← ha, Finset.mul_sum]
+      exact Finset.sum_congr rfl fun σ _ => by ring
+  · rw [finrank_dualRel, LinearEquiv.finrank_map_eq, finrank_rel,
+      Module.finrank_fintype_fun_eq_card, Fintype.card_coe,
+      show (3 : ℕ) = 2 + 1 from rfl, card_monomials]
+    rfl
+
+variable (K) in
+/-- **The operad of the Koszul dual relators of `Pois` is the operad of `Pois`**, in every arity,
+through the exchange of the product and the bracket. -/
+noncomputable def quotDualEquiv (n : ℕ) :
+    ((Mono (PoisShGen 2) n → K) ⧸ LTree.idealOf K (rel K) n) ≃ₗ[K]
+      ((Mono (PoisShGen 2) n → K) ⧸ LTree.idealOf K (dualRel K (rel K)) n) :=
+  (quotRelabelEquiv K swap (rel K) n).trans
+    (Submodule.quotEquivOfEq _ _ (by rw [dualRel_rel]))
+
+variable (K) in
+/-- **The Koszul dual relators of `Pois` present a Koszul operad**: Koszulness is invariant under
+relabelling the generators. -/
+theorem isKoszul_dualRel : ShuffleBar.IsKoszul K (dualRel K (rel K)) := by
+  rw [dualRel_rel]
+  exact ShuffleBar.isKoszul_relabel swap (isKoszul K)
+
+variable (K) in
+/-- **The Koszul dual of `Pois` has dimension `n!` in arity `n ≥ 1`.** -/
+theorem finrank_quotient_dualRel {n : ℕ} (hn : 0 < n) :
+    Module.finrank K ((Mono (PoisShGen 2) n → K) ⧸ LTree.idealOf K (dualRel K (rel K)) n) =
+      n.factorial := by
+  rw [← (quotDualEquiv K n).finrank_eq, finrank_quotient K hn]
 
 end PoisBin
 
