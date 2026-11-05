@@ -24,6 +24,18 @@ to the bar trees `STree (BE F)` of `Operad.ShuffleAnyBar`.
   projection onto the relevant monomials (`ShuffleBridge.proj`) keeps them in the span.
 * Hence **`Rules.IsKoszul` gives `ShuffleBar.IsKoszul`**
   (`ShuffleBridge.shuffleBar_isKoszul_of_isKoszul`).
+* **Relabelling.** Relabelling the leaves along a map strictly increasing on them moves the least
+  leaf of every key (`ShuffleBridge.rkey`, `ShuffleBridge.cutKeys_relabel`,
+  `ShuffleBridge.setF_relabel`), keeps the bar trees of each weight and degree
+  (`ShuffleBridge.mem_P_relabelM`) and commutes with the differential
+  (`ShuffleBridge.d_relabelM`). Relabelling along the positions is a context with an inverse
+  context, so it carries the any-arity bar construction on any set of leaves, with the ideal of
+  the flagged rules, onto the one on `0, …, n - 1`.
+* Hence **binary Koszulness gives `Rules.IsKoszul`** (`ShuffleBridge.isKoszul_of_shuffleBar`,
+  through `ShuffleBridge.exact_range`), and **the two predicates agree**:
+  `ShuffleBar.IsKoszul K R ↔ G.IsKoszul` under `hsrc` and `hR` alone
+  (`ShuffleBridge.isKoszul_iff`). For the commutative and associative operads:
+  `ComBin.isKoszul_iff`, `AssBin.isKoszul_iff`.
 -/
 import Operad.ShuffleBridge
 
@@ -614,4 +626,234 @@ end Ideals
 
 end ShuffleBridge
 
+namespace ShuffleBridge
+
+open STree
+
+/-! ## Relabelling the bar construction -/
+
+section RelabelBar
+
+variable {E : ℕ → Type v}
+
+/-- **A key relabelled**: its least leaf moved along `φ`. -/
+def rkey (φ : ℕ → ℕ) (k : ℕ ×ₗ ℕ) : ℕ ×ₗ ℕ := toLex (φ (ofLex k).1, (ofLex k).2)
+
+lemma relabel_node {k : ℕ} (d : E k) (c : Fin k → STree E) (φ : ℕ → ℕ) :
+    (node d c).relabel φ = node d fun i => (c i).relabel φ := rfl
+
+lemma weight_relabel (φ : ℕ → ℕ) (t : STree E) : (t.relabel φ).weight = t.weight := by
+  rw [relabel, weight_subst]
+  simp
+
+lemma key_relabel (φ : ℕ → ℕ) {t : STree E} (ht : t.IsShuffle) :
+    key (t.relabel φ) = rkey φ (key t) := by
+  rw [key, key, rkey, ofLex_toLex, first_relabel φ ht, weight_relabel]
+
+lemma rootF_relabel (φ : ℕ → ℕ) (t : STree (BE E)) : rootF (t.relabel φ) = rootF t := by
+  cases t <;> rfl
+
+lemma cutKeys_relabel (φ : ℕ → ℕ) : ∀ t : STree (BE E), t.IsShuffle →
+    cutKeys (t.relabel φ) = (cutKeys t).image (rkey φ)
+  | leaf _, _ => rfl
+  | node d c, h => by
+    have ih : ∀ i, cutKeys ((c i).relabel φ) = (cutKeys (c i)).image (rkey φ) :=
+      fun i => cutKeys_relabel φ (c i) (h.child i)
+    have hk := key_relabel φ h
+    rw [relabel_node] at hk ⊢
+    simp only [STree.cutKeys, Finset.image_union, ih, hk]
+    congr 1
+    · split_ifs <;> simp
+    · ext x
+      simp only [Finset.mem_biUnion, Finset.mem_image, Finset.mem_univ, true_and]
+      exact ⟨fun ⟨i, y, hy, e⟩ => ⟨y, ⟨i, hy⟩, e⟩, fun ⟨y, ⟨i, hy⟩, e⟩ => ⟨i, y, hy, e⟩⟩
+
+lemma rkey_eq_iff {φ : ℕ → ℕ} {S : Set ℕ} (hφ : Set.InjOn φ S) {k k' : ℕ ×ₗ ℕ}
+    (hk : (ofLex k).1 ∈ S) (hk' : (ofLex k').1 ∈ S) : rkey φ k = rkey φ k' ↔ k = k' := by
+  refine ⟨fun h => ?_, fun h => h ▸ rfl⟩
+  have h' := congrArg ofLex h
+  simp only [rkey, ofLex_toLex, Prod.mk.injEq] at h'
+  exact ofLex.injective (Prod.ext (hφ hk hk' h'.1) h'.2)
+
+lemma rkey_lt_iff {φ : ℕ → ℕ} {S : Set ℕ} (hφ : StrictMonoOn φ S) {k k' : ℕ ×ₗ ℕ}
+    (hk : (ofLex k).1 ∈ S) (hk' : (ofLex k').1 ∈ S) : rkey φ k < rkey φ k' ↔ k < k' := by
+  rw [rkey, rkey, Prod.Lex.toLex_lt_toLex, ← toLex_ofLex k, ← toLex_ofLex k',
+    Prod.Lex.toLex_lt_toLex, ofLex_toLex, ofLex_toLex, hφ.lt_iff_lt hk hk',
+    hφ.injOn.eq_iff hk hk']
+
+lemma setF_relabel {φ : ℕ → ℕ} {S : Set ℕ} (hφ : Set.InjOn φ S) {k : ℕ ×ₗ ℕ}
+    (hk : (ofLex k).1 ∈ S) (b : Bool) : ∀ t : STree (BE E), t.IsShuffle →
+    (∀ a ∈ t.labels, a ∈ S) →
+    setF (rkey φ k) b (t.relabel φ) = (setF k b t).relabel φ
+  | leaf _, _, _ => rfl
+  | node d c, h, hS => by
+    have hkey := key_relabel φ h
+    have hfirst : (ofLex (key (node d c))).1 ∈ S := hS _ (first_mem h)
+    rw [relabel_node] at hkey ⊢
+    rw [setF_node, setF_node, relabel_node, hkey]
+    simp only [rkey_eq_iff hφ hfirst hk]
+    congr 1
+    funext i
+    exact setF_relabel hφ hk b (c i) (h.child i)
+      fun a ha => hS a (Multiset.mem_of_le (labels_le_node d c i) ha)
+
+variable {A B : Finset ℕ} (φ : ℕ → ℕ) (hφ : StrictMonoOn φ A) (himg : A.image φ = B)
+
+lemma cuts_relabelM (X : SMono (BE E) A) :
+    cuts (relabelM φ hφ himg X) = (cuts X).image (rkey φ) :=
+  cutKeys_relabel φ X.1 X.isShuffle
+
+lemma mem_A_of_cut {X : SMono (BE E) A} {k : ℕ ×ₗ ℕ} (hk : k ∈ cuts X) : (ofLex k).1 ∈ A :=
+  X.mem_labels.1 (mem_vkeys X.isShuffle (mem_vkeys_of_mem_cutKeys hk)).1
+
+lemma setM_relabelM (X : SMono (BE E) A) {k : ℕ ×ₗ ℕ} (hk : (ofLex k).1 ∈ A) (b : Bool) :
+    setM (rkey φ k) b (relabelM φ hφ himg X) = relabelM φ hφ himg (setM k b X) :=
+  Subtype.ext (setF_relabel hφ.injOn (S := A) hk b X.1 X.isShuffle fun _ ha => X.mem_labels.1 ha)
+
+lemma mem_P_relabelM {w s : ℕ} {X : SMono (BE E) A} (hX : X ∈ Bar.P A w s) :
+    relabelM φ hφ himg X ∈ Bar.P B w s := by
+  refine ⟨?_, ?_, ?_⟩
+  · show rootF (X.1.relabel φ) = false
+    rw [rootF_relabel]
+    exact hX.1
+  · show (X.1.relabel φ).weight = w
+    rw [weight_relabel]
+    exact hX.2.1
+  · rw [cuts_relabelM, Finset.card_image_of_injOn fun k hk k' hk' h =>
+      (rkey_eq_iff hφ.injOn (mem_A_of_cut hk) (mem_A_of_cut hk')).1 h]
+    exact hX.2.2
+
+variable (K : Type*) [CommRing K]
+
+/-- **Relabelling commutes with the differential** of the bar construction. -/
+theorem d_relabelM (v : SMono (BE E) A →₀ K) :
+    Bar.d K (Finsupp.mapDomain (relabelM φ hφ himg) v) =
+      Finsupp.mapDomain (relabelM φ hφ himg) (Bar.d K v) := by
+  induction v using Finsupp.induction_linear with
+  | zero => simp
+  | add v w hv hw => rw [Finsupp.mapDomain_add, map_add, hv, hw, map_add, Finsupp.mapDomain_add]
+  | single X c =>
+    have hinj : Set.InjOn (rkey φ) (cuts X : Set (ℕ ×ₗ ℕ)) := fun k hk k' hk' h =>
+      (rkey_eq_iff hφ.injOn (mem_A_of_cut hk) (mem_A_of_cut hk')).1 h
+    rw [Finsupp.mapDomain_single, Bar.d, CutComplex.d_single, Bar.d, CutComplex.d_single,
+      Finsupp.mapDomain_smul, CutComplex.dX, CutComplex.dX, cuts_relabelM,
+      Finset.sum_image hinj, Finsupp.mapDomain_finsetSum]
+    congr 1
+    refine Finset.sum_congr rfl fun k hk => ?_
+    rw [Finsupp.mapDomain_smul, Finsupp.mapDomain_single,
+      setM_relabelM φ hφ himg X (mem_A_of_cut hk), CutComplex.sgn, CutComplex.sgn,
+      Finset.filter_image, Finset.card_image_of_injOn (hinj.mono (Finset.filter_subset _ _))]
+    congr 3
+    exact Finset.filter_congr fun k' hk' =>
+      rkey_lt_iff hφ (mem_A_of_cut hk') (mem_A_of_cut hk)
+
+end RelabelBar
+
+/-! ## Binary Koszulness gives Koszulness with generators of any arity -/
+
+section Converse
+
+variable {F : ℕ → Type v} [BinaryGens F] [Fintype (F 2)] [DecidableEq (F 2)]
+  {K : Type*} [Field K] {ρ : Type*} {O : AdmOrder F} (G : Rules K ρ O.toCtxOrder)
+  (hsrc : ∀ r, G.src r = Finset.range 3) {R : Submodule K (LTree.Mono (F 2) 3 → K)}
+  (hR : R.map (vecEquiv F K 3).toLinearMap = Submodule.span K (Set.range (ruleVec G hsrc)))
+
+omit [Fintype (F 2)] [DecidableEq (F 2)] in
+lemma weight_add_one {n : ℕ} (X : SMono (BE F) (Finset.range n)) : X.1.weight + 1 = n := by
+  have h1 := weight_toS (F := BE F) (ofS X.1)
+  rw [toS_ofS] at h1
+  have h2 : (ofS (F := BE F) X.1).arity = n := by
+    rw [← LTree.length_labels, ← Multiset.coe_card, labels_ofS, Finset.range_val,
+      Multiset.card_range]
+  omega
+
+include hR in
+/-- **Binary Koszulness gives exactness on the leaves `0, …, n - 1`.** -/
+theorem exact_range (hK : ShuffleBar.IsKoszul K R) {n w s : ℕ} (hsw : s < w)
+    {v : SMono (BE F) (Finset.range n) →₀ K} (hv : v ∈ Bar.C K (Finset.range n) w s)
+    (hdv : Bar.d K v ∈ (G.bar.rw (Finset.range n)).ideal) :
+    ∃ u ∈ Bar.C K (Finset.range n) w (s + 1),
+      v - Bar.d K u ∈ (G.bar.rw (Finset.range n)).ideal := by
+  by_cases hmain : w + 1 = n ∧ s ≠ 0
+  · obtain ⟨hwn, hs⟩ := hmain
+    obtain ⟨s', rfl⟩ := Nat.exists_eq_succ_of_ne_zero hs
+    have hx : barMap K _ v ∈ ShuffleBar.C K n (s' + 1) := map_C_le K n w (s' + 1) ⟨v, hv, rfl⟩
+    have hdx : ShuffleBar.d K (barMap K _ v) ∈ ShuffleBar.J K R := by
+      rw [← barMap_d]
+      exact barMap_mem_J G hsrc hR hdv
+        (Finsupp.supported_mono (fun X hX => hX.1) (d_mem_C hv))
+    obtain ⟨y, hy, hxy⟩ := hK n (s' + 1) (by omega) _ hx hdx
+    obtain ⟨u, hu, rfl⟩ := C_le_map (F := F) K n (s' + 1 + 1) hy
+    refine ⟨u, by rwa [show w = n - 1 by omega], mem_ideal_of_barMap G hsrc hR ?_⟩
+    rw [map_sub, barMap_d]
+    exact hxy
+  · have hv0 : v = 0 := by
+      ext X
+      by_contra hX
+      obtain ⟨-, hXw, hXs⟩ := (Finsupp.mem_supported K v).1 hv (Finsupp.mem_support_iff.2 hX)
+      have := weight_add_one X
+      exact hmain ⟨by omega, by omega⟩
+    refine ⟨0, Submodule.zero_mem _, ?_⟩
+    rw [hv0, map_zero, sub_zero]
+    exact Submodule.zero_mem _
+
+include hR in
+/-- **Binary Koszulness gives Koszulness with generators of any arity**: relabel an arbitrary
+set of leaves onto `0, …, n - 1` along the positions, a context with an inverse context which
+commutes with the differential. -/
+theorem isKoszul_of_shuffleBar (hK : ShuffleBar.IsKoszul K R) : G.IsKoszul := by
+  intro A w s hsw v hv hdv
+  have hβα : ∀ X : SMono (BE F) A, relabelM (eltIn A) (strictMonoOn_eltIn A) (image_eltIn A)
+      (relabelM (posIn A) (strictMonoOn_posIn A) (image_posIn A) X) = X := fun X =>
+    Subtype.ext (by
+      show (X.1.relabel (posIn A)).relabel (eltIn A) = X.1
+      rw [relabel_relabel]
+      exact relabel_id fun a ha => eltIn_posIn (X.mem_labels.1 ha))
+  set α := relabelM (E := BE F) (posIn A) (strictMonoOn_posIn A) (image_posIn A)
+  set β := relabelM (E := BE F) (eltIn A) (strictMonoOn_eltIn A) (image_eltIn A)
+  have hv' : Finsupp.mapDomain α v ∈ Bar.C K (Finset.range A.card) w s :=
+    mapDomain_mem_supported K v fun X hX =>
+      mem_P_relabelM _ _ _ ((Finsupp.mem_supported K v).1 hv hX)
+  have hdv' : Bar.d K (Finsupp.mapDomain α v) ∈ (G.bar.rw (Finset.range A.card)).ideal := by
+    rw [d_relabelM]
+    exact G.bar.mapDomain_mem_ideal (isSCtx_relabelM _ _ _) hdv
+  obtain ⟨u, hu, hvu⟩ := exact_range G hsrc hR hK hsw hv' hdv'
+  refine ⟨Finsupp.mapDomain β u, mapDomain_mem_supported K u fun X hX =>
+    mem_P_relabelM _ _ _ ((Finsupp.mem_supported K u).1 hu hX), ?_⟩
+  have hvβ : v = Finsupp.mapDomain β (Finsupp.mapDomain α v) := by
+    rw [← Finsupp.mapDomain_comp, show β ∘ α = id from funext hβα, Finsupp.mapDomain_id]
+  rw [hvβ, d_relabelM, ← Finsupp.mapDomain_sub]
+  exact G.bar.mapDomain_mem_ideal (isSCtx_relabelM _ _ _) hvu
+
+include hR in
+/-- **The two shuffle Koszulness predicates agree** for binary relators and rules on the leaves
+`0, 1, 2` whose vectors span them. -/
+theorem isKoszul_iff : ShuffleBar.IsKoszul K R ↔ G.IsKoszul :=
+  ⟨isKoszul_of_shuffleBar G hsrc hR, shuffleBar_isKoszul_of_isKoszul G hsrc hR⟩
+
+end Converse
+
+end ShuffleBridge
+
+namespace ComBin
+
+variable (K : Type*) [Field K]
+
+/-- **The two Koszulness predicates of the commutative operad agree.** -/
+theorem isKoszul_iff : ShuffleBar.IsKoszul K (rel K) ↔ (ComGen.rules K).IsKoszul :=
+  ShuffleBridge.isKoszul_iff _ (src_rules K) (map_rel K)
+
+end ComBin
+
+namespace AssBin
+
+variable (K : Type*) [Field K]
+
+/-- **The two Koszulness predicates of the associative operad agree.** -/
+theorem isKoszul_iff : ShuffleBar.IsKoszul K (rel K) ↔ (AssShGen.rules K).IsKoszul :=
+  ShuffleBridge.isKoszul_iff _ (src_rules K) (map_rel K)
+
+end AssBin
+
 end Operad
+

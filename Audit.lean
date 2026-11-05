@@ -1949,3 +1949,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBridge.barMap_mem_J
 #print axioms Operad.ShuffleBridge.mem_ideal_of_barMap
 #print axioms Operad.ShuffleBridge.shuffleBar_isKoszul_of_isKoszul
+#print axioms Operad.ShuffleBridge.cutKeys_relabel
+#print axioms Operad.ShuffleBridge.setF_relabel
+#print axioms Operad.ShuffleBridge.d_relabelM
+#print axioms Operad.ShuffleBridge.exact_range
+#print axioms Operad.ShuffleBridge.isKoszul_of_shuffleBar
+#print axioms Operad.ShuffleBridge.isKoszul_iff
+#print axioms Operad.ComBin.isKoszul_iff
+#print axioms Operad.AssBin.isKoszul_iff

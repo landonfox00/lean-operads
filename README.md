@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 122,000 lines in 245 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,704
+About 122,000 lines in 246 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,723
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -202,9 +202,15 @@ So **a binary quadratic Gröbner basis gives `Rules.IsKoszul`**
 basis once its leading condition holds (`ShuffleBridge.isGroebner_of_resolvable`). The
 commutative and associative operads pass through it: `ComBin.isKoszul_and_bridge` and
 `AssBin.isKoszul_and_bridge` derive both predicates from the binary Gröbner bases alone, the
-relators and rules matching by `ComBin.map_rel` and `AssBin.map_rel`. `ShuffleBar.IsKoszul ↔
-Rules.IsKoszul` in general is open: the bar trees, their differentials, the relator subcomplex
-`ShuffleBar.J` and the ideal of the flagged rules `Rules.bar` are not compared. The
+relators and rules matching by `ComBin.map_rel` and `AssBin.map_rel`. `ShuffleBridgeBar.lean`
+compares the bar constructions: binary bar trees are any-arity bar trees with the same cut edges,
+merges and signs, so the differentials agree (`ShuffleBridge.barMap_d`); the relator subcomplex
+`ShuffleBar.J` and the ideal of the flagged rules `Rules.bar` correspond
+(`ShuffleBridge.mem_ideal_of_barMap`, `ShuffleBridge.barMap_mem_J`); and relabelling the leaves
+commutes with the differential (`ShuffleBridge.d_relabelM`). So **the two shuffle predicates
+agree**: `ShuffleBar.IsKoszul K R ↔ G.IsKoszul` for binary relators `R` and rules `G` on
+`0, 1, 2` whose vectors span them (`ShuffleBridge.isKoszul_iff`; `ComBin.isKoszul_iff`,
+`AssBin.isKoszul_iff`). The
 comparison with `Koszul.IsKoszul` is open: Dotsenko and Khoroshkin deduce that a symmetric operad
 is Koszul exactly when its shuffle operad is, because the forgetful functor carries the symmetric
 bar complex to the shuffle one, and that comparison of bar complexes is not formalized. So the

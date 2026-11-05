@@ -40,13 +40,8 @@ only (`Operad.BinaryGens`), the binary decorations being `F 2`.
   (`ComBin.map_idealOf_rel`, `AssBin.map_idealOf_rel`), and the binary Gröbner bases alone give
   both Koszulness predicates (`ComBin.isKoszul_and_bridge`, `AssBin.isKoszul_and_bridge`).
 
-**Open: the bar complexes.** `ShuffleBar.IsKoszul K R ↔ G.IsKoszul` is not proved. It needs the
-bar trees and differentials compared (`BarTree (F 2)` is `LTree (BE F 2)` and `BE F` has binary
-generators, so `toS` applies, but the keys `(minLabel, arity)` and `(first, weight)` of the
-vertices differ by one and `mergeK` clears only flagged vertices), the binary relator
-subcomplex `ShuffleBar.J`, spanned at uncut edges of valid bar trees of every arity, compared
-with the ideal of the flagged rules `Rules.bar` on `0, …, n - 1`, and the any-arity bar complex
-on an arbitrary set of leaves relabelled onto `0, …, n - 1`.
+**The bar complexes** are compared in `Operad.ShuffleBridgeBar`, which proves
+`ShuffleBar.IsKoszul K R ↔ G.IsKoszul` under `hsrc` and `hR` (`ShuffleBridge.isKoszul_iff`).
 -/
 import Operad.ShuffleBinCom
 import Operad.ShuffleBinAss

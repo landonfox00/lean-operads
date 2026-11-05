@@ -35,8 +35,8 @@ with the symmetric `Operad.Lie`.
 
 The two proofs here run in parallel. `Operad.ShuffleBridge` connects them: the relators and the
 rules correspond (`Operad.ComBin.map_rel`), and the binary Gröbner basis alone gives both
-Koszulness predicates (`Operad.ComBin.isKoszul_and_bridge`). The bar complexes themselves are not
-compared.
+Koszulness predicates (`Operad.ComBin.isKoszul_and_bridge`); `Operad.ShuffleBridgeBar` proves the
+two predicates equivalent for these relators (`Operad.ComBin.isKoszul_iff`).
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleDualKoszul
