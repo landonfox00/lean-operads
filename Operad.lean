@@ -166,6 +166,8 @@ import Operad.ShuffleFreeSym
 import Operad.ShuffleSymPres
 import Operad.ShuffleFreeBin
 import Operad.ShuffleAnyInhom
+import Operad.ShuffleAnyCom
+import Operad.ShuffleBinCom
 import Operad.LInfinity
 import Operad.CInfinity
 import Operad.TreeMerge
@@ -199,6 +201,7 @@ import Operad.CofreeVanish
 import Operad.ConvFilt
 import Operad.BarWeights
 import Operad.KoszulBar
+import Operad.CutCofree
 import Operad.KoszulCriterion
 import Operad.PInfinity
 import Operad.KirillovKostant
@@ -233,3 +236,4 @@ import Operad.GrLeafKunneth
 import Operad.GrTwistedCompare
 import Operad.GrTwistedConverse
 import Operad.KoszulComplex
+import Operad.KoszulQuadratic

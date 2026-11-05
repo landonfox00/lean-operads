@@ -8,7 +8,10 @@ morphism `α = f_α ∘ ι`:
 * **the fundamental theorem of twisting morphisms** (`Cobar.fundamental`): `f_α` is a
   quasi-isomorphism iff `1 ∘ f_α : C ∘_ι ΩC → C ∘_α P` is one. The twisted composite product
   `C ∘_ι ΩC` is acyclic outside the unit (`GrComposite.cobar_contraction`), so this says that
-  `f_α` is a quasi-isomorphism iff `C ∘_α P` is acyclic.
+  `f_α` is a quasi-isomorphism iff `C ∘_α P` is acyclic. The differential of `C ∘_α P` is
+  built in the square-zero extension of an augmentation of `P`, so the theorem is stated for an
+  augmentable `P`; the differential is the same for every augmentation
+  (`GrComposite.twDiff_indep_aug`, `Cobar.fundamental_of_nonempty`).
 
 For quadratic data `(E, r)` without generators with at most one input and relators without unit
 component, the presented operad `P = T(E)/(r)` is augmented (`Koszul.presAug`), and:
@@ -263,8 +266,11 @@ include hred in
 /-- **The fundamental theorem of twisting morphisms**: for a reduced cooperad `C` and a dg operad
 `P` without operations with no inputs, over a field of characteristic zero, a morphism of dg
 operads `f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, `α = f ∘ ι`
-being its twisting morphism. As stated it also takes an augmentation `ε : GrAug R P`, from which
-the twisted differential is built; whether that hypothesis is needed is open. -/
+being its twisting morphism. It also takes an augmentation `ε : GrAug R P`, used to build the
+differential of `C ∘_α P` in the square-zero extension `P ⋉ (C ∘ P)`; that differential does not
+depend on `ε` (`GrComposite.twDiff_indep_aug`), so only the existence of an augmentation is
+assumed (`Cobar.fundamental_of_nonempty`). Removing it needs a construction of the twisted
+differential for operads without augmentation. -/
 theorem fundamental
     (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
     (φ : CobarHom R C P) :
@@ -283,6 +289,30 @@ theorem fundamental
   ⟨fun h _ _ _ => (compareData ε hred hP0 φ).qiso (fun A _ _ _ => (h A).1)
       (fun A _ _ _ => (h A).2),
     fun h A _ _ => (compareData ε hred hP0 φ).qiso_converse hred h A⟩
+
+include hred in
+/-- **The fundamental theorem of twisting morphisms, for any augmentable `P`**: `f` is a
+quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, the differential of `C ∘_α P` being
+that of any augmentation of `P`, the same for all of them (`GrComposite.twDiff_indep_aug`). -/
+theorem fundamental_of_nonempty (hε : Nonempty (GrAug R P))
+    (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
+    (φ : CobarHom R C P) :
+    (∀ (A : Type) [Fintype A] [DecidableEq A],
+      FreeGrL.SurjAt R (d R C).toSpEnd (DGOperad.toDer (R := R) (P := P)).toSpEnd
+          φ.1.toGrSpeciesHom A
+        ∧ FreeGrL.InjAt R (d R C).toSpEnd (DGOperad.toDer (R := R) (P := P)).toSpEnd
+          φ.1.toGrSpeciesHom A)
+      ↔ ∀ (ε : GrAug R P) (S : Type) [Fintype S] [DecidableEq S],
+        QIso.Surj ⊤ ⊤ (twDiff R C (FreeGrL.aug R (CobarGen R C)) (d R C) (ι R C) S)
+            (twDiff R C ε (DGOperad.toDer (R := R) (P := P)) (twOf φ.1) S)
+            ((map₂ idSpHom φ.1.toGrSpeciesHom).app S)
+          ∧ QIso.Inj ⊤ ⊤ (twDiff R C (FreeGrL.aug R (CobarGen R C)) (d R C) (ι R C) S)
+            (twDiff R C ε (DGOperad.toDer (R := R) (P := P)) (twOf φ.1) S)
+            ((map₂ idSpHom φ.1.toGrSpeciesHom).app S) := by
+  obtain ⟨ε₀⟩ := hε
+  refine (fundamental ε₀ hred hP0 φ).trans ⟨fun h ε S _ _ => ?_, fun h S _ _ => h ε₀ S⟩
+  rw [twDiff_indep_aug ε _ ε₀]
+  exact h S
 
 end Cobar
 

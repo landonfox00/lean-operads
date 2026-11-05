@@ -19,7 +19,10 @@ one with values in `P ⊆ 𝒬`; their convolution product `cor ⋆ β` has valu
 * **`d_α ∘ d_β` is the extension of `(cor ⋆ α) ⋆ β`** (`GrComposite.twD_twD`), so by the
   associator of an odd family, **`d_α ∘ d_α` is the extension of `cor ⋆ (α ⋆ α)`**
   (`GrComposite.twD_sq`), and **`d_α` squares to zero for a twisting morphism** into a graded
-  operad (`GrComposite.twD_twD_eq_zero`).
+  operad (`GrComposite.twD_twD_eq_zero`);
+* **`d_β` does not depend on the augmentation** (`GrComposite.twD_indep_aug`): the terms of
+  `cor ⋆ β` only compose corollas `(0, ω)` with operations `(y, 0)`, and `ε` enters
+  `(x, ω) ∘ᵢ (y, ν)` only through `ε(x) ν`. The augmentation is used to build `𝒬`, not `d_β`.
 -/
 import Operad.FreeGrGraft
 import Operad.Twisting
@@ -387,6 +390,54 @@ theorem twD_twD_eq_zero {α : GrOperad.Inv R (ConvOp R C P)} (hα : GrOperad.Inv
   rw [twD_sq ε hα, h, twD_zero]
 
 end TwD
+
+/-! ## Independence of the augmentation -/
+
+section Indep
+
+/-- The inner part of a lifted family, at a parity. -/
+lemma fst_parC_liftFam (β : GrOperad.Inv R (ConvOp R C P)) (q : Bool) {A : Type} [Fintype A]
+    [DecidableEq A] (y : C A) :
+    SqExt.fst (toLin (parC q ((liftFam ε β).1 A)) y) = toLin (parC q (β.1 A)) y := by
+  rw [parC_apply, parC_apply, map_sum]
+  refine Finset.sum_congr rfl fun c _ => ?_
+  rw [SqExt.par_def, SqExt.fst_parE]
+  rfl
+
+/-- **The product `cor ⋆ β` does not depend on the augmentation**: its terms only compose a
+corolla `(0, ω)` with operations `(y, 0)`, and the augmentation enters `(x, ω) ∘ᵢ (y, ν)` only
+through `ε(x) ν`. -/
+lemma snd_star_indep_aug (ε' : GrAug R P) (β : GrOperad.Inv R (ConvOp R C P)) {X : Type}
+    [Fintype X] [DecidableEq X] (c : C X) :
+    SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε) (liftFam ε β)).1 X) c)
+      = SqExt.snd (toLin ((GrOperad.Inv.star R _ (corFam ε') (liftFam ε' β)).1 X) c) := by
+  rw [toLin_star, toLin_star, map_sum, map_sum]
+  refine Finset.sum_congr rfl fun S _ => ?_
+  rw [toLin_term, toLin_term, SqExt.map_def, SqExt.map_def, SqExt.snd_mapE, SqExt.snd_mapE]
+  refine congrArg (map (splitEquiv S)) ?_
+  generalize GrCooperad.decomp (R := R) (C := C) none
+    (SymSpecies.map (R := R) (splitEquiv S).symm c) = t
+  induction t using TensorProduct.induction_on with
+  | zero => simp only [map_zero]
+  | tmul x y =>
+    simp only [kap, LinearMap.coe_sum, Finset.sum_apply, map_sum, TensorProduct.map_tmul,
+      mu_tmul, LinearMap.comp_apply]
+    refine Finset.sum_congr rfl fun q _ => ?_
+    rw [SqExt.comp_def, SqExt.comp_def, SqExt.snd_compE, SqExt.snd_compE, fst_corFam,
+      fst_corFam, lact_zero, lact_zero, fst_parC_liftFam, fst_parC_liftFam]
+    rfl
+  | add a b ha hb => simp only [map_add, ha, hb]
+
+/-- **The twisted differential does not depend on the augmentation**: `d_β` is the same for any
+two augmentations of `P`, for every invariant family `β`. -/
+theorem twD_indep_aug (ε' : GrAug R P) (β : GrOperad.Inv R (ConvOp R C P)) (S : Type)
+    [Fintype S] [DecidableEq S] : twD ε β S = twD ε' β S :=
+  LinearMap.ext fun w => eq_of_corolla (fun S _ _ => twD ε β S) (fun S _ _ => twD ε' β S)
+    (fun S S' _ _ _ _ σ w => twF_map ε _ σ w) (fun S S' _ _ _ _ σ w => twF_map ε' _ σ w)
+    (fun S Y _ _ _ _ i z w => twF_act ε _ i z w) (fun S Y _ _ _ _ i z w => twF_act ε' _ i z w)
+    (fun A _ _ c => by rw [twD_corolla, twD_corolla]; exact snd_star_indep_aug ε ε' β c) w
+
+end Indep
 
 end GrComposite
 

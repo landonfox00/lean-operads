@@ -185,6 +185,8 @@ lemma wpart_tail_eq {r : ρ} {f : SMono E (G.src r) → SMono E A} (hf : IsSCtx 
   have e := IsSCtx.weight_add hf m (G.lead r)
   constructor <;> intro h' <;> omega
 
+section TailWeight
+
 variable (hwt : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight ≤ (G.lead r).1.weight)
 include hwt
 
@@ -209,13 +211,21 @@ lemma red_weight_le {X : SMono E A} {u : SMono E A →₀ K} (hu : u ∈ (G.rw A
   show (f m).1.weight ≤ (f (G.lead r)).1.weight
   omega
 
+end TailWeight
+
 variable (hO : ∀ {A : Finset ℕ} {x y : SMono E A}, O.lt x y → x.1.weight ≤ y.1.weight)
 include hO
+
+/-- **Over an order compatible with the weight, a tail weighs no more than its leading
+monomial**: every tail monomial is below the leading one. -/
+lemma Rules.tail_weight_le : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight ≤ (G.lead r).1.weight :=
+  fun r m hm => hO (G.tail_lt r m hm)
 
 /-- **The leading part of a resolvable presentation is resolvable**, over an order compatible
 with the weight: the top-weight part of a resolution is a resolution. -/
 theorem Rules.top_resolvable (hres : (G.rw A).Resolvable) : (G.top.rw A).Resolvable := by
   classical
+  have hwt := G.tail_weight_le hO
   refine Rules.resolvable_iff.2 fun r₁ r₂ B => ?_
   let B' : G.Amb A r₁ r₂ := ⟨B.f₁, B.f₂, B.ctx₁, B.ctx₂, B.eq⟩
   have hB' := Rules.resolvable_iff.1 hres r₁ r₂ B'
@@ -250,9 +260,10 @@ theorem Rules.wpart_nf (hres : (G.rw A).Resolvable) {n : ℕ} {v : SMono E A →
     (hv : v ∈ Finsupp.supported K K {m : SMono E A | m.1.weight = n}) :
     wpart n ((G.rw A).nf v) = (G.top.rw A).nf v := by
   classical
+  have hwt := G.tail_weight_le hO
   set S := G.rw A
   set S' := G.top.rw A
-  have hS' : S'.Resolvable := G.top_resolvable hwt hO hres
+  have hS' : S'.Resolvable := G.top_resolvable hO hres
   have hlt : ∀ u ∈ Finsupp.supported K K {m : SMono E A | m.1.weight < n},
       wpart n (S.nf u) = 0 := fun u hu => by
     have hcl : ∀ X ∈ {m : SMono E A | m.1.weight < n}, ∀ w ∈ S.red X,
@@ -275,7 +286,7 @@ theorem Rules.wpart_nf (hres : (G.rw A).Resolvable) {n : ℕ} {v : SMono E A →
   · obtain ⟨u, hu⟩ := hred
     obtain ⟨r, f, hf, hfm, rfl⟩ := hu
     have hu' : Finsupp.mapDomain f (G.top.tail r) ∈ S'.red m := ⟨r, f, hf, hfm, rfl⟩
-    rw [← (G.top_resolvable hwt hO hres).nf_red m _ hu', ← hres.nf_red m _ ⟨r, f, hf, hfm, rfl⟩]
+    rw [← (G.top_resolvable hO hres).nf_red m _ hu', ← hres.nf_red m _ ⟨r, f, hf, hfm, rfl⟩]
     have hsplit : G.tail r =
         (G.tail r).filter (fun m' => m'.1.weight = (G.lead r).1.weight) +
         (G.tail r).filter fun m' => ¬ m'.1.weight = (G.lead r).1.weight :=
@@ -317,7 +328,8 @@ theorem Rules.pbw (hres : (G.rw A).Resolvable) {n : ℕ} {v : SMono E A →₀ K
     (∃ u ∈ Finsupp.supported K K {m : SMono E A | m.1.weight < n}, v - u ∈ (G.rw A).ideal) ↔
       v ∈ (G.top.rw A).ideal := by
   classical
-  have hS' := G.top_resolvable hwt hO hres
+  have hwt := G.tail_weight_le hO
+  have hS' := G.top_resolvable hO hres
   have hle : ∀ X ∈ {m : SMono E A | m.1.weight ≤ n}, ∀ w ∈ (G.rw A).red X,
       w ∈ Finsupp.supported K K {m : SMono E A | m.1.weight ≤ n} := fun X hX w hw => by
     have hsub : {Y : SMono E A | Y.1.weight ≤ X.1.weight} ⊆ {m | m.1.weight ≤ n} :=
@@ -330,7 +342,7 @@ theorem Rules.pbw (hres : (G.rw A).Resolvable) {n : ℕ} {v : SMono E A →₀ K
     exact Finsupp.supported_mono hsub (red_weight_le G hwt hw)
   constructor
   · rintro ⟨u, hu, hvu⟩
-    rw [← hS'.nf_eq_zero_iff, ← G.wpart_nf hwt hO hres hv, (hres.nf_eq_nf_iff).2 hvu]
+    rw [← hS'.nf_eq_zero_iff, ← G.wpart_nf hO hres hv, (hres.nf_eq_nf_iff).2 hvu]
     have h := (G.rw A).nf_mem_of_closed hlt hu
     show ((G.rw A).nf u).filter _ = 0
     exact filter_eq_zero_of fun Y hY =>
@@ -341,7 +353,7 @@ theorem Rules.pbw (hres : (G.rw A).Resolvable) {n : ℕ} {v : SMono E A →₀ K
         fun Y hY => show Y.1.weight ≤ n from (show Y.1.weight = n from hY).le
       have h1 := (G.rw A).nf_mem_of_closed hle (Finsupp.supported_mono hsub hv)
       have h2 : wpart n ((G.rw A).nf v) = 0 := by
-        rw [G.wpart_nf hwt hO hres hv]
+        rw [G.wpart_nf hO hres hv]
         exact hS'.ideal_le_ker hv'
       intro Y hY
       have hY' : Y.1.weight ≤ n := (Finsupp.mem_supported K _).1 h1 hY
@@ -422,10 +434,9 @@ theorem Rules.toGr_surjective : Function.Surjective (G.toGr A n) := by
   · rw [LinearMap.map_sub]
     rfl
 
-variable (hwt : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight ≤ (G.lead r).1.weight)
-  (hO : ∀ {A : Finset ℕ} {x y : SMono E A}, O.lt x y → x.1.weight ≤ y.1.weight)
+variable (hO : ∀ {A : Finset ℕ} {x y : SMono E A}, O.lt x y → x.1.weight ≤ y.1.weight)
   (hres : (G.rw A).Resolvable)
-include hwt hO hres
+include hO hres
 
 theorem Rules.ker_toGr : LinearMap.ker (G.toGr A n) =
     (G.top.rw A).ideal.comap (Finsupp.supported K K {m : SMono E A | m.1.weight = n}).subtype := by
@@ -433,7 +444,7 @@ theorem Rules.ker_toGr : LinearMap.ker (G.toGr A n) =
   rw [LinearMap.mem_ker, Submodule.mem_comap, Submodule.coe_subtype]
   show Submodule.Quotient.mk _ = 0 ↔ v ∈ _
   rw [Submodule.Quotient.mk_eq_zero, Submodule.mem_comap, Submodule.coe_subtype,
-    ← G.pbw hwt hO hres hv]
+    ← G.pbw hO hres hv]
   constructor
   · rintro ⟨u, hu, hu'⟩
     refine ⟨u, hu, ?_⟩
@@ -449,21 +460,21 @@ theorem Rules.ker_toGr : LinearMap.ker (G.toGr A n) =
 presented by their leading part**, weight by weight: the PBW theorem for inhomogeneous
 presentations with a PBW basis. -/
 noncomputable def Rules.grEquiv : G.topW A n ≃ₗ[K] G.gr A n :=
-  (Submodule.quotEquivOfEq _ _ (G.ker_toGr A n hwt hO hres).symm).trans
+  (Submodule.quotEquivOfEq _ _ (G.ker_toGr A n hO hres).symm).trans
     ((G.toGr A n).quotKerEquivOfSurjective (G.toGr_surjective A n))
 
 end Graded
 
 /-- **The quadratic part of a quadratic-linear presentation with a PBW basis presents a Koszul
-operad**: for rules with leading monomials of weight two and tails of weight at most two, over an
-order compatible with the weight, if the rules are resolvable their quadratic part is Koszul. -/
+operad**: for rules with leading monomials of weight two, over an order compatible with the
+weight (so that tails have weight at most two), if the rules are resolvable their quadratic part
+is Koszul. -/
 theorem Rules.top_isKoszul (hquad : ∀ r, (G.lead r).1.weight = 2)
-    (hwt : ∀ r, ∀ m ∈ (G.tail r).support, m.1.weight ≤ (G.lead r).1.weight)
     (hO : ∀ {A : Finset ℕ} {x y : SMono E A}, O.lt x y → x.1.weight ≤ y.1.weight)
     (hres : ∀ C, (G.rw C).Resolvable) : G.top.IsKoszul := by
   classical
   refine G.top.isKoszul_of_resolvable hquad (fun r m hm => ?_)
-    fun C => G.top_resolvable hwt hO (hres C)
+    fun C => G.top_resolvable hO (hres C)
   simp only [Rules.top, Finsupp.support_filter] at hm
   have h2 := (Finset.mem_filter (s := (G.tail r).support)
     (p := fun x => x.1.weight = (G.lead r).1.weight) (a := m)).1 hm

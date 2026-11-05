@@ -133,6 +133,10 @@ lemma lact_of_u (i : A) {x : C A} (hx : ε.u A x = 0) :
     lact R V ε i x = (0 : GrComposite R V C B →ₗ[R] GrComposite R V C (Without A i ⊕ B)) := by
   simp only [lact, hx, zero_smul, Finset.sum_const_zero]
 
+/-- The left action of the zero operation vanishes. -/
+lemma lact_zero (i : A) (ν : GrComposite R V C B) : lact R V ε i (0 : C A) ν = 0 := by
+  rw [lact_of_u ε i (map_zero (ε.u A)), LinearMap.zero_apply]
+
 lemma u_of_ne {i k : A} (hik : i ≠ k) (x : C A) : ε.u A x = 0 :=
   ε.u_eq_zero ⟨fun e => hik (by rw [← e.apply_symm_apply i, ← e.apply_symm_apply k])⟩ x
 
