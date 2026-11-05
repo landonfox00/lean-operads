@@ -28,8 +28,10 @@ In arity three there are three shuffle monomials: the left comb `μ(μ(0, 1), 2)
   the operad of the Koszul dual relators (`ComBin.isKoszul_dualRel`).
 
 `ComBin.isKoszul_dualRel` concerns the shuffle operad presented by `Operad.ShuffleBar.dualRel`
-of the relators. That this is the shuffle operad of the Lie operad is the classical computation of
-the Koszul dual of `Com`; it is not proved here.
+of the relators. `Operad.ShuffleKoszulDuals` identifies it: the Koszul dual relators are the
+multiples of the Jacobi relator (`ComBin.dualRel_rel`), and the operad they present has dimension
+`(n - 1)!` in arity `n ≥ 2` (`ComBin.finrank_quotient_jac`), that of `Lie`. It is not compared
+with the symmetric `Operad.Lie`.
 
 The two shuffle notions are not compared: the bar trees `Operad.BarTree` and the trees
 `Operad.STree` are not translated into each other, so neither Koszulness is deduced from the

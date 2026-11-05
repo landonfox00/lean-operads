@@ -25,8 +25,10 @@ here it is `AssShGen 2`, the product `x₁x₂` and the opposite product `x₂x�
   (`AssBin.isKoszul`), and so is the operad of the Koszul dual relators (`AssBin.isKoszul_dualRel`).
 
 `AssBin.isKoszul_dualRel` concerns the shuffle operad presented by `Operad.ShuffleBar.dualRel` of
-the relators. That this is again the shuffle operad of `Ass` is the classical self-duality of
-`Ass`, proved for the symmetric binary presentation (`Operad.BinAss.dual`) and not here.
+the relators. `Operad.ShuffleKoszulDuals` proves that this is again the operad of `Ass`: the Koszul
+dual relators are the relators rescaled by `x₂x₁ ↦ -x₂x₁` (`AssBin.dualRel_rel`), so the two
+presented operads are isomorphic in every arity (`AssBin.quotDualEquiv`). The self-duality of the
+symmetric binary presentation is `Operad.BinAss.dual`.
 
 The two shuffle notions are not compared: the bar trees `Operad.BarTree` and the trees
 `Operad.STree` are not translated into each other, so neither Koszulness is deduced from the
