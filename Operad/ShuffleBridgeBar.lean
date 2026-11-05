@@ -15,6 +15,15 @@ to the bar trees `STree (BE F)` of `Operad.ShuffleAnyBar`.
   (`ShuffleBridge.barMap`, `ShuffleBridge.barMap_d`), and the binary bar construction in arity
   `n` and degree `s` is the image of the any-arity one on `0, …, n - 1`
   (`ShuffleBridge.C_le_map`, `ShuffleBridge.map_C_le`).
+* **The relator subcomplex and the ideal of the flagged rules.** Under the hypotheses `hsrc` and
+  `hR` of `Operad.ShuffleBridge`, a bar monomial combination whose image lies in `ShuffleBar.J`
+  lies in the ideal of `Rules.bar` (`ShuffleBridge.mem_ideal_of_barMap`), and the ideal of
+  `Rules.bar`, on combinations whose roots are not cut, maps into `ShuffleBar.J`
+  (`ShuffleBridge.barMap_mem_J`). The generators of either side are homogeneous, in the leaves
+  for `ShuffleBar.J` and in the root flag for `Rules.bar` (`ShuffleBridge.rootF_ctx`), so a
+  projection onto the relevant monomials (`ShuffleBridge.proj`) keeps them in the span.
+* Hence **`Rules.IsKoszul` gives `ShuffleBar.IsKoszul`**
+  (`ShuffleBridge.shuffleBar_isKoszul_of_isKoszul`).
 -/
 import Operad.ShuffleBridge
 
@@ -355,6 +364,253 @@ lemma map_C_le (n w s : ℕ) :
   exact Finsupp.single_mem_supported K _ (adm_ofS hX)
 
 end Degrees
+
+end ShuffleBridge
+
+namespace ShuffleBridge
+
+open STree
+
+section Ideals
+
+variable {F : ℕ → Type v} [BinaryGens F] [Fintype (F 2)] [DecidableEq (F 2)]
+
+/-- **The context of an edge**, on any set of leaves: substituting at an edge of a binary shuffle
+tree with distinct leaves `B` is a context from the monomials on `0, 1, 2`. -/
+theorem exists_ctx_of_edge' {B : Finset ℕ} (x : LTree (F 2)) (hxs : x.IsShuffle)
+    (hxl : (x.labels : Multiset ℕ) = B.val) {p : List Bool} {s : Bool} (he : x.IsEdge p s) :
+    ∃ f : SMono F (Finset.range 3) → SMono F B, IsSCtx f ∧
+      ∀ g, (f g).1 = toS (x.substAt p s (ofS g.1)) := by
+  have hnd : x.labels.Nodup := by
+    rw [← Multiset.coe_nodup, hxl]
+    exact B.nodup
+  have hw := LTree.winSpec_of_edge he hxs hnd
+  have hmem : ∀ g : SMono F (Finset.range 3), (toS (x.substAt p s (ofS g.1))).IsShuffle ∧
+      (toS (x.substAt p s (ofS g.1))).labels = B.val := fun g => by
+    have hg := (LTree.mem_monomials 3 _).1 (ofS_mem g)
+    refine ⟨(isShuffle_toS_iff _).2 (LTree.isShuffle_substAt he hxs hnd hg.1 hg.2), ?_⟩
+    rw [labels_toS, ← hxl]
+    exact Multiset.coe_eq_coe.2 (LTree.perm_labels_substAt he hxs hnd hg.2)
+  refine ⟨fun g => ⟨_, hmem g⟩,
+    ⟨toS x, bpath p, fun a => toS ((x.subtreeAt p).winIns s a), ?_, ⟨fun a _ => ?_,
+      fun a ha b hb => ?_, fun a ha b hb hab => ?_⟩, fun g => ?_⟩, fun g => rfl⟩
+  · obtain ⟨e, l, r, h⟩ := he.exists_node
+    rw [get?_toS x p h]
+    rfl
+  · exact (isShuffle_toS_iff _).2 (hw.shuffle a)
+  · rw [labels_toS, Multiset.mem_coe] at hb
+    have ha3 : a < 3 := Finset.mem_range.1 ha
+    have hb' : b ∈ (x.subtreeAt p).labels := by
+      refine hw.perm.symm.subset ?_
+      simp only [List.mem_append]
+      interval_cases a
+      · exact Or.inl (Or.inl hb)
+      · exact Or.inl (Or.inr hb)
+      · exact Or.inr hb
+    have : b ∈ (x.labels : Multiset ℕ) := Multiset.mem_coe.2 (LTree.labels_subtreeAt_subset _ _ hb')
+    rw [hxl] at this
+    exact this
+  · simp only
+    rw [first_toS _ (hw.shuffle a), first_toS _ (hw.shuffle b)]
+    exact hw.mono a b hab (Finset.mem_range.1 hb)
+  · show toS (x.substAt p s (ofS g.1)) = _
+    rw [toS_substAt, toS_ofS]
+
+/-! ## The relator subcomplex and the ideal of the flagged rules -/
+
+variable {K : Type*} [Field K] {ρ : Type*} {O : AdmOrder F} (G : Rules K ρ O.toCtxOrder)
+  (hsrc : ∀ r, G.src r = Finset.range 3) {R : Submodule K (LTree.Mono (F 2) 3 → K)}
+  (hR : R.map (vecEquiv F K 3).toLinearMap = Submodule.span K (Set.range (ruleVec G hsrc)))
+
+include hR in
+/-- **A relator with its root flagged lies in the ideal of the flagged rules.** -/
+lemma mapDomain_flM_mem {r : LTree.Mono (F 2) 3 → K} (hr : r ∈ R) (c : Bool) :
+    Finsupp.mapDomain (flM c) (vecEquiv F K 3 r) ∈ (G.bar.rw (Finset.range 3)).ideal := by
+  have h1 : vecEquiv F K 3 r ∈ Submodule.span K (Set.range (ruleVec G hsrc)) := by
+    rw [← hR]
+    exact Submodule.mem_map_of_mem hr
+  suffices ∀ w ∈ Submodule.span K (Set.range (ruleVec G hsrc)),
+      Finsupp.mapDomain (flM c) w ∈ (G.bar.rw (Finset.range 3)).ideal from this _ h1
+  intro w hw
+  induction hw using Submodule.span_induction with
+  | mem _ h =>
+    obtain ⟨r', rfl⟩ := h
+    have hcast : ∀ {A B : Finset ℕ} (h : A = B), (flM (E := F) c ∘ SMono.cast h) =
+        SMono.cast h ∘ flM c := fun _ => funext fun _ => Subtype.ext rfl
+    have : Finsupp.mapDomain (flM c) (ruleVec G hsrc r') =
+        ruleVec G.bar (fun r => hsrc r.1) (r', c) := by
+      rw [ruleVec, ruleVec, ← Finsupp.mapDomain_comp, hcast, Finsupp.mapDomain_comp,
+        Finsupp.mapDomain_sub, Finsupp.mapDomain_single]
+      rfl
+    rw [this]
+    exact ruleVec_mem G.bar _ (r', c)
+  | zero => rw [Finsupp.mapDomain_zero]; exact Submodule.zero_mem _
+  | add _ _ _ _ h₁ h₂ => rw [Finsupp.mapDomain_add]; exact Submodule.add_mem _ h₁ h₂
+  | smul a _ _ h => rw [Finsupp.mapDomain_smul]; exact Submodule.smul_mem _ a h
+
+omit [Fintype (F 2)] [DecidableEq (F 2)] in
+lemma flM_ne_leaf (b : Bool) (σ : SMono F (Finset.range 3)) (a : ℕ) : (flM b σ).1 ≠ leaf a := by
+  have hw := weight_eq_two rfl σ
+  intro h
+  have := congrArg STree.weight h
+  rw [flM_val, weight_fl] at this
+  rw [this] at hw
+  simp at hw
+
+omit [Fintype (F 2)] [DecidableEq (F 2)] in
+lemma rootF_flM (b : Bool) (σ : SMono F (Finset.range 3)) : rootF (flM b σ).1 = b := by
+  rw [flM_val]
+  cases h : σ.1 with
+  | leaf a =>
+    have hw := weight_eq_two rfl σ
+    rw [h] at hw
+    simp at hw
+  | node e c => rfl
+
+/-- **A generator of the ideal of the flagged rules with an unflagged root lies in the relator
+subcomplex**, and the others are killed by the projection onto the unflagged roots. -/
+lemma barMap_gen_mem {A C : Finset ℕ} (hC : C = Finset.range 3)
+    {f : SMono (BE F) C → SMono (BE F) A} (hf : IsSCtx f) (b : Bool) {w : SMono F C →₀ K}
+    (hw : Finsupp.mapDomain (SMono.cast hC) w ∈ R.map (vecEquiv F K 3).toLinearMap) :
+    barMap K A (proj K (fun X : SMono (BE F) A => rootF X.1 = false)
+      (Finsupp.mapDomain f (Finsupp.mapDomain (flM b) w))) ∈ ShuffleBar.J K R := by
+  subst hC
+  rw [cast_rfl, Finsupp.mapDomain_id] at hw
+  obtain ⟨r, hr, rfl⟩ := hw
+  by_cases hne : Nonempty (SMono F (Finset.range 3))
+  swap
+  · have : vecEquiv F K 3 r = 0 := by
+      ext g
+      exact (hne ⟨g⟩).elim
+    show barMap K A (proj K _ (Finsupp.mapDomain f
+      (Finsupp.mapDomain (flM b) (vecEquiv F K 3 r)))) ∈ _
+    rw [this, Finsupp.mapDomain_zero, Finsupp.mapDomain_zero, map_zero, map_zero]
+    exact Submodule.zero_mem _
+  obtain ⟨σ₀⟩ := hne
+  show barMap K A (proj K _ (Finsupp.mapDomain f
+    (Finsupp.mapDomain (flM b) (vecEquiv F K 3 r)))) ∈ _
+  have hroot : ∀ σ : SMono F (Finset.range 3),
+      rootF (f (flM b σ)).1 = rootF (f (flM b σ₀)).1 := fun σ =>
+    rootF_ctx hf (flM_ne_leaf b σ) (flM_ne_leaf b σ₀) (by rw [rootF_flM, rootF_flM])
+  rw [← Finsupp.mapDomain_comp]
+  cases hc : rootF (f (flM b σ₀)).1
+  swap
+  · rw [proj_of_supported_not K _ (mapDomain_mem_supported K _ fun σ _ => by
+      show ¬ rootF (f (flM b σ)).1 = false
+      rw [hroot, hc]
+      decide), map_zero]
+    exact Submodule.zero_mem _
+  rw [proj_of_supported K _ (mapDomain_mem_supported K _ fun σ _ => by
+    show rootF (f (flM b σ)).1 = false
+    rw [hroot, hc])]
+  obtain ⟨p, s, he, hwin, hall⟩ := exists_edge_of_ctx (F := BE F) hf (flM b σ₀)
+  rw [flM_val, ofS_fl] at hwin
+  have hfl := flags_of_windowRoot _ s he b _ hwin
+  have hflag : ShuffleBar.flagAt (ofS (F := BE F) (f (flM b σ₀)).1) p = b := hfl.1
+  have huncut : ShuffleBar.IsUncut (ofS (F := BE F) (f (flM b σ₀)).1) p s :=
+    ⟨he, by rw [ShuffleBar.flagAt, LTree.subtreeAt_append]; exact hfl.2⟩
+  have hvalid : ShuffleBar.Valid (ofS (F := BE F) (f (flM b σ₀)).1) := by
+    refine ⟨isShuffle_ofS _, ?_, ?_⟩
+    · rw [← Multiset.coe_nodup, labels_ofS]
+      exact A.nodup
+    · rw [← rootF_toS, toS_ofS]
+      exact hc
+  refine Submodule.subset_span ⟨_, p, s, r, hvalid, huncut, hr, ?_⟩
+  rw [vecEquiv_eq_sum, Finsupp.mapDomain_finsetSum, map_sum, ShuffleBar.substRel]
+  refine Finset.sum_congr rfl fun σ _ => ?_
+  rw [Finsupp.mapDomain_smul, map_smul, Finsupp.mapDomain_single, barMap_single,
+    Function.comp_apply, hall, flM_val, monoEquiv_val, ofS_fl, ofS_toS, ShuffleBar.substBar,
+    hflag]
+
+include hR in
+/-- **The ideal of the flagged rules maps into the relator subcomplex**, on the combinations of
+bar monomials whose root is not cut. -/
+theorem barMap_mem_J {A : Finset ℕ} {v : SMono (BE F) A →₀ K} (hv : v ∈ (G.bar.rw A).ideal)
+    (hr : v ∈ Finsupp.supported K K {X | rootF X.1 = false}) :
+    barMap K A v ∈ ShuffleBar.J K R := by
+  rw [← proj_of_supported K (fun X : SMono (BE F) A => rootF X.1 = false) hr]
+  rw [Rules.ideal_eq_span] at hv
+  refine (Submodule.span_le (p := (ShuffleBar.J K R).comap
+    ((barMap K A).comp (proj K fun X : SMono (BE F) A => rootF X.1 = false)))).2 ?_ hv
+  rintro _ ⟨r, f, hf, rfl⟩
+  have hgen : Finsupp.single (G.bar.lead r) 1 - G.bar.tail r =
+      Finsupp.mapDomain (flM r.2) (Finsupp.single (G.lead r.1) 1 - G.tail r.1) := by
+    rw [Finsupp.mapDomain_sub, Finsupp.mapDomain_single]
+    rfl
+  rw [SetLike.mem_coe, Submodule.mem_comap, LinearMap.comp_apply]
+  erw [hgen]
+  exact barMap_gen_mem (hsrc r.1) hf r.2
+    (by rw [hR]; exact Submodule.subset_span ⟨r.1, rfl⟩)
+
+include hR in
+/-- **The relator subcomplex pulls back into the ideal of the flagged rules.** -/
+theorem mem_ideal_of_barMap {A : Finset ℕ} {v : SMono (BE F) A →₀ K}
+    (hv : barMap K A v ∈ ShuffleBar.J K R) : v ∈ (G.bar.rw A).ideal := by
+  set P : ShuffleBar.BarTree (F 2) → Prop := fun y => (y.labels : Multiset ℕ) = A.val
+  have hπ : proj K P (barMap K A v) = barMap K A v :=
+    proj_of_supported K P (mapDomain_mem_supported K v fun X _ => labels_ofS X)
+  have hmem : barMap K A v ∈ (G.bar.rw A).ideal.map (barMap K A) := by
+    rw [← hπ]
+    refine (Submodule.span_le (p := ((G.bar.rw A).ideal.map (barMap K A)).comap
+      (proj K P))).2 ?_ hv
+    rintro _ ⟨x, p, s, r, hx, hu, hr, rfl⟩
+    have hlab : ∀ σ : LTree.Mono (F 2) 3,
+        ((ShuffleBar.substBar x p s σ.1).labels : Multiset ℕ) = x.labels := fun σ =>
+      Multiset.coe_eq_coe.2
+        (ShuffleBar.perm_labels_substBar hx.shuffle hx.nodup hu (ShuffleBar.mono_shape σ).2.1)
+    rw [SetLike.mem_coe, Submodule.mem_comap]
+    by_cases hxl : (x.labels : Multiset ℕ) = A.val
+    · have hs : ShuffleBar.substRel K x p s r ∈ Finsupp.supported K K {y | P y} :=
+        Submodule.sum_mem _ fun σ _ => Submodule.smul_mem _ _
+          (Finsupp.single_mem_supported K _ (show P _ from (hlab σ).trans hxl))
+      rw [proj_of_supported K P hs]
+      obtain ⟨f, hf, hfv⟩ := exists_ctx_of_edge' (F := BE F) x hx.shuffle hxl hu.1
+      refine ⟨_, G.bar.mapDomain_mem_ideal hf
+        (mapDomain_flM_mem G hsrc hR hr (ShuffleBar.flagAt x p)), ?_⟩
+      rw [vecEquiv_eq_sum, Finsupp.mapDomain_finsetSum, Finsupp.mapDomain_finsetSum, map_sum,
+        ShuffleBar.substRel]
+      refine Finset.sum_congr rfl fun σ _ => ?_
+      rw [Finsupp.mapDomain_smul, Finsupp.mapDomain_smul, map_smul, Finsupp.mapDomain_single,
+        Finsupp.mapDomain_single, barMap_single, hfv, ofS_toS, flM_val, monoEquiv_val, ofS_fl,
+        ofS_toS]
+      rfl
+    · have hs : ShuffleBar.substRel K x p s r ∈ Finsupp.supported K K {y | ¬ P y} :=
+        Submodule.sum_mem _ fun σ _ => Submodule.smul_mem _ _
+          (Finsupp.single_mem_supported K _
+            (show ¬ P _ from fun h => hxl ((hlab σ).symm.trans h)))
+      rw [proj_of_supported_not K P hs]
+      exact Submodule.zero_mem _
+  obtain ⟨u, hu, he⟩ := hmem
+  rwa [← barMap_injective K A he]
+
+omit [BinaryGens F] [Fintype (F 2)] [DecidableEq (F 2)] in
+lemma d_mem_C {A : Finset ℕ} {w s : ℕ} {u : SMono (BE F) A →₀ K}
+    (hu : u ∈ Bar.C K A w (s + 1)) : Bar.d K u ∈ Bar.C K A w s := by
+  rw [Bar.C, Finsupp.supported_eq_span_single] at hu
+  induction hu using Submodule.span_induction with
+  | mem _ h =>
+    obtain ⟨X, hX, rfl⟩ := h
+    exact Bar.d_mem_P hX
+  | zero => rw [map_zero]; exact Submodule.zero_mem _
+  | add _ _ _ _ h₁ h₂ => rw [map_add]; exact Submodule.add_mem _ h₁ h₂
+  | smul a _ _ h => rw [map_smul]; exact Submodule.smul_mem _ a h
+
+include hR in
+/-- **Koszulness with generators of any arity gives binary Koszulness**: if the rules present a
+Koszul shuffle operad, so do the binary relators whose span they are. -/
+theorem shuffleBar_isKoszul_of_isKoszul (hK : G.IsKoszul) : ShuffleBar.IsKoszul K R := by
+  intro n s hsn x hx hdx
+  obtain ⟨v, hv, rfl⟩ := C_le_map (F := F) K n s hx
+  have hdv : Bar.d K v ∈ (G.bar.rw (Finset.range n)).ideal :=
+    mem_ideal_of_barMap G hsrc hR (by rw [barMap_d]; exact hdx)
+  obtain ⟨u, hu, hvu⟩ := hK (Finset.range n) (n - 1) s (by omega) v hv hdv
+  refine ⟨barMap K _ u, map_C_le K n (n - 1) (s + 1) ⟨u, hu, rfl⟩, ?_⟩
+  rw [← barMap_d, ← map_sub]
+  refine barMap_mem_J G hsrc hR hvu (Submodule.sub_mem _ ?_ ?_)
+  · exact Finsupp.supported_mono (fun X hX => hX.1) hv
+  · exact Finsupp.supported_mono (fun X hX => hX.1) (d_mem_C hu)
+
+end Ideals
 
 end ShuffleBridge
 

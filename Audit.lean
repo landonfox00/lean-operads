@@ -1944,3 +1944,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBridge.barMap_d
 #print axioms Operad.ShuffleBridge.C_le_map
 #print axioms Operad.ShuffleBridge.map_C_le
+#print axioms Operad.ShuffleBridge.exists_ctx_of_edge'
+#print axioms Operad.ShuffleBridge.mapDomain_flM_mem
+#print axioms Operad.ShuffleBridge.barMap_mem_J
+#print axioms Operad.ShuffleBridge.mem_ideal_of_barMap
+#print axioms Operad.ShuffleBridge.shuffleBar_isKoszul_of_isKoszul
