@@ -144,9 +144,13 @@ end NSOperad
 
 /-! ## The associative operad `Ass`
 
-`Ass n = R` in every arity, with composition given by multiplication. This is the smallest
-nontrivial check that the axioms above are mutually consistent and that the reindexings line
-up as intended.
+`Ass n = R` in every arity, arity `0` included, with composition given by multiplication. This
+is the smallest nontrivial check that the axioms above are mutually consistent and that the
+reindexings line up as intended.
+
+Because `Ass R 0 = R`, this is the operad of *unital* associative algebras. The presented
+`AssPres` of `Operad.Magmatic`, the magmatic operad modulo associativity, vanishes in arity `0`
+and governs non-unital ones, so it is not isomorphic to `Ass`.
 
 Note this is `Ass`, *not* `Com`. As a **non-symmetric** operad, one free generator in each arity
 means exactly one planar way to combine `n` inputs in order, which is the operad governing

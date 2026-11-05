@@ -14,7 +14,7 @@ is a boundary of `S`.
   `0 → W → U ⊔ W → U → 0`.
 * **The two out of three property** (`QIso.surj_of_sup`, `QIso.inj_of_sup`): if `F` is a
   quasi-isomorphism on `(W, D)` and on `(U ⊔ W, D)`, it is one on `(U, D₀)`.
-* **Finite filtrations** (`QIso.surj_filt`, `QIso.inj_filt`): for a decreasing filtration
+* **Finite filtrations** (`QIso.qiso_filt`, `QIso.qiso_filt_ge`): for a decreasing filtration
   `S p = X p ⊔ S (p + 1)`, vanishing from some point on, with `D₀` preserving the graded pieces
   `X p` and `D₁` raising the filtration, a quasi-isomorphism on the graded pieces is one on the
   filtered module.

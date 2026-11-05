@@ -19,9 +19,9 @@ families are the equivariant maps, and this is the convolution product.
   `q''` are plugged into `q` at disjoint subsets (`GrOperad.Inv.assoc_eq_sum_disj`): the nested
   terms of the two products are the same, by sequential associativity. By parallel
   associativity, exchanging the two subsets together with `q'` and `q''` costs the Koszul sign
-  (`GrOperad.Inv.disj_swap`), hence **the graded pre-Lie identity** (`GrOperad.Inv.preLie`), and
-  **the associator with an odd family twice vanishes** (`GrOperad.Inv.assoc_odd`), without
-  dividing by two: the terms cancel in pairs.
+  (through the canonical form `GrOperad.Inv.disj_canon`), hence **the graded pre-Lie identity**
+  (`GrOperad.Inv.preLie`), and **the associator with an odd family twice vanishes**
+  (`GrOperad.Inv.assoc_odd`), without dividing by two: the terms cancel in pairs.
 * The product adds parities (`GrOperad.Inv.isPar_star`), morphisms of graded operads preserve it
   (`GrOperad.Inv.appHom_star`), and **derivations are derivations of the product**
   (`GrOperad.Inv.appDer_star`).

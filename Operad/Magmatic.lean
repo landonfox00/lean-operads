@@ -56,8 +56,9 @@ noncomputable def magOp (R : Type u) [CommRing R] : Mag R 2 := genOf magMul
 
 /-! ### An operad presented by generators and relations
 
-The associative operad is the magmatic operad modulo associativity. This is the first operad in
-the library given by a presentation rather than built by hand, which is what ideals were for. -/
+The non-unital associative operad `AssPres` is the magmatic operad modulo associativity. It
+vanishes in arity `0`, unlike the unital `Ass` of `Operad.Basic`. This is the first operad in the
+library given by a presentation rather than built by hand, which is what ideals were for. -/
 
 /-- The associator of the magmatic generator: the difference of the two ternary composites. -/
 noncomputable def assocRel (R : Type u) [CommRing R] : Mag R 3 :=

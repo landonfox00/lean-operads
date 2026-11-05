@@ -21,8 +21,8 @@ substitutions at two windows of a monomial needs.
   three vertices spanned by two adjacent edges, of arity four (`LTree.isCtx_std`, through the
   truncation `LTree.trunc`).
 * **Two edges** of a monomial share a vertex, or one lies in an input of the window of the other,
-  or they lie in disjoint subtrees (`LTree.edge_pair_cases`); substitutions at disjoint subtrees
-  commute (`LTree.replaceAt_comm`).
+  or they lie in disjoint subtrees (`LTree.edge_below_cases`, `LTree.path_cases`); substitutions
+  at disjoint subtrees commute (`LTree.replaceAt_comm`).
 -/
 import Operad.ShuffleDualKoszul
 

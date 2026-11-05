@@ -4,7 +4,7 @@
 A graded linear species `V` is **reduced** when it vanishes in arities at most one. Endomorphisms
 acting on each arity by a scalar (`GrSpEnd.scalar`) extend to derivations of `T(V)` counting the
 vertices of a tree with weights depending on their arities, linearly in the weights
-(`FreeGrL.derSp_scalar_add`, `FreeGrL.derSp_scalar_smul`).
+(`FreeGrL.derSp_lin`).
 
 * **The arity excess**: the derivation weighting a vertex with `k` inputs by `k - 1` is the scalar
   `|A| - 1` on `T(V)(A)` (`FreeGrL.derSp_excess`).

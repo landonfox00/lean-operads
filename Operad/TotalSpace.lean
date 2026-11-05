@@ -244,11 +244,13 @@ instance : LieAlgebra R (Tot R P) where
 
 /-! ### The Gerstenhaber bracket
 
-Specialising to the endomorphism operad recovers Gerstenhaber's classical construction: the
-circle product on `⨁ n, End V (n+1)` is his `∘`, and the Lie ring structure above is the
-Gerstenhaber bracket. -/
+Specialising to the endomorphism operad gives Gerstenhaber's construction *without its signs*:
+the circle product on `⨁ n, End V (n+1)` is his `∘` with every sign set to `1`, and the
+commutator is a Lie bracket. The two agree in characteristic `2`. Gerstenhaber's bracket itself
+carries the suspension signs; it is `brT` on `TotS R (End R V)` (`Operad.TotalSpaceS`). -/
 
-/-- The Gerstenhaber Lie ring of a module: the total space of its endomorphism operad. -/
+/-- The unsigned Gerstenhaber Lie ring of a module: the total space of its endomorphism operad,
+with the unsigned circle product. The signed bracket is `brT` on `TotS R (End R V)`. -/
 abbrev Gerstenhaber (R : Type u) [CommRing R] (V : Type v) [AddCommGroup V] [Module R V] :
     Type v :=
   Tot R (End R V)

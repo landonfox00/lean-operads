@@ -6,7 +6,7 @@ generators, the suspended generators `sE → sI` (`Koszul.barGen`) induce a morp
 cooperads `T^c(sE) → B(P, I)`, and by restriction **the comparison morphism `P^¡ → B(P, I)`**
 (`Koszul.toBar`). It desuspends to the Koszul twisting morphism: **`π ∘ i = κ`**
 (`Koszul.pi_toBar`), so by the Maurer–Cartan equations of `π` and `κ`, **`π ∘ d_B ∘ i = 0`**
-(`Koszul.piL_d_toBar`). Since a morphism into the cofree cut cooperad is determined by its
+(`Koszul.piL_d_toBar`). Since a morphism into the cut cooperad is determined by its
 cogenerator part (`Bar.d_app_eq_zero`), **`d_B ∘ i = 0`** (`Koszul.d_toBar`): over a field of
 characteristic zero, `i` commutes with the differentials, `P^¡` having the zero differential.
 -/

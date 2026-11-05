@@ -32,6 +32,7 @@ jobs:
         uses: leanprover/lean-action@v1
 
       - name: Documentation
-        uses: leanprover-community/docgen-action@main
+        # `main` as of 2026-11-03; the action has no release tags.
+        uses: leanprover-community/docgen-action@dacc1acc2a3f532cc577266979ba9c36c7593f7c
         with:
           build-page: false

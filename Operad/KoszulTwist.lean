@@ -55,7 +55,7 @@ theorem eval_gbracket_congr {j k : ℕ} (α : TConv R E Q (j + 1)) {θ θ' : TCo
 include hC in
 /-- **Twisting at a Koszul-dual Maurer–Cartan element squares to zero on the Koszul dual.** If
 `T ⋆ₛ T` vanishes on `C 3`, then `⁅T, ⁅T, ψ⁆ₛ⁆ₛ` vanishes on `C` for every cochain `ψ`. -/
-theorem eval_gbracket_gbracket_eq_zero [Invertible (2 : R)] (T : TConv R E Q 2)
+theorem eval_gbracket_gbracket_eq_zero (T : TConv R E Q 2)
     (hT : ∀ x ∈ C 3, eval (sstar (R := R) (j := 1) (k := 1) T T) x = 0) (m : ℕ)
     (ψ : TConv R E Q (m + 1)) :
     ∀ x ∈ C (1 + (1 + m) + 1), eval (gbracket (R := R) (j := 1) (k := 1 + m) T

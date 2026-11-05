@@ -56,11 +56,19 @@ jobs:
         run: |
           set -o pipefail
           lake env lean Audit.lean 2>&1 | tee audit.txt
-          if grep -q 'sorryAx' audit.txt; then
-            echo "::error::a declaration depends on sorryAx"
-            exit 1
-          fi
-          echo "No declaration depends on sorryAx."
+          python3 - <<'PY'
+          import re, sys
+          std = {"propext", "Classical.choice", "Quot.sound"}
+          bad = [l for l in open("audit.txt", encoding="utf-8")
+                 if (m := re.search(r"depends on axioms: \[(.*)\]", l))
+                 and set(a.strip() for a in m.group(1).split(",")) - std]
+          print("".join(bad) or "Every audited declaration rests only on the three standard axioms.")
+          sys.exit(1 if bad else 0)
+          PY
+
+      # Every constant of every `Operad` module, not only the audited ones.
+      - name: Axiom sweep
+        run: lake env lean AxiomSweep.lean
 
       - name: Summary
         if: always()

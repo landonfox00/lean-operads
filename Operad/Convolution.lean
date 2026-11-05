@@ -9,8 +9,10 @@ linear maps
 with the product that decomposes in `C`, applies the two maps, and recomposes in `P`. It is the
 object the rest of the library's deformation theory is about: `PreLie` proves that the total space
 of an operad is pre-Lie, `GradedPreLie` and `TotalSpaceS` carry the suspension signs, and
-`Cohomology` computes with a differential `[Θ, −]`; but the algebra whose Maurer–Cartan elements
-are twisting morphisms `C → P` is this one, and it did not exist.
+`Cohomology` computes with a differential `[Θ, −]`. This file builds the ungraded convolution
+algebra. It carries no suspension signs and no differential, so its Maurer–Cartan elements are
+*not* twisting morphisms. Twisting morphisms `C → P` live on the graded convolution operad
+`ConvOp` (`Operad.ConvOperad`, `Operad.Twisting`, `Operad.TwistingDG`).
 
 ## The product
 

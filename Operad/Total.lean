@@ -12,9 +12,10 @@ is then additive in the degree: for `α : P (j + 1)` and `β : P (k + 1)` every 
 the positional convention, since `compFin` already lands in a uniform arity no matter which slot
 is used.
 
-This is the structure the whole deformation theory of operads runs on: the commutator of `⋆` is
-a Lie bracket, an operad structure is a Maurer–Cartan element, and `d = [Θ, -]` is the
-differential whose cohomology controls deformations.
+This is the unsigned skeleton of the structure the deformation theory of operads runs on: the
+commutator of `⋆` is a Lie bracket. With the suspension signs of `Operad.DG` (in
+`Operad.TotalSpaceS`), an operad structure is a Maurer–Cartan element and `d = ⁅Θ, -⁆` is the
+differential whose cohomology controls deformations (`Operad.Cohomology`).
 -/
 import Operad.Constructions
 import Mathlib.Algebra.BigOperators.Fin

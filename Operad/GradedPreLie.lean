@@ -298,4 +298,34 @@ theorem sstar_assoc_symm {j k l : ℕ} (α : P (j + 1)) (β : P (k + 1)) (γ : P
   rw [sstar_sstar_left_split, sstar_sstar_left_split α γ β, map_add, disjointPartS_symm α β γ]
   simp only [reindex_reindex, add_sub_cancel_left]
 
+/-! ### Two equal arguments of degree one
+
+When `β = γ = T` has degree one, the bijection of `sum_before_eq_s` carries each "before" term to
+the "after" term with the same composite and the opposite sign. So the disjoint part vanishes
+term by term, with no division by `2`. The graded pre-Lie identity alone would give only
+`2 A(α, T, T) = 0`. -/
+
+/-- **The signed disjoint part vanishes on two equal arguments of degree one**, over any
+commutative ring. -/
+theorem disjointPartS_self_one {j : ℕ} (α : P (j + 1)) (T : P (1 + 1)) :
+    disjointPartS (R := R) α T T = 0 := by
+  unfold disjointPartS
+  rw [Finset.sum_congr rfl fun i _ => sum_compl_nested i _, Finset.sum_add_distrib,
+    sum_before_eq_s α T T, ← Finset.sum_add_distrib]
+  refine Finset.sum_eq_zero fun s _ => ?_
+  rw [← Finset.sum_add_distrib]
+  refine Finset.sum_eq_zero fun t _ => ?_
+  erw [reindex_self, ← add_smul]
+  convert zero_smul R _
+  rw [pow_add, pow_add]
+  simp [mul_one, one_mul]
+  ring_nf
+
+/-- **The signed associator vanishes on two equal arguments of degree one**:
+`(α ⋆ₛ T) ⋆ₛ T = α ⋆ₛ (T ⋆ₛ T)`, over any commutative ring. -/
+theorem sstar_sstar_self_one {j : ℕ} (α : P (j + 1)) (T : P (1 + 1)) :
+    sstar (R := R) (sstar (R := R) α T) T
+      = reindex R P (by omega) (sstar (R := R) α (sstar (R := R) T T)) := by
+  rw [sstar_sstar_left_split, disjointPartS_self_one, add_zero]
+
 end Operad
