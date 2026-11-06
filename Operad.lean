@@ -175,6 +175,7 @@ import Operad.ShuffleBridge
 import Operad.ShuffleBridgeBar
 import Operad.GrShuffle
 import Operad.GrFreeEven
+import Operad.ShuffleFreeL
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois
