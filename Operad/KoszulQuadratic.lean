@@ -25,9 +25,11 @@ up to `n` (`FreeGrL.decomp_mem_wtEqL`). Relators are **quadratic** when they lie
 
 The comparisons use the eigenspaces of the vertex count (`FreeGrL.vx`), which split the free graded
 operad over a `ℚ`-algebra, so the theorems assume a field of characteristic zero; the definitions
-do not. The corelations are defined as a preimage under `κ_T ⋆ κ_T`: that it is a bijection
-`T^c(sE)^{(2)} → T(E)^{(2)}`, so that `s²R` is the image of `R`, is not proved here, nor is the
-reverse inclusion `s²R ⊆ P^¡`.
+do not. The corelations are defined as a preimage under `κ_T ⋆ κ_T`. That it is a bijection
+`T^c(sE)^{(2)} ≃ T(E)^{(2)}` when `E` has no elements without inputs, so that `s²R ≅ R` is the
+image of `R`, and the reverse inclusion `s²R ⊆ P^¡`, so that `P^¡ ∩ T^c(sE)^{(2)} = s²R`, are
+proved in `Operad/KoszulCorel.lean` (`Koszul.starEquiv`, `Koszul.coRelEquiv`,
+`Koszul.coRel_le_dual`, `Koszul.dual_inf_wtEqL`).
 -/
 import Operad.ConvFilt
 

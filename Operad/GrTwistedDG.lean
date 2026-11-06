@@ -14,6 +14,10 @@ anticommutator with `1 ∘' d_P` is again a morphism of right modules, the twist
 `d_P ∘ α` (`GrComposite.twD_leaf_anticomm`), and `(1 ∘' d_P)²` vanishes (`GrComposite.leaf_sq`).
 So **`D_α² = d_{α ⋆ α + d_P ∘ α}`, which vanishes for a twisting morphism**
 (`GrComposite.twDiff_sq`).
+
+The augmentation is only used to build `d_α`. For any dg operad `P`, augmented or not, the same
+differential is `GrComposite.twDiff'`, with `GrComposite.twDiff'_sq`
+(`Operad/GrTwistedFree.lean`).
 -/
 import Operad.GrTwisted
 import Operad.GrLeafAct

@@ -11,8 +11,11 @@ So **an element with at least `k ≥ 2` vertices whose convolution square has we
 has at least `k + 1` vertices** (`Cobar.mem_vxGe_succ`): its part with `k` vertices has a
 convolution square of weight `k` and at least `k + 1`, which vanishes, so it is a multiple of the
 units, which have no vertices. This gives the uniqueness half of the universal property of the
-cut cooperad on a reduced graded linear species (`FreeGrL.app_eq_of_genCoef`); the universal
-property itself is `FreeGrL.cofreeHomEquiv` (`Operad/CutCofree.lean`).
+cut cooperad on a graded linear species without elements without inputs, over any graded
+cooperad (`FreeGrL.app_eq_of_genCoef₀`, and `FreeGrL.app_eq_of_genCoef` for a reduced species);
+the universal property itself is `FreeGrL.cofreeHomEquiv` (`Operad/CutCofree.lean`) for a reduced
+species, and `FreeGrL.cofreeHomEquivConil` (`Operad/CutCofreeConil.lean`) for a species with
+elements of one input over a conilpotent cooperad.
 -/
 import Operad.FreeGrCompare
 import Operad.BarCobarRes

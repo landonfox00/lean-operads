@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 117,000 lines in 239 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,607
+About 126,000 lines in 252 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,803
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -160,7 +160,10 @@ declarations and confirms every one rests only on Lean's three standard axioms �
 | **Infinitesimal deformations of a symmetric operad**: two-cochains `ω` and the deformed operad on pairs `x + εx'` (`Deformed`), **an operad exactly when `ω` is an `𝔖`-cocycle** (`Deformed.instSymOperad`, `Deformed.isCocycle_of_symOperad`); coboundaries of equivariant families, and **a cocycle is a coboundary exactly when `P → P_ω` lifts the identity** (`isCoboundary_iff_exists_lift`); derivations are the lifts `P → P[ε]` of the identity (`SymDerivation.liftEquiv`), the Euler and inner derivations with `ad_1 = -euler` (`ad_one`); transport along isomorphisms (`SymOperadIso.forall_isCoboundary`) | `Deformation.lean` | **proved** |
 | **Derivations along a morphism** `f : F → P` (`SymDerivationAlong`), killing the unit (`SymDerivationAlong.app_one`); the lifts of `f` to a deformed operad `P_ω` form a torsor under them (`SymDerivationAlong.ofLifts`, `Deformed.liftAdd`), and **they are the lifts of `f` to `P[ε]`** (`SymDerivationAlong.liftEquiv`); out of a free operad, morphisms and **derivations along `f` are their values on the generators** (`FreeSet.linHom`, `Pres.lin_hom_ext`, `SymDerivationAlong.freeEquiv`), and `f` lifts to every `P_ω` (`Deformed.freeLift`) | `DerivationAlong.lean` | **proved** |
 | **Formal deformations** of a symmetric operad (`FormalDeformation`: cochains `μ_k` making `Σ t^k μ_k` an operad structure on power series, `FormalDeformation.instSymOperad`); the obstruction to extending a trivialization by one order is a two-cocycle (`isCocycle_obstruction`, via `SymCochain.isCocycle_of_injective`) and is the coboundary of the next term exactly when it extends (`isMorAt_iff`); **rigidity**: if every two-cocycle is a coboundary, every formal deformation is trivial (`exists_trivialization`), by an isomorphism of operads with the trivial deformation (`exists_iso_trivial`) | `FormalDeformation.lean` | **proved** |
-| **The bar construction of a shuffle operad and the criterion of Dotsenko and Khoroshkin**: bar trees (monomials with cut edges) and the bar differential of the free shuffle operad, **`d² = 0`** (`ShuffleBar.d_dTree`); the relators substituted at uncut edges span a subcomplex `J R` (`ShuffleBar.d_mem_J`), the kernel onto the bar construction of the presented operad; quadratic Gröbner bases (`LTree.IsGroebner`), the normal monomials as a complement of the ideal (`IsGroebner.isCompl`) and normal forms on any set of labels from any such complement (`LTree.nfOf`); **a shuffle operad with a quadratic Gröbner basis is Koszul**: its bar homology vanishes below the diagonal (`ShuffleBar.isKoszul`), for any Gröbner data — a complement by normal monomials and a level lowered by the relators led by leading windows (`ShuffleBar.GroebnerData`, `ShuffleBar.isKoszul_of_data`) — by components normalization (`ShuffleBar.Φ`), reduction modulo the relators (`ShuffleBar.reduce`) and a contracting homotopy for the leading part (`ShuffleBar.d₀_hTree_add`); instantiated for the commutative operad, whose relators are a quadratic Gröbner basis (`ComBin.isGroebner`), so it is Koszul (`ComBin.isKoszul`), and so is the operad of its Koszul dual relators (`ComBin.isKoszul_dualRel`) | `ShuffleNormal.lean`, `ShuffleBar.lean`, `ShuffleKoszul.lean`, `ShuffleBinCom.lean` | **proved** |
+| **The bar construction of a shuffle operad and the criterion of Dotsenko and Khoroshkin**: bar trees (monomials with cut edges) and the bar differential of the free shuffle operad, **`d² = 0`** (`ShuffleBar.d_dTree`); the relators substituted at uncut edges span a subcomplex `J R` (`ShuffleBar.d_mem_J`), the kernel onto the bar construction of the presented operad; quadratic Gröbner bases (`LTree.IsGroebner`), the normal monomials as a complement of the ideal (`IsGroebner.isCompl`) and normal forms on any set of labels from any such complement (`LTree.nfOf`); **a shuffle operad with a quadratic Gröbner basis is Koszul**: its bar homology vanishes below the diagonal (`ShuffleBar.isKoszul`), for any Gröbner data — a complement by normal monomials and a level lowered by the relators led by leading windows (`ShuffleBar.GroebnerData`, `ShuffleBar.isKoszul_of_data`) — by components normalization (`ShuffleBar.Φ`), reduction modulo the relators (`ShuffleBar.reduce`) and a contracting homotopy for the leading part (`ShuffleBar.d₀_hTree_add`); instantiated for the commutative operad, whose relators are a quadratic Gröbner basis (`ComBin.isGroebner`), so it is Koszul (`ComBin.isKoszul`), and so is the operad of its Koszul dual relators (`ComBin.isKoszul_dualRel`); and for the associative operad, on the two generators `x₁x₂` and `x₂x₁`, whose relators — the kernel of the evaluation to words in arity three, spanned by the six left combs `e(f(-, -), -)` with `(e, f) ≠ (x₁x₂, x₂x₁)` minus the monomials with the same words (`AssBin.rel_eq_span`) — are a quadratic Gröbner basis (`AssBin.isGroebner`), the evaluation being injective on the normal monomials (`AssBin.ev_inj`), so it is Koszul (`AssBin.isKoszul`), and so is the operad of its Koszul dual relators (`AssBin.isKoszul_dualRel`); **the Koszul duals identified**: those of `Ass` are its relators rescaled by `x₂x₁ ↦ -x₂x₁`, so `Ass` is self-dual (`AssBin.dualRel_rel`, `AssBin.quotDualEquiv`), and those of `Com` are the multiples of the Jacobi relator (`ComBin.dualRel_rel`), presenting a Koszul operad of dimension `(n - 1)!` in arity `n ≥ 2` (`ComBin.isKoszul_jac`, `ComBin.finrank_quotient_jac`); in each arity the presented operads of `Com` and `Ass` are `K` and the span of the arrangements, of dimension `n!` (`ComBin.quotEquiv`, `AssBin.quotEquiv`, `AssBin.finrank_quotient`) | `ShuffleNormal.lean`, `ShuffleBar.lean`, `ShuffleKoszul.lean`, `ShuffleBinCom.lean`, `ShuffleBinAss.lean`, `ShuffleKoszulDuals.lean` | **proved** |
+| **The Poisson operad is Koszul in both shuffle senses**: on the generators `x₁x₂` and `[x₁, x₂]` (`PoisShGen`), six rules (associativity twice, Jacobi, Leibniz three times) for the path order of `PoisDim.PW` (`PoisShGen.rules`, `PoisShGen.order`); the evaluation in the Kirillov–Kostant model vanishes on their ideal (`PoisShGen.ideal_le_ker`) and is injective on the normal monomials (`PoisShGen.eq_zero_of_evL`), by at most `\|A\|!` normal monomials (`PoisShGen.card_irr_le`) against `\|A\|!` independent values (`PoisShGen.factorial_le_finrank`); so the rules are a quadratic Gröbner basis (`PoisShGen.disjoint_normal`, `PoisShGen.res_amb`), with a PBW basis (`PoisShGen.basis`), the ideal is the kernel of the evaluation (`PoisShGen.ideal_eq_ker`), the quotient has dimension `n!` (`PoisShGen.finrank_eq_factorial`), and **`Pois` is Koszul** (`PoisShGen.isKoszul`); on the binary side the relators, the kernel of the evaluation in arity three, are spanned by the rules (`PoisBin.rel_eq_span`, `PoisBin.map_rel`), so **`PoisBin.isKoszul`**, `PoisBin.isKoszul_and`, `PoisBin.isKoszul_iff`, `PoisBin.finrank_quotient`; **`Pois` is self-dual up to exchanging the product and the bracket** (`PoisBin.dualRel_rel`, `PoisBin.quotDualEquiv`), the pairings of the relators with the exchanged ones checked by `decide` (`PoisBin.pairZ_swap`), and its dual relators are Koszul (`PoisBin.isKoszul_dualRel`), by **the invariance of Koszulness under relabelling the generators** (`ShuffleBar.isKoszul_relabel`; ideals and quotients: `LTree.map_relabelVec_idealOf`, `LTree.quotRelabelEquiv`) | `ShuffleAnyPois.lean`, `ShuffleBinPois.lean`, `ShuffleRelabel.lean` | **proved** |
+| **From graded operads to symmetric and shuffle operads**: a graded operad without odd operations (`GrOperad.IsEven`) is a symmetric operad (`GrOperad.toSymOperad`); the even part of a graded operad is a graded suboperad (`GrOperad.evenSub`) and a symmetric operad (`GrOperad.EvenOp`), so a shuffle operad through `SymOperad.toShuffle`, functorially (`GrOperadHom.toEven`); free and presented graded operads on even generators are even (`FreeGrL.isEven`, `GrOperadIdeal.isEven_quot`, `Koszul.isEven_pres`), so `T(E)/(r)` is its even part (`Koszul.presEvenEquiv`) and a quotient of `T(E)` as a shuffle operad (`Koszul.presProjSh_surjective`). The comparison of `Koszul.IsKoszul` with the shuffle notions is open | `GrShuffle.lean` | **proved** |
+| **The free graded operad on even generators is the free operad in modules**: symmetric operads as graded operads concentrated in even parity (`SymGr`), morphisms between the two frameworks on even parts (`GrOperadHom.toSymOfEven`, `SymOperadHom.toGrEven`), and for an even graded linear species `E` inverse morphisms `T(E) ⇄ FreeL R E` from the two universal properties (`FreeGrL.toFreeL`, `FreeGrL.ofFreeL`, `FreeGrL.ofFreeL_toFreeL`, `FreeGrL.toFreeL_ofFreeL`), so `FreeGrL.freeLEquiv` in every arity and `FreeGrL.evenFreeLHom_bijective` | `GrFreeEven.lean` | **proved** |
 | **The dimension of the Koszul dual cooperad from a quadratic Gröbner basis**: the Koszul dual cooperad of a shuffle operad presented by relators of arity three, in arity `n`, as the top homology of its bar construction (`ShuffleBar.KD`); the normal bar trees are a basis of the bar construction modulo the relators (`ShuffleBar.normalized_eq`, `ShuffleBar.normalized_injective`), on which the complex is exact below the diagonal (`ShuffleBar.exact_dN`); **its Euler characteristic gives `dim KD(n)` as an alternating sum of numbers of normal bar trees** (`ShuffleBar.finrank_KD`), so **two quadratic Gröbner bases with the same leading monomials have Koszul dual cooperads of the same dimension in every arity** (`ShuffleBar.finrank_KD_eq`); by inclusion and exclusion over the cut edges, **that dimension is the number of monomials all of whose windows are leading** (`ShuffleBar.sum_ncard_nrm`, `ShuffleBar.finrank_KD_eq_ncard`) | `ShuffleKoszulDual.lean` | **proved** |
 | **Rescaling the generators**: the weight of a monomial, the product of the scalars of its vertices (`LTree.wt`), is multiplicative under plugging and substitution (`LTree.wt_plug`, `LTree.wt_substAt`) and unchanged by merging along a cut edge (`ShuffleBar.wt_mergeK`); the diagonal rescaling of the bar construction (`ShuffleBar.scaleBar`) commutes with the differential (`ShuffleBar.d_scaleBar`) and carries the relator subcomplex of `R` into that of the rescaled relators (`ShuffleBar.map_scaleBar_J_le`), so **for nonzero scalars it carries the Koszul dual cooperad of `R` onto that of the rescaled relators** (`ShuffleBar.map_scaleBar_KD`) and **their dimensions agree in every arity** (`ShuffleBar.finrank_KD_rescale`); **Koszulness is invariant under rescaling** (`ShuffleBar.isKoszul_rescale`) | `ShuffleRescale.lean` | **proved** |
 | **The associated graded of the Koszul dual cooperad**: a weight on a basis grades the free module (`Graded.wproj`), and the associated graded of a subspace for the filtration by weight, the span of its top components (`Graded.grW`), has its dimension (`Graded.finrank_grW`); a weight on the generators weighs bar trees additively, kept by the differential (`ShuffleBar.d_wproj`) and added by substitution (`ShuffleBar.wdegB_substBar`); if `R₀` is spanned by top components of relators of `R`, the relator subcomplex of `R₀` is the associated graded of that of `R` (`ShuffleBar.J_inf_C_eq_grW`) and **the Koszul dual cooperad of `R₀` is the associated graded of that of `R`** (`ShuffleBar.KD_eq_grW`), as soon as the dimensions agree, for instance for two quadratic Gröbner bases with the same leading monomials (`ShuffleBar.finrank_J_inf_C_add`, `ShuffleBar.KD_eq_grW_of_isGroebner`): the Rees family of the Koszul dual cooperad is flat | `ShuffleGraded.lean` | **proved** |
@@ -187,31 +190,96 @@ declarations and confirms every one rests only on Lean's three standard axioms �
 | **`sum_permComp`** — the total of a composite is the product of the totals | `Perm.lean` | **proved** |
 | **`evHom` — summing is a morphism `Perm → Ass`** | `Perm.lean` | **proved** |
 
-**Three notions of Koszul.** The library has three Koszul predicates, and no theorem relates
-them: `Koszul.IsKoszul` (`GrKoszulDual.lean`: `ΩP^¡ → P` is a quasi-isomorphism, the textbook
-notion), `ShuffleBar.IsKoszul` (`ShuffleKoszul.lean`: the bar homology of a binary shuffle
-operad vanishes below the diagonal) and `Rules.IsKoszul` (`ShuffleAnyKoszul.lean`: the same for
-shuffle operads with generators of any arity). The two shuffle notions are the same construction
-on different trees, bar trees of binary monomials (`BarTree`) and bar trees of any arity
-(`STree (BE E)`), with differentials written separately; no translation between them is built,
-so neither is deduced from the other. They meet on one example: the commutative operad is Koszul
-in both senses (`ComBin.isKoszul_and`), presented on both sides by the two left combs minus the
-right comb (`ComBin.rel_eq_span`, `ComGen.rules`), but the two proofs only run in parallel. The
+**Three notions of Koszul.** The library has three Koszul predicates: `Koszul.IsKoszul`
+(`GrKoszulDual.lean`: `ΩP^¡ → P` is a quasi-isomorphism, the textbook notion),
+`ShuffleBar.IsKoszul` (`ShuffleKoszul.lean`: the bar homology of a binary shuffle operad vanishes
+below the diagonal) and `Rules.IsKoszul` (`ShuffleAnyKoszul.lean`: the same for shuffle operads
+with generators of any arity). `ShuffleBridge.lean` translates the binary side into the any-arity
+side for generators of arity two only: binary shuffle monomials are any-arity shuffle monomials
+(`ShuffleBridge.monoEquiv`), edges are contexts and conversely, the ideal of binary relators is
+the ideal of the rules with the same leading monomials whose vectors span them, arity by arity
+(`ShuffleBridge.map_idealOf`, `ShuffleBridge.quotEquiv`), and the normal monomials correspond.
+So **a binary quadratic Gröbner basis gives `Rules.IsKoszul`**
+(`ShuffleBridge.isKoszul_of_isGroebner`), and both predicates at once
+(`ShuffleBridge.isKoszul_and_of_isGroebner`); conversely, resolvable rules give a binary Gröbner
+basis once its leading condition holds (`ShuffleBridge.isGroebner_of_resolvable`). The
+commutative and associative operads pass through it: `ComBin.isKoszul_and_bridge` and
+`AssBin.isKoszul_and_bridge` derive both predicates from the binary Gröbner bases alone, the
+relators and rules matching by `ComBin.map_rel` and `AssBin.map_rel`. `ShuffleBridgeBar.lean`
+compares the bar constructions: binary bar trees are any-arity bar trees with the same cut edges,
+merges and signs, so the differentials agree (`ShuffleBridge.barMap_d`); the relator subcomplex
+`ShuffleBar.J` and the ideal of the flagged rules `Rules.bar` correspond
+(`ShuffleBridge.mem_ideal_of_barMap`, `ShuffleBridge.barMap_mem_J`); and relabelling the leaves
+commutes with the differential (`ShuffleBridge.d_relabelM`). So **the two shuffle predicates
+agree**: `ShuffleBar.IsKoszul K R ↔ G.IsKoszul` for binary relators `R` and rules `G` on
+`0, 1, 2` whose vectors span them (`ShuffleBridge.isKoszul_iff`; `ComBin.isKoszul_iff`,
+`AssBin.isKoszul_iff`). The
 comparison with `Koszul.IsKoszul` is open: Dotsenko and Khoroshkin deduce that a symmetric operad
 is Koszul exactly when its shuffle operad is, because the forgetful functor carries the symmetric
-bar complex to the shuffle one, and that comparison of bar complexes is not formalized. So the
+bar complex to the shuffle one, and that comparison of bar complexes is not formalized. The
+symmetric statement to compare is the Koszul criterion `Koszul.isKoszul_iff` (`P^¡ → B(P, I)` a
+quasi-isomorphism), since the shuffle side has a bar construction and no Koszul complex.
+`GrShuffle.lean` lays the first link: an even graded operad is a symmetric operad
+(`GrOperad.toSymOperad`), the even part of any graded operad is one (`GrOperad.EvenOp`), hence a
+shuffle operad through `SymOperad.toShuffle`, with morphisms (`GrOperadHom.toEven`); and a graded
+operad presented on even generators is even (`FreeGrL.isEven`, `Koszul.isEven_pres`), so it is
+arity by arity a shuffle operad (`Koszul.presEvenEquiv`), a quotient of that of `T(E)`
+(`Koszul.presProjSh_surjective`). `GrFreeEven.lean` identifies `T(E)` on even generators with
+the ungraded free operad on the linear species `E`, arity by arity and as symmetric operads
+(`FreeGrL.freeLEquiv`, `FreeGrL.evenFreeLHom_bijective`). Open: the underlying shuffle operad of
+`FreeL R E` as the free shuffle operad on a basis of `E(2)` (the library has this for free
+species, `FreeSet.shuffleEquiv`, not for `E(2)` the trivial or sign representation), and the bar
+construction `B(P, I)` as the shuffle bar construction modulo its relator subcomplex. So the
 Gröbner and PBW criteria in the table conclude the shuffle notions, for the shuffle operad, and
 do not reach `Koszul.IsKoszul` or the symmetric operad. The concrete Gröbner bases are those of
 `Com`, on the binary side (`ComBin.isGroebner`, `ShuffleBinCom.lean`) and on the any-arity side
 (`ComGen.rules`, `ShuffleAnyCom.lean`); with them `Com` is Koszul in the two shuffle senses, and
-so is the binary shuffle operad of its Koszul dual relators (`ComBin.isKoszul_dualRel`), which is
-the shuffle operad of `Lie` by the classical computation, not proved here. No operad is proved
-Koszul in the sense of `Koszul.IsKoszul`, and `Ass` and `Pois` in no sense.
+so is the binary shuffle operad of its Koszul dual relators (`ComBin.isKoszul_dualRel`). Those
+dual relators are the multiples of the Jacobi relator (`ComBin.dualRel_rel`,
+`ShuffleKoszulDuals.lean`), and the operad they present has dimension `(n - 1)!` in arity `n ≥ 2`
+(`ComBin.finrank_quotient_jac`), that of `Lie`; it is not compared with the symmetric
+`Operad.Lie`, whose dimensions the library does not compute. Those of `Ass` are on the binary
+side (`AssBin.isGroebner`, `ShuffleBinAss.lean`) and on the any-arity side (`AssShGen.rules`,
+`ShuffleAnyAss.lean`), where the ideal of the rules is the kernel of the evaluation to words
+(`AssShGen.ideal_eq_ker`) and the quotient on `n` leaves has dimension `n!`
+(`AssShGen.finrank_eq_factorial`); with them `Ass` is Koszul in the two shuffle senses. On the
+binary side `Ass` is self-dual: its Koszul dual relators are its relators rescaled by
+`x₂x₁ ↦ -x₂x₁` (`AssBin.dualRel_rel`), so the two presented operads are isomorphic in every arity
+(`AssBin.quotDualEquiv`). There too the ideals are kernels, of the augmentation for `Com` and of
+the evaluation to words for `Ass` (`ComBin.idealOf_eq_ker`, `AssBin.idealOf_eq_ker`), so in arity
+`n ≥ 1` the presented operads are `K` and the span of the `n!` arrangements (`ComBin.quotEquiv`,
+`AssBin.quotEquiv`), the dimensions of `Sym.Com` and `Sym.Ass` (`AssBin.finrank_quotient_eq_sym`).
+These are linear isomorphisms in each arity: the binary side defines no compositions on its
+quotients, so the identification with the shuffle operads of `Sym.Com` and `Sym.Ass` through
+`SymOperad.toShuffle` is not constructed. `Pois` is Koszul in the two shuffle senses as well.
+Its Gröbner basis is on the any-arity side (`PoisShGen.rules`, `ShuffleAnyPois.lean`), for the path
+order of the word order of `PoisDim.PW` (more brackets first, then fewer products): six rules,
+associativity twice, Jacobi, and Leibniz three times, led by the three monomials with a product
+below a bracket. Normal monomials are at most `|A|!` on `A`, read as words through
+`PoisDim.read_injective` (`PoisShGen.card_irr_le`); the values of the monomials in the
+Kirillov–Kostant model contain `|A|!` independent ones (`PoisShGen.factorial_le_finrank`); so the
+evaluation is injective on the normal monomials (`PoisShGen.eq_zero_of_evL`), the rules are a
+quadratic Gröbner basis (`PoisShGen.res_amb`), `Pois` is Koszul (`PoisShGen.isKoszul`), the ideal
+is the kernel of the evaluation (`PoisShGen.ideal_eq_ker`) and the quotient on `n` leaves has
+dimension `n!` (`PoisShGen.finrank_eq_factorial`). On the binary side (`ShuffleBinPois.lean`) the
+relators are the kernel of the evaluation in arity three (`PoisBin.rel`), spanned by the six rules
+(`PoisBin.rel_eq_span`, `PoisBin.map_rel`), and the bridge gives `PoisBin.isKoszul`,
+`PoisBin.isKoszul_and` and `PoisBin.isKoszul_iff`. The binary key `LTree.pathKey`, which compares
+path lengths first, admits no quadratic Gröbner basis for these relators (26 normal monomials in
+arity four, by a script), so binary Koszulness comes only through the bridge. On the binary
+side `Pois` is self-dual up to exchanging the product and the bracket: its Koszul dual relators are
+its relators relabelled along that exchange (`PoisBin.dualRel_rel`), so the two presented operads
+are isomorphic in every arity (`PoisBin.quotDualEquiv`), and the dual relators present a Koszul
+operad (`PoisBin.isKoszul_dualRel`), Koszulness being invariant under relabelling the generators
+(`ShuffleBar.isKoszul_relabel`, `ShuffleRelabel.lean`). No operad is proved Koszul in the sense of
+`Koszul.IsKoszul`.
 Likewise the relators of "quadratic data" are *arbitrary* sets, and the theorems about
 `Koszul.IsKoszul` hold in that generality. Weight two is a separate hypothesis
 (`Koszul.IsQuadratic`), under which, over a field of characteristic zero, `P^¡ = C(sE, s²R)`
 (`Koszul.dualSub_eq_coquadSub`); there `s²R` is the preimage of `R` under `κ_T ⋆ κ_T` on the trees
-with two vertices, and that this map is a bijection `T^c(sE)^{(2)} → T(E)^{(2)}` is not proved.
+with two vertices, a map that is a bijection `T^c(sE)^{(2)} ≃ T(E)^{(2)}` when `E` has no elements
+without inputs (`Koszul.starEquiv`), and `s²R` is exactly the part of `P^¡` with two vertices
+(`Koszul.dual_inf_wtEqL`).
 
 `Ass` is not decoration: it is the smallest instance that exercises every axiom, so proving it
 confirms the axiom set is consistent and the reindexings line up.
@@ -685,19 +753,28 @@ weight at least `k + 1` has at least `k + 1` vertices (`Cobar.mem_vxGe_succ`,
 `Operad/CofreeVanish.lean`), so a morphism into the bar construction whose composite with `π` is
 killed by the differential is a morphism of dg cooperads (`Bar.d_app_eq_zero`,
 `Operad/BarWeights.lean`). The same argument shows that a morphism of graded cooperads into the cut
-cooperad on a reduced graded linear species `V` is determined by its composite with the coefficient
-of the generators (`FreeGrL.app_eq_of_genCoef`), and `Operad/CutCofree.lean` proves **the universal
-property of the cut cooperad**: over a `ℚ`-algebra, for `V` reduced and a graded cooperad `C` of
-projective modules, as over a field, the morphisms of graded cooperads `C → T^c(V)` are the
-morphisms of graded linear species `C → V`, and for a coaugmented `C` those from the reduced part
-`C̄ → V` (`FreeGrL.cofreeHomEquiv`, `FreeGrL.cofreeHomEquivRed`, `FreeGrL.existsUnique_lift`). The
+cooperad on a graded linear species `V` without elements without inputs is determined by its
+composite with the coefficient of the generators, for any graded cooperad `C`
+(`FreeGrL.app_eq_of_genCoef₀`, `FreeGrL.app_eq_of_genCoef`), and `Operad/CutCofree.lean` proves
+**the universal property of the cut cooperad**: over a `ℚ`-algebra, for `V` reduced and a graded
+cooperad `C` such that in each arity `k ≥ 2` the module `C (Fin k)` or the module `V (Fin k)` is
+projective, as over a field, the morphisms of graded cooperads `C → T^c(V)` are the morphisms of
+graded linear species `C → V`, and for a coaugmented `C` those from the reduced part `C̄ → V`
+(`FreeGrL.cofreeHomEquiv'`, `FreeGrL.cofreeHomEquivRed'`, `FreeGrL.existsUnique_lift'`, and
+`FreeGrL.cofreeHomEquiv` for `C` projective in every arity). The
 morphism is built by transposition: a morphism of graded operads from the free graded operad on
 the homogeneous generators to the scalar-valued convolution operad of `C`, given by a lift of
 `φ : C → V` to the generators weighted by `1 / k!`, assigns each tree a functional on `C`, twisted
 by the sign `σ(C(n, 2))` of its `n` odd vertices to absorb the Koszul sign of the convolution
 product (`FreeGr.coefF_comp`), and these functionals are the coefficients of a morphism of graded
-cooperads (`FreeGr.ofCoef`, `FreeGrL.lift`). Species with elements of at most one input, over a
-conilpotent `C`, are not treated. For quadratic data `(E, r)` without generators with at most one
+cooperads (`FreeGr.ofCoef`, `FreeGrL.lift`). For `V` with elements of one input but none without
+inputs, `Operad/CutCofreeConil.lean` defines the graded coradical filtration and conilpotence
+(`GrCooperad.filt`, `GrCooperad.Conilpotent`) and proves that for a conilpotent coaugmented `C`,
+the reduced cooperations or the elements of `V` projective in each arity, the coaugmented morphisms
+`C → T^c(V)` are the morphisms `C̄ → V` (`FreeGrL.cofreeHomEquivConil`,
+`FreeGrL.existsUnique_liftConil`). Species with elements without inputs, and existence with
+neither side projective, are open: transposition sees a cooperation only through its scalar
+functionals. For quadratic data `(E, r)` without generators with at most one
 input, **the comparison morphism `i : P^¡ → B(P, I)` commutes with the differentials**
 (`Koszul.d_toBar`, `Operad/KoszulBar.lean`), `ΩP^¡ → P` is the counit after `Ωi`
 (`Koszul.counit_comp`), and with Theorem A this gives **the Koszul criterion: `P` is Koszul iff
@@ -717,9 +794,20 @@ being an ideal (`Koszul.quadIdeal`); the desuspension map vanishes off the trees
 `C(sE, s²R)` is the largest subcooperad of `T^c(sE)` killed by the projection onto
 `T^c(sE)^{(2)}/s²R` (`Koszul.coquadSub`). **For quadratic relators `P^¡ = C(sE, s²R)`**
 (`Koszul.dualSub_eq_coquadSub`, through `Koszul.admissible_eq`), and the trees with two vertices
-of `P^¡` are corelations (`Koszul.dual_inf_wtEqL_le`). Not proved: that `κ_T ⋆ κ_T` is a
-bijection `T^c(sE)^{(2)} → T(E)^{(2)}`, which would make `s²R` the image of `R`, and the reverse
-inclusion `s²R ⊆ P^¡`.
+of `P^¡` are corelations (`Koszul.dual_inf_wtEqL_le`). `Operad/KoszulCorel.lean` proves the
+converse, **`s²R ⊆ P^¡`** (`Koszul.coRel_le_dual`): the trees with at most one vertex and the
+corelations form a subcooperad (`Koszul.coRelSub`), a corelation decomposing into a unit tensored
+with a relabelled corelation on either side, by the counit laws, plus parts with one vertex on
+each side; so **`P^¡ ∩ T^c(sE)^{(2)} = s²R`** (`Koszul.dual_inf_wtEqL`). When `E` has no elements
+without inputs, **`κ_T ⋆ κ_T` is a bijection `T^c(sE)^{(2)} ≃ T(E)^{(2)}`** (`Koszul.starEquiv`,
+`Koszul.bijOn_starKap`), so **`s²R` is the image of `R` under its inverse, and `s²R ≅ R`**
+(`Koszul.map_coRel`, `Koszul.coRelEquiv`). The proof compares with the cobar construction: `T(E)` is a retract of
+`ΩT^c(sE)` (`Koszul.kapHom_lamHom`), the retraction sends `ι ⋆ ι` to `κ_T ⋆ κ_T`
+(`Koszul.kapHom_ιι`), and the contraction identity `d h + h d = E - (1 - ε)` makes `ι ⋆ ι = -d ∘ ι`
+injective on the trees with two vertices and the image of a tree with two vertices of `T(E)` the
+boundary of a generator (`Koszul.eq_zero_of_starKap_eq_zero`, `Koszul.exists_starKap`). The
+hypothesis is needed: the convolution product sums over the decompositions whose inner operation
+has inputs, so `κ_T ⋆ κ_T` vanishes on a tree with two vertices whose top vertex has no inputs.
 
 **Graded composite products and root decompositions.** `Operad/GrComposite.lean` builds **the
 graded composite** `M ∘ N` of graded linear species: generators `m ⊗ (y_a)_a` with an order in
@@ -752,28 +840,38 @@ differential** `d_β` of `C ∘ P` is the extension of `cor ⋆ β` by the total
 `P ⋉ (C ∘ P)`, a morphism of right `P`-modules (`GrComposite.twD`, `GrComposite.twF_act`,
 `Operad/GrTwisted.lean`), with `d_α ∘ d_α` the extension of `cor ⋆ (α ⋆ α)`
 (`GrComposite.twD_sq`); `d_β` is the same for every augmentation of `P`
-(`GrComposite.twD_indep_aug`), which builds the square-zero extension and nothing else.
-For a dg operad `P`, **the twisted composite product `C ∘_α P`** has the
+(`GrComposite.twD_indep_aug`), which builds the square-zero extension and nothing else. **No
+augmentation is needed**: the free graded operad `T(P)` on `P` is augmented, a morphism of right
+modules along the evaluation `T(P) → P` does not see the inner operations beyond their images
+(`GrComposite.factor_map₂`), and so `d_{ι ∘ β}` of `C ∘ T(P)` descends to a twisted differential
+of `C ∘ P` for every graded operad `P` (`GrComposite.twD'`, `GrComposite.twD'_eval`,
+`Operad/GrTwistedFree.lean`), a morphism of right `P`-modules, equal to `twD ε β` for every
+augmentation `ε` (`GrComposite.twD'_eq`), with `twD' α ∘ twD' α = twD' (α ⋆ α)` for an odd `α`
+(`GrComposite.twD'_sq`). For a dg operad `P`, **the twisted composite product `C ∘_α P`** has the
 differential `D_α = d_α + (1 ∘' d_P)`, squaring to zero for a twisting morphism
 (`GrComposite.twDiff`, `GrComposite.twDiff_sq`, `Operad/GrTwistedDG.lean`, with the Leibniz rule
-of `1 ∘' d_P` against the action, `Operad/GrLeafAct.lean`). For a reduced cooperad, **`C ∘_ι ΩC`
+of `1 ∘' d_P` against the action, `Operad/GrLeafAct.lean`; for any `P`, `GrComposite.twDiff'`,
+`GrComposite.twDiff'_sq`, `GrComposite.twDiff'_eq`). For a reduced cooperad, **`C ∘_ι ΩC`
 is acyclic**: `h = (s ∘ 1) ∘ ρ ∘ (ε ∘ 1)` is a contracting homotopy onto the unit
 (`GrComposite.cobar_contraction`, `GrComposite.cobar_acyclic`, `Operad/GrTwistedCobar.lean`).
 Over a field of characteristic zero, with the graded commutator `[1 ∘' a, 1 ∘' b] = 1 ∘' [a, b]`
 (`GrComposite.leafMap_comm`) and equivariant splittings, `1 ∘ g : M ∘ N → M ∘ N'`, with the
 differentials at the inner operations, is a quasi-isomorphism when `g` is one
 (`GrComposite.qiso_leaf`, `Operad/GrLeafKunneth.lean`); filtering by the number of inputs of
-the outer cooperation, which the twisted differential lowers, gives **the comparison lemma**: for a morphism `g : P' → P`,
-`1 ∘ g : C ∘_β' P' → C ∘_β P` is a quasi-isomorphism in arity `S` when `g` is one in the arities
-at most `|S|` (`GrComposite.TwCompareData.qiso`, `Operad/GrTwistedCompare.lean`), and **`g` is a
-quasi-isomorphism as soon as `1 ∘ g` is one** (`GrComposite.TwCompareData.qiso_converse`,
-`Operad/GrTwistedConverse.lean`). So: **the fundamental theorem of twisting morphisms**, for a
-reduced cooperad `C` and a dg operad `P` without operations without inputs, a morphism
-`f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one (`Cobar.fundamental`,
-`Operad/KoszulComplex.lean`). The statement takes an augmentation of `P`, but only to build the
-differential of `C ∘_α P`, which does not depend on it (`GrComposite.twDiff_indep_aug`,
-`Cobar.fundamental_of_nonempty`); a `P` admitting no augmentation is not covered, the twisted
-differential not being constructed for it. And for quadratic data without generators with at most one input
+the outer cooperation, which the twisted differential lowers, gives **the comparison lemma**: for
+a morphism `g : P' → P`, `1 ∘ g : C ∘_β' P' → C ∘_β P` is a quasi-isomorphism in arity `S` when
+`g` is one in the arities at most `|S|` (`GrComposite.TwCompareData.qiso`,
+`Operad/GrTwistedCompare.lean`), and **`g` is a quasi-isomorphism as soon as `1 ∘ g` is one**
+(`GrComposite.TwCompareData.qiso_converse`, `Operad/GrTwistedConverse.lean`); both hold for
+twisted differentials given as linear maps lowering the number of outer inputs
+(`GrComposite.TwCompareGen.qiso`, `GrComposite.TwCompareGen.qiso_converse`). So: **the
+fundamental theorem of twisting morphisms**, for a reduced cooperad `C` and a dg operad `P`
+without operations without inputs, a morphism `f : ΩC → P` is a quasi-isomorphism iff
+`1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, **for every such `P`, augmented or not**
+(`Cobar.fundamental'`, `Operad/KoszulComplex.lean`), the differential of `C ∘_α P` being
+`GrComposite.twDiff'`; the forms taking an augmentation of `P`, with the same differential, are
+`Cobar.fundamental` and `Cobar.fundamental_of_nonempty`. And for quadratic data without
+generators with at most one input
 presenting `P` with a free unit, augmented by the coefficient of the unit (`Koszul.presAug`),
 **the Koszul complex criterion: `P` is Koszul iff the Koszul complex `P^¡ ∘_κ P` is acyclic in the
 arities at least two** (`Koszul.isKoszul_iff_acyclic`).

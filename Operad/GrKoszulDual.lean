@@ -22,6 +22,10 @@ desuspensions, and vanishes on the other trees.
   `P` is **Koszul** when it is a quasi-isomorphism (`Koszul.IsKoszul`).
 
 Graded operads are dg operads with the zero differential (`ZeroDG`).
+
+For even generators the presented operad is a symmetric, hence shuffle, operad
+(`Operad/GrShuffle.lean`); the comparison of `Koszul.IsKoszul` with the shuffle notions
+`ShuffleBar.IsKoszul` and `Rules.IsKoszul` is open.
 -/
 import Operad.GrSubCooperad
 import Operad.Twisting

@@ -5,15 +5,19 @@ Let `V` be a reduced graded linear species, without elements with at most one in
 graded cooperad, over a `ℚ`-algebra `R`. **The morphisms of graded cooperads `C → T^c(V)` into the
 cut cooperad `T^c(V) = FreeGrL R V` are the morphisms of graded linear species `C → V`**, by
 composition with the coefficient of the generators, when the modules `C (Fin k)` are projective,
-as over a field (`FreeGrL.cofreeHomEquiv`, `FreeGrL.existsUnique_lift`). For a coaugmented `C`
-they are the morphisms `C̄ → V` from the reduced part (`FreeGrL.cofreeHomEquivRed`).
+as over a field (`FreeGrL.cofreeHomEquiv`, `FreeGrL.existsUnique_lift`), and more generally when
+in each arity `k ≥ 2` the module `C (Fin k)` or the module `V (Fin k)` is projective
+(`FreeGrL.cofreeHomEquiv'`, `FreeGrL.existsUnique_lift'`). For a coaugmented `C` they are the
+morphisms `C̄ → V` from the reduced part (`FreeGrL.cofreeHomEquivRed`,
+`FreeGrL.cofreeHomEquivRed'`).
 
-* **Uniqueness** (`FreeGrL.app_eq_of_genCoef`). The difference `δ = f - f'` of two morphisms with
+* **Uniqueness** (`FreeGrL.app_eq_of_genCoef₀`, for any `V` without elements without inputs and
+  any `C`). The difference `δ = f - f'` of two morphisms with
   the same coefficient of the generators has no unit component and no trees with one vertex
   (`FreeGrL.sub_ι_genCoef_mem`), and `(ι ⋆ ι) ∘ δ = (ι δ) ⋆ (ι f) + (ι f') ⋆ (ι δ)`
   (`FreeGrL.star_sub_star_mem`), so if the values of `δ` have at least `k ≥ 2` vertices they have
-  at least `k + 1` (`Cobar.mem_vxGe_succ`); the trees with `|A|` inputs have fewer than `|A|`
-  vertices.
+  at least `k + 1` (`Cobar.mem_vxGe_succ`); an element of `T^c(V)` is a finite sum of trees
+  (`FreeGrL.eq_zero_of_forall_mem_vxGe`).
 * **Transposition.** A morphism of graded operads `Ψ` from a free graded operad on generators to
   the scalar-valued convolution operad `ConvOp R C (ScalarOp R)` gives each tree `t` the
   functional `c ↦ σ(C(n, 2)) Ψ(t)(c)` on the cooperations, `n` the number of odd vertices of `t`
@@ -23,7 +27,8 @@ they are the morphisms `C̄ → V` from the reduced part (`FreeGrL.cofreeHomEqui
   with a nonzero coefficient, `c ↦ ∑ₜ coefF t c · t` is a morphism of graded cooperads into the
   free graded operad (`FreeGr.ofCoef`).
 * **Existence.** A morphism `φ : C → V` lifts through the combinations of homogeneous
-  generators, parity by parity, `C (Fin k)` being projective (`FreeGrL.exists_genLift`).
+  generators, parity by parity, `C (Fin k)` or `V (Fin k)` being projective
+  (`FreeGrL.exists_genLift`, `FreeGrL.exists_genLift_of`, `FreeGrL.liftLOf`).
   Weighting the generators with `k` inputs by `1 / k!` defines `Ψ` (`FreeGrL.liftOp`), whose
   coefficients are locally finite by induction on the number of inputs (`FreeGrL.coefFinite`,
   with the shapes of trees `FreeGr.shapeR`). Its image in the cut cooperad (`FreeGrL.lift`) has
@@ -31,8 +36,10 @@ they are the morphisms `C̄ → V` from the reduced part (`FreeGrL.cofreeHomEqui
   each of the `k!` numberings `e` of the inputs, that is to `φ(c)` (`FreeGrL.genCoef_lift`).
 
 Conilpotence of `C` is not needed: `V` being reduced, the trees with `|A|` inputs have fewer than
-`|A|` vertices. The case of a species `V` with elements of at most one input, over a conilpotent
-`C`, is not treated.
+`|A|` vertices. Species with elements of one input, over a conilpotent `C`, are treated in
+`Operad/CutCofreeConil.lean`. Existence with neither side projective is open: the transposition
+detects a cooperation only through scalar functionals, and over a general `ℚ`-algebra a module
+`C (Fin k)` may have no nonzero functional while mapping nontrivially to `V`.
 -/
 import Operad.KoszulBar
 import Operad.FreeGrRoot
@@ -496,14 +503,18 @@ local notation "𝔟" => SgnLin.bas (treeSgn (grGenPar R V)) R
 
 /-- **A lift of a morphism of graded linear species to the homogeneous generators**: linear maps
 sending a cooperation with `k` inputs to a combination of generators of its parity whose value
-is its image, vanishing for `k ≤ 1`. -/
-structure GenLift (φ : GrSpeciesHom R C V) where
+is its image. -/
+structure GenLift₀ (φ : GrSpeciesHom R C V) where
   /-- The lift in arity `k`. -/
   L (k : ℕ) : C (Fin k) →ₗ[R] (GrGen R V k →₀ R)
   lc (k : ℕ) (x : C (Fin k)) :
     Finsupp.linearCombination R (fun g : GrGen R V k => g.1.1) (L k x) = φ.app (Fin k) x
   par (k : ℕ) (b : Bool) (x : C (Fin k)) (g : GrGen R V k) :
     L k (GrSpecies.par (R := R) b x) g = if g.1.2 = b then L k x g else 0
+
+/-- **A lift to the homogeneous generators vanishing for `k ≤ 1`**, as for a reduced graded
+linear species. -/
+structure GenLift (φ : GrSpeciesHom R C V) extends GenLift₀ φ where
   low (k : ℕ) : k ≤ 1 → L k = 0
 
 variable (R) in
@@ -517,7 +528,7 @@ variable [Algebra ℚ R] {φ : GrSpeciesHom R C V}
 
 /-- The values on the generators: the coefficient of a generator in the lift, weighted by
 `1 / k!`. -/
-noncomputable def liftVal (ℓ : GenLift φ) :
+noncomputable def liftVal (ℓ : GenLift₀ φ) :
     FreeGr.GenVal R (grGenPar R V) (ConvOp R C (ScalarOp R)) :=
   ⟨fun k g => ConvOp.of ((ScalarOp.of (Fin k)).toLinearMap ∘ₗ
       (wk R k • (Finsupp.lapply g ∘ₗ ℓ.L k))), fun k g => by
@@ -530,11 +541,11 @@ noncomputable def liftVal (ℓ : GenLift φ) :
 
 /-- **The transposed morphism**: the morphism of graded operads from the free graded operad on
 the homogeneous generators to the scalar-valued convolution operad given by the lift. -/
-noncomputable def liftOp (ℓ : GenLift φ) :
+noncomputable def liftOp (ℓ : GenLift₀ φ) :
     GrOperadHom R (FreeGr R (grGenPar R V)) (ConvOp R C (ScalarOp R)) :=
   FreeGr.homEquiv.symm (liftVal ℓ)
 
-lemma liftOp_gen (ℓ : GenLift φ) {k : ℕ} (g : GrGen R V k) :
+lemma liftOp_gen (ℓ : GenLift₀ φ) {k : ℕ} (g : GrGen R V k) :
     (liftOp ℓ).app (Fin k) (𝔟 (Reg.std (corolla g))) = (liftVal ℓ).1 k g :=
   FreeGr.homEquiv_symm_gen _ g
 
@@ -546,20 +557,20 @@ lemma bsgn_std {k : ℕ} (g : GrGen R V k) :
   cases grGenPar R V k g <;> rfl
 
 /-- **The coefficient of a corolla** is the weighted coefficient of the generator in the lift. -/
-lemma coefF_std (ℓ : GenLift φ) {k : ℕ} (g : GrGen R V k) (c : C (Fin k)) :
+lemma coefF_std (ℓ : GenLift₀ φ) {k : ℕ} (g : GrGen R V k) (c : C (Fin k)) :
     FreeGr.coefF (liftOp ℓ) (Reg.std (corolla g)) c = wk R k * ℓ.L k c g := by
   rw [FreeGr.coefF_apply, bsgn_std, one_mul, liftOp_gen]
   rfl
 
 /-- **A tree with a nonzero image has fewer vertices than inputs.** -/
 lemma liftOp_bas (ℓ : GenLift φ) (x : Reg (TreeOfArity (GrGen R V)) A) :
-    (liftOp ℓ).app A (𝔟 x) = 0 ∨ FreeGr.vcnt x + 1 ≤ Fintype.card A := by
-  refine FreeReg.induction (P := fun A _ _ x => (liftOp ℓ).app A (𝔟 x) = 0 ∨
+    (liftOp ℓ.toGenLift₀).app A (𝔟 x) = 0 ∨ FreeGr.vcnt x + 1 ≤ Fintype.card A := by
+  refine FreeReg.induction (P := fun A _ _ x => (liftOp ℓ.toGenLift₀).app A (𝔟 x) = 0 ∨
     FreeGr.vcnt x + 1 ≤ Fintype.card A) ?_ ?_ ?_ ?_ x
   · intro A B _ _ _ _ e x hx
     rcases hx with h | h
     · left
-      rw [← SgnLin.map_bas, (liftOp ℓ).app_map, h, map_zero]
+      rw [← SgnLin.map_bas, (liftOp ℓ.toGenLift₀).app_map, h, map_zero]
     · right
       rw [FreeGr.vcnt_map, ← Fintype.card_congr e]
       exact h
@@ -589,7 +600,8 @@ lemma liftOp_bas (ℓ : GenLift φ) (x : Reg (TreeOfArity (GrGen R V)) A) :
       omega
 
 lemma coefF_ne_zero (ℓ : GenLift φ) {x : Reg (TreeOfArity (GrGen R V)) A} {c : C A}
-    (h : FreeGr.coefF (liftOp ℓ) x c ≠ 0) : FreeGr.vcnt x + 1 ≤ Fintype.card A := by
+    (h : FreeGr.coefF (liftOp ℓ.toGenLift₀) x c ≠ 0) :
+    FreeGr.vcnt x + 1 ≤ Fintype.card A := by
   rcases liftOp_bas ℓ x with h0 | h0
   · refine absurd ?_ h
     rw [FreeGr.coefF_apply, h0]
@@ -605,8 +617,9 @@ lemma ne_zero_of_pair_ne_zero {X Y : Type*} [AddCommGroup X] [Module R X] [AddCo
   · rw [hg, map_zero, LinearMap.zero_apply]
 
 lemma two_le_of_coefF (ℓ : GenLift φ) {x : Reg (TreeOfArity (GrGen R V)) A}
-    (hx : FreeGr.vcnt x ≠ 0) (h : FreeGr.coefF (liftOp ℓ) x ≠ 0) : 2 ≤ Fintype.card A := by
-  obtain ⟨c, hc⟩ : ∃ c, FreeGr.coefF (liftOp ℓ) x c ≠ 0 := by
+    (hx : FreeGr.vcnt x ≠ 0) (h : FreeGr.coefF (liftOp ℓ.toGenLift₀) x ≠ 0) :
+    2 ≤ Fintype.card A := by
+  obtain ⟨c, hc⟩ : ∃ c, FreeGr.coefF (liftOp ℓ.toGenLift₀) x c ≠ 0 := by
     by_contra hn
     exact h (LinearMap.ext fun c => not_not.1 fun hc => hn ⟨c, hc⟩)
   have := coefF_ne_zero ℓ hc
@@ -615,10 +628,10 @@ lemma two_le_of_coefF (ℓ : GenLift φ) {x : Reg (TreeOfArity (GrGen R V)) A}
 /-- **The coefficients of the lift are locally finite**: a cooperation has finitely many trees
 with nonzero coefficient, by induction on the number of inputs, a composite of two trees with
 vertices and nonzero coefficients having more inputs than each. -/
-theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ) := by
+theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ.toGenLift₀) := by
   suffices h : ∀ n (A : Type) [Fintype A] [DecidableEq A], Fintype.card A = n → ∀ c : C A,
       (Function.support fun x : Reg (TreeOfArity (GrGen R V)) A =>
-        FreeGr.coefF (liftOp ℓ) x c).Finite from fun A _ _ c => h _ A rfl c
+        FreeGr.coefF (liftOp ℓ.toGenLift₀) x c).Finite from fun A _ _ c => h _ A rfl c
   intro n
   induction n using Nat.strong_induction_on with
   | _ n ih =>
@@ -626,15 +639,17 @@ theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ) := by
   have hV : ∀ (a b : ℕ) (i : Fin a) (e : Without (Fin a) i ⊕ Fin b ≃ A),
       {pq : Reg (TreeOfArity (GrGen R V)) (Fin a) × Reg (TreeOfArity (GrGen R V)) (Fin b) |
         FreeGr.vcnt pq.1 ≠ 0 ∧ FreeGr.vcnt pq.2 ≠ 0 ∧
-        SymCooperad.pair (FreeGr.coefF (liftOp ℓ) pq.1) (FreeGr.coefF (liftOp ℓ) pq.2)
+        SymCooperad.pair (FreeGr.coefF (liftOp ℓ.toGenLift₀) pq.1)
+          (FreeGr.coefF (liftOp ℓ.toGenLift₀) pq.2)
           (GrCooperad.decomp (R := R) i (SymSpecies.map (R := R) e.symm c)) ≠ 0}.Finite := by
     intro a b i e
     have hcard := Fintype.card_congr e
     rw [Fintype.card_sum, Reg.card_without, Fintype.card_fin, Fintype.card_fin] at hcard
     have ha := i.pos
     by_cases hab : 2 ≤ a ∧ 2 ≤ b
-    · refine (SymCooperad.finite_support_pair_all (fun p => FreeGr.coefF (liftOp ℓ) p)
-        (fun q => FreeGr.coefF (liftOp ℓ) q) (fun x => ih a (by omega) (Fin a)
+    · refine (SymCooperad.finite_support_pair_all
+        (fun p => FreeGr.coefF (liftOp ℓ.toGenLift₀) p)
+        (fun q => FreeGr.coefF (liftOp ℓ.toGenLift₀) q) (fun x => ih a (by omega) (Fin a)
           (Fintype.card_fin a) x) (fun y => ih b (by omega) (Fin b) (Fintype.card_fin b) y)
         _).subset fun pq hpq => hpq.2.2
     · refine Set.finite_empty.subset fun pq ⟨hp, hq, hne⟩ => absurd ?_ hab
@@ -653,7 +668,8 @@ theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ) := by
       (fun pq : Reg (TreeOfArity (GrGen R V)) (Fin a) × Reg (TreeOfArity (GrGen R V)) (Fin b) =>
         SetOperad.map e (SetOperad.comp i pq.1 pq.2)) ''
         {pq | FreeGr.vcnt pq.1 ≠ 0 ∧ FreeGr.vcnt pq.2 ≠ 0 ∧
-          SymCooperad.pair (FreeGr.coefF (liftOp ℓ) pq.1) (FreeGr.coefF (liftOp ℓ) pq.2)
+          SymCooperad.pair (FreeGr.coefF (liftOp ℓ.toGenLift₀) pq.1)
+            (FreeGr.coefF (liftOp ℓ.toGenLift₀) pq.2)
             (GrCooperad.decomp (R := R) i (SymSpecies.map (R := R) e.symm c)) ≠ 0}
   have h₀ : U₀.Finite := Set.finite_range _
   have h₁ : U₁.Finite := Set.finite_iUnion fun e => (Finset.finite_toSet _).image _
@@ -666,7 +682,7 @@ theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ) := by
   rcases FreeGr.shapeR t with ⟨e, rfl⟩ | ⟨k, g, e, rfl⟩ | ⟨a, b, i, p, q, e, hp, hq, rfl⟩
   · exact Or.inl (Or.inl ⟨e, rfl⟩)
   · obtain rfl : k = Fintype.card A := by simpa using Fintype.card_congr e
-    rw [FreeGr.coefF_map, coefF_std] at ht
+    rw [FreeGr.coefF_map, coefF_std ℓ.toGenLift₀] at ht
     refine Or.inl (Or.inr (Set.mem_iUnion.2 ⟨e, g, Finsupp.mem_support_iff.2 ?_, rfl⟩))
     exact right_ne_zero_of_mul ht
   · have hcard := Fintype.card_congr e
@@ -678,10 +694,17 @@ theorem coefFinite (ℓ : GenLift φ) : FreeGr.CoefFinite (liftOp ℓ) := by
     · exact Finset.mem_coe.2 (Finset.mem_range.2 (by omega))
     · exact Finset.mem_coe.2 (Finset.mem_range.2 (by omega))
 
+/-- **The morphism of graded cooperads given by a lift with locally finite coefficients**: the
+transposed morphism into the free graded operad on the homogeneous generators, followed by the
+projection to the cut cooperad. -/
+noncomputable def liftOf (ℓ : GenLift₀ φ) (hΨ : FreeGr.CoefFinite (liftOp ℓ)) :
+    GrCooperadHom R C (FreeGrL R V) :=
+  (projHom R V).comp (FreeGr.ofCoef (liftOp ℓ) hΨ)
+
 /-- **The morphism of graded cooperads given by a lift**: the transposed morphism into the free
 graded operad on the homogeneous generators, followed by the projection to the cut cooperad. -/
 noncomputable def lift (ℓ : GenLift φ) : GrCooperadHom R C (FreeGrL R V) :=
-  (projHom R V).comp (FreeGr.ofCoef (liftOp ℓ) (coefFinite ℓ))
+  liftOf ℓ.toGenLift₀ (coefFinite ℓ)
 
 omit [Algebra ℚ R] in
 /-- Relabelled corollas determine their relabelling and their label. -/
@@ -739,15 +762,15 @@ lemma eq_std_of_weight {t : Reg (TreeOfArity (GrGen R V)) A}
 /-- **The cogenerator part of the lift is the given morphism**: the trees with one vertex of the
 image of `c` are the corollas `e · g`, with coefficient `L(e⁻¹ c)(g) / k!`, whose values add up to
 `e · φ(e⁻¹ c) / k! = φ(c) / k!` for each of the `k!` numberings `e` of the inputs. -/
-theorem genCoef_lift (ℓ : GenLift φ) (c : C A) :
-    genCoef R V A ((lift ℓ).app A c) = φ.app A c := by
+theorem genCoef_liftOf (ℓ : GenLift₀ φ) (hΨ : FreeGr.CoefFinite (liftOp ℓ)) (c : C A) :
+    genCoef R V A ((liftOf ℓ hΨ).app A c) = φ.app A c := by
   haveI : DecidableEq (Reg (TreeOfArity (GrGen R V)) A) := Classical.decEq _
   set k := Fintype.card A with hk
   set y : Reg (TreeOfArity (GrGen R V)) A →₀ R :=
-    FreeGr.ofCoefL (liftOp ℓ) (coefFinite ℓ) A c with hy
+    FreeGr.ofCoefL (liftOp ℓ) hΨ A c with hy
   let f : Reg (TreeOfArity (GrGen R V)) A → V A := fun t =>
     FreeGr.coefF (liftOp ℓ) t c • coefReg R V t
-  have h1 : genCoef R V A ((lift ℓ).app A c) = ∑ t ∈ y.support, f t := by
+  have h1 : genCoef R V A ((liftOf ℓ hΨ).app A c) = ∑ t ∈ y.support, f t := by
     show genCoefF R V A y = _
     rw [genCoefF]
     erw [Finsupp.linearCombination_apply]
@@ -793,6 +816,11 @@ theorem genCoef_lift (ℓ : GenLift φ) (c : C A) :
     rw [show FreeGr.coefF (liftOp ℓ) t c = y t from rfl, Finsupp.notMem_support_iff.1 ht,
       zero_smul]
 
+/-- **The cogenerator part of the lift is the given morphism.** -/
+theorem genCoef_lift (ℓ : GenLift φ) (c : C A) :
+    genCoef R V A ((lift ℓ).app A c) = φ.app A c :=
+  genCoef_liftOf ℓ.toGenLift₀ (coefFinite ℓ) c
+
 /-! ## Existence of lifts -/
 
 section Exists
@@ -827,9 +855,13 @@ lemma coe_parValMap (k : ℕ) (b : Bool) (F : GenOf R V k b →₀ R) :
     Finsupp.linearCombination_apply, Finsupp.sum, Finsupp.sum, Submodule.coe_sum]
   rfl
 
+variable {X : (A : Type) → [Fintype A] → [DecidableEq A] → Type*}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (X A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (X A)] [GrSpecies R X]
+
 /-- The part of parity `b` of the image, onto the elements of parity `b`. -/
-noncomputable def parImg (φ : GrSpeciesHom R C V) (k : ℕ) (b : Bool) :
-    C (Fin k) →ₗ[R] LinearMap.range (GrSpecies.par (R := R) (V := V) (A := Fin k) b) :=
+noncomputable def parImg (φ : GrSpeciesHom R X V) (k : ℕ) (b : Bool) :
+    X (Fin k) →ₗ[R] LinearMap.range (GrSpecies.par (R := R) (V := V) (A := Fin k) b) :=
   LinearMap.codRestrict _ (GrSpecies.par (R := R) b ∘ₗ φ.app (Fin k)) fun c =>
     ⟨φ.app (Fin k) c, rfl⟩
 
@@ -838,6 +870,98 @@ lemma mapDomain_val_apply {k : ℕ} {b : Bool} (F : GenOf R V k b →₀ R) (g :
   split_ifs with h
   · exact Finsupp.mapDomain_apply Subtype.val_injective F ⟨g, h⟩
   · exact Finsupp.mapDomain_notin_range F g fun ⟨g', hg'⟩ => h (hg' ▸ g'.2)
+
+/-- **Lifts to the generators of each parity**, through the surjective value maps, when `X (Fin k)`
+or `V (Fin k)` is projective. In the second case the lift factors through `φ`. -/
+lemma exists_lift_par_of (φ : GrSpeciesHom R X V) (k : ℕ) (b : Bool)
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) :
+    ∃ h : X (Fin k) →ₗ[R] (GenOf R V k b →₀ R), parValMap R V k b ∘ₗ h = parImg φ k b := by
+  rcases hk with hk | hk
+  · exact Module.projective_lifting_property _ _ (parValMap_surjective k b)
+  · obtain ⟨s, hs⟩ := Module.projective_lifting_property (parValMap R V k b)
+      (LinearMap.codRestrict _ (GrSpecies.par (R := R) (V := V) (A := Fin k) b) fun v => ⟨v, rfl⟩)
+      (parValMap_surjective k b)
+    refine ⟨s ∘ₗ φ.app (Fin k), LinearMap.ext fun x => ?_⟩
+    rw [← LinearMap.comp_assoc, hs]
+    rfl
+
+/-- The chosen lift to the generators of each parity, `X (Fin k)` or `V (Fin k)` being
+projective. -/
+noncomputable def liftParOf (φ : GrSpeciesHom R X V) (k : ℕ) (b : Bool)
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) :
+    X (Fin k) →ₗ[R] (GenOf R V k b →₀ R) :=
+  Classical.choose (exists_lift_par_of φ k b hk)
+
+lemma parValMap_liftParOf (φ : GrSpeciesHom R X V) (k : ℕ) (b : Bool)
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) (x : X (Fin k)) :
+    (parValMap R V k b (liftParOf φ k b hk x) : V (Fin k))
+      = GrSpecies.par (R := R) b (φ.app (Fin k) x) :=
+  congrArg Subtype.val
+    (LinearMap.congr_fun (Classical.choose_spec (exists_lift_par_of φ k b hk)) x)
+
+/-- **The lift in arity `k`**: the parts of each parity lifted, `X (Fin k)` or `V (Fin k)` being
+projective. -/
+noncomputable def liftLOf (φ : GrSpeciesHom R X V) (k : ℕ)
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) :
+    X (Fin k) →ₗ[R] (GrGen R V k →₀ R) :=
+  ∑ b : Bool, Finsupp.lmapDomain R R Subtype.val ∘ₗ liftParOf φ k b hk ∘ₗ
+    GrSpecies.par (R := R) b
+
+lemma liftLOf_apply (φ : GrSpeciesHom R X V) {k : ℕ}
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) (x : X (Fin k))
+    (g : GrGen R V k) :
+    liftLOf φ k hk x g = liftParOf φ k g.1.2 hk (GrSpecies.par (R := R) g.1.2 x) ⟨g, rfl⟩ := by
+  rw [liftLOf, LinearMap.coe_sum, Finset.sum_apply, Finsupp.finsetSum_apply, Fintype.sum_bool]
+  simp only [LinearMap.comp_apply, Finsupp.lmapDomain_apply, mapDomain_val_apply]
+  obtain ⟨⟨v, c⟩, hv⟩ := g
+  cases c <;> simp
+
+/-- **The value of the lift is the image.** -/
+lemma lc_liftLOf (φ : GrSpeciesHom R X V) {k : ℕ}
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) (x : X (Fin k)) :
+    Finsupp.linearCombination R (fun g : GrGen R V k => g.1.1) (liftLOf φ k hk x)
+      = φ.app (Fin k) x := by
+  rw [liftLOf, LinearMap.coe_sum, Finset.sum_apply, map_sum, Fintype.sum_bool]
+  simp only [LinearMap.comp_apply, Finsupp.lmapDomain_apply, ← coe_parValMap,
+    parValMap_liftParOf, ← φ.app_par, GrSpecies.par_par_self]
+  rw [add_comm, ← map_add, GrSpecies.par_add]
+
+/-- **The lift sees only the generators of the parity of a homogeneous element.** -/
+lemma liftLOf_par (φ : GrSpeciesHom R X V) {k : ℕ}
+    (hk : Module.Projective R (X (Fin k)) ∨ Module.Projective R (V (Fin k))) (b : Bool)
+    (x : X (Fin k)) (g : GrGen R V k) :
+    liftLOf φ k hk (GrSpecies.par (R := R) b x) g
+      = if g.1.2 = b then liftLOf φ k hk x g else 0 := by
+  obtain ⟨⟨v, c⟩, hv⟩ := g
+  rw [liftLOf_apply φ hk, liftLOf_apply φ hk]
+  show liftParOf φ k c hk (GrSpecies.par (R := R) c (GrSpecies.par (R := R) b x)) _
+    = if c = b then liftParOf φ k c hk (GrSpecies.par (R := R) c x) _ else 0
+  by_cases h : c = b
+  · subst h
+    rw [GrSpecies.par_par_self, if_pos rfl]
+  · rw [GrSpecies.par_par_ne h, map_zero, if_neg h]
+    rfl
+
+/-- **Every morphism into a reduced graded linear species lifts to the homogeneous generators**
+when, in each arity `k ≥ 2`, the cooperations or the elements of `V` form a projective module. -/
+theorem exists_genLift_of
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    (hproj : ∀ k, 2 ≤ k → Module.Projective R (C (Fin k)) ∨ Module.Projective R (V (Fin k)))
+    (φ : GrSpeciesHom R C V) : Nonempty (GenLift φ) := by
+  refine ⟨⟨⟨fun k => if h : 2 ≤ k then liftLOf φ k (hproj k h) else 0, fun k x => ?_,
+    fun k b x g => ?_⟩, fun k hk => ?_⟩⟩
+  · beta_reduce
+    by_cases hk : 2 ≤ k
+    · rw [dif_pos hk]
+      exact lc_liftLOf φ _ x
+    · rw [dif_neg hk]
+      exact (hred (Fin k) (by rw [Fintype.card_fin]; omega) _).trans
+        (hred (Fin k) (by rw [Fintype.card_fin]; omega) _).symm
+  · by_cases hk : 2 ≤ k
+    · simp only [dif_pos hk]
+      exact liftLOf_par φ _ b x g
+    · simp only [dif_neg hk, LinearMap.zero_apply, Finsupp.coe_zero, Pi.zero_apply, ite_self]
+  · exact dif_neg (by omega)
 
 variable [hC : ∀ k : ℕ, Module.Projective R (C (Fin k))]
 
@@ -876,7 +1000,7 @@ on a cooperad of projective modules. -/
 theorem exists_genLift
     (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
     (φ : GrSpeciesHom R C V) : Nonempty (GenLift φ) := by
-  refine ⟨⟨liftL φ, fun k x => ?_, fun k b x g => ?_, fun k hk => ?_⟩⟩
+  refine ⟨⟨⟨liftL φ, fun k x => ?_, fun k b x g => ?_⟩, fun k hk => ?_⟩⟩
   · by_cases hk : 2 ≤ k
     · rw [liftL, if_pos hk, LinearMap.coe_sum, Finset.sum_apply, map_sum, Fintype.sum_bool]
       simp only [LinearMap.comp_apply, Finsupp.lmapDomain_apply, ← coe_parValMap, parValMap_liftPar,
@@ -896,7 +1020,8 @@ theorem exists_genLift
         rfl
     · rw [liftL, if_neg hk]
       simp
-  · rw [liftL, if_neg (by omega)]
+  · show liftL φ k = 0
+    rw [liftL, if_neg (by omega)]
 
 end Exists
 
@@ -1052,16 +1177,33 @@ lemma ιι_sub_mem {f f' : GrCooperadHom R C 𝒞} {k : ℕ}
       (q' := GrOperad.Inv.appHom (ConvOp.preHom (P := CobarGr R 𝒞) f') (Cobar.ι R 𝒞))
       (toLin_sub_appHom_mem f f' hk) (toLin_appHom_ι_mem f) (toLin_appHom_ι_mem f') A x)
 
+omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrCooperad R C] in
+/-- **An element with arbitrarily many vertices vanishes**: it is a finite sum of trees. -/
+lemma eq_zero_of_forall_mem_vxGe {z : FreeGrL R V A} (hz : ∀ p, z ∈ vxGe R V p A) : z = 0 := by
+  have htop : z ∈ ⨆ j : ℕ, vx R V j A := by
+    rw [iSup_vx]
+    exact Submodule.mem_top
+  obtain ⟨s, hs⟩ := Submodule.mem_iSup_iff_exists_finset.1 htop
+  have hst : Disjoint (s : Set ℕ) (Set.Ici (s.sup id + 1)) := by
+    refine Set.disjoint_left.2 fun j hj hj' => ?_
+    have h1 : j ≤ s.sup id := Finset.le_sup (f := id) (Finset.mem_coe.1 hj)
+    have h2 : s.sup id + 1 ≤ j := hj'
+    omega
+  have hd := (iSupIndep_eigenspace_nat ((derSp (GrSpEnd.id R V)).app A)).disjoint_biSup_biSup hst
+  refine Submodule.disjoint_def.1 hd z (by simpa only [Finset.mem_coe] using hs) ?_
+  refine (iSup_le fun k => ?_ : vxGe R V (s.sup id + 1) A ≤ ⨆ i ∈ Set.Ici (s.sup id + 1),
+    vx R V i A) (hz _)
+  exact le_biSup (fun j => vx R V j A) (Set.mem_Ici.2 k.2)
+
 /-- **Morphisms into the cut cooperad are determined by their cogenerator parts**: two morphisms
-of graded cooperads into the cut cooperad on a reduced graded linear species with the same
-coefficient of the generators agree, over a `ℚ`-algebra. -/
-theorem app_eq_of_genCoef
-    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
-    {f f' : GrCooperadHom R C 𝒞}
+of graded cooperads into the cut cooperad on a graded linear species without elements without
+inputs, with the same coefficient of the generators, agree, over a `ℚ`-algebra. The species may
+have elements with one input, and the cooperad need not be conilpotent. -/
+theorem app_eq_of_genCoef₀ (hV0 : ∀ v : V (Fin 0), v = 0) {f f' : GrCooperadHom R C 𝒞}
     (h : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
       genCoef R V A (f.app A x) = genCoef R V A (f'.app A x))
     (A : Type) [Fintype A] [DecidableEq A] (x : C A) : f.app A x = f'.app A x := by
-  have hV0 : ∀ v : V (Fin 0), v = 0 := hred (Fin 0) (by simp)
   have hu : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
       unitCoeffL R V A (f.app A x - f'.app A x) = 0 := by
     intro A _ _ x
@@ -1086,9 +1228,19 @@ theorem app_eq_of_genCoef
       rwa [map_sub, h, sub_self, map_zero, sub_zero] at this
     | succ k hk ih =>
       exact fun A' _ _ x' => Cobar.mem_vxGe_succ hV0 hk (ih A' x') (ιι_sub_mem ih A' x')
-  have hle := vxGe_anti (R := R) (V := V) (A := A) (le_max_right 2 (Fintype.card A))
-  rw [vxGe_card hred] at hle
-  exact sub_eq_zero.1 ((Submodule.mem_bot R).1 (hle (key _ (le_max_left _ _) A x)))
+  exact sub_eq_zero.1 (eq_zero_of_forall_mem_vxGe fun p =>
+    vxGe_anti (le_max_left p 2) (key _ (le_max_right p 2) A x))
+
+/-- **Morphisms into the cut cooperad are determined by their cogenerator parts**: two morphisms
+of graded cooperads into the cut cooperad on a reduced graded linear species with the same
+coefficient of the generators agree, over a `ℚ`-algebra. -/
+theorem app_eq_of_genCoef
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    {f f' : GrCooperadHom R C 𝒞}
+    (h : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      genCoef R V A (f.app A x) = genCoef R V A (f'.app A x))
+    (A : Type) [Fintype A] [DecidableEq A] (x : C A) : f.app A x = f'.app A x :=
+  app_eq_of_genCoef₀ (hred (Fin 0) (by simp)) h A x
 
 end Unique
 
@@ -1114,6 +1266,41 @@ omit [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (C A)]
   [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (C A)] [GrCooperad R C] [Algebra ℚ R] in
 @[simp] lemma genCoefHom_app (x : FreeGrL R V A) : (genCoefHom R V).app A x = genCoef R V A x :=
   rfl
+
+/-- **The universal property of the cut cooperad, with projectivity on either side**: over a
+`ℚ`-algebra, for a reduced graded linear species `V` and a graded cooperad `C` such that in each
+arity `k ≥ 2` the cooperations `C (Fin k)` or the elements `V (Fin k)` form a projective module,
+the morphisms of graded cooperads `C → T^c(V)` are the morphisms of graded linear species
+`C → V`, by composition with the projection onto the cogenerators. -/
+noncomputable def cofreeHomEquiv'
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    (hproj : ∀ k, 2 ≤ k → Module.Projective R (C (Fin k)) ∨ Module.Projective R (V (Fin k))) :
+    GrCooperadHom R C (FreeGrL R V) ≃ GrSpeciesHom R C V where
+  toFun f := (genCoefHom R V).comp f.toGrSpeciesHom
+  invFun φ := lift (Classical.choice (exists_genLift_of hred hproj φ))
+  left_inv _ := GrCooperadHom.ext (app_eq_of_genCoef hred fun _ _ _ x => genCoef_lift _ x)
+  right_inv _ := GrSpeciesHom.ext fun _ _ _ x => genCoef_lift _ x
+
+@[simp] lemma cofreeHomEquiv'_apply
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    (hproj : ∀ k, 2 ≤ k → Module.Projective R (C (Fin k)) ∨ Module.Projective R (V (Fin k)))
+    (f : GrCooperadHom R C (FreeGrL R V)) (x : C A) :
+    (cofreeHomEquiv' hred hproj f).app A x = genCoef R V A (f.app A x) :=
+  rfl
+
+/-- **The cofree property of the cut cooperad, with projectivity on either side**: every
+morphism of graded linear species into a reduced graded linear species `V` lifts uniquely to a
+morphism of graded cooperads into `T^c(V)`, over a `ℚ`-algebra, when in each arity `k ≥ 2` the
+cooperations or the elements of `V` form a projective module. -/
+theorem existsUnique_lift'
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    (hproj : ∀ k, 2 ≤ k → Module.Projective R (C (Fin k)) ∨ Module.Projective R (V (Fin k)))
+    (φ : GrSpeciesHom R C V) :
+    ∃! f : GrCooperadHom R C (FreeGrL R V), ∀ (A : Type) [Fintype A] [DecidableEq A] (x : C A),
+      genCoef R V A (f.app A x) = φ.app A x :=
+  ⟨lift (Classical.choice (exists_genLift_of hred hproj φ)), fun _ _ _ x => genCoef_lift _ x,
+    fun _ hf => GrCooperadHom.ext (app_eq_of_genCoef hred fun A _ _ x =>
+      (hf A x).trans (genCoef_lift _ x).symm)⟩
 
 variable [∀ k : ℕ, Module.Projective R (C (Fin k))]
 
@@ -1197,11 +1384,23 @@ noncomputable def cofreeHomEquivRed
     GrCooperadHom R C (FreeGrL R V) ≃ GrSpeciesHom R (GrCooperad.Red R C) V :=
   (cofreeHomEquiv hred).trans (redHomEquiv hred)
 
+omit [∀ k : ℕ, Module.Projective R (C (Fin k))] in
+/-- **The universal property of the cut cooperad from the reduced part, with projectivity on
+either side**: the morphisms of graded cooperads `C → T^c(V)` are the morphisms of graded linear
+species `C̄ → V`, when in each arity `k ≥ 2` the cooperations or the elements of `V` form a
+projective module. -/
+noncomputable def cofreeHomEquivRed'
+    (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
+    (hproj : ∀ k, 2 ≤ k → Module.Projective R (C (Fin k)) ∨ Module.Projective R (V (Fin k))) :
+    GrCooperadHom R C (FreeGrL R V) ≃ GrSpeciesHom R (GrCooperad.Red R C) V :=
+  (cofreeHomEquiv' hred hproj).trans (redHomEquiv hred)
+
 lemma cofreeHomEquivRed_apply
     (hred : ∀ (B : Type) [Fintype B] [DecidableEq B], Fintype.card B ≤ 1 → ∀ v : V B, v = 0)
     (f : GrCooperadHom R C (FreeGrL R V)) (x : C A) :
     (cofreeHomEquivRed hred f).app A (GrCooperad.Red.proj R C A x)
-      = genCoef R V A (f.app A x) :=
+      = genCoef R V A (f.app A x) := by
+  rw [cofreeHomEquivRed, Equiv.trans_apply]
   rfl
 
 end Universal
