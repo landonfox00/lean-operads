@@ -246,6 +246,7 @@ import Operad.GrTwistedCobar
 import Operad.GrLeafKunneth
 import Operad.GrTwistedCompare
 import Operad.GrTwistedConverse
+import Operad.GrTwistedFree
 import Operad.KoszulComplex
 import Operad.KoszulQuadratic
 import Operad.KoszulCorel

@@ -574,6 +574,32 @@ variable {R : Type u} [Field R] [CharZero R]
   (D : GrDer (GrOperadHom.id R P) true) (D' : GrDer (GrOperadHom.id R P') true)
   (g : GrOperadHom R P' P)
 
+/-- **The data of a comparison of twisted composite products** `C ∘ P' → C ∘ P` along a morphism
+`g : P' → P` of graded operads with differentials, the twisted differentials given as families of
+linear maps `T'` and `T`: they lower the number of inputs of the outer operation, `1 ∘ g`
+intertwines them, the differentials `T + 1 ∘' d` square to zero, and there are no operations
+without inputs. No augmentation is involved. -/
+structure TwCompareGen
+    (T : ∀ (S : Type) [Fintype S] [DecidableEq S], GrComposite R C P S →ₗ[R] GrComposite R C P S)
+    (T' : ∀ (S : Type) [Fintype S] [DecidableEq S],
+      GrComposite R C P' S →ₗ[R] GrComposite R C P' S) : Prop where
+  hD : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P A), D.app A (D.app A x) = 0
+  hD' : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P' A), D'.app A (D'.app A x) = 0
+  hg : ∀ (A : Type) [Fintype A] [DecidableEq A] (x : P' A),
+    g.app A (D'.app A x) = D.app A (g.app A x)
+  lower : ∀ (S : Type) [Fintype S] [DecidableEq S] (k : ℕ) (x : GrComposite R C P S),
+    x ∈ outerSpan R C P S k → T S x ∈ outerLt R C P S k
+  lower' : ∀ (S : Type) [Fintype S] [DecidableEq S] (k : ℕ) (x : GrComposite R C P' S),
+    x ∈ outerSpan R C P' S k → T' S x ∈ outerLt R C P' S k
+  nat : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P' S),
+    (map₂ idSpHom g.toGrSpeciesHom).app S (T' S w) = T S ((map₂ idSpHom g.toGrSpeciesHom).app S w)
+  dd : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P S),
+    (T S + leafD R C D S) ((T S + leafD R C D S) w) = 0
+  dd' : ∀ (S : Type) [Fintype S] [DecidableEq S] (w : GrComposite R C P' S),
+    (T' S + leafD R C D' S) ((T' S + leafD R C D' S) w) = 0
+  hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0
+  hP0' : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P' B, y = 0
+
 /-- **The data of a comparison of twisted composite products** `C ∘_β' P' → C ∘_β P` along a
 morphism `g : P' → P` of graded operads with differentials: odd families vanishing in the arities
 of one element, related by `g`, with differentials squaring to zero, and no operations without
@@ -600,18 +626,6 @@ structure TwCompareData (β : GrOperad.Inv R (ConvOp R C P))
   hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0
   hP0' : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P' B, y = 0
 
-variable {ε ε' D D' g} {β : GrOperad.Inv R (ConvOp R C P)} {β' : GrOperad.Inv R (ConvOp R C P')}
-  (hd : TwCompareData ε ε' D D' g β β') {S : Type} [Fintype S] [DecidableEq S]
-
-include hd
-
-omit [CharZero R] in
-lemma TwCompareData.leaf_comm (x : GrComposite R C P' S) :
-    (map₂ idSpHom g.toGrSpeciesHom).app S (leafD R C D' S x)
-      = leafD R C D S ((map₂ idSpHom g.toGrSpeciesHom).app S x) :=
-  map₂_leafMap idSpHom (fun _ _ _ _ => rfl) g.toGrSpeciesHom D'.toSpEnd D.toSpEnd
-    (fun A _ _ y => hd.hg A y) x
-
 /-- The graded pieces of the filtration by the number of outer inputs, from the most. -/
 noncomputable def filtX (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
     [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P₀ A)]
@@ -619,10 +633,11 @@ noncomputable def filtX (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] �
     (S : Type) [Fintype S] [DecidableEq S] (p : ℕ) : Submodule R (GrComposite R C P₀ S) :=
   if p ≤ Fintype.card S then outerSpan R C P₀ S (Fintype.card S - p) else ⊥
 
-omit hd [CharZero R] in
+omit [CharZero R] in
 lemma filt_sup (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w)
     [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (P₀ A)]
-    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P₀ A)] [GrOperad R P₀] (p : ℕ) :
+    [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (P₀ A)] [GrOperad R P₀] {S : Type}
+    [Fintype S] [DecidableEq S] (p : ℕ) :
     outerLt R C P₀ S (Fintype.card S + 1 - p)
       = filtX P₀ S p ⊔ outerLt R C P₀ S (Fintype.card S + 1 - (p + 1)) := by
   unfold filtX
@@ -632,10 +647,39 @@ lemma filt_sup (P₀ : (A : Type) → [Fintype A] → [DecidableEq A] → Type w
   · rw [show Fintype.card S + 1 - p = 0 by omega, show Fintype.card S + 1 - (p + 1) = 0 by omega,
       bot_sup_eq]
 
-lemma TwCompareData.filtData :
+section Gen
+
+variable {D D' g}
+  {T : ∀ (S : Type) [Fintype S] [DecidableEq S], GrComposite R C P S →ₗ[R] GrComposite R C P S}
+  {T' : ∀ (S : Type) [Fintype S] [DecidableEq S],
+    GrComposite R C P' S →ₗ[R] GrComposite R C P' S}
+  (hd : TwCompareGen D D' g T T') {S : Type} [Fintype S] [DecidableEq S]
+
+include hd
+
+omit [CharZero R] in
+lemma TwCompareGen.lower_of_lt {k : ℕ} {x : GrComposite R C P S} (hx : x ∈ outerLt R C P S k) :
+    T S x ∈ outerLt R C P S k :=
+  map_mem_outerSpanP (T S) _ (fun g hg => outerSpanP_mono (P := (· < Fintype.card g.A))
+    (fun _ h => h.trans hg) (hd.lower S _ _ (mk_mem_outerSpanP g rfl))) hx
+
+omit [CharZero R] in
+lemma TwCompareGen.lower_of_lt' {k : ℕ} {x : GrComposite R C P' S}
+    (hx : x ∈ outerLt R C P' S k) : T' S x ∈ outerLt R C P' S k :=
+  map_mem_outerSpanP (T' S) _ (fun g hg => outerSpanP_mono (P := (· < Fintype.card g.A))
+    (fun _ h => h.trans hg) (hd.lower' S _ _ (mk_mem_outerSpanP g rfl))) hx
+
+omit [CharZero R] in
+lemma TwCompareGen.leaf_comm (x : GrComposite R C P' S) :
+    (map₂ idSpHom g.toGrSpeciesHom).app S (leafD R C D' S x)
+      = leafD R C D S ((map₂ idSpHom g.toGrSpeciesHom).app S x) :=
+  map₂_leafMap idSpHom (fun _ _ _ _ => rfl) g.toGrSpeciesHom D'.toSpEnd D.toSpEnd
+    (fun A _ _ y => hd.hg A y) x
+
+lemma TwCompareGen.filtData :
     QIso.FiltData (filtX P' S) (fun p => outerLt R C P' S (Fintype.card S + 1 - p))
       (filtX P S) (fun p => outerLt R C P S (Fintype.card S + 1 - p)) (Fintype.card S + 1)
-      (leafD R C D' S) (twD ε' β' S) (leafD R C D S) (twD ε β S)
+      (leafD R C D' S) (T' S) (leafD R C D S) (T S)
       ((map₂ idSpHom g.toGrSpeciesHom).app S) where
   split p := by
     refine ⟨?_, fun x => ?_, fun u hu => ?_, fun u hu => ?_, fun w hw => ?_⟩
@@ -645,7 +689,7 @@ lemma TwCompareData.filtData :
         exact disjoint_outerSpan_outerLt _
       · exact disjoint_bot_left
     · have := hd.dd' S x
-      rwa [twDiff, add_comm] at this
+      rwa [add_comm] at this
     · unfold filtX at hu ⊢
       split_ifs at hu ⊢ with hp
       · exact leafMap_mem_outerSpanP _ hu
@@ -654,12 +698,12 @@ lemma TwCompareData.filtData :
     · unfold filtX at hu
       split_ifs at hu with hp
       · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
-        exact twD_mem_outerLt ε' hd.hβ' hd.hβ1' hu
+        exact hd.lower' S _ _ hu
       · rw [Submodule.mem_bot] at hu
         rw [hu, map_zero]
         exact zero_mem _
     · rw [LinearMap.add_apply]
-      exact add_mem (leafMap_mem_outerSpanP _ hw) (twD_mem_outerLt_of_lt ε' hd.hβ' hd.hβ1' hw)
+      exact add_mem (leafMap_mem_outerSpanP _ hw) (hd.lower_of_lt' hw)
   split' p := by
     refine ⟨?_, fun x => ?_, fun u hu => ?_, fun u hu => ?_, fun w hw => ?_⟩
     · unfold filtX
@@ -668,7 +712,7 @@ lemma TwCompareData.filtData :
         exact disjoint_outerSpan_outerLt _
       · exact disjoint_bot_left
     · have := hd.dd S x
-      rwa [twDiff, add_comm] at this
+      rwa [add_comm] at this
     · unfold filtX at hu ⊢
       split_ifs at hu ⊢ with hp
       · exact leafMap_mem_outerSpanP _ hu
@@ -677,12 +721,12 @@ lemma TwCompareData.filtData :
     · unfold filtX at hu
       split_ifs at hu with hp
       · rw [show Fintype.card S + 1 - (p + 1) = Fintype.card S - p by omega]
-        exact twD_mem_outerLt ε hd.hβ hd.hβ1 hu
+        exact hd.lower S _ _ hu
       · rw [Submodule.mem_bot] at hu
         rw [hu, map_zero]
         exact zero_mem _
     · rw [LinearMap.add_apply]
-      exact add_mem (leafMap_mem_outerSpanP _ hw) (twD_mem_outerLt_of_lt ε hd.hβ hd.hβ1 hw)
+      exact add_mem (leafMap_mem_outerSpanP _ hw) (hd.lower_of_lt hw)
   hom p := by
     refine ⟨fun u hu => ?_, fun w hw => map₂_mem_outerSpanP _ hw, fun x => hd.leaf_comm x,
       fun x => hd.nat S x⟩
@@ -697,15 +741,16 @@ lemma TwCompareData.filtData :
   top' := by rw [Nat.sub_self, outerLt_zero]
 
 /-- **The comparison lemma, forward**: if `g` is a quasi-isomorphism in the arities at most `|S|`,
-then `1 ∘ g : C ∘_β' P' → C ∘_β P` is one in arity `S`, over a field of characteristic zero. -/
-theorem TwCompareData.qiso
+then `1 ∘ g : (C ∘ P', T' + 1 ∘' d') → (C ∘ P, T + 1 ∘' d)` is one in arity `S`, over a field of
+characteristic zero. -/
+theorem TwCompareGen.qiso
     (hs : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
       FreeGrL.SurjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A)
     (hi : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
       FreeGrL.InjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A) :
-    QIso.Surj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+    QIso.Surj ⊤ ⊤ (T' S + leafD R C D' S) (T S + leafD R C D S)
         ((map₂ idSpHom g.toGrSpeciesHom).app S)
-      ∧ QIso.Inj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+      ∧ QIso.Inj ⊤ ⊤ (T' S + leafD R C D' S) (T S + leafD R C D S)
         ((map₂ idSpHom g.toGrSpeciesHom).app S) := by
   obtain ⟨s'⟩ := Splitting.exists_of_field D'.toSpEnd (fun A _ _ x => hd.hD' A x)
   obtain ⟨s⟩ := Splitting.exists_of_field D.toSpEnd (fun A _ _ x => hd.hD A x)
@@ -734,9 +779,58 @@ theorem TwCompareData.qiso
     · exact ⟨QIso.surj_bot _ _ _, QIso.inj_bot _ _ _⟩
   have h := QIso.qiso_filt hd.filtData (fun p => (hpiece p).1) (fun p => (hpiece p).2) 0
   rw [Nat.sub_zero, outerLt_eq_top hd.hP0', outerLt_eq_top hd.hP0] at h
-  have e1 : leafD R C D' S + twD ε' β' S = twDiff R C ε' D' β' S := add_comm _ _
-  have e2 : leafD R C D S + twD ε β S = twDiff R C ε D β S := add_comm _ _
+  have e1 : leafD R C D' S + T' S = T' S + leafD R C D' S := add_comm _ _
+  have e2 : leafD R C D S + T S = T S + leafD R C D S := add_comm _ _
   rwa [e1, e2] at h
+
+end Gen
+
+variable {ε ε' D D' g} {β : GrOperad.Inv R (ConvOp R C P)} {β' : GrOperad.Inv R (ConvOp R C P')}
+  (hd : TwCompareData ε ε' D D' g β β') {S : Type} [Fintype S] [DecidableEq S]
+
+include hd
+
+omit [CharZero R] in
+/-- **The data of a comparison with augmentations** give those of a comparison with the twisted
+differentials `twD ε β` and `twD ε' β'`. -/
+lemma TwCompareData.toGen :
+    TwCompareGen D D' g (fun S _ _ => twD ε β S) (fun S _ _ => twD ε' β' S) where
+  hD := hd.hD
+  hD' := hd.hD'
+  hg := hd.hg
+  lower _ _ _ _ _ hx := twD_mem_outerLt ε hd.hβ hd.hβ1 hx
+  lower' _ _ _ _ _ hx := twD_mem_outerLt ε' hd.hβ' hd.hβ1' hx
+  nat := hd.nat
+  dd := hd.dd
+  dd' := hd.dd'
+  hP0 := hd.hP0
+  hP0' := hd.hP0'
+
+omit [CharZero R] in
+lemma TwCompareData.leaf_comm (x : GrComposite R C P' S) :
+    (map₂ idSpHom g.toGrSpeciesHom).app S (leafD R C D' S x)
+      = leafD R C D S ((map₂ idSpHom g.toGrSpeciesHom).app S x) :=
+  hd.toGen.leaf_comm x
+
+lemma TwCompareData.filtData :
+    QIso.FiltData (filtX P' S) (fun p => outerLt R C P' S (Fintype.card S + 1 - p))
+      (filtX P S) (fun p => outerLt R C P S (Fintype.card S + 1 - p)) (Fintype.card S + 1)
+      (leafD R C D' S) (twD ε' β' S) (leafD R C D S) (twD ε β S)
+      ((map₂ idSpHom g.toGrSpeciesHom).app S) :=
+  hd.toGen.filtData
+
+/-- **The comparison lemma, forward**: if `g` is a quasi-isomorphism in the arities at most `|S|`,
+then `1 ∘ g : C ∘_β' P' → C ∘_β P` is one in arity `S`, over a field of characteristic zero. -/
+theorem TwCompareData.qiso
+    (hs : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
+      FreeGrL.SurjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A)
+    (hi : ∀ (A : Type) [Fintype A] [DecidableEq A], Fintype.card A ≤ Fintype.card S →
+      FreeGrL.InjAt R D'.toSpEnd D.toSpEnd g.toGrSpeciesHom A) :
+    QIso.Surj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S)
+      ∧ QIso.Inj ⊤ ⊤ (twDiff R C ε' D' β' S) (twDiff R C ε D β S)
+        ((map₂ idSpHom g.toGrSpeciesHom).app S) :=
+  hd.toGen.qiso hs hi
 
 end Compare
 

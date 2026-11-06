@@ -23,6 +23,10 @@ one with values in `P ⊆ 𝒬`; their convolution product `cor ⋆ β` has valu
 * **`d_β` does not depend on the augmentation** (`GrComposite.twD_indep_aug`): the terms of
   `cor ⋆ β` only compose corollas `(0, ω)` with operations `(y, 0)`, and `ε` enters
   `(x, ω) ∘ᵢ (y, ν)` only through `ε(x) ν`. The augmentation is used to build `𝒬`, not `d_β`.
+
+For a graded operad `P` without augmentation, `d_β` is built through the free graded operad on
+`P`, which is augmented, and agrees with `twD ε β` for every augmentation `ε`
+(`GrComposite.twD'`, `GrComposite.twD'_eq`, `Operad/GrTwistedFree.lean`).
 -/
 import Operad.FreeGrGraft
 import Operad.Twisting

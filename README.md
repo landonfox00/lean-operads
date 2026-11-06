@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 124,000 lines in 251 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,785
+About 126,000 lines in 252 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 1,803
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -840,28 +840,38 @@ differential** `d_β` of `C ∘ P` is the extension of `cor ⋆ β` by the total
 `P ⋉ (C ∘ P)`, a morphism of right `P`-modules (`GrComposite.twD`, `GrComposite.twF_act`,
 `Operad/GrTwisted.lean`), with `d_α ∘ d_α` the extension of `cor ⋆ (α ⋆ α)`
 (`GrComposite.twD_sq`); `d_β` is the same for every augmentation of `P`
-(`GrComposite.twD_indep_aug`), which builds the square-zero extension and nothing else.
-For a dg operad `P`, **the twisted composite product `C ∘_α P`** has the
+(`GrComposite.twD_indep_aug`), which builds the square-zero extension and nothing else. **No
+augmentation is needed**: the free graded operad `T(P)` on `P` is augmented, a morphism of right
+modules along the evaluation `T(P) → P` does not see the inner operations beyond their images
+(`GrComposite.factor_map₂`), and so `d_{ι ∘ β}` of `C ∘ T(P)` descends to a twisted differential
+of `C ∘ P` for every graded operad `P` (`GrComposite.twD'`, `GrComposite.twD'_eval`,
+`Operad/GrTwistedFree.lean`), a morphism of right `P`-modules, equal to `twD ε β` for every
+augmentation `ε` (`GrComposite.twD'_eq`), with `twD' α ∘ twD' α = twD' (α ⋆ α)` for an odd `α`
+(`GrComposite.twD'_sq`). For a dg operad `P`, **the twisted composite product `C ∘_α P`** has the
 differential `D_α = d_α + (1 ∘' d_P)`, squaring to zero for a twisting morphism
 (`GrComposite.twDiff`, `GrComposite.twDiff_sq`, `Operad/GrTwistedDG.lean`, with the Leibniz rule
-of `1 ∘' d_P` against the action, `Operad/GrLeafAct.lean`). For a reduced cooperad, **`C ∘_ι ΩC`
+of `1 ∘' d_P` against the action, `Operad/GrLeafAct.lean`; for any `P`, `GrComposite.twDiff'`,
+`GrComposite.twDiff'_sq`, `GrComposite.twDiff'_eq`). For a reduced cooperad, **`C ∘_ι ΩC`
 is acyclic**: `h = (s ∘ 1) ∘ ρ ∘ (ε ∘ 1)` is a contracting homotopy onto the unit
 (`GrComposite.cobar_contraction`, `GrComposite.cobar_acyclic`, `Operad/GrTwistedCobar.lean`).
 Over a field of characteristic zero, with the graded commutator `[1 ∘' a, 1 ∘' b] = 1 ∘' [a, b]`
 (`GrComposite.leafMap_comm`) and equivariant splittings, `1 ∘ g : M ∘ N → M ∘ N'`, with the
 differentials at the inner operations, is a quasi-isomorphism when `g` is one
 (`GrComposite.qiso_leaf`, `Operad/GrLeafKunneth.lean`); filtering by the number of inputs of
-the outer cooperation, which the twisted differential lowers, gives **the comparison lemma**: for a morphism `g : P' → P`,
-`1 ∘ g : C ∘_β' P' → C ∘_β P` is a quasi-isomorphism in arity `S` when `g` is one in the arities
-at most `|S|` (`GrComposite.TwCompareData.qiso`, `Operad/GrTwistedCompare.lean`), and **`g` is a
-quasi-isomorphism as soon as `1 ∘ g` is one** (`GrComposite.TwCompareData.qiso_converse`,
-`Operad/GrTwistedConverse.lean`). So: **the fundamental theorem of twisting morphisms**, for a
-reduced cooperad `C` and a dg operad `P` without operations without inputs, a morphism
-`f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one (`Cobar.fundamental`,
-`Operad/KoszulComplex.lean`). The statement takes an augmentation of `P`, but only to build the
-differential of `C ∘_α P`, which does not depend on it (`GrComposite.twDiff_indep_aug`,
-`Cobar.fundamental_of_nonempty`); a `P` admitting no augmentation is not covered, the twisted
-differential not being constructed for it. And for quadratic data without generators with at most one input
+the outer cooperation, which the twisted differential lowers, gives **the comparison lemma**: for
+a morphism `g : P' → P`, `1 ∘ g : C ∘_β' P' → C ∘_β P` is a quasi-isomorphism in arity `S` when
+`g` is one in the arities at most `|S|` (`GrComposite.TwCompareData.qiso`,
+`Operad/GrTwistedCompare.lean`), and **`g` is a quasi-isomorphism as soon as `1 ∘ g` is one**
+(`GrComposite.TwCompareData.qiso_converse`, `Operad/GrTwistedConverse.lean`); both hold for
+twisted differentials given as linear maps lowering the number of outer inputs
+(`GrComposite.TwCompareGen.qiso`, `GrComposite.TwCompareGen.qiso_converse`). So: **the
+fundamental theorem of twisting morphisms**, for a reduced cooperad `C` and a dg operad `P`
+without operations without inputs, a morphism `f : ΩC → P` is a quasi-isomorphism iff
+`1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, **for every such `P`, augmented or not**
+(`Cobar.fundamental'`, `Operad/KoszulComplex.lean`), the differential of `C ∘_α P` being
+`GrComposite.twDiff'`; the forms taking an augmentation of `P`, with the same differential, are
+`Cobar.fundamental` and `Cobar.fundamental_of_nonempty`. And for quadratic data without
+generators with at most one input
 presenting `P` with a free unit, augmented by the coefficient of the unit (`Koszul.presAug`),
 **the Koszul complex criterion: `P` is Koszul iff the Koszul complex `P^¡ ∘_κ P` is acyclic in the
 arities at least two** (`Koszul.isKoszul_iff_acyclic`).

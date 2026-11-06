@@ -5,13 +5,14 @@ For a reduced coaugmented graded cooperad `C` over a field of characteristic zer
 `P` without operations with no inputs, and a morphism `f_α : ΩC → P` of dg operads with twisting
 morphism `α = f_α ∘ ι`:
 
-* **the fundamental theorem of twisting morphisms** (`Cobar.fundamental`): `f_α` is a
-  quasi-isomorphism iff `1 ∘ f_α : C ∘_ι ΩC → C ∘_α P` is one. The twisted composite product
-  `C ∘_ι ΩC` is acyclic outside the unit (`GrComposite.cobar_contraction`), so this says that
-  `f_α` is a quasi-isomorphism iff `C ∘_α P` is acyclic. The differential of `C ∘_α P` is
-  built in the square-zero extension of an augmentation of `P`, so the theorem is stated for an
-  augmentable `P`; the differential is the same for every augmentation
-  (`GrComposite.twDiff_indep_aug`, `Cobar.fundamental_of_nonempty`).
+* **the fundamental theorem of twisting morphisms** (`Cobar.fundamental'`): `f_α` is a
+  quasi-isomorphism iff `1 ∘ f_α : C ∘_ι ΩC → C ∘_α P` is one, for every such `P`, augmented or
+  not. The twisted composite product `C ∘_ι ΩC` is acyclic outside the unit
+  (`GrComposite.cobar_contraction`), so this says that `f_α` is a quasi-isomorphism iff `C ∘_α P`
+  is acyclic. The differential of `C ∘_α P` is `GrComposite.twDiff'`, built through the free
+  graded operad on `P` and equal to `twDiff R C ε` for every augmentation `ε`
+  (`GrComposite.twDiff'_eq`); the forms with an augmentation are kept (`Cobar.fundamental`,
+  `Cobar.fundamental_of_nonempty`).
 
 For quadratic data `(E, r)` without generators with at most one input and relators without unit
 component, the presented operad `P = T(E)/(r)` is augmented (`Koszul.presAug`), and:
@@ -19,7 +20,7 @@ component, the presented operad `P = T(E)/(r)` is augmented (`Koszul.presAug`), 
 * **the Koszul complex criterion** (`Koszul.isKoszul_iff_acyclic`): `P` is Koszul iff the Koszul
   complex `P^¡ ∘_κ P` is acyclic in the arities at least two, when `R·1 → P(1)` is injective.
 -/
-import Operad.GrTwistedConverse
+import Operad.GrTwistedFree
 import Operad.KoszulCriterion
 
 universe u v w
@@ -268,9 +269,9 @@ include hred in
 operads `f : ΩC → P` is a quasi-isomorphism iff `1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, `α = f ∘ ι`
 being its twisting morphism. It also takes an augmentation `ε : GrAug R P`, used to build the
 differential of `C ∘_α P` in the square-zero extension `P ⋉ (C ∘ P)`; that differential does not
-depend on `ε` (`GrComposite.twDiff_indep_aug`), so only the existence of an augmentation is
-assumed (`Cobar.fundamental_of_nonempty`). Removing it needs a construction of the twisted
-differential for operads without augmentation. -/
+depend on `ε` (`GrComposite.twDiff_indep_aug`, `Cobar.fundamental_of_nonempty`), and the
+augmentation is not needed at all (`Cobar.fundamental'`, with the differential
+`GrComposite.twDiff'`, equal to this one by `GrComposite.twDiff'_eq`). -/
 theorem fundamental
     (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
     (φ : CobarHom R C P) :
@@ -313,6 +314,60 @@ theorem fundamental_of_nonempty (hε : Nonempty (GrAug R P))
   refine (fundamental ε₀ hred hP0 φ).trans ⟨fun h ε S _ _ => ?_, fun h S _ _ => h ε₀ S⟩
   rw [twDiff_indep_aug ε _ ε₀]
   exact h S
+
+omit ε in
+include hred in
+/-- **The data of the comparison** `1 ∘ f : C ∘_ι ΩC → C ∘_α P`, with the twisted differential
+of `C ∘ P` built without an augmentation of `P` (`GrComposite.twD'`). -/
+lemma compareGen (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
+    (φ : CobarHom R C P) :
+    TwCompareGen (DGOperad.toDer (R := R) (P := P)) (d R C) φ.1
+      (fun S _ _ => twD' (twOf φ.1) S)
+      (fun S _ _ => twD (FreeGrL.aug R (CobarGen R C)) (ι R C) S) where
+  hD _ _ _ x := DGOperad.d_d x
+  hD' _ _ _ x := d_d R C x
+  hg A _ _ x := φ.2 A x
+  lower _ _ _ _ _ hx := twD'_mem_outerLt (isPar_twOf φ.1)
+    (fun A _ _ hA x => killsUnit_twOf φ.1 A x (hred A hA.le x)) hx
+  lower' _ _ _ _ _ hx := twD_mem_outerLt _ (isPar_ι R C)
+    (fun A _ _ hA x => ιL_unitSpan R C (hred A hA.le x)) hx
+  nat _ _ _ w := map₂_twD_twD' (FreeGrL.aug R (CobarGen R C)) φ.1 (isPar_ι R C) w
+  dd _ _ _ w := twDiff'_sq _ (fun _ _ _ x => DGOperad.d_d x) (isPar_twOf φ.1)
+    ((mc_iff φ.1).2 fun A _ _ _ => (φ.2 A _).symm) w
+  dd' _ _ _ w := twDiff_sq _ (d R C) (fun _ _ _ x => d_d R C x) (isPar_ι R C) (ι_mc R C) w
+  hP0 := hP0
+  hP0' _ _ _ hB y := FreeGrL.eq_zero_of_isEmpty (gen_eq_zero hred) hB y
+
+omit ε in
+include hred in
+/-- **The fundamental theorem of twisting morphisms, for any dg operad `P`**: for a reduced
+cooperad `C` and a dg operad `P` without operations with no inputs, over a field of
+characteristic zero, a morphism of dg operads `f : ΩC → P` is a quasi-isomorphism iff
+`1 ∘ f : C ∘_ι ΩC → C ∘_α P` is one, `α = f ∘ ι` being its twisting morphism. No augmentation of
+`P` is assumed: the differential of `C ∘_α P` is `GrComposite.twDiff'`, built through the free
+graded operad on `P`, and equal to the differential `twDiff R C ε` of every augmentation `ε`
+(`GrComposite.twDiff'_eq`). -/
+theorem fundamental'
+    (hP0 : ∀ (B : Type) [Fintype B] [DecidableEq B], IsEmpty B → ∀ y : P B, y = 0)
+    (φ : CobarHom R C P) :
+    (∀ (A : Type) [Fintype A] [DecidableEq A],
+      FreeGrL.SurjAt R (d R C).toSpEnd (DGOperad.toDer (R := R) (P := P)).toSpEnd
+          φ.1.toGrSpeciesHom A
+        ∧ FreeGrL.InjAt R (d R C).toSpEnd (DGOperad.toDer (R := R) (P := P)).toSpEnd
+          φ.1.toGrSpeciesHom A)
+      ↔ ∀ (S : Type) [Fintype S] [DecidableEq S],
+        QIso.Surj ⊤ ⊤ (twDiff R C (FreeGrL.aug R (CobarGen R C)) (d R C) (ι R C) S)
+            (twDiff' R C (DGOperad.toDer (R := R) (P := P)) (twOf φ.1) S)
+            ((map₂ idSpHom φ.1.toGrSpeciesHom).app S)
+          ∧ QIso.Inj ⊤ ⊤ (twDiff R C (FreeGrL.aug R (CobarGen R C)) (d R C) (ι R C) S)
+            (twDiff' R C (DGOperad.toDer (R := R) (P := P)) (twOf φ.1) S)
+            ((map₂ idSpHom φ.1.toGrSpeciesHom).app S) :=
+  ⟨fun h _ _ _ => (compareGen hred hP0 φ).qiso (fun A _ _ _ => (h A).1) (fun A _ _ _ => (h A).2),
+    fun h A _ _ => (compareGen hred hP0 φ).qiso_converse
+      (fun _ _ _ z => twD'_unitOf (isPar_twOf φ.1)
+        (fun A _ _ hA x => killsUnit_twOf φ.1 A x (hred A hA.le x)) z)
+      (fun _ _ _ z => twD_unitOf _ (isPar_ι R C)
+        (fun A _ _ hA x => ιL_unitSpan R C (hred A hA.le x)) z) hred h A⟩
 
 end Cobar
 
