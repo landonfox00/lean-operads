@@ -2009,3 +2009,13 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Koszul.presEvenEquiv
 #print axioms Operad.Koszul.presProjSh
 #print axioms Operad.Koszul.presProjSh_surjective
+#print axioms Operad.SymGr.instGrOperad
+#print axioms Operad.GrOperadHom.toSymOfEven
+#print axioms Operad.SymOperadHom.toGrEven
+#print axioms Operad.FreeGrL.toFreeL
+#print axioms Operad.FreeGrL.ofFreeL
+#print axioms Operad.FreeGrL.ofFreeL_toFreeL
+#print axioms Operad.FreeGrL.toFreeL_ofFreeL
+#print axioms Operad.FreeGrL.freeLEquiv
+#print axioms Operad.FreeGrL.evenFreeLHom
+#print axioms Operad.FreeGrL.evenFreeLHom_bijective
