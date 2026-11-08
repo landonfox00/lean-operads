@@ -52,14 +52,14 @@ that `E` is concentrated in arity two and `E (Fin 2)` is free on `G`. Let `T = F
   merge-composition in `MergeSp.lean`.
 
 Not proved here: `ΦL ∘ Bar.d = ShuffleBar.d K ∘ ΦL`; `ShuffleBarSymDiff.lean` proves it on the trees
-with one or two vertices (`ShuffleBarSym.ΦL_d_of_mem_deg`). The expected proof expands `Bar.d` on a
-basis vector by `Bar.d_comp` and `FreeGrL.comp_shEv`. Merging a cut edge gives the basis vector of
-the merged tree with its children in the planar order of the merged vertex; sorting them into the
-shuffle order costs the Koszul sign of the odd vertices moved, which is the change of `sign` for
-the reordered preorder. The sign `(-1)^(position of the edge in preorder)` of `FreeGrL` then
-becomes `ShuffleBar.sgn`, the position of the edge in key order, because `sign` counts exactly the
-pairs of vertices whose two orders differ. Also open: the hypotheses `hcompl` and `hone` of
-`Koszul.isKoszul_iff`, which concern the presented operad of step 2c.
+with one or two vertices (`ShuffleBarSym.ΦL_d_of_mem_deg`). `ShuffleBarSymSign.lean` merges an edge
+at any depth (`ShuffleBarSym.mergeT`, its bar tree `mergeK` of the bar tree), proves the sign rule
+`sign t · (-1)^p · kzAt t κ · sign (mergeT t κ) = ShuffleBar.sgn (toBar t) κ`, `p` the position of
+the edge in preorder and `kzAt` the Koszul sign of sorting the children of the merged vertex
+(`ShuffleBarSym.sign_mergeT`), and derives the identity from the expansion of `Bar.d` over the
+edges with these signs (`ShuffleBarSym.ΦL_d_of_expansion`); the expansion is open on the trees with
+three or more vertices. Also open: the hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`,
+which concern the presented operad of step 2c.
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleContext
