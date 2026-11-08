@@ -2110,3 +2110,8 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.Φ_barBasisN
 #print axioms Operad.ShuffleBarSym.map_ΦL_deg
 #print axioms Operad.ShuffleBarSym.iSup_deg
+#print axioms Operad.FreeGrL.shEv_mem_vx
+#print axioms Operad.ShuffleBarSym.barBasisN_mem_vx
+#print axioms Operad.ShuffleBarSym.deg_eq_vx
+#print axioms Operad.ShuffleBarSym.d_mem_deg
+#print axioms Operad.ShuffleBarSym.ΦL_d_mem_C

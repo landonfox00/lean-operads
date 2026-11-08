@@ -36,9 +36,16 @@ that `E` is concentrated in arity two and `E (Fin 2)` is free on `G`. Let `T = F
   inversions of the keys `(least leaf, number of leaves)` of the non-root vertices of `t` listed in
   preorder (`ShuffleBarSym.preKeys`). The preorder is the order in which `FreeGrL` composes the
   vertices; the key order is the one of `ShuffleBar.sgn`.
+* **Vertex counts.** The evaluation of a shuffle tree with `s` vertices lies in the eigenspace
+  `FreeGrL.vx s` of the vertex count (`FreeGrL.shEv_mem_vx`, for any homogeneous basis as in step
+  2a), by splitting off a child that is not a leaf and composing it back (`FreeGrL.comp_shEv`).
 * **Degrees.** `ShuffleBarSym.deg n s` is the span of the basis vectors of trees with `s`
-  vertices; the degrees exhaust `B(T, Ī)(Fin n)` (`ShuffleBarSym.iSup_deg`), and for `n ≥ 2` and
-  `K` a field **`ΦL` maps `deg n s` onto `ShuffleBar.C K n s`** (`ShuffleBarSym.map_ΦL_deg`).
+  vertices; the degrees exhaust `B(T, Ī)(Fin n)` (`ShuffleBarSym.iSup_deg`), and over a field of
+  characteristic zero `deg n s = FreeGrL.vx s` (`ShuffleBarSym.deg_eq_vx`), so the bar
+  differential maps `deg n (s + 1)` to `deg n s` (`ShuffleBarSym.d_mem_deg`). For `n ≥ 2` and `K` a
+  field **`ΦL` maps `deg n s` onto `ShuffleBar.C K n s`** (`ShuffleBarSym.map_ΦL_deg`), so on
+  `deg n (s + 1)` both `ΦL ∘ Bar.d` and `ShuffleBar.d ∘ ΦL` land in `C K n s`
+  (`ShuffleBarSym.ΦL_d_mem_C`).
 * **The bar differential is the differential of a merge structure** (`Bar.mergeSp`,
   `Bar.mergeSp_fn`, `Bar.d_eq_mergeSp_d`), for any graded operad and ideal, so it satisfies the
   Leibniz rule `d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y` (`Bar.d_comp`) and the laws of
@@ -50,18 +57,17 @@ merged tree with its children in the planar order of the merged vertex; sorting 
 shuffle order costs the Koszul sign of the odd vertices moved, which is the change of `sign` for
 the reordered preorder. The sign `(-1)^(position of the edge in preorder)` of `FreeGrL` then
 becomes `ShuffleBar.sgn`, the position of the edge in key order, because `sign` counts exactly the
-pairs of vertices whose two orders differ. Also open: `deg n s` as the vertex-count eigenspace
-`FreeGrL.vx` (it lies in it once the evaluation of a shuffle tree with `s` vertices is shown to
-lie in `vx s`), and the hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`, which concern the
-presented operad of step 2c.
+pairs of vertices whose two orders differ. Also open: the hypotheses `hcompl` and `hone` of
+`Koszul.isKoszul_iff`, which concern the presented operad of step 2c.
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleContext
 import Operad.ShuffleFreeGrL
 import Operad.ShuffleFreeL
 import Operad.MergeSp
+import Operad.BarWeights
 
-universe u v
+universe u v w
 
 namespace Operad
 
@@ -263,6 +269,202 @@ theorem d_comp {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq
   exact (mergeSp I).d_comp i X Y
 
 end Bar
+
+/-! ## The vertex count of the shuffle basis -/
+
+section Vx
+
+open Function STree
+
+namespace FreeGrL
+
+variable {R : Type u} [CommRing R]
+  {W : (A : Type) → [Fintype A] → [DecidableEq A] → Type v}
+  [∀ (A : Type) [Fintype A] [DecidableEq A], AddCommGroup (W A)]
+  [∀ (A : Type) [Fintype A] [DecidableEq A], Module R (W A)] [GrSpecies R W]
+  {B : ℕ → Type w} (b : ∀ k, Module.Basis (B k) R (W (Fin k)))
+
+/-- The inputs of a composite at a leaf `m`, named by their values. -/
+def labSplit {Y Y₁ Y₂ : Finset ℕ} {m : ℕ} (hm : m ∈ Y₁)
+    (hY : ∀ x, x ∈ Y ↔ (x ∈ Y₁ ∧ x ≠ m) ∨ x ∈ Y₂) (hd : ∀ x ∈ Y₁, x ≠ m → x ∉ Y₂) :
+    Lab Y ≃ Without (Lab Y₁) ⟨m, hm⟩ ⊕ Lab Y₂ where
+  toFun x := if hx : x.1 ∈ Y₂ then Sum.inr ⟨x.1, hx⟩ else
+    Sum.inl ⟨⟨x.1, (((hY x.1).1 x.2).resolve_right hx).1⟩,
+      fun h => (((hY x.1).1 x.2).resolve_right hx).2 (congrArg Subtype.val h)⟩
+  invFun u := match u with
+    | Sum.inl a => ⟨a.1.1, (hY _).2 (Or.inl ⟨a.1.2, fun h => a.2 (Subtype.ext h)⟩)⟩
+    | Sum.inr c => ⟨c.1, (hY _).2 (Or.inr c.2)⟩
+  left_inv x := by
+    by_cases hx : x.1 ∈ Y₂
+    · simp [hx]
+    · simp [hx]
+  right_inv u := by
+    rcases u with a | c
+    · have : a.1.1 ∉ Y₂ := hd _ a.1.2 fun h => a.2 (Subtype.ext h)
+      simp [this]
+    · simp [c.2]
+
+lemma sval_labSplit {Y Y₁ Y₂ : Finset ℕ} {m : ℕ} (hm : m ∈ Y₁)
+    (hY : ∀ x, x ∈ Y ↔ (x ∈ Y₁ ∧ x ≠ m) ∨ x ∈ Y₂) (hd : ∀ x ∈ Y₁, x ≠ m → x ∉ Y₂) (x : Lab Y) :
+    sval (labSplit hm hY hd x) = x.1 := by
+  by_cases hx : x.1 ∈ Y₂
+  · simp [labSplit, hx]
+  · simp [labSplit, hx]
+
+lemma labels_eq_toFinset {t : STree B} (h : t.labels.Nodup) :
+    t.labels = t.labels.toFinset.val := by
+  rw [Multiset.toFinset_val, Multiset.dedup_eq_self.2 h]
+
+variable {p : ∀ k, B k → Bool}
+  (hb : ∀ k (β : B k), GrSpecies.par (R := R) (p k β) (b k β) = b k β)
+include hb
+
+/-- **The evaluation of a shuffle tree with `s` vertices has `s` vertices**: it lies in the
+eigenspace `vx s` of the vertex count. -/
+theorem shEv_mem_vx : ∀ (n : ℕ) (t : STree B), t.weight ≤ n → t.IsShuffle →
+    ∀ (Y : Finset ℕ) (h : t.labels = Y.val), shEv b t Y h ∈ vx R W t.weight (Lab Y)
+  | _, .leaf a, _, _, Y, h => by
+    rw [shEv_leaf, weight]
+    have hY : Y = {a} := Finset.val_inj.1 (by rw [← h]; rfl)
+    subst hY
+    rw [unitL_eq (Equiv.ofUnique Unit (Lab {a}))]
+    exact unit_mem_eig _
+  | 0, .node β c, hw, _, _, _ => by simp [weight] at hw
+  | n + 1, .node (k := k) β c, hw, ht, Y, h => by
+    have hnd : (STree.node β c).labels.Nodup := h ▸ Y.nodup
+    by_cases hall : ∀ j, ∃ a, c j = .leaf a
+    · choose a ha using hall
+      have hmem : ∀ j, a j ∈ Y := fun j => by
+        rw [← Finset.mem_val, ← h]
+        exact mem_labels_node.2 ⟨j, by rw [ha j]; simp⟩
+      have hinj : Injective a := fun i j hij => by
+        by_contra hne
+        have := disjoint_of_node hnd hne
+        rw [ha i, ha j, hij] at this
+        simp at this
+      have hsurj : ∀ y : Lab Y, ∃ j, a j = y.1 := fun y => by
+        have hy : y.1 ∈ (STree.node β c).labels := by rw [h]; exact y.2
+        obtain ⟨j, hj⟩ := mem_labels_node.1 hy
+        rw [ha j] at hj
+        exact ⟨j, (Multiset.mem_singleton.1 hj).symm⟩
+      let θ : Fin k ≃ Lab Y := Equiv.ofBijective (fun j => ⟨a j, hmem j⟩)
+        ⟨fun i j hij => hinj (congrArg Subtype.val hij), fun y => by
+          obtain ⟨j, hj⟩ := hsurj y
+          exact ⟨j, Subtype.ext hj⟩⟩
+      have hc : c = fun j => STree.leaf (θ j).1 := funext fun j => ha j
+      have hw1 : (STree.node β c).weight = 1 := by
+        simp [weight, ha]
+      subst hc
+      rw [hw1, shEv_corolla]
+      exact map_mem_eig θ (ι_mem_vx _)
+    · push Not at hall
+      obtain ⟨j, hj⟩ := hall
+      set t₂ := c j with ht₂
+      set m := t₂.first with hm_def
+      have hjs : t₂.IsShuffle := ht.child j
+      have hmj : m ∈ t₂.labels := first_mem hjs
+      let c₁ : Fin k → STree B := update c j (.leaf m)
+      let t₁ : STree B := .node β c₁
+      have hle : t₁.labels ≤ (STree.node β c).labels := by
+        simp only [t₁, labels_node]
+        refine Finset.sum_le_sum fun i _ => ?_
+        by_cases hij : i = j
+        · subst hij
+          simp only [c₁, update_self, labels_leaf]
+          exact Multiset.singleton_le.2 hmj
+        · simp only [c₁, update_of_ne hij]
+          exact le_rfl
+      have hnd₁ : t₁.labels.Nodup := Multiset.nodup_of_le hle hnd
+      have hnd₂ : t₂.labels.Nodup := nodup_of_node hnd j
+      set Y₁ := t₁.labels.toFinset
+      set Y₂ := t₂.labels.toFinset
+      have h₁ : t₁.labels = Y₁.val := labels_eq_toFinset hnd₁
+      have h₂ : t₂.labels = Y₂.val := labels_eq_toFinset hnd₂
+      have hm₁ : m ∈ Y₁ := Multiset.mem_toFinset.2
+        (mem_labels_node.2 ⟨j, by simp [c₁]⟩)
+      have hother : ∀ i, i ≠ j → ∀ x ∈ (c i).labels, x ∉ t₂.labels := fun i hij x hx hx' =>
+        Multiset.disjoint_left.1 (disjoint_of_node hnd hij) hx hx'
+      have hsub : t₁.subst (update STree.leaf m t₂) = STree.node β c := by
+        simp only [t₁, subst_node]
+        congr 1
+        funext i
+        by_cases hij : i = j
+        · subst hij
+          simp [c₁, ht₂]
+        · simp only [c₁, update_of_ne hij]
+          rw [subst_congr (ys := STree.leaf) (c i) fun x hx => update_of_ne
+            (fun hxm => hother i hij x hx (by rw [hxm]; exact hmj)) _ _, subst_leaf]
+      have hY : ∀ x, x ∈ Y ↔ (x ∈ Y₁ ∧ x ≠ m) ∨ x ∈ Y₂ := fun x => by
+        rw [← Finset.mem_val, ← h, ← hsub, labels_subst, h₁]
+        simp only [Multiset.mem_bind, Finset.mem_val]
+        constructor
+        · rintro ⟨y, hy, hxy⟩
+          by_cases hym : y = m
+          · subst hym
+            rw [update_self] at hxy
+            exact Or.inr (Multiset.mem_toFinset.2 hxy)
+          · rw [update_of_ne hym, labels_leaf, Multiset.mem_singleton] at hxy
+            subst hxy
+            exact Or.inl ⟨hy, hym⟩
+        · rintro (⟨hx, hxm⟩ | hx)
+          · exact ⟨x, hx, by rw [update_of_ne hxm]; simp⟩
+          · exact ⟨m, hm₁, by rw [update_self]; exact Multiset.mem_toFinset.1 hx⟩
+      have hd : ∀ x ∈ Y₁, x ≠ m → x ∉ Y₂ := fun x hx hxm hx₂ => by
+        obtain ⟨i, hi⟩ := mem_labels_node.1 (Multiset.mem_toFinset.1 hx)
+        by_cases hij : i = j
+        · subst hij
+          simp [c₁] at hi
+          exact hxm hi
+        · simp only [c₁, update_of_ne hij] at hi
+          exact hother i hij x hi (Multiset.mem_toFinset.1 hx₂)
+      have hh : (t₁.subst (update STree.leaf m t₂)).labels = Y.val := by rw [hsub, h]
+      let E := labSplit hm₁ hY hd
+      have hcomp := comp_shEv b hb t₂ Y₂ h₂ t₁ Y₁ h₁ m hm₁ Y hh E (sval_labSplit hm₁ hY hd)
+      have hev := map_shEv b hsub rfl hh h (Equiv.refl _) fun _ => rfl
+      rw [GrOperad.map_refl] at hev
+      rw [hev] at hcomp
+      have hwsum : t₁.weight + t₂.weight = (STree.node β c).weight := by
+        have hupd : ∀ i, (c₁ i).weight = update (fun i => (c i).weight) j 0 i := fun i => by
+          by_cases hij : i = j
+          · subst hij
+            simp [c₁]
+          · simp [c₁, update_of_ne hij]
+        simp only [t₁, weight, hupd]
+        rw [Finset.sum_update_of_mem (Finset.mem_univ j),
+          ← Finset.add_sum_erase _ _ (Finset.mem_univ j), Finset.sdiff_singleton_eq_erase, ht₂]
+        omega
+      have ht₂w : 1 ≤ t₂.weight := by
+        rcases hj' : t₂ with a | ⟨β', c'⟩
+        · exact absurd hj' (hj a)
+        · simp [weight]
+      have ht₁s : t₁.IsShuffle := by
+        refine ⟨ht.pos, fun i => ?_, ?_⟩
+        · by_cases hij : i = j
+          · subst hij
+            simp [c₁]
+          · simp only [c₁, update_of_ne hij]
+            exact ht.child i
+        · have : (fun i => (c₁ i).first) = fun i => (c i).first := funext fun i => by
+            by_cases hij : i = j
+            · subst hij
+              simp [c₁, hm_def, ht₂]
+            · simp [c₁, update_of_ne hij]
+          rw [this]
+          exact ht.mono
+      have ih₁ := shEv_mem_vx n t₁ (by omega) ht₁s Y₁ h₁
+      have ht₁w : 1 ≤ t₁.weight := by
+        simp only [t₁, weight]
+        omega
+      have ih₂ := shEv_mem_vx n t₂ (by omega) hjs Y₂ h₂
+      have hc' := comp_mem_eig (a := GrSpEnd.id R W) (⟨m, hm₁⟩ : Lab Y₁) ih₁ ih₂
+      rw [hcomp, hwsum] at hc'
+      have := map_mem_eig E.symm (Submodule.smul_mem _ (σ R (vpar p t₂ && vaft p t₁ m)) hc')
+      rwa [smul_smul, σ_mul_self, one_smul, ← GrOperad.map_trans, Equiv.self_trans_symm,
+        GrOperad.map_refl] at this
+
+end FreeGrL
+
+end Vx
 
 end Operad
 
@@ -1130,6 +1332,62 @@ theorem iSup_deg (n : ℕ) : ⨆ s, deg c hc n s = ⊤ := by
   rw [← (barBasisN c hc n).span_eq, Submodule.span_le]
   rintro _ ⟨t, rfl⟩
   exact Submodule.mem_iSup_of_mem t.1.weight (Submodule.subset_span ⟨t, rfl, rfl⟩)
+
+/-- **A basis vector of a tree with `s` vertices has `s` vertices**: it lies in the eigenspace
+`FreeGrL.vx s` of the vertex count. -/
+theorem barBasisN_mem_vx (n : ℕ) (t : SMono (VMono G) (Finset.range n)) :
+    barBasisN c hc n t ∈ FreeGrL.vx K (BarGen (Ibar K E c hc)) t.1.weight (Fin n) := by
+  rw [barBasisN_apply, barBasis]
+  erw [FreeGrL.shuffleBasis_apply (genBasis c hc) (par_genBasis c hc)]
+  exact FreeGrL.map_mem_eig _ (FreeGrL.shEv_mem_vx (genBasis c hc) (par_genBasis c hc) _ t.1
+    le_rfl t.2.1 _ _)
+
+lemma deg_le_vx (n s : ℕ) : deg c hc n s ≤ FreeGrL.vx K (BarGen (Ibar K E c hc)) s (Fin n) := by
+  rw [deg, Submodule.span_le]
+  rintro _ ⟨t, ht, rfl⟩
+  have := barBasisN_mem_vx c hc n t
+  rw [ht] at this
+  exact this
+
+variable [CharZero K]
+
+/-- **The vertex grading is the vertex count**: `deg n s` is the eigenspace `FreeGrL.vx s`, over
+a field of characteristic zero. -/
+theorem deg_eq_vx (n s : ℕ) : deg c hc n s = FreeGrL.vx K (BarGen (Ibar K E c hc)) s (Fin n) := by
+  refine le_antisymm (deg_le_vx c hc n s) fun x hx => ?_
+  have hx' : x ∈ deg c hc n s ⊔ ⨆ i, ⨆ (_ : i ≠ s), deg c hc n i := by
+    rw [← iSup_split_single (fun i => deg c hc n i) s, iSup_deg]
+    exact Submodule.mem_top
+  obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.1 hx'
+  have hzv : z ∈ FreeGrL.vx K (BarGen (Ibar K E c hc)) s (Fin n) := by
+    have := Submodule.sub_mem _ hx (deg_le_vx c hc n s hy)
+    rwa [add_sub_cancel_left] at this
+  have hzo : z ∈ ⨆ i, ⨆ (_ : i ≠ s), FreeGrL.vx K (BarGen (Ibar K E c hc)) i (Fin n) :=
+    (iSup₂_mono fun i _ => deg_le_vx c hc n i) hz
+  have hind := iSupIndep_def.1 (iSupIndep_eigenspace_nat
+    ((FreeGrL.derSp (GrSpEnd.id K (BarGen (Ibar K E c hc)))).app (Fin n))) s
+  have hz0 : z = 0 := Submodule.disjoint_def.1 hind z hzv hzo
+  rw [hz0, add_zero]
+  exact hy
+
+/-- **The bar differential lowers the degree by one.** -/
+theorem d_mem_deg {n s : ℕ} {x : BarCoop (Ibar K E c hc) (Fin n)} (hx : x ∈ deg c hc n (s + 1)) :
+    Bar.d (Ibar K E c hc) (Fin n) x ∈ deg c hc n s := by
+  rw [deg_eq_vx] at hx ⊢
+  exact Bar.d_vx_succ hx
+
+/-- **Both differentials lower the degree by one through `Φ`**: in arity `n ≥ 2`, on the trees
+with `s + 1` vertices, `ΦL ∘ Bar.d` and `ShuffleBar.d ∘ ΦL` both take values in
+`ShuffleBar.C K n s`. -/
+theorem ΦL_d_mem_C {n s : ℕ} (hn : 2 ≤ n) {x : BarCoop (Ibar K E c hc) (Fin n)}
+    (hx : x ∈ deg c hc n (s + 1)) :
+    ΦL c hc n (Bar.d (Ibar K E c hc) (Fin n) x) ∈ ShuffleBar.C (E := G) K n s ∧
+      ShuffleBar.d K (ΦL c hc n x) ∈ ShuffleBar.C (E := G) K n s := by
+  refine ⟨?_, ShuffleBar.d_mem_C K ?_⟩
+  · rw [← map_ΦL_deg c hc hn s]
+    exact Submodule.mem_map_of_mem (d_mem_deg c hc hx)
+  · rw [← map_ΦL_deg c hc hn (s + 1)]
+    exact Submodule.mem_map_of_mem hx
 
 end Phi
 
