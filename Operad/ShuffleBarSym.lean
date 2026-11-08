@@ -51,9 +51,10 @@ that `E` is concentrated in arity two and `E (Fin 2)` is free on `G`. Let `T = F
   Leibniz rule `d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y` (`Bar.d_comp`) and the laws of
   merge-composition in `MergeSp.lean`.
 
-Not proved here: `ΦL ∘ Bar.d = ShuffleBar.d K ∘ ΦL`. The expected proof expands `Bar.d` on a basis
-vector by `Bar.d_comp` and `FreeGrL.comp_shEv`. Merging a cut edge gives the basis vector of the
-merged tree with its children in the planar order of the merged vertex; sorting them into the
+Not proved here: `ΦL ∘ Bar.d = ShuffleBar.d K ∘ ΦL`; `ShuffleBarSymDiff.lean` proves it on the trees
+with one or two vertices (`ShuffleBarSym.ΦL_d_of_mem_deg`). The expected proof expands `Bar.d` on a
+basis vector by `Bar.d_comp` and `FreeGrL.comp_shEv`. Merging a cut edge gives the basis vector of
+the merged tree with its children in the planar order of the merged vertex; sorting them into the
 shuffle order costs the Koszul sign of the odd vertices moved, which is the change of `sign` for
 the reordered preorder. The sign `(-1)^(position of the edge in preorder)` of `FreeGrL` then
 becomes `ShuffleBar.sgn`, the position of the edge in key order, because `sign` counts exactly the
