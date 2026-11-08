@@ -35,9 +35,11 @@ whose top homology is the Koszul dual cooperad (`ShuffleKoszulDual.lean`); the K
 identifications are open, both arity by arity as complexes of vector spaces:
 
 * the underlying shuffle operad of the free graded operad `T(E)` on an even binary species with
-  the free shuffle operad on a basis of `E(2)` (Dotsenko–Khoroshkin). `GrFreeEven.lean` reduces
-  it to the ungraded free operad `FreeL R E`; the library has the shuffle basis in the ungraded
-  framework for free species only (`FreeSet.shuffleEquiv`, `FreeSet.presBasis`);
+  the free shuffle operad on a basis of `E(2)` (Dotsenko–Khoroshkin). This one is done:
+  `GrFreeEven.lean` reduces it to the ungraded free operad `FreeL R E`, and `ShuffleFreeL.lean`
+  identifies `Shuf (FreeL R E)` with the free shuffle operad on a basis (`FreeL.shuffleEquiv`);
+  for generators with odd parts, `ShuffleFreeGrL.lean` gives the signed shuffle-tree basis of
+  the free graded operad (`FreeGrL.shuffleBasis`, `FreeGrL.comp_shEv`);
 * the bar construction `B(P, I) = T^c(sI)` with the shuffle bar construction modulo its relator
   subcomplex, `ShuffleBar.C K n s ⧸ ShuffleBar.J K R`, which needs in addition the exactness of
   the cut cooperad.
