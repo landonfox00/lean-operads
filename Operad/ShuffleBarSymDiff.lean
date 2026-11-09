@@ -42,12 +42,11 @@ one, times the Koszul sign of sorting the children of the merged vertex, the odd
 subtrees with an odd number of vertices. This sign times `sign t` and the sign of the merged tree is
 `(-1)` to the number of cut edges of smaller key, as in `ShuffleBar.sgn`.
 
-Not proved here: `ΦL ∘ Bar.d = ShuffleBar.d ∘ ΦL` on trees with three or more vertices.
-`ShuffleBarSymSign.lean` merges an edge at any depth as a shuffle tree of monomials, its leaves
-relabelled by rank (`ShuffleBarSym.mergeT`), proves the sign identity above
-(`ShuffleBarSym.sign_mergeT`), and derives `ΦL ∘ Bar.d = ShuffleBar.d ∘ ΦL` from the expansion of
-`Bar.d` over the edges (`ShuffleBarSym.ΦL_d_of_expansion`); the expansion itself, by `Bar.d_comp`
-and `FreeGrL.shEv_split`, is open on trees with three or more vertices.
+On trees with three or more vertices, `ShuffleBarSymSign.lean` merges an edge at any depth as a
+shuffle tree of monomials, its leaves relabelled by rank (`ShuffleBarSym.mergeT`), proves the sign
+identity above (`ShuffleBarSym.sign_mergeT`), and derives `ΦL ∘ Bar.d = ShuffleBar.d ∘ ΦL` from the
+expansion of `Bar.d` over the edges (`ShuffleBarSym.ΦL_d_of_expansion`), and `ShuffleBarSymExp.lean`
+proves the expansion on every tree (`ShuffleBarSym.dExpansion`, `ShuffleBarSym.ΦL_d`).
 -/
 import Operad.ShuffleBarSym
 

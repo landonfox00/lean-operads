@@ -45,13 +45,9 @@ odd generator carries no sign; and reading the children of the merged vertex in 
 costs the Koszul sign `kzAt`. These are the signs of `ShuffleBarSym.DExpansion`. A script
 checked `sign_mergeT` with these signs on about 9000 edges of random trees with up to ten leaves.
 
-Not proved here: the expansion `ShuffleBarSym.DExpansion` on the trees with three or more vertices.
-It needs `Bar.d` of a basis vector expanded over its edges, by `Bar.d_comp` and
-`FreeGrL.shEv_split` (or by `FreeGr.barD` on a planar representative of the evaluation), the merge
-`Bar.msVal` of two basis generators as the relabelled basis generator of `mergedMono` (as
-`ShuffleBarSym.comp_tBasis` does for two vertices), and the evaluation of a vertex whose generator
-is relabelled by a permutation as the Koszul sign `GrEnd.rsg` times the evaluation with its children
-permuted (`GrComposite.mk_reorder`), which is `kzAt`.
+`ShuffleBarSymExp.lean` proves the expansion `ShuffleBarSym.DExpansion` on every tree
+(`ShuffleBarSym.dExpansion`), hence `ΦL ∘ Bar.d = ShuffleBar.d ∘ ΦL` on all of `B(T, Ī)(Fin n)`
+(`ShuffleBarSym.ΦL_d`).
 -/
 import Operad.ShuffleBarSymDiff
 

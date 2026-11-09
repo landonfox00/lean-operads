@@ -51,15 +51,16 @@ that `E` is concentrated in arity two and `E (Fin 2)` is free on `G`. Let `T = F
   Leibniz rule `d (x ∘ᵢ y) = d x ∘ᵢ y + (-1)^|x| x ∘ᵢ d y + x ⊛ᵢ y` (`Bar.d_comp`) and the laws of
   merge-composition in `MergeSp.lean`.
 
-Not proved here: `ΦL ∘ Bar.d = ShuffleBar.d K ∘ ΦL`; `ShuffleBarSymDiff.lean` proves it on the trees
-with one or two vertices (`ShuffleBarSym.ΦL_d_of_mem_deg`). `ShuffleBarSymSign.lean` merges an edge
-at any depth (`ShuffleBarSym.mergeT`, its bar tree `mergeK` of the bar tree), proves the sign rule
-`sign t · (-1)^p · kzAt t κ · sign (mergeT t κ) = ShuffleBar.sgn (toBar t) κ`, `p` the position of
-the edge in preorder and `kzAt` the Koszul sign of sorting the children of the merged vertex
-(`ShuffleBarSym.sign_mergeT`), and derives the identity from the expansion of `Bar.d` over the
-edges with these signs (`ShuffleBarSym.ΦL_d_of_expansion`); the expansion is open on the trees with
-three or more vertices. Also open: the hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`,
-which concern the presented operad of step 2c.
+`ΦL ∘ Bar.d = ShuffleBar.d K ∘ ΦL` is proved in the following files. `ShuffleBarSymDiff.lean` proves
+it on the trees with one or two vertices (`ShuffleBarSym.ΦL_d_of_mem_deg`). `ShuffleBarSymSign.lean`
+merges an edge at any depth (`ShuffleBarSym.mergeT`, its bar tree `mergeK` of the bar tree), proves
+the sign rule `sign t · (-1)^p · kzAt t κ · sign (mergeT t κ) = ShuffleBar.sgn (toBar t) κ`, `p` the
+position of the edge in preorder and `kzAt` the Koszul sign of sorting the children of the merged
+vertex (`ShuffleBarSym.sign_mergeT`), and derives the identity from the expansion of `Bar.d` over
+the edges with these signs (`ShuffleBarSym.ΦL_d_of_expansion`); `ShuffleBarSymExp.lean` proves the
+expansion on every tree, hence the identity on all of `B(T, Ī)(Fin n)` (`ShuffleBarSym.ΦL_d`). Not
+proved here: the hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`, which concern the
+presented operad of step 2c.
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleContext
