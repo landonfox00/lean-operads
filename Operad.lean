@@ -177,6 +177,10 @@ import Operad.GrShuffle
 import Operad.GrFreeEven
 import Operad.ShuffleFreeL
 import Operad.ShuffleFreeGrL
+import Operad.ShuffleBarSym
+import Operad.ShuffleBarSymDiff
+import Operad.ShuffleBarSymSign
+import Operad.ShuffleBarSymExp
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois
