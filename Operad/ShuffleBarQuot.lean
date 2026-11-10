@@ -42,10 +42,8 @@ Let `E` be a graded linear species over a field `K` with an even basis `c k` of 
   the cycles with `n - 1` vertices and every cycle with `s + 1 < n` vertices is a boundary**
   (`ShuffleBarSym.isKoszul_iff_cycles`).
 
-Open (the rest of step 2c): `B(P, Ī_P)(Fin n)` as the quotient of `B(T, Ī)(Fin n) ≅ ShuffleBar.C`
-by the relator subcomplex `ShuffleBar.J` of the shuffle relators of `r 3`, and the surjectivity of
-`P^¡(n)` onto the cycles of the top degree, which together turn `Koszul.IsKoszul K E r` into
-`ShuffleBar.IsKoszul`.
+`ShuffleBarProj.lean` continues: `B(P, Ī_P)` is the quotient of `B(T, Ī)` by the ideal generated
+by the suspended relators, and the Koszul criterion moves to `B(T, Ī)` modulo that ideal.
 -/
 import Operad.ShuffleBarSymExp
 import Operad.KoszulCriterion

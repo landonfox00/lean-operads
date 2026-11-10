@@ -182,6 +182,8 @@ import Operad.ShuffleBarSymDiff
 import Operad.ShuffleBarSymSign
 import Operad.ShuffleBarSymExp
 import Operad.ShuffleBarQuot
+import Operad.BarMap
+import Operad.ShuffleBarProj
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois
