@@ -34,7 +34,9 @@ Consequently **`P` is Koszul iff the homology of `B(T, Ī)(Fin n)` modulo `Krel`
 top degree for every `n ≥ 2`** (`ShuffleBarSym.isKoszul_iff_free_lower`), and **`P` is Koszul iff
 `ShuffleBar.IsKoszul K R`, given only `ΦL (Krel) = ShuffleBar.J K R ⊓ supported (barSet G n)`**
 (`ShuffleBarSym.isKoszul_iff_shuffle_of_J`). That identification for the shuffle relators
-`ShuffleBarSym.Rsh` is open.
+`ShuffleBarSym.Rsh`, for relators of arity three stable under the permutations of `Fin 3`, is
+proved in `Operad/ShuffleBarJ.lean` (`ShuffleBarSym.map_ΦL_Krel`), which gives the bridge
+`ShuffleBarSym.isKoszul_iff_shuffle`.
 -/
 import Operad.ShuffleBarProj
 

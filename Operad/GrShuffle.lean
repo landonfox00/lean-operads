@@ -31,8 +31,8 @@ The comparison of `Koszul.IsKoszul` with the shuffle notions goes through the Ko
 quasi-isomorphism in the arities at least two. This is the statement matching
 `ShuffleBar.IsKoszul`, the homology of the shuffle bar construction vanishing below the diagonal,
 whose top homology is the Koszul dual cooperad (`ShuffleKoszulDual.lean`); the Koszul complex
-`P^¡ ∘_κ P` of `Koszul.isKoszul_iff_acyclic` has no shuffle counterpart in the library. Two
-identifications are open, both arity by arity as complexes of vector spaces:
+`P^¡ ∘_κ P` of `Koszul.isKoszul_iff_acyclic` has no shuffle counterpart in the library. It needs
+two identifications, both arity by arity as complexes of vector spaces:
 
 * the underlying shuffle operad of the free graded operad `T(E)` on an even binary species with
   the free shuffle operad on a basis of `E(2)` (Dotsenko–Khoroshkin). This one is done:
@@ -42,7 +42,10 @@ identifications are open, both arity by arity as complexes of vector spaces:
   the free graded operad (`FreeGrL.shuffleBasis`, `FreeGrL.comp_shEv`);
 * the bar construction `B(P, I) = T^c(sI)` with the shuffle bar construction modulo its relator
   subcomplex, `ShuffleBar.C K n s ⧸ ShuffleBar.J K R`, which needs in addition the exactness of
-  the cut cooperad.
+  the cut cooperad. This one is done for an even binary species and relators of arity three
+  spanning a subspace stable under the permutations of `Fin 3`, so that over a field of
+  characteristic zero `Koszul.IsKoszul K E r ↔ ShuffleBar.IsKoszul K (Rsh c hc r)`
+  (`ShuffleBarSym.isKoszul_iff_shuffle`, `ShuffleBarQuot.lean` to `ShuffleBarJ.lean`).
 -/
 import Operad.GrKoszulDual
 import Operad.GrSuboperad

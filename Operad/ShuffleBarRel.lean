@@ -12,13 +12,9 @@ toward the hypothesis `hJ` of `ShuffleBarSym.isKoszul_iff_shuffle_of_J`, the ide
   `ShuffleBarSym.barSet G n`), `J R ⊓ supported S` is spanned by the relators substituted in the
   trees of `S`.
 
-Open: the identification itself. Its two inclusions need the ideal `Krel` of `B(T, Ī)` in a basis
-adapted to the suspended relators (trees with a vertex in `s((r))`), the multilinearity of the
-evaluation of shuffle trees in the label of one vertex, the bar tree of a tree whose vertex
-monomial has a window substituted (`ShuffleBar.substBar` of `ShuffleBarSym.toBar`), the
-invariance of `ShuffleBarSym.sign` under changing vertex monomials, and the ideal `(r)` of
-`T(E)(Fin k)` in `tBasis` coordinates as the shuffle ideal of `Rsh` (for `r` concentrated in arity
-three and stable under the permutations of `Fin 3`).
+The identification itself, for `r` concentrated in arity three and stable under the permutations
+of `Fin 3`, is proved in `Operad/ShuffleBarJ.lean` (`ShuffleBarSym.map_ΦL_Krel`), from the ideal
+`(r)` of `T(E)` in shuffle coordinates (`Operad/ShuffleRelIdeal.lean`).
 -/
 import Operad.ShuffleBarTop
 

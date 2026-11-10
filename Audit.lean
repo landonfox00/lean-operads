@@ -2281,3 +2281,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.span_le_relIdeal
 #print axioms Operad.ShuffleBarSym.relGen_mem
 #print axioms Operad.ShuffleBarSym.ShIT_le
+#print axioms Operad.FreeGrL.mapSp_map_shEv_mapV
+#print axioms Operad.eq_zero_of_linearIndependent_comp
+#print axioms Operad.ShuffleBarSym.sign_replace
+#print axioms Operad.ShuffleBarSym.nS_replace
+#print axioms Operad.ShuffleBarSym.toBar_replace_substAt
+#print axioms Operad.ShuffleBarSym.exists_of_isUncut
+#print axioms Operad.ShuffleBarSym.Tq_mem_Krel
+#print axioms Operad.ShuffleBarSym.ΦL_Tq_relator
+#print axioms Operad.ShuffleBarSym.ΦL_Tq_mem_J
+#print axioms Operad.ShuffleBarSym.exists_sel
+#print axioms Operad.ShuffleBarSym.eq_zero_of_mem_sel
+#print axioms Operad.ShuffleBarSym.barBasisN_mem_sup
+#print axioms Operad.ShuffleBarSym.map_ΦL_Krel
+#print axioms Operad.ShuffleBarSym.isKoszul_iff_shuffle

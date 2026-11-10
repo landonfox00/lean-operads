@@ -188,6 +188,7 @@ import Operad.ShuffleBarTop
 import Operad.ShuffleBarRel
 import Operad.ShuffleEvF
 import Operad.ShuffleRelIdeal
+import Operad.ShuffleBarJ
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois
