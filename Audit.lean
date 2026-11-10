@@ -2265,3 +2265,5 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.toBar_surj_top
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_free_lower
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_shuffle_of_J
+#print axioms Operad.ShuffleBar.substRel_mem_supported
+#print axioms Operad.ShuffleBar.J_inf_supported
