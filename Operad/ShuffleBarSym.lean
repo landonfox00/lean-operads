@@ -58,9 +58,9 @@ the sign rule `sign t · (-1)^p · kzAt t κ · sign (mergeT t κ) = ShuffleBar.
 position of the edge in preorder and `kzAt` the Koszul sign of sorting the children of the merged
 vertex (`ShuffleBarSym.sign_mergeT`), and derives the identity from the expansion of `Bar.d` over
 the edges with these signs (`ShuffleBarSym.ΦL_d_of_expansion`); `ShuffleBarSymExp.lean` proves the
-expansion on every tree, hence the identity on all of `B(T, Ī)(Fin n)` (`ShuffleBarSym.ΦL_d`). Not
-proved here: the hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`, which concern the
-presented operad of step 2c.
+expansion on every tree, hence the identity on all of `B(T, Ī)(Fin n)` (`ShuffleBarSym.ΦL_d`). The
+hypotheses `hcompl` and `hone` of `Koszul.isKoszul_iff`, which concern the presented operad, are
+proved in `ShuffleBarQuot.lean` (step 2c).
 -/
 import Operad.ShuffleKoszul
 import Operad.ShuffleContext
