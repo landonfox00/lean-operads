@@ -32,9 +32,10 @@ operations with at least two inputs.
   iff `ShuffleBar.IsKoszul K R`, given that identification and the surjectivity of `P^¡` onto the
   top cycles** (`ShuffleBarSym.isKoszul_iff_shuffle_of`).
 
-Open (the rest of step 2c): the identification `ΦL (Krel) = ShuffleBar.J K (Rsh c hc r) ⊓
-supported (barSet G n)` for relators of arity three stable under the permutations of `Fin 3`, and
-the surjectivity of `P^¡(n)` onto the cycles of `B(P, Ī_P)(Fin n)` with `n - 1` vertices.
+The surjectivity of `P^¡(n)` onto the cycles of `B(P, Ī_P)(Fin n)` with `n - 1` vertices is
+proved in `Operad/ShuffleBarTop.lean` (`ShuffleBarSym.toBar_surj_top`). Open (the rest of step
+2c): the identification `ΦL (Krel) = ShuffleBar.J K (Rsh c hc r) ⊓ supported (barSet G n)` for
+relators of arity three stable under the permutations of `Fin 3`.
 -/
 import Operad.ShuffleBarQuot
 import Operad.BarMap
