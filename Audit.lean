@@ -2267,3 +2267,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_shuffle_of_J
 #print axioms Operad.ShuffleBar.substRel_mem_supported
 #print axioms Operad.ShuffleBar.J_inf_supported
+#print axioms Operad.FreeGrL.mapSp_graft_mk
+#print axioms Operad.FreeGrL.mapSp_shEvF
+#print axioms Operad.FreeGrL.shEv_eq_shEvF
+#print axioms Operad.FreeGrL.shEvF_mapV
+#print axioms Operad.FreeGrL.sum_shEvF_replace
+#print axioms Operad.FreeGrL.mapSp_sum_shEv_replace
+#print axioms Operad.FreeGrL.exists_sort
+#print axioms Operad.ShuffleBarSym.comp_labBasis
+#print axioms Operad.ShuffleBarSym.comp_mem_ShIT_left
+#print axioms Operad.ShuffleBarSym.comp_mem_ShIT_right
+#print axioms Operad.ShuffleBarSym.map_tBasis3
+#print axioms Operad.ShuffleBarSym.span_le_relIdeal
+#print axioms Operad.ShuffleBarSym.relGen_mem
+#print axioms Operad.ShuffleBarSym.ShIT_le
