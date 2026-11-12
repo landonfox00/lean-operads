@@ -264,3 +264,6 @@ import Operad.GrTwistedFree
 import Operad.KoszulComplex
 import Operad.KoszulQuadratic
 import Operad.KoszulCorel
+import Operad.SymPresBinB
+import Operad.SymPresAss
+import Operad.SymPresPois

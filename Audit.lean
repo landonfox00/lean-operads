@@ -2295,3 +2295,12 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.barBasisN_mem_sup
 #print axioms Operad.ShuffleBarSym.map_ΦL_Krel
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_shuffle
+#print axioms Operad.SymPresB.app_shEv
+#print axioms Operad.SymPresB.app_tBasis
+#print axioms Operad.SymPresB.mem_Rsh_kerRel
+#print axioms Operad.SymPresB.isKoszul_kerRel_iff
+#print axioms Operad.SymPresAss.Rsh_eq
+#print axioms Operad.SymPresAss.isKoszul
+#print axioms Operad.SymPresPois.relB_vanish
+#print axioms Operad.SymPresPois.Rsh_eq
+#print axioms Operad.SymPresPois.isKoszul
