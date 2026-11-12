@@ -189,6 +189,8 @@ import Operad.ShuffleBarRel
 import Operad.ShuffleEvF
 import Operad.ShuffleRelIdeal
 import Operad.ShuffleBarJ
+import Operad.SymPresBin
+import Operad.SymPresComLie
 import Operad.ShuffleRelabel
 import Operad.ShuffleAnyPois
 import Operad.ShuffleBinPois
