@@ -270,3 +270,6 @@ import Operad.SymPresBinB
 import Operad.SymPresAss
 import Operad.SymPresPois
 import Operad.SymPresIdent
+import Operad.FaithfulAlgebra
+import Operad.SymPresIsoGen
+import Operad.SymPresIso
