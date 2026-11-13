@@ -269,3 +269,4 @@ import Operad.KoszulCorel
 import Operad.SymPresBinB
 import Operad.SymPresAss
 import Operad.SymPresPois
+import Operad.SymPresIdent
