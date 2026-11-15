@@ -22,7 +22,7 @@ associative operad. Over a field `K`:
 The comparison of `T(E)/(rel)` with the library's set-theoretic presentations of `Ass` is not
 made here.
 -/
-import Operad.SymPresBinB
+import Operad.SymPresBin
 import Operad.ShuffleBinAss
 
 universe u

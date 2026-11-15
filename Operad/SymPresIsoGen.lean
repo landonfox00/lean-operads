@@ -25,7 +25,7 @@ operad `FreeGrL K E`) with an ungraded binary quadratic operad `BinPres K r₂ r
 * **Generators from a binary operation.** `SymPresIso.regHom q₀ : Reg2 K → SymGr Q` sends a
   function `f` on the numberings to `∑ τ, f τ • τ · q₀` (`SymPresIso.regApp_two` in arity two),
   and `SymPresIso.binSpHom ρ q₀` is its restriction to `BinSp K K ρ`; an algebra turns them into
-  the models of `Operad.SymPresBinB` (`SymPresIso.app_regApp`). In a binary quadratic operad a
+  the models of `Operad.SymPresBin` (`SymPresIso.app_regApp`). In a binary quadratic operad a
   commutative generator is fixed by the transposition and an antisymmetric one is negated
   (`SymPresIso.map_swap_genQ_comm`, `SymPresIso.map_swap_genQ_antisymm`).
 * **The generic isomorphism** (`SymPresIso.iso`). Generators of `Koszul.Pres K E r` are sent to

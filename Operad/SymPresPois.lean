@@ -29,7 +29,7 @@ its Koszulness:
 The comparison of `T(E)/(rel)` with the library's presentation `Pois` of `BinaryQuadratic.lean`
 is not made here.
 -/
-import Operad.SymPresBinB
+import Operad.SymPresBin
 import Operad.ShuffleBinPois
 
 universe u
