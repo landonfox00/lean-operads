@@ -10,6 +10,18 @@ stacked on it. Sizes count new Lean lines. Days are wall-clock days for one sess
 1.5k lines a day for routine material and about 1k for sign-heavy dg material. The pace of the
 symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 
+## Decisions, 2026-11-15
+
+The cuts proposed below are accepted.
+
+1. `HyperCom`: dimensions for `n ≤ 4`. The general dimensions are out of scope.
+2. W12: items 1–2. Item 3, the any-arity bridge, is a stretch item.
+3. W13: items 1–3. Item 4 is deferred; the alternative is the identification of `P∞`-algebras
+   for `P = Lie, Com, Ass` with `L∞`, `C∞` and `A∞`.
+4. W8 item 2: settle whether the statement holds. If it fails, prove the counterexample or the
+   corrected statement and record it in `ROADMAP.md`.
+5. One session works through the packages in the order given under "Totals".
+
 ## What is already closed but still reads as open
 
 Checked against the code. Nothing new has to be proved for these; the text is stale.

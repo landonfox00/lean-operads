@@ -24,8 +24,11 @@ desuspensions, and vanishes on the other trees.
 Graded operads are dg operads with the zero differential (`ZeroDG`).
 
 For even generators the presented operad is a symmetric, hence shuffle, operad
-(`Operad/GrShuffle.lean`); the comparison of `Koszul.IsKoszul` with the shuffle notions
-`ShuffleBar.IsKoszul` and `Rules.IsKoszul` is open.
+(`Operad/GrShuffle.lean`). For generators of arity two in characteristic zero, `Koszul.IsKoszul`
+is equivalent to `ShuffleBar.IsKoszul` of the shuffle relators
+(`ShuffleBarSym.isKoszul_iff_shuffle`, in `Operad/ShuffleBarJ.lean`), which is equivalent to
+`Rules.IsKoszul` (`ShuffleBridge.isKoszul_iff`, in `Operad/ShuffleBridgeBar.lean`). For generators
+of other arities the comparison is open.
 -/
 import Operad.GrSubCooperad
 import Operad.Twisting

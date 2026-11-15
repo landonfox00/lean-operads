@@ -35,7 +35,8 @@ and `Dias` and `Trias` on `n` inputs have dimensions `n · n!` and `(2ⁿ - 1) �
 identity leaves as `nestL p q = nestR p' q'` for `(x q y) p z = x p' (y q' z)`; in each, the
 order component is the associativity of the ordinal sum (`LinOrd.nestL_std`). Singletons give the
 morphism `Dias → Trias` (`DiasSet.toTrias`, `Dias.toTrias`), injective in every arity. That these
-relations present `Dias` and `Trias` is not proved here.
+relations present `Dias` and `Trias` is proved in `Operad/DiasTrias.lean` (`DiasSet.presIso`,
+`TriasSet.presIso`).
 -/
 import Operad.SymAss
 import Operad.SetBinary

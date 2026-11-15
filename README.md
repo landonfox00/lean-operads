@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 135,000 lines in 261 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,015
+About 142,000 lines in 274 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,151
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1208,12 +1208,14 @@ are kept as the history of how the library got here.
    partitions of a finite type transport along a bijection, functorially — `partMap_refl` and
    `partMap_trans` are the two laws the eventual `map` field will rest on.
 
-   The product itself is still to build:
-   `(F ∘ G)(S) = ⊕_π F(blocks π) ⊗ ⨂_{B ∈ π} G(B)`. The remaining work is to decorate each
-   partition with `F` of its block type and a `PiTensorProduct` of `G` over the blocks, sum over
-   `Finpartition univ` (a `Fintype`), and prove the functor laws for that sum — the last being the
-   hard part, since it means transporting a direct sum over a *transported* index. Symmetric
-   operads as monoids for the product then follow.
+   **Done since, by another route.** `Operad/Composite.lean` builds the product by generators
+   `⟨m; y; e⟩` and relations, with no sum over partitions; `Operad/CompositeAssoc.lean` proves
+   associativity, and `Operad/OperadMonoid.lean` proves that operads are its monoids. The plan at
+   the time was the sum over partitions,
+   `(F ∘ G)(S) = ⊕_π F(blocks π) ⊗ ⨂_{B ∈ π} G(B)`: decorate each partition with `F` of its block
+   type and a `PiTensorProduct` of `G` over the blocks, sum over `Finpartition univ` (a
+   `Fintype`), and prove the functor laws for that sum — the last being the hard part, since it
+   means transporting a direct sum over a *transported* index.
 
    Worth weighing first: symmetric operads can instead be defined Markl-style, as our `NSOperad`
    plus `Σₙ`-actions and an equivariance axiom for partial composition. That is a much cheaper
