@@ -33,6 +33,27 @@ Characteristic zero enters for `Com` and `Lie` through the symmetrization of a p
 one-dimensional representations of `𝔖₂` (`2` invertible would do), as in `Operad.SymPresIdent`,
 and for `Pois` already in the definition of its presentation; `Ass` needs no hypothesis. The
 arity-wise linear equivalences are `(SymPresIso.assIso K).linearEquiv A`, and so on.
+
+**On even parts**, the same data give the ungraded form, isomorphisms of symmetric operads
+`SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K E r)) (BinPres …)` (`SymPresIso.evenIso`), under
+the same hypotheses on `K`; `SymPresIso.genPE r hE v` is the class of the generator `v` in the
+even part:
+
+* **`SymPresIso.assEvenIso : SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (SymPresAss.E K)
+  (SymPresAss.rel K))) (BinAss K)`** (`SymPresIso.assEvenIso_hom_mu`,
+  `SymPresIso.assEvenIso_hom_op`, `SymPresIso.assEvenIso_inv_gen`);
+* **`SymPresIso.comEvenIso : SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (ECom K)
+  (rCom K))) (FreeBin.BinCom K)`** (`SymPresIso.comEvenIso_hom_gen`,
+  `SymPresIso.comEvenIso_inv_gen`);
+* **`SymPresIso.lieEvenIso : SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (ELie K)
+  (rLie K))) (Lie K)`** (`SymPresIso.lieEvenIso_hom_gen`, `SymPresIso.lieEvenIso_inv_gen`);
+* **`SymPresIso.poisEvenIso : SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (SymPresPois.E K)
+  (SymPresPois.rel K))) (Pois K)`** (`SymPresIso.poisEvenIso_hom_mul`,
+  `SymPresIso.poisEvenIso_hom_br`, `SymPresIso.poisEvenIso_inv_mul`,
+  `SymPresIso.poisEvenIso_inv_br`).
+
+Their components are linear equivalences (`SymOperadIso.linearEquiv`), so the dimensions agree in
+every arity (`SymOperadIso.finrank_eq`).
 -/
 import Operad.SymPresIsoGen
 
@@ -123,6 +144,32 @@ theorem assIso_inv_gen :
     (assIso K).inv.app (Fin 2) (assGen K) = genP (rel K) (c K 2 (.op mu)) :=
   ofBin_gen isEven_reg2 (fun _ : Unit => c K 2 (.op mu)) (ass_hq K) ()
 
+/-- **The even part of the step-3 presentation of `Ass` is the binary quadratic operad
+`BinAss`**, as symmetric operads, over any field. -/
+noncomputable def assEvenIso :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (E K) (rel K))) (BinAss K) :=
+  evenIso isEven_reg2 (c K) (assF K) (ass_hF K) (fun _ => c K 2 (.op mu)) (ass_hq K)
+    (fun _ => assF_mu K) (ass_h₂ K)
+
+/-- The product `x₁x₂` goes to the product, on even parts. -/
+theorem assEvenIso_hom_mu :
+    (assEvenIso K).hom.app (Fin 2) (genPE (rel K) isEven_reg2 (c K 2 (.op mu))) = assGen K :=
+  (evenIso_hom_gen isEven_reg2 (c K) (assF K) (ass_hF K) (fun _ => c K 2 (.op mu)) (ass_hq K)
+    (fun _ => assF_mu K) (ass_h₂ K) _).trans (assF_mu K)
+
+/-- The opposite product `x₂x₁` goes to the transposed product, on even parts. -/
+theorem assEvenIso_hom_op :
+    (assEvenIso K).hom.app (Fin 2) (genPE (rel K) isEven_reg2 (c K 2 (.op op)))
+      = SymOperad.map (R := K) (Equiv.swap (0 : Fin 2) 1) (assGen K) :=
+  (evenIso_hom_gen isEven_reg2 (c K) (assF K) (ass_hF K) (fun _ => c K 2 (.op mu)) (ass_hq K)
+    (fun _ => assF_mu K) (ass_h₂ K) _).trans (assF_op K)
+
+/-- The product goes back to the product `x₁x₂`, on even parts. -/
+theorem assEvenIso_inv_gen :
+    (assEvenIso K).inv.app (Fin 2) (assGen K) = genPE (rel K) isEven_reg2 (c K 2 (.op mu)) :=
+  evenIso_inv_gen isEven_reg2 (c K) (assF K) (ass_hF K) (fun _ => c K 2 (.op mu)) (ass_hq K)
+    (fun _ => assF_mu K) (ass_h₂ K) ()
+
 end Ass
 
 /-! ## `Com` -/
@@ -199,6 +246,27 @@ theorem comIso_inv_gen :
     (comIso K).inv.app (Fin 2) (comGen K) = genP (rCom K) (cCom K 2 (.op .mu)) :=
   ofBin_gen (isEven_binSp _) (fun _ : Unit => cCom K 2 (.op .mu)) (com_hq K) ()
 
+/-- **The even part of the step-3 presentation of `Com` is the binary quadratic operad
+`BinCom`**, as symmetric operads, over a field of characteristic zero. -/
+noncomputable def comEvenIso :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (ECom K) (rCom K))) (FreeBin.BinCom K) :=
+  evenIso (isEven_binSp _) (cCom K) (comF K) (com_hF K) (fun _ => cCom K 2 (.op .mu))
+    (com_hq K) (fun _ => comF_gen K .mu) (com_h₂ K)
+
+/-- The product goes to the product, on even parts. -/
+theorem comEvenIso_hom_gen :
+    (comEvenIso K).hom.app (Fin 2) (genPE (rCom K) (isEven_binSp _) (cCom K 2 (.op .mu)))
+      = comGen K :=
+  (evenIso_hom_gen (isEven_binSp _) (cCom K) (comF K) (com_hF K) (fun _ => cCom K 2 (.op .mu))
+    (com_hq K) (fun _ => comF_gen K .mu) (com_h₂ K) _).trans (comF_gen K .mu)
+
+/-- The product goes back to the product, on even parts. -/
+theorem comEvenIso_inv_gen :
+    (comEvenIso K).inv.app (Fin 2) (comGen K)
+      = genPE (rCom K) (isEven_binSp _) (cCom K 2 (.op .mu)) :=
+  evenIso_inv_gen (isEven_binSp _) (cCom K) (comF K) (com_hF K) (fun _ => cCom K 2 (.op .mu))
+    (com_hq K) (fun _ => comF_gen K .mu) (com_h₂ K) ()
+
 end Com
 
 /-! ## `Lie` -/
@@ -273,6 +341,27 @@ theorem lieIso_hom_gen :
 theorem lieIso_inv_gen :
     (lieIso K).inv.app (Fin 2) (lieGen K) = genP (rLie K) (cLie K 2 (.op .mu)) :=
   ofBin_gen (isEven_binSp _) (fun _ : Unit => cLie K 2 (.op .mu)) (lie_hq K) ()
+
+/-- **The even part of the step-3 presentation of `Lie` is the binary quadratic operad
+`Lie`**, as symmetric operads, over a field of characteristic zero. -/
+noncomputable def lieEvenIso :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (ELie K) (rLie K))) (Lie K) :=
+  evenIso (isEven_binSp _) (cLie K) (lieF K) (lie_hF K) (fun _ => cLie K 2 (.op .mu))
+    (lie_hq K) (fun _ => lieF_gen K .mu) (lie_h₂ K)
+
+/-- The bracket goes to the bracket, on even parts. -/
+theorem lieEvenIso_hom_gen :
+    (lieEvenIso K).hom.app (Fin 2) (genPE (rLie K) (isEven_binSp _) (cLie K 2 (.op .mu)))
+      = lieGen K :=
+  (evenIso_hom_gen (isEven_binSp _) (cLie K) (lieF K) (lie_hF K) (fun _ => cLie K 2 (.op .mu))
+    (lie_hq K) (fun _ => lieF_gen K .mu) (lie_h₂ K) _).trans (lieF_gen K .mu)
+
+/-- The bracket goes back to the bracket, on even parts. -/
+theorem lieEvenIso_inv_gen :
+    (lieEvenIso K).inv.app (Fin 2) (lieGen K)
+      = genPE (rLie K) (isEven_binSp _) (cLie K 2 (.op .mu)) :=
+  evenIso_inv_gen (isEven_binSp _) (cLie K) (lieF K) (lie_hF K) (fun _ => cLie K 2 (.op .mu))
+    (lie_hq K) (fun _ => lieF_gen K .mu) (lie_h₂ K) ()
 
 end Lie
 
@@ -389,6 +478,41 @@ theorem poisIso_inv_mul :
 theorem poisIso_inv_br :
     (poisIso K).inv.app (Fin 2) (poisGen K .bracket) = genP (rel K) (c K 2 (.op br)) :=
   ofBin_gen isEven_reg2 (poisQ K) (pois_hq K) .bracket
+
+/-- **The even part of the step-3 presentation of `Pois` is the binary quadratic operad
+`Pois`**, as symmetric operads, over a field of characteristic zero. -/
+noncomputable def poisEvenIso :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (E K) (rel K))) (Pois K) :=
+  evenIso isEven_reg2 (c K) (poisF K) (pois_hF K) (poisQ K) (pois_hq K) (poisF_gen K)
+    (pois_h₂ K)
+
+/-- The product goes to the product, on even parts. -/
+theorem poisEvenIso_hom_mul :
+    (poisEvenIso K).hom.app (Fin 2) (genPE (rel K) isEven_reg2 (c K 2 (.op mul)))
+      = poisGen K .mul :=
+  (evenIso_hom_gen isEven_reg2 (c K) (poisF K) (pois_hF K) (poisQ K) (pois_hq K) (poisF_gen K)
+    (pois_h₂ K) _).trans (poisF_mul K)
+
+/-- The bracket goes to the bracket, on even parts. -/
+theorem poisEvenIso_hom_br :
+    (poisEvenIso K).hom.app (Fin 2) (genPE (rel K) isEven_reg2 (c K 2 (.op br)))
+      = poisGen K .bracket :=
+  (evenIso_hom_gen isEven_reg2 (c K) (poisF K) (pois_hF K) (poisQ K) (pois_hq K) (poisF_gen K)
+    (pois_h₂ K) _).trans (poisF_br K)
+
+/-- The product goes back to the product, on even parts. -/
+theorem poisEvenIso_inv_mul :
+    (poisEvenIso K).inv.app (Fin 2) (poisGen K .mul)
+      = genPE (rel K) isEven_reg2 (c K 2 (.op mul)) :=
+  evenIso_inv_gen isEven_reg2 (c K) (poisF K) (pois_hF K) (poisQ K) (pois_hq K) (poisF_gen K)
+    (pois_h₂ K) .mul
+
+/-- The bracket goes back to the bracket, on even parts. -/
+theorem poisEvenIso_inv_br :
+    (poisEvenIso K).inv.app (Fin 2) (poisGen K .bracket)
+      = genPE (rel K) isEven_reg2 (c K 2 (.op br)) :=
+  evenIso_inv_gen isEven_reg2 (c K) (poisF K) (pois_hF K) (poisQ K) (pois_hq K) (poisF_gen K)
+    (pois_h₂ K) .bracket
 
 end Pois
 
