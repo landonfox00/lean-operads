@@ -2,7 +2,9 @@
 # The symmetric presentation of `Pois` is Koszul
 
 Step 3 of the bridge between symmetric and shuffle operads (Dotsenko–Khoroshkin), for the Poisson
-operad. Over a field `K` of characteristic zero:
+operad. Over a field `K` in which `2 ≠ 0` (the instance `[NeZero (2 : K)]`, which is inferred from
+`[CharZero K]`), the presentation and its shuffle relators; over a field of characteristic zero,
+its Koszulness:
 
 * **The generators** (`SymPresPois.E`): the regular representation `Reg2 K` of `𝔖₂` in arity
   two, two-dimensional and even, which is the trivial representation plus the sign
@@ -20,13 +22,14 @@ operad. Over a field `K` of characteristic zero:
   other, `PoisBin.rel K` is spanned by the six relators `PoisBin.relB` of the rules, and each
   vanishes on every family of inputs by the identities of the Poisson algebra `PoisDim.W K`
   (`SymPresPois.relB_vanish`).
-* Hence **the symmetric operad `Pois = T(E)/(rel)` is Koszul** (`SymPresPois.isKoszul`), by the
-  bridge `ShuffleBarSym.isKoszul_iff_shuffle` and `PoisBin.isKoszul`.
+* Hence, over a field of characteristic zero, **the symmetric operad `Pois = T(E)/(rel)` is
+  Koszul** (`SymPresPois.isKoszul`), by the bridge `ShuffleBarSym.isKoszul_iff_shuffle` and
+  `PoisBin.isKoszul`.
 
 The comparison of `T(E)/(rel)` with the library's presentation `Pois` of `BinaryQuadratic.lean`
-is not made here.
+is made in `Operad.SymPresIso` (`SymPresIso.poisIso`, `SymPresIso.poisEvenIso`).
 -/
-import Operad.SymPresBinB
+import Operad.SymPresBin
 import Operad.ShuffleBinPois
 
 universe u
@@ -37,7 +40,7 @@ namespace SymPresPois
 
 open Sym SymPresB PoisShGen MvPolynomial KK
 
-variable (K : Type u) [Field K] [CharZero K]
+variable (K : Type u) [Field K] [NeZero (2 : K)]
 
 /-- The two numberings of `Fin 2`, as a case split. -/
 lemma perm_two (τ : Fin 2 ≃ Fin 2) : τ = Equiv.refl _ ∨ τ = Equiv.swap 0 1 := by
@@ -64,8 +67,10 @@ noncomputable def coordEquiv : Reg2 K (Fin 2) ≃ₗ[K] (PoisShGen 2 → K) wher
     show (if τ = Equiv.refl _ then _ else _) = f.val τ
     rcases perm_two τ with rfl | rfl
     · rw [if_pos rfl]
+      field_simp
       ring
     · rw [if_neg refl_ne_swap.symm]
+      field_simp
       ring
   right_inv h := by
     funext e
@@ -78,11 +83,13 @@ noncomputable def coordEquiv : Reg2 K (Fin 2) ≃ₗ[K] (PoisShGen 2 → K) wher
           else (h .mul - h .br) / 2) + (if Equiv.swap (0 : Fin 2) 1 = Equiv.refl _ then
           (h .mul + h .br) / 2 else (h .mul - h .br) / 2) = h .mul
       rw [h1, h2]
+      field_simp
       ring
     · show (if Equiv.refl (Fin 2) = Equiv.refl _ then (h .mul + h .br) / 2
           else (h .mul - h .br) / 2) - (if Equiv.swap (0 : Fin 2) 1 = Equiv.refl _ then
           (h .mul + h .br) / 2 else (h .mul - h .br) / 2) = h .br
       rw [h1, h2]
+      field_simp
       ring
 
 lemma symm_refl (h : PoisShGen 2 → K) :
@@ -141,14 +148,14 @@ lemma μ_mul (x y : PoisDim.W K) : μ (c K) (φ K) mul x y = x * y := by
   simp only [mb, LinearMap.add_apply, LinearMap.mul_apply', bracketL, LinearMap.mk₂_apply,
     Pi.single_apply, reduceCtorEq, if_true, if_false]
   rw [bracket_antisymm wordBracket_antisymm y x, mul_comm y x]
-  module
+  match_scalars <;> field_simp <;> ring
 
 lemma μ_br (x y : PoisDim.W K) : μ (c K) (φ K) br x y = 𝔟 x y := by
   rw [φ, μ_model, val_c, val_c, symm_refl, symm_swap]
   simp only [mb, LinearMap.add_apply, LinearMap.mul_apply', bracketL, LinearMap.mk₂_apply,
     Pi.single_apply, reduceCtorEq, if_true, if_false]
   rw [bracket_antisymm wordBracket_antisymm y x, mul_comm y x]
-  module
+  match_scalars <;> field_simp <;> ring
 
 /-- **A binary tree evaluates to its value in the Poisson algebra.** -/
 theorem lev_eq : ∀ t : LTree (PoisShGen 2),
@@ -161,7 +168,7 @@ theorem lev_eq : ∀ t : LTree (PoisShGen 2),
     rw [lev, μ_br, lev_eq l, lev_eq r]
     rfl
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 /-- A coordinate vector of one monomial picks its value. -/
 lemma sum_vecOf {W : Type*} [AddCommGroup W] [Module K W] (F : LTree (PoisShGen 2) → W)
     {t : LTree (PoisShGen 2)} (ht : t ∈ LTree.monomials 3) :
@@ -170,7 +177,7 @@ lemma sum_vecOf {W : Type*} [AddCommGroup W] [Module K W] (F : LTree (PoisShGen 
   · simp [LTree.vecOf]
   · rw [show LTree.vecOf K 3 t σ = 0 from if_neg fun h => hσ (Subtype.ext h), zero_smul]
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 /-- **A combination of monomials** picks the combination of their values. -/
 lemma sum_combo {W : Type*} [AddCommGroup W] [Module K W] (F : LTree (PoisShGen 2) → W) :
     ∀ l : List (ℤ × LTree (PoisShGen 2)), (∀ x ∈ l, x.2 ∈ LTree.monomials 3) →
@@ -186,7 +193,7 @@ lemma sum_combo {W : Type*} [AddCommGroup W] [Module K W] (F : LTree (PoisShGen 
     refine Finset.sum_congr rfl fun σ _ => ?_
     rw [Pi.add_apply, Pi.smul_apply, add_smul, smul_eq_mul, mul_smul]
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 lemma bracket_neg_right (f g : PoisDim.W K) : 𝔟 f (-g) = -𝔟 f g := by
   have h := bracket_sub_right (wordBracket K) f 0 g
   rwa [zero_sub, bracket_zero_right, zero_sub] at h
@@ -246,9 +253,10 @@ theorem Rsh_eq : ShuffleBarSym.Rsh (c K) (hc K) (rel K) = PoisBin.rel K := by
     | smul a x _ hx =>
       simp only [Pi.smul_apply, smul_eq_mul, mul_smul, ← Finset.smul_sum, hx, smul_zero]
 
+omit [NeZero (2 : K)] in
 /-- **The symmetric operad `Pois`, presented by a commutative product and a Lie bracket in arity
 two and the Poisson relations, is Koszul**, over a field of characteristic zero. -/
-theorem isKoszul : Koszul.IsKoszul K (E K) (rel K) :=
+theorem isKoszul [CharZero K] : Koszul.IsKoszul K (E K) (rel K) :=
   (isKoszul_kerRel_iff (c K) (hc K) (φ K)).2 (by
     rw [← rel, Rsh_eq]
     exact PoisBin.isKoszul K)

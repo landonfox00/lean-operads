@@ -25,7 +25,7 @@ operad `FreeGrL K E`) with an ungraded binary quadratic operad `BinPres K r₂ r
 * **Generators from a binary operation.** `SymPresIso.regHom q₀ : Reg2 K → SymGr Q` sends a
   function `f` on the numberings to `∑ τ, f τ • τ · q₀` (`SymPresIso.regApp_two` in arity two),
   and `SymPresIso.binSpHom ρ q₀` is its restriction to `BinSp K K ρ`; an algebra turns them into
-  the models of `Operad.SymPresBinB` (`SymPresIso.app_regApp`). In a binary quadratic operad a
+  the models of `Operad.SymPresBin` (`SymPresIso.app_regApp`). In a binary quadratic operad a
   commutative generator is fixed by the transposition and an antisymmetric one is negated
   (`SymPresIso.map_swap_genQ_comm`, `SymPresIso.map_swap_genQ_antisymm`).
 * **The generic isomorphism** (`SymPresIso.iso`). Generators of `Koszul.Pres K E r` are sent to
@@ -33,7 +33,15 @@ operad `FreeGrL K E`) with an ungraded binary quadratic operad `BinPres K r₂ r
   `SymPresIso.toBin_gen`); generators of `BinPres K r₂ r₃` are sent to vectors `q g` of
   `E (Fin 2)` (`SymPresIso.ofBin`, `SymPresIso.ofBin_gen`). The hypotheses: every algebra over
   either operad restricts to an algebra over the other one along these maps, and the two maps are
-  inverse to each other on the generators.
+  inverse to each other on the generators. The two inverse laws are
+  `SymPresIso.ofBin_comp_toBin` and `SymPresIso.toBin_comp_ofBin`.
+* **The generic isomorphism on even parts** (`SymPresIso.evenIso`), from the same data: the
+  ungraded form `SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K E r)) (BinPres K r₂ r₃)`. It is
+  `SymPresIso.iso` on the underlying operations (`SymPresIso.evenIso_hom_app`,
+  `SymPresIso.evenIso_inv_app_val`); `SymPresIso.genPE r hE v` is the class of a generator `v` in
+  the even part, sent to `F v`, and the binary generator `g` goes back to the class of `q g`
+  (`SymPresIso.evenIso_hom_gen`, `SymPresIso.evenIso_inv_gen`). Isomorphic symmetric operads
+  have the same dimension in every arity (`SymOperadIso.finrank_eq`).
 
 `Operad.SymPresIso` applies this to `Com`, `Lie`, `Ass` and `Pois`.
 -/
@@ -179,6 +187,11 @@ def GrOperadIso.evenIso (Φ : GrOperadHom R P (SymGr Q))
   hom_inv_id := SymOperadHom.ext fun A _ _ x => GrOperad.EvenOp.ext
     (congrArg (fun φ : GrOperadHom R P P => φ.app A x.val) h₁)
   inv_hom_id := h₂
+
+/-- Isomorphic symmetric operads have the same dimension in every arity. -/
+lemma SymOperadIso.finrank_eq (e : SymOperadIso R Q Q') (A : Type) [Fintype A] [DecidableEq A] :
+    Module.finrank R (Q A) = Module.finrank R (Q' A) :=
+  (e.linearEquiv A).finrank_eq
 
 end Iso
 
@@ -463,13 +476,28 @@ lemma toBin_gen (F : GrSpeciesHom K E (SymGr (BinPres K r₂ r₃)))
 
 variable (r) (hE : GrSpecies.IsEven K E)
 
+/-- **The class of a generator in the even part** of the presented graded operad. -/
+noncomputable def genPE {A : Type} [Fintype A] [DecidableEq A] (v : E A) :
+    GrOperad.EvenOp K (Koszul.Pres K E r) A :=
+  (GrOperad.evenEquiv (Koszul.isEven_pres r hE) A).symm (genP r v)
+
+@[simp] lemma genPE_val {A : Type} [Fintype A] [DecidableEq A] (v : E A) :
+    (genPE r hE v).val = genP r v :=
+  GrOperad.val_evenEquiv_symm _ _
+
+lemma genPE_map {A B : Type} [Fintype A] [DecidableEq A] [Fintype B] [DecidableEq B] (e : A ≃ B)
+    (v : E A) :
+    genPE r hE (SymSpecies.map (R := K) e v) = SymOperad.map (R := K) e (genPE r hE v) :=
+  GrOperad.EvenOp.ext ((genPE_val r hE _).trans ((genP_map r e v).trans
+    (congrArg (GrOperad.map (R := K) e) (genPE_val r hE v).symm)))
+
 /-- The values of the binary generators in the even part of the graded presentation. -/
 noncomputable def evGen (q : G' → E (Fin 2)) (g : G') :
     GrOperad.EvenOp K (Koszul.Pres K E r) (Fin 2) :=
-  (GrOperad.evenEquiv (Koszul.isEven_pres r hE) (Fin 2)).symm (genP r (q g))
+  genPE r hE (q g)
 
 lemma evGen_val (q : G' → E (Fin 2)) (g : G') : (evGen r hE q g).val = genP r (q g) :=
-  GrOperad.val_evenEquiv_symm _ _
+  genPE_val r hE (q g)
 
 variable {r}
 
@@ -500,44 +528,96 @@ noncomputable def ofBin (q : G' → E (Fin 2))
     SymOperadHom K (BinPres K r₂ r₃) (GrOperad.EvenOp K (Koszul.Pres K E r)) :=
   SymOperadIdeal.presHomEquiv.symm ⟨FreeBin.homOf (evGen r hE q), kills_ofBin hE q hq⟩
 
+/-- The morphism `ofBin` sends a binary generator to the class of its vector, in the even
+part. -/
+lemma ofBin_genQ (q : G' → E (Fin 2))
+    (hq : ∀ (V : Type u) [AddCommGroup V] [Module K V] (δ : SymPresIdent.PresAlg K E r V),
+      ∃ γ : SymAlgebra K (BinPres K r₂ r₃) V,
+        ∀ g, γ.app (Fin 2) (genQ r₂ r₃ g) = δ.app (Fin 2) (genP r (q g))) (g : G') :
+    (ofBin hE q hq).app (Fin 2) (genQ r₂ r₃ g) = genPE r hE (q g) :=
+  FreeBin.homOf_gen (evGen r hE q) g
+
 lemma ofBin_gen (q : G' → E (Fin 2))
     (hq : ∀ (V : Type u) [AddCommGroup V] [Module K V] (δ : SymPresIdent.PresAlg K E r V),
       ∃ γ : SymAlgebra K (BinPres K r₂ r₃) V,
         ∀ g, γ.app (Fin 2) (genQ r₂ r₃ g) = δ.app (Fin 2) (genP r (q g))) (g : G') :
-    ((ofBin hE q hq).app (Fin 2) (genQ r₂ r₃ g)).val = genP r (q g) := by
-  show ((FreeBin.homOf (evGen r hE q)).app (Fin 2) _).val = _
-  rw [FreeBin.homOf_gen, evGen_val]
+    ((ofBin hE q hq).app (Fin 2) (genQ r₂ r₃ g)).val = genP r (q g) :=
+  (congrArg GrOperad.EvenOp.val (ofBin_genQ hE q hq g)).trans (genPE_val r hE (q g))
+
+variable {G : Type} (c : ∀ k, Module.Basis (BinGen G k) K (E (Fin k)))
+  (F : GrSpeciesHom K E (SymGr (BinPres K r₂ r₃)))
+  (hF : ∀ (V : Type (max u 1)) [AddCommGroup V] [Module K V]
+    (α : SymAlgebra K (BinPres K r₂ r₃) V), ∃ δ : SymPresIdent.PresAlg K E r V,
+      ∀ (A : Type) [Fintype A] [DecidableEq A] (v : E A),
+        δ.app A (genP r v) = α.app A (F.app A v))
+  (q : G' → E (Fin 2))
+  (hq : ∀ (V : Type u) [AddCommGroup V] [Module K V] (δ : SymPresIdent.PresAlg K E r V),
+    ∃ γ : SymAlgebra K (BinPres K r₂ r₃) V,
+      ∀ g, γ.app (Fin 2) (genQ r₂ r₃ g) = δ.app (Fin 2) (genP r (q g)))
+  (h₁ : ∀ g, F.app (Fin 2) (q g) = genQ r₂ r₃ g)
+  (h₂ : ∀ g : G, ((ofBin hE q hq).app (Fin 2) (F.app (Fin 2) (c 2 (.op g)))).val
+    = genP r (c 2 (.op g)))
+
+include c h₂ in
+/-- **First inverse law**: from the graded presentation to the binary quadratic operad and back
+is the identity, when it is so on the basis of the generators. -/
+theorem ofBin_comp_toBin :
+    (ofBin hE q hq).toGrEven.comp (toBin F hF) = GrOperadHom.id K (Koszul.Pres K E r) :=
+  GrOperadIdeal.presHomEquiv.injective (Subtype.ext (SymPresIdent.hom_ext_basis c fun g => by
+    show ((ofBin hE q hq).app (Fin 2) ((toBin F hF).app (Fin 2) (genP r (c 2 (.op g))))).val
+      = genP r (c 2 (.op g))
+    rw [toBin_gen]
+    exact h₂ g))
+
+include h₁ in
+/-- **Second inverse law**: from the binary quadratic operad to the graded presentation and back
+is the identity, when it is so on the binary generators. -/
+theorem toBin_comp_ofBin :
+    (toBin F hF).toSymOfEven.comp (ofBin hE q hq) = SymOperadHom.id :=
+  presLin_hom_ext fun n g => by
+    cases g with
+    | op g =>
+      show (toBin F hF).app (Fin 2) ((ofBin hE q hq).app (Fin 2) (genQ r₂ r₃ g)).val
+        = genQ r₂ r₃ g
+      rw [ofBin_gen, toBin_gen]
+      exact h₁ g
 
 /-- **The isomorphism of graded operads between a graded presentation and a binary quadratic
 operad**: generator maps both ways along which the algebras of either operad restrict to
 algebras of the other, and which are inverse to each other on the generators. -/
-noncomputable def iso {G : Type} (c : ∀ k, Module.Basis (BinGen G k) K (E (Fin k)))
-    (F : GrSpeciesHom K E (SymGr (BinPres K r₂ r₃)))
-    (hF : ∀ (V : Type (max u 1)) [AddCommGroup V] [Module K V]
-      (α : SymAlgebra K (BinPres K r₂ r₃) V), ∃ δ : SymPresIdent.PresAlg K E r V,
-        ∀ (A : Type) [Fintype A] [DecidableEq A] (v : E A),
-          δ.app A (genP r v) = α.app A (F.app A v))
-    (q : G' → E (Fin 2))
-    (hq : ∀ (V : Type u) [AddCommGroup V] [Module K V] (δ : SymPresIdent.PresAlg K E r V),
-      ∃ γ : SymAlgebra K (BinPres K r₂ r₃) V,
-        ∀ g, γ.app (Fin 2) (genQ r₂ r₃ g) = δ.app (Fin 2) (genP r (q g)))
-    (h₁ : ∀ g, F.app (Fin 2) (q g) = genQ r₂ r₃ g)
-    (h₂ : ∀ g : G, ((ofBin hE q hq).app (Fin 2) (F.app (Fin 2) (c 2 (.op g)))).val
-      = genP r (c 2 (.op g))) :
-    GrOperadIso K (Koszul.Pres K E r) (SymGr (BinPres K r₂ r₃)) :=
-  GrOperadIso.ofEven (toBin F hF) (ofBin hE q hq)
-    (GrOperadIdeal.presHomEquiv.injective (Subtype.ext (SymPresIdent.hom_ext_basis c fun g => by
-      show ((ofBin hE q hq).app (Fin 2) ((toBin F hF).app (Fin 2) (genP r (c 2 (.op g))))).val
-        = genP r (c 2 (.op g))
-      rw [toBin_gen]
-      exact h₂ g)))
-    (presLin_hom_ext fun n g => by
-      cases g with
-      | op g =>
-        show (toBin F hF).app (Fin 2) ((ofBin hE q hq).app (Fin 2) (genQ r₂ r₃ g)).val
-          = genQ r₂ r₃ g
-        rw [ofBin_gen, toBin_gen]
-        exact h₁ g)
+noncomputable def iso : GrOperadIso K (Koszul.Pres K E r) (SymGr (BinPres K r₂ r₃)) :=
+  GrOperadIso.ofEven (toBin F hF) (ofBin hE q hq) (ofBin_comp_toBin hE c F hF q hq h₂)
+    (toBin_comp_ofBin hE F hF q hq h₁)
+
+/-- **The isomorphism of symmetric operads between the even part of a graded presentation and a
+binary quadratic operad**, from the same data as `SymPresIso.iso`. -/
+noncomputable def evenIso :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K E r)) (BinPres K r₂ r₃) :=
+  GrOperadIso.evenIso (toBin F hF) (ofBin hE q hq) (ofBin_comp_toBin hE c F hF q hq h₂)
+    (toBin_comp_ofBin hE F hF q hq h₁)
+
+/-- The isomorphism on even parts is the isomorphism of graded operads on the underlying
+operations. -/
+lemma evenIso_hom_app {A : Type} [Fintype A] [DecidableEq A]
+    (x : GrOperad.EvenOp K (Koszul.Pres K E r) A) :
+    (evenIso hE c F hF q hq h₁ h₂).hom.app A x = (iso hE c F hF q hq h₁ h₂).hom.app A x.val :=
+  rfl
+
+/-- The inverse on even parts is the inverse of the isomorphism of graded operads. -/
+lemma evenIso_inv_app_val {A : Type} [Fintype A] [DecidableEq A] (y : BinPres K r₂ r₃ A) :
+    ((evenIso hE c F hF q hq h₁ h₂).inv.app A y).val = (iso hE c F hF q hq h₁ h₂).inv.app A y :=
+  rfl
+
+/-- The isomorphism on even parts sends the class of a generator to its image under the
+generator map. -/
+lemma evenIso_hom_gen {A : Type} [Fintype A] [DecidableEq A] (v : E A) :
+    (evenIso hE c F hF q hq h₁ h₂).hom.app A (genPE r hE v) = F.app A v :=
+  (congrArg ((toBin F hF).app A) (genPE_val r hE v)).trans (toBin_gen F hF v)
+
+/-- The inverse on even parts sends a binary generator to the class of its vector. -/
+lemma evenIso_inv_gen (g : G') :
+    (evenIso hE c F hF q hq h₁ h₂).inv.app (Fin 2) (genQ r₂ r₃ g) = genPE r hE (q g) :=
+  ofBin_genQ hE q hq g
 
 end Generic
 

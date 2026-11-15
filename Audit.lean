@@ -2364,3 +2364,39 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymPresIso.poisIso_hom_br
 #print axioms Operad.SymPresIso.poisIso_inv_mul
 #print axioms Operad.SymPresIso.poisIso_inv_br
+#print axioms Operad.SymOperadIso.finrank_eq
+#print axioms Operad.SymPresIso.ofBin_comp_toBin
+#print axioms Operad.SymPresIso.toBin_comp_ofBin
+#print axioms Operad.SymPresIso.evenIso
+#print axioms Operad.SymPresIso.evenIso_hom_gen
+#print axioms Operad.SymPresIso.evenIso_inv_gen
+#print axioms Operad.SymPresIso.assEvenIso
+#print axioms Operad.SymPresIso.assEvenIso_hom_mu
+#print axioms Operad.SymPresIso.assEvenIso_hom_op
+#print axioms Operad.SymPresIso.assEvenIso_inv_gen
+#print axioms Operad.SymPresIso.comEvenIso
+#print axioms Operad.SymPresIso.comEvenIso_hom_gen
+#print axioms Operad.SymPresIso.comEvenIso_inv_gen
+#print axioms Operad.SymPresIso.lieEvenIso
+#print axioms Operad.SymPresIso.lieEvenIso_hom_gen
+#print axioms Operad.SymPresIso.lieEvenIso_inv_gen
+#print axioms Operad.SymPresIso.poisEvenIso
+#print axioms Operad.SymPresIso.poisEvenIso_hom_mul
+#print axioms Operad.SymPresIso.poisEvenIso_hom_br
+#print axioms Operad.SymPresIso.poisEvenIso_inv_mul
+#print axioms Operad.SymPresIso.poisEvenIso_inv_br
+
+/-- The identifications of `Com`, `Lie` and `Pois`, stated over a field in which `2 ≠ 0`, apply
+unchanged in characteristic zero: the instance `NeZero (2 : K)` is inferred. -/
+noncomputable example (K : Type) [Field K] [CharZero K] :
+    GrOperadIso K (Koszul.Pres K (SymPresComLie.ECom K) (SymPresComLie.rCom K))
+      (SymGr (FreeBin.BinCom K)) :=
+  SymPresIso.comIso K
+
+/-- They apply from a proof that `2 ≠ 0`, the hypothesis of `BinCom.dual` and `Lie.dual`. -/
+noncomputable example (K : Type) [Field K] (h2 : (2 : K) ≠ 0) :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (SymPresComLie.ELie K)
+      (SymPresComLie.rLie K))) (Lie K) :=
+  haveI : NeZero (2 : K) := ⟨h2⟩
+  SymPresIso.lieEvenIso K
+
