@@ -21,6 +21,11 @@ The cuts proposed below are accepted.
 4. W8 item 2: settle whether the statement holds. If it fails, prove the counterexample or the
    corrected statement and record it in `ROADMAP.md`.
 5. One session works through the packages in the order given under "Totals".
+6. W8 moves to the end, as a stretch item. The generality target is that of Loday–Vallette, a
+   field of characteristic zero, where every module is projective and today's `CutCofree`
+   applies. So W10 and W13 item 3 are stated over a field, and their docstrings and `ROADMAP.md`
+   rows say so. W8 item 2 is settled in a short note, and blocks nothing. W9 keeps its
+   dependency on W8 item 1 and moves with it.
 
 ## What is already closed but still reads as open
 
@@ -227,9 +232,8 @@ Two sessions in parallel on independent packages would take about 5–9 weeks. I
 packages: {W1, W2, W3, W4, W5, W6, W7, W11} against the chain W8 → W9, W10, W13.3. With the
 stretch items the total is 54–115k lines.
 
-**Order.** W0, W5 and W1 come first: they are cheap and close visible rows. Then W8, which
-unblocks three packages. Then W3, W2, W6, W7 and W4a, then W10, W9 and W11, then W12 and W4b,
-and W13 last.
+**Order** (after decision 6). W0, W5 and W1 come first: they are cheap and close visible rows.
+Then W3, W2, W6, W7 and W4a, then W10 and W11, then W12 and W4b, then W13. W8 and W9 come last.
 
 ## Top risks
 
