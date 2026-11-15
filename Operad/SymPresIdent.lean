@@ -35,9 +35,11 @@ operad.
   PoisAlg K V` and **`SymPresIdent.poisEquiv`**, onto `SymAlgebra K (Pois K) V`. The six rules of
   `PoisBin.relB` hold in every Poisson algebra (`SymPresIdent.relB_vanish_alg`).
 
-`Com` and `Lie` need `2` invertible, for the symmetrization of a commutative product or a bracket
-on the one-dimensional representations of `𝔖₂`. The isomorphisms of graded operads
-`Koszul.Pres K E r ≅ SymGr (BinPres …)` are not made here.
+The identifications for `Com`, `Lie` and `Pois` are over a field in which `2 ≠ 0`, as the instance
+`[NeZero (2 : K)]`, which is inferred from `[CharZero K]`: `Com` and `Lie` for the symmetrization
+of a commutative product or a bracket on the one-dimensional representations of `𝔖₂`, and `Pois`
+for the basis `(1 ± τ)/2` of its generators. `Ass` needs no hypothesis. The isomorphisms of graded
+operads `Koszul.Pres K E r ≅ SymGr (BinPres …)` are not made here, but in `Operad.SymPresIso`.
 -/
 import Operad.SymPresComLie
 import Operad.SymPresAss
@@ -333,7 +335,7 @@ noncomputable def comAlgOf (φ : GrOperadHom K (FreeGrL K (ECom K)) (SymGr (EndO
     rw [(kills_orbitRel_iff _ φ).1 hφ _ rfl, sgEv_zero] at h
     exact sub_eq_zero.1 h.symm
 
-variable [CharZero K]
+variable [NeZero (2 : K)]
 
 /-- **The algebra over `FreeGrL K (ECom K)` of a commutative product**, through the halved
 product. -/
@@ -435,7 +437,7 @@ noncomputable def lieAlgOf (φ : GrOperadHom K (FreeGrL K (ELie K)) (SymGr (EndO
     refine Eq.trans ?_ h.symm
     abel
 
-variable [CharZero K]
+variable [NeZero (2 : K)]
 
 /-- **The algebra over `FreeGrL K (ELie K)` of an antisymmetric bracket**, through the halved
 bracket. -/
@@ -648,18 +650,18 @@ section Pois
 
 open SymPresPois PoisShGen
 
-variable {K : Type u} [Field K] [CharZero K] {V : Type v} [AddCommGroup V] [Module K V]
+variable {K : Type u} [Field K] [NeZero (2 : K)] {V : Type v} [AddCommGroup V] [Module K V]
 
-omit [Field K] [CharZero K] in
+omit [Field K] [NeZero (2 : K)] in
 lemma ext3_zero (w : Fin 3 → V) : ext3 w 0 = w 0 := rfl
 
-omit [Field K] [CharZero K] in
+omit [Field K] [NeZero (2 : K)] in
 lemma ext3_one (w : Fin 3 → V) : ext3 w 1 = w 1 := rfl
 
-omit [Field K] [CharZero K] in
+omit [Field K] [NeZero (2 : K)] in
 lemma ext3_two (w : Fin 3 → V) : ext3 w 2 = w 2 := rfl
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 lemma relList_mem (r : Rule) : ∀ x ∈ PoisBin.relList r, x.2 ∈ LTree.monomials 3 := by
   cases r <;> simp [PoisBin.relList, PoisBin.bL_mem, PoisBin.bT_mem, PoisBin.bR_mem]
 
@@ -681,11 +683,11 @@ lemma rule_of (ψ : GrOperadHom K (FreeGrL K (Reg2 K)) (SymGr (EndOp K V)))
   rw [Rsh_eq, PoisBin.rel_eq_span_relB]
   exact Submodule.subset_span ⟨r, rfl⟩
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 lemma tr_refl_swap : (Equiv.refl (Fin 2)).trans (Equiv.swap 0 1).symm = Equiv.swap 0 1 := by
   decide
 
-omit [CharZero K] in
+omit [NeZero (2 : K)] in
 lemma tr_swap_swap : (Equiv.swap (0 : Fin 2) 1).trans (Equiv.swap 0 1).symm = Equiv.refl _ := by
   decide
 
@@ -766,14 +768,14 @@ lemma μ_poisModel_mul (a : PoisAlg K V) (x y : V) :
   rw [poisModel, μ_model, val_c, val_c, symm_refl, symm_swap]
   simp only [LinearMap.add_apply, bil_apply, Pi.single_apply, reduceCtorEq, if_true, if_false]
   rw [a.comm y x, a.antisymm y x]
-  module
+  match_scalars <;> field_simp <;> ring
 
 lemma μ_poisModel_br (a : PoisAlg K V) (x y : V) :
     μ (c K) (poisModel a) br x y = a.bracket ![x, y] := by
   rw [poisModel, μ_model, val_c, val_c, symm_refl, symm_swap]
   simp only [LinearMap.add_apply, bil_apply, Pi.single_apply, reduceCtorEq, if_true, if_false]
   rw [a.comm y x, a.antisymm y x]
-  module
+  match_scalars <;> field_simp <;> ring
 
 /-- **The six rules of `PoisBin.relB` hold in every Poisson algebra.** -/
 theorem relB_vanish_alg (a : PoisAlg K V) (r : Rule) (w : Fin 3 → V) :

@@ -2385,3 +2385,18 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.SymPresIso.poisEvenIso_hom_br
 #print axioms Operad.SymPresIso.poisEvenIso_inv_mul
 #print axioms Operad.SymPresIso.poisEvenIso_inv_br
+
+/-- The identifications of `Com`, `Lie` and `Pois`, stated over a field in which `2 ≠ 0`, apply
+unchanged in characteristic zero: the instance `NeZero (2 : K)` is inferred. -/
+noncomputable example (K : Type) [Field K] [CharZero K] :
+    GrOperadIso K (Koszul.Pres K (SymPresComLie.ECom K) (SymPresComLie.rCom K))
+      (SymGr (FreeBin.BinCom K)) :=
+  SymPresIso.comIso K
+
+/-- They apply from a proof that `2 ≠ 0`, the hypothesis of `BinCom.dual` and `Lie.dual`. -/
+noncomputable example (K : Type) [Field K] (h2 : (2 : K) ≠ 0) :
+    SymOperadIso K (GrOperad.EvenOp K (Koszul.Pres K (SymPresComLie.ELie K)
+      (SymPresComLie.rLie K))) (Lie K) :=
+  haveI : NeZero (2 : K) := ⟨h2⟩
+  SymPresIso.lieEvenIso K
+
