@@ -27,7 +27,7 @@ its Koszulness:
   `PoisBin.isKoszul`.
 
 The comparison of `T(E)/(rel)` with the library's presentation `Pois` of `BinaryQuadratic.lean`
-is not made here.
+is made in `Operad.SymPresIso` (`SymPresIso.poisIso`, `SymPresIso.poisEvenIso`).
 -/
 import Operad.SymPresBin
 import Operad.ShuffleBinPois
