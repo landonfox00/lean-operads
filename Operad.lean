@@ -273,3 +273,4 @@ import Operad.FaithfulAlgebra
 import Operad.SymPresIsoGen
 import Operad.SymPresIso
 import Operad.SymGroebner
+import Operad.FreeLin
