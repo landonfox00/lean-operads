@@ -24,7 +24,7 @@ without unit; `Lie.toSymAss` is the composite with `Sym.Ass`.
   (`Lie.range_toAss_le`). An injective morphism is an isomorphism onto its image
   (`SymOperadHom.isoRange`), so `Lie` is that suboperad (`Lie.isoCommutator`).
 
-The dimension `(n - 1)!` of `Lie` in arity `n` is not proved here.
+The dimension `(n - 1)!` of `Lie` in arity `n` is `Lie.finrank_eq`, in `Operad.ShuffleAnyLie`.
 -/
 import Operad.LieFree
 import Operad.FaithfulAlgebra

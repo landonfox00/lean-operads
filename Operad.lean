@@ -288,3 +288,4 @@ import Operad.DualCooperad
 import Operad.CooperadTranspose
 import Operad.KoszulDualCooperad
 import Operad.LieAss
+import Operad.ShuffleAnyLie
