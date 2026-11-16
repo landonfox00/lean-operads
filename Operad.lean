@@ -300,3 +300,9 @@ import Operad.SpRetraction
 import Operad.KoszulInhom
 import Operad.KoszulInhomRes
 import Operad.KoszulInhomQIso
+import Operad.PreLieBrace
+import Operad.RootedTree
+import Operad.PreLieTreeVal
+import Operad.GraftAlgebra
+import Operad.Cayley
+import Operad.PreLieTrees
