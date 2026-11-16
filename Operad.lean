@@ -308,3 +308,7 @@ import Operad.Cayley
 import Operad.PreLieTrees
 import Operad.RootedTreeOps
 import Operad.PreLieInsertion
+import Operad.UnshuffleSign
+import Operad.LInfTree
+import Operad.LInfTransfer
+import Operad.LInfHTT
