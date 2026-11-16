@@ -282,3 +282,5 @@ import Operad.ScalarRestriction
 import Operad.ReesFiber
 import Operad.BaseChange
 import Operad.ReesWeight
+import Operad.HyperComModel
+import Operad.HyperComFour

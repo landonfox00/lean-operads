@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 145,000 lines in 284 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,210
+About 146,000 lines in 286 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,227
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -627,8 +627,20 @@ hypercommutative, with no higher operations (`HCAlg.ofComm`). `Operad/HyperComDi
 `finrank_three`): by the induction principle of presented operads (`SymSuboperad.mem_of_presGen`,
 `Operad/SymSuboperad.lean`) every operation of arity at most three is spanned by `m₃` and the
 relabellings of `m₂ ∘ m₂`, all equal by the WDVV relations (`HyperCom.map_c22_eq_all`); the scalar
-algebras `μₙ = cₙ · product` (`HCAlg.scal`) separate `m₃` from `m₂ ∘ m₂`. Arity four (`dim = 7`)
-is not formalized.
+algebras `μₙ = cₙ · product` (`HCAlg.scal`) separate `m₃` from `m₂ ∘ m₂`.
+`Operad/HyperComFour.lean` computes **`dim HyperCom(4) = 7`** (`HyperCom.finrank_four`), over any
+field. A basis (`HyperCom.seven`): `m₄`, the iterated product, `m₃(m₂(x₀, x₁), x₂, x₃)` and the
+four operations `m₂(m₃(…), x_a)`. A relabelling of a composite of totally symmetric operations
+only depends on where the inner inputs go (`SymOperad.map_comp_eq_of_symm`), so there are four
+composites `tOp a = m₂(m₃(…), x_a)` and six composites `pOp a b = m₃(m₂(x_a, x_b), …)`; the
+product `m₂` is associative in the operad, so the commutative operad maps to `HyperCom`
+(`HyperCom.ofCom`) and there is one iterated product; these and `m₄` span arity four
+(`HyperCom.mem_span_basic4`); the WDVV relation of arity four is
+`pOp i j + tOp k = pOp i k + tOp j` (`HyperCom.pOp_add_tOp`), which leaves seven operations
+(`HyperCom.span_seven`). They are independent (`HyperCom.linearIndependent_seven`) in a
+hypercommutative algebra on `K × K` (`HCAlg.model`, `Operad/HyperComModel.lean`): the product in
+arity two, and `μₙ(v) = cₙ h(v₁) ⋯ h(vₙ) · 1` with `h (p, q) = q - p` in arity `n ≥ 3`. The
+dimensions in arity five and beyond are not computed.
 
 **Graded and dg operads.** `Operad/DGOperad.lean` defines graded operads in super modules, with a
 parity decomposition preserved by relabellings and compositions and parallel associativity up to
