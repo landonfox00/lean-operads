@@ -290,3 +290,4 @@ import Operad.KoszulDualCooperad
 import Operad.LieAss
 import Operad.ShuffleAnyLie
 import Operad.BarAdjunction
+import Operad.DeformationComplex
