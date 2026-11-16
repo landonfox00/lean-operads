@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 163,000 lines in 317 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,495
+About 164,000 lines in 319 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,518
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1383,6 +1383,18 @@ composites (`LSer.hat_comp`), and so **∞-morphisms compose** (`LSer.IsInfMorph
 identity is one (`LSer.isInfMorph_id`). For graded symmetric `F` the defining equation is
 `∑_T ± F(ℓ(v_T), v_{Tᶜ}) = ℓ' ∘ F`, the convention of `LInf.IsLInf` (`LSer.hat_beta_snd`), and the
 trees of the transfer form an ∞-morphism into the dg Lie algebra (`LSer.isInfMorph_transfer`).
+
+**The homotopy transfer theorem for commutative dg algebras.** `Operad/CInfTransfer.lean` proves
+that the transferred A∞-structure of `HTT.transfer` is a **C∞-structure** when the dg algebra is a
+C∞-algebra, that is, when its product is commutative in the bar convention
+(`CInfT.isCInf_transfer`). Families of operations are evaluated at finite sets of positions
+(`CInfT.toSer`, `LSer.ev`), and a signed shuffle sum is a sum over the subsets of a set of
+positions (`ShSplit.shf`, in `Operad/ShuffleSplit.lean`). The shuffle sum of a product cut at an
+initial segment is a sum of products of the shuffle sums of the two sides (`ShSplit.shf_cut`), and
+the product of two families at a set of positions is the sum over its cuts (`CInfT.ev_BIN`). By
+induction on the arity, the trees vanish on shuffles (`CInfT.vanAt_tf`): of the cuts, only those
+with all letters of one word on each side survive, and the two surviving terms cancel by
+commutativity (`CInfT.shf_ev_BIN`, `CInfT.shf_BIN_self`).
 
 ## Roadmap
 
