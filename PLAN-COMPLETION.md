@@ -10,6 +10,23 @@ stacked on it. Sizes count new Lean lines. Days are wall-clock days for one sess
 1.5k lines a day for routine material and about 1k for sign-heavy dg material. The pace of the
 symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 
+## Status
+
+| package | state | where |
+|---|---|---|
+| W0 | PR open | `completion-plan-2026-11-15` |
+| W5 | PR open | `w5-groebner-koszul-2026-11-15`, `SymGroebner.lean` |
+| W1 | PR open | `w1-free-linearization-2026-11-15`, `FreeLin.lean` |
+| W3 | PR open | `w3-shuffle-isos-2026-11-15`, `ShufflePresIso.lean`, `ShuffleIsoComAss.lean`, `ShuffleIsoPoisLie.lean` |
+
+W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
+with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
+`Sym.Ass K` have the component `K` on the empty set and a presented shuffle operad has none;
+with `Sym.Com` and `Sym.Ass` the morphism is bijective on every nonempty finite linear order.
+For `Lie` the rule is the Jacobi rule on one generator, and injectivity goes through `Pois`,
+the library having no dimension of `Lie`. That the Jacobi rule is a Gröbner basis, and
+`dim Lie(n) = (n - 1)!`, join W4 (a).
+
 ## Decisions, 2026-11-15
 
 The cuts proposed below are accepted.

@@ -31,9 +31,10 @@ three there are twelve monomials and six arrangements, each the word of two mono
   (`AssShGen.finrank_eq_factorial`), and substitution of trees is substitution of words
   (`AssShGen.ev_subst`).
 
-The identification of the presented shuffle operad with the shuffle operad of `Sym.Ass`, through
-`SymOperad.toShuffle`, is not constructed: the statements above are in each arity, for the
-evaluation to words. The binary side has the same statements in each arity
+The presented shuffle operad is the underlying shuffle operad of the associative operad
+`Lin K AssSet`, and that of `Sym.Ass` on every nonempty set of inputs (`AssShGen.presIso`,
+`AssShGen.toSymAss_bijective`, in `Operad.ShuffleIsoComAss`); the statements above are in each
+arity, for the evaluation to words. The binary side has the same statements in each arity
 (`Operad.AssBin.quotEquiv`, `Operad.AssBin.finrank_quotient`, in `Operad.ShuffleKoszulDuals`).
 `Operad.ShuffleBinAss` proves the associative operad Koszul as a binary shuffle operad too
 (`Operad.AssBin.isKoszul_and`), separately.
