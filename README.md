@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 148,000 lines in 291 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,276
+About 149,000 lines in 292 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,292
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -843,7 +843,23 @@ convolution square at the unique splitting by the inputs of the inner corolla
 (`Bar.piL_barD_corollas`, `Bar.star_piF_corollas`). By the cobar adjunction it gives **the
 counit of the bar–cobar adjunction**, the morphism of dg operads `ΩB(P, I) → P` (`Bar.counit`).
 Conversely, a morphism of coaugmented dg cooperads `f : C → B(P, I)` gives the twisting morphism
-`π ∘ f` (`Bar.twistingOfHom`).
+`π ∘ f` (`Bar.twistingOfHom`). `Operad/BarAdjunction.lean` proves **the bar side of the
+adjunction**: on a conilpotent coaugmented dg cooperad `C`, the coaugmented morphisms of dg
+cooperads `C → B(P, I)` are the twisting morphisms `C → P` with values in `I` (`Bar.homEquiv`,
+`Bar.homEquivField` over a field of characteristic zero), and with the cobar adjunction
+**`Hom(ΩC, P) ≅ Tw(C, P) ≅ Hom(C, B(P, I))`** (`Bar.barCobarEquiv`). The defect `d ∘ f - f ∘ d` of
+a morphism of graded cooperads `f : C → B(P, I)` is a coderivation along `f`, and a coderivation
+into the cut cooperad is determined by its cogenerator part: **`π ∘ d ∘ f = π ∘ f ∘ d` implies
+`d ∘ f = f ∘ d`** (`Bar.d_app_eq_app_d`, through `ConvOp.toLin_star_d_sub_mem`); `π` is the
+cogenerator part desuspended (`Bar.piL_eq_val_genCoef`) and `π ∘ d ∘ f = -(π f) ⋆ (π f)`
+(`Bar.piL_d_app_eq`), so `f` commutes with the differentials when `π ∘ f` satisfies the
+Maurer–Cartan equation (`Bar.app_d_of_mc`); a twisting morphism with values in `I` lifts through
+the universal property of the cut cooperad (`Bar.exists_dgHom`), and a morphism into the bar
+construction is determined by `π ∘ f` (`Bar.dgHom_ext`). The bijection is natural: in the
+cooperad by `Bar.twOfHom_comp`, in the operad by `Bar.mapHom` and `Bar.piL_mapHom`,
+`π ∘ B(φ) = φ ∘ π`. The ring is a `ℚ`-algebra, `I` has no operations without inputs, in each arity
+the reduced cooperations or the operations of `I` form a projective module, and `P` carries the
+zero differential.
 
 **The bar–cobar resolution.** A **merge structure** on a graded linear species composes
 homogeneous elements at an input, adding the parities plus one; its bar differential and its
