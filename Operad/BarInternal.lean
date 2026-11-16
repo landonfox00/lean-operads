@@ -3,14 +3,14 @@
 
 For a dg operad `P` and an ideal `I` stable under its differential `∂`, **the bar construction
 `B(P, I)` is a dg cooperad** with the sum of the bar differential and **the internal
-differential**, `∂` applied to the vertices of a tree one at a time (`Bar.dInt`,
+differential**, `-∂` applied to the vertices of a tree one at a time (`Bar.dInt`,
 `Bar.dgCooperad`).
 
-* The internal differential is the derivation of the free graded operad on `sI` extending `∂` on
-  the generators (`Bar.dGen`, `FreeGrL.derSp`). Modulo the linearity relations it is the vertex
-  derivation of the free graded operad on the homogeneous elements (`FreeGrL.proj_vD`, through
-  `FreeGr.der_ext`), so **it is a coderivation** (`Bar.decomp_dInt`) and **it squares to zero**
-  (`Bar.dInt_dInt`).
+* The internal differential is the derivation of the free graded operad on `sI` extending
+  `s a ↦ -s (∂ a)` on the generators (`Bar.dGen`, `FreeGrL.derSp`). Modulo the linearity
+  relations it is the vertex derivation of the free graded operad on the homogeneous elements
+  (`FreeGrL.proj_vD`, through `FreeGr.der_ext`), so **it is a coderivation**
+  (`Bar.decomp_dInt`) and **it squares to zero** (`Bar.dInt_dInt`).
 * **It anticommutes with the bar differential** (`Bar.d_dInt`). On two merged generators the
   defect is the Leibniz rule of `∂` through the merge `s a ⊛ s b = (-1)^{|a|} s (a ∘ b)`
   (`Bar.d_barVal`, `Bar.gam_gen_mem`), and `FreeGr.anti_mem` reduces every tree to that case.
@@ -120,29 +120,34 @@ local notation "𝒥" => GrOperadIdeal.span R (grLinRel R (BarGen I))
 
 namespace Bar
 
-/-- **The differential of the operad on the generators** of the bar construction. -/
+/-- **The differential of the operad on the generators** of the bar construction, with the sign
+of the suspension: `s a ↦ -s (∂ a)`. -/
 def dGen : GrSpEnd R (BarGen I) true where
-  app A _ _ := (DGOperad.d (R := R) (P := P) (A := A)).restrict fun _ hx => hI hx
-  app_map σ' x := Subtype.ext (DGOperad.map_d σ' (x : I.sub _).1).symm
+  app A _ _ := -(DGOperad.d (R := R) (P := P) (A := A)).restrict fun _ hx => hI hx
+  app_map σ' x := Subtype.ext (by
+    show -DGOperad.d (R := R) (GrOperad.map (R := R) σ' (x : I.sub _).1)
+      = GrOperad.map (R := R) σ' (-DGOperad.d (R := R) (x : I.sub _).1)
+    rw [map_neg, DGOperad.map_d])
   app_par c x := Subtype.ext (by
-    show DGOperad.d (R := R) (GrOperad.par (R := R) (!c) (x : I.sub _).1)
-      = GrOperad.par (R := R) (!(xor c true)) (DGOperad.d (R := R) (x : I.sub _).1)
-    rw [DGOperad.d_par, Bool.xor_true])
+    show -DGOperad.d (R := R) (GrOperad.par (R := R) (!c) (x : I.sub _).1)
+      = GrOperad.par (R := R) (!(xor c true)) (-DGOperad.d (R := R) (x : I.sub _).1)
+    rw [DGOperad.d_par, Bool.xor_true, map_neg])
 
 lemma genD_val {k : ℕ} (x : BarT I k) :
-    BarT.val (FreeGrL.genD (dGen I hI) k x) = DGOperad.d (R := R) x.val := rfl
+    BarT.val (FreeGrL.genD (dGen I hI) k x) = -DGOperad.d (R := R) x.val := rfl
 
 lemma genD_par {k : ℕ} (x : BarT I k) : (FreeGrL.genD (dGen I hI) k x).1.2 = !x.1.2 := rfl
 
-/-- **The Leibniz rule on merged decorations**:
-`∂ (s a ⊛ s b) = -(s ∂a ⊛ s b) - (-1)^|sa| (s a ⊛ s ∂b)`. -/
+/-- **The Leibniz rule on merged decorations**, with `δ (s a) = -s (∂ a)`:
+`δ (s a ⊛ s b) = -(δ s a ⊛ s b) - (-1)^|sa| (s a ⊛ δ s b)`. -/
 lemma d_barVal {k l : ℕ} (a : BarT I k) (q : Fin k) (b : BarT I l) (m : ℕ) (h : m + 1 = k + l) :
-    DGOperad.d (R := R) (barVal I a q b m h)
+    -DGOperad.d (R := R) (barVal I a q b m h)
       = (-1 : R) • barVal I (FreeGrL.genD (dGen I hI) k a) q b m h
         + (-σ R a.1.2) • barVal I a q (FreeGrL.genD (dGen I hI) l b) m h := by
   unfold barVal
-  rw [genD_val, genD_val, genD_par, map_smul, ← DGOperad.map_d, DGOperad.d_comp, map_add,
-    smul_add]
+  rw [genD_val, genD_val, genD_par]
+  simp only [map_neg, LinearMap.neg_apply, smul_neg]
+  rw [map_smul, ← DGOperad.map_d, DGOperad.d_comp, map_add, smul_add]
   have ha : GrOperad.par (R := R) false a.val - GrOperad.par (R := R) true a.val
       = σ R (!a.1.2) • a.val := by
     have h1 := GrOperad.tw_hom (R := R) true a.par_val
@@ -150,7 +155,7 @@ lemma d_barVal {k l : ℕ} (a : BarT I k) (q : Fin k) (b : BarT I l) (m : ℕ) (
     exact h1
   rw [ha, map_smul, LinearMap.smul_apply, map_smul, smul_smul, smul_smul, smul_smul,
     Bool.not_not]
-  cases a.1.2 <;> simp [σ]
+  cases a.1.2 <;> simp [σ] <;> abel
 
 /-- **The defect of the internal differential on two merged generators** lies in the ideal of the
 linearity relations. -/
@@ -212,7 +217,9 @@ theorem dInt_dInt {A : Type} [Fintype A] [DecidableEq A] (X : FreeGrL R (BarGen 
   FreeGrL.sq_eq_zero (fun A _ _ v => by
     rw [dInt, FreeGrL.derSp_ι, FreeGrL.derSp_ι]
     have : (dGen I hI).app A ((dGen I hI).app A v) = 0 :=
-      Subtype.ext (DGOperad.d_d (R := R) (v : I.sub A).1)
+      Subtype.ext (by
+        show -DGOperad.d (R := R) (-DGOperad.d (R := R) (v : I.sub A).1) = 0
+        rw [map_neg, neg_neg, DGOperad.d_d])
     rw [this, map_zero]) X
 
 /-- **The internal differential anticommutes with the bar differential.** -/
