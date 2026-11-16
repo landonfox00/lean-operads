@@ -2396,6 +2396,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.TConv.mem_koszulDual_of_forall_generated
 #print axioms Operad.TConv.ann_koszulDual_eq_generated
 #print axioms Operad.TConv.mem_koszulDual_iff_forall_generated
+#print axioms Operad.Lie.homOfBracket
+#print axioms Operad.Lie.homOfBracket_bracket
+#print axioms Operad.Ass.app_commutator
+#print axioms Operad.AssAlg.jacobi
+#print axioms Operad.Lie.toAss
+#print axioms Operad.Lie.toAss_bracket
+#print axioms Operad.Lie.toAss_injective
+#print axioms Operad.SymOperadHom.isoRange
+#print axioms Operad.Lie.range_toAss_le
+#print axioms Operad.Lie.isoCommutator
+#print axioms Operad.Lie.toSymAss_injective
 #print axioms Operad.FreeGrL.shEv_perm
 #print axioms Operad.FreeGrL.shEv_node_smul
 #print axioms Operad.FreeGrL.shEv_sortL
