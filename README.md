@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 153,000 lines in 300 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,363
+About 154,000 lines in 302 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,386
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1297,8 +1297,24 @@ the uniqueness of morphisms into a cut cooperad (`Koszul.mapSp_mapSp_retr`,
 `Koszul.imRetr_le`). The desuspension `κ : (qP^¡, d_φ) → P` is a twisting morphism
 (`Koszul.twistingQL`), the morphism `Ω(qP^¡, d_φ) → P` is the counit of the bar–cobar
 adjunction after `Ωi` (`Koszul.cobarMorQL`), and **it is a quasi-isomorphism iff `i` is one in
-the arities at least two** (`Koszul.cobarMorQL_bijective_iff`). That `i` is a
-quasi-isomorphism when `qP` is Koszul and `P` has the PBW property is not formalized.
+the arities at least two** (`Koszul.cobarMorQL_bijective_iff`).
+
+**The resolution of an operad with quadratic-linear relations.** `Operad/KoszulInhomQIso.lean`
+proves that, for quadratic-linear data whose quadratic part `qP` is Koszul and with the
+Poincaré–Birkhoff–Witt property (`Koszul.IsPBW`: an element of `(r)` with at most `n` vertices
+has its component with `n` vertices in `(q)`), **the morphism `Ω(qP^¡, d_φ) → P` is a
+quasi-isomorphism** (`Koszul.cobarMorQL_bijective`), and so is the comparison morphism
+`(qP^¡, d_φ) → B(P, I)` in the arities at least two (`Koszul.toBarDG_bijective`).
+`Operad/KoszulInhomRes.lean` has the weights: the Koszul dual cooperad is stable under the vertex
+count of `T^c(sE)` (`Koszul.vcount_mem_dual`), so `Ω(qP^¡, d_φ)` is spanned by its weight spaces
+(`Koszul.iSup_wtQL`); the cobar differential preserves the weights (`Koszul.d_wtQL`) and the
+part coming from `d_φ` lowers them by one (`Koszul.wtQL_deltaQL`). An exactness criterion by
+weights (`exists_eq_D_of_graded`) then reduces the statement to two inputs: the PBW property
+identifies the symbol of an element killed by `Ω(qP^¡, d_φ) → P`
+(`Koszul.cobarMorQ_eq_zero_of_pbw`), and the Koszulness of `qP` gives exactness in each weight
+(`Koszul.exists_d_eq_of_isKoszul`). The PBW property is a hypothesis: it is not derived from the
+Koszulness of `qP` and the conditions on the relators, and the PBW theorem of
+`ShuffleAnyInhom.lean`, in the shuffle setting, is not connected to it.
 
 **L∞-algebras.** `Operad/LInfinity.lean` defines **L∞[1]-structures** on a super module (the
 shifted convention): odd, graded symmetric operations of every arity with the generalized Jacobi

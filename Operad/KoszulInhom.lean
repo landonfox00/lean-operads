@@ -47,7 +47,7 @@ Also here: the coefficient of the generators is natural in the morphisms of the 
 (`GrSubCooperad.map`).
 
 That `i` is a quasi-isomorphism when `qP` is Koszul and `P` has the Poincaré–Birkhoff–Witt
-property in every weight is not proved here.
+property in every weight is in `Operad.KoszulInhomQIso`.
 -/
 import Operad.KoszulBar
 import Operad.KoszulCorel

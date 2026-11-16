@@ -298,3 +298,5 @@ import Operad.DeformationLift
 import Operad.DeformationInner
 import Operad.SpRetraction
 import Operad.KoszulInhom
+import Operad.KoszulInhomRes
+import Operad.KoszulInhomQIso
