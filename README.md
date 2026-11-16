@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 149,000 lines in 293 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,305
+About 151,000 lines in 297 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,328
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -752,7 +752,28 @@ quadratic relators over a field of characteristic zero, without generators witho
 `κ_T ⋆ κ_T` maps `P^¡` onto the relations, so that bracket vanishes exactly when `D` vanishes on
 the relators (`Koszul.bracket_ofDerT_eq_zero_iff`): **the cocycles of weight one are the
 derivations of `P` along `φ`** (`Koszul.derEquiv`, `Koszul.ofDerT_injective`). The coboundaries
-of weight one and the obstructions in weight two are not formalized.
+of weight one, the inner derivations, are not formalized.
+
+**Lifts of a morphism and their obstructions.** `Operad/TruncOperad.lean` constructs, for a
+graded operad `Q`, the power series `Q[[t]]` with the Cauchy product (`PowOp`) and the truncated
+polynomials `Q[t]/tⁿ⁺¹` (`TruncOp`), with their coefficients (`TruncOp.coef`,
+`TruncOp.coef_comp`), the truncations (`TruncOp.trunc`) and, over a dg operad, the differential
+(`TruncOp.dDer`). The coefficients of a convolution product are the Cauchy product of the
+coefficients (`CoefSys.coefI_star`, in `Operad/ConvCoef.lean`). `Operad/InvObstruction.lean`
+has the obstruction in the Lie algebra of invariant families: for odd families `x₀, …, xₙ` whose
+square `∑ tᵏ xₖ ⋆ ∑ tᵏ xₖ` vanishes up to order `n`, the coefficient of order `n + 1` is a
+cocycle (`GrOperad.Inv.LiftSeq.twD_obstruction`), and the sequence extends by `y` exactly when
+`[x₀, y]` is minus that coefficient (`GrOperad.Inv.LiftSeq.sq_update_eq_zero_iff`).
+`Operad/DeformationLift.lean` applies this to a lift `φ̃ : P → Q[t]/tⁿ⁺¹` of `φ` with values in
+the cycles (`Koszul.Lift`). For quadratic relators over a field of characteristic zero, without
+generators without inputs, the morphisms out of `P` are the morphisms out of `T(E)` whose
+cochain has convolution square zero (`Koszul.homEquivMC`), the obstruction of a lift is a
+cocycle of `Def(φ)` (`Koszul.Lift.defD_obstruction`), and **a lift extends to `Q[t]/tⁿ⁺²`
+exactly when its obstruction is minus the differential of a cochain of weight one with values in
+the cycles** (`Koszul.Lift.extends_iff_defD`, `Koszul.Lift.extend`). The cochains are graded by
+parity only, so the vanishing of the class of the obstruction is stated through the cochains of
+weight one. The complex `Hom_𝔖(P^¡, P)` is not compared with the cochains of
+`FormalDeformation.lean`.
 
 **Inner derivations, dg endomorphism operads and homotopy algebras.** `Operad/InnerDer.lean`
 defines, for an odd operation `D` with one input of a graded operad, the inner derivation

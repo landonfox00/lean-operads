@@ -291,3 +291,7 @@ import Operad.LieAss
 import Operad.ShuffleAnyLie
 import Operad.BarAdjunction
 import Operad.DeformationComplex
+import Operad.TruncOperad
+import Operad.ConvCoef
+import Operad.InvObstruction
+import Operad.DeformationLift

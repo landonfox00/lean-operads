@@ -23,7 +23,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W7 | PR open | `w7-koszul-dual-cooperad-2026-11-15`, `DualCooperad.lean`, `CooperadTranspose.lean`, `KoszulDualCooperad.lean` |
 | W4 (a) | PR open | `w4a-lie-in-ass-2026-11-15`, `LieAss.lean`; `w4a-lie-groebner-2026-11-15`, `ShuffleAnyLie.lean` (the Gröbner basis of the Jacobi rule, `dim Lie(n) = (n - 1)!`) |
 | W10 | PR open | `w10-bar-adjunction-2026-11-15`, `BarAdjunction.lean`; with today's `CutCofreeConil`, so with its projectivity hypothesis, which holds over a field |
-| W11 | part 1 PR open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); the inner derivations and target 3 follow |
+| W11 | parts 1 and 2 PRs open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); `w11-obstructions-2026-11-15`, `TruncOperad.lean`, `ConvCoef.lean`, `InvObstruction.lean`, `DeformationLift.lean`: target 3; the inner derivations follow |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
@@ -189,8 +189,10 @@ the cogenerators.
 2. **`H¹`**: the 1-cocycles are the derivations of `P` along `φ` (`DerivationAlong`), and the
    1-coboundaries are those inner to `Q(1)`. So `H¹(φ)` is derivations modulo inner ones.
 3. **`H²` and obstructions**: a lift of `φ` to `Q[t]/tⁿ⁺¹` extends to `Q[t]/tⁿ⁺²` iff its
-   obstruction class in `H²(φ)` vanishes. The `φ = id` case is tied to the existing
-   `FormalDeformation` obstruction.
+   obstruction class in `H²(φ)` vanishes. As done: the cochains are graded by parity only, so
+   the vanishing is stated as the obstruction being minus the differential of a cochain of
+   weight one with values in the cycles. The complex `Hom_𝔖(P^¡, P)` is not compared with the
+   cochains of `FormalDeformation`; that comparison is the stretch item W14.
 
 *Size* 3–6k. *Time* 4–8 days. *Depends on* nothing, though it is best after W10.
 
@@ -228,6 +230,17 @@ of the tree formula in the species convention. **Proposed cut**: items 1–3. It
 replaced by the identification of `P∞`-algebras for `P = Lie, Com, Ass` with `L∞`, `C∞` and
 `A∞`. That identification is itself 3–6k per operad, so item 4 needs a decision.
 
+### W14 — stretch: the deformation complex of a Koszul operad and `FormalDeformation`
+**Target.** For a Koszul operad `P`, compare the cohomology of `Hom_𝔖(P^¡, P)` (W11) with the
+`𝔖`-cochains of `Deformation.lean` and `FormalDeformation.lean`, in degrees one and two, and
+match the obstruction of `Koszul.Lift` for the identity of `P` with the obstruction cocycle of
+`FormalDeformation`. The two sides live in different settings: W11 is graded and symmetric, and
+`FormalDeformation` is ungraded, so the comparison goes through `EvenOp` and the resolution
+`Ω P^¡ → P`.
+
+*Size* 6–12k. *Time* 8–15 days. *Depends on* W10 and W11, and on W8 for the generality of the
+bar construction. A stretch item, next to W8 and W9: not started, and done only if asked.
+
 ## Totals
 
 | package | lines, low–high (k) | days, low–high |
@@ -249,6 +262,7 @@ replaced by the identification of `P∞`-algebras for `P = Lie, Com, Ass` with `
 | W13 items 1–3 | 11–23 | 15–29 |
 | **total, with the proposed cuts** | **41–89k** | **53–107 days** |
 | stretch: W6 `n = 5`; W12 item 3; W13 item 4 | +13–26k | +13–27 days |
+| stretch: W14 comparison with `FormalDeformation` | +6–12k | +8–15 days |
 
 With the cuts: 41–89k new lines and about 53–107 days for one session, which is 8–15 weeks.
 Two sessions in parallel on independent packages would take about 5–9 weeks. Independent

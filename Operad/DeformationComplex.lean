@@ -31,8 +31,8 @@ cycles of `Q`: a morphism of dg operads, `P` carrying the zero differential.
   `Def(φ)` when `D` has values in the cycles of `Q` (`Koszul.defD_ofDer_eq_zero`).
 
 The cochains are graded by parity only, so the cohomology `Koszul.DefH` is not split by weight
-here. The coboundaries of weight one, the inner derivations, and the obstructions in weight two
-are not in this file.
+here. The obstructions in weight two are in `Operad.DeformationLift`. The coboundaries of weight
+one, the inner derivations, are not in this file.
 -/
 import Operad.InvLie
 import Operad.GrKoszulDual
