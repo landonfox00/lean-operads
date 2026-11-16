@@ -23,7 +23,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W7 | PR open | `w7-koszul-dual-cooperad-2026-11-15`, `DualCooperad.lean`, `CooperadTranspose.lean`, `KoszulDualCooperad.lean` |
 | W4 (a) | PR open | `w4a-lie-in-ass-2026-11-15`, `LieAss.lean`; `w4a-lie-groebner-2026-11-15`, `ShuffleAnyLie.lean` (the Gröbner basis of the Jacobi rule, `dim Lie(n) = (n - 1)!`) |
 | W10 | PR open | `w10-bar-adjunction-2026-11-15`, `BarAdjunction.lean`; with today's `CutCofreeConil`, so with its projectivity hypothesis, which holds over a field |
-| W11 | parts 1 and 2 PRs open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); `w11-obstructions-2026-11-15`, `TruncOperad.lean`, `ConvCoef.lean`, `InvObstruction.lean`, `DeformationLift.lean`: target 3; the inner derivations follow |
+| W11 | PRs open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); `w11-obstructions-2026-11-15`, `TruncOperad.lean`, `ConvCoef.lean`, `InvObstruction.lean`, `DeformationLift.lean`: target 3; `w11-inner-derivations-2026-11-16`, `DeformationInner.lean`: the inner derivations (the rest of target 2) |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
@@ -187,7 +187,8 @@ the cogenerators.
    complex because `φκ` is a twisting morphism (`InvLie`). Its cohomology is `Hⁿ(φ)`. The
    deformation complex of `P` is the case `φ = id`.
 2. **`H¹`**: the 1-cocycles are the derivations of `P` along `φ` (`DerivationAlong`), and the
-   1-coboundaries are those inner to `Q(1)`. So `H¹(φ)` is derivations modulo inner ones.
+   1-coboundaries are those inner to `Q(1)`. So `H¹(φ)` is derivations modulo inner ones. As
+   done: the two statements, without the quotient, the cochains being graded by parity only.
 3. **`H²` and obstructions**: a lift of `φ` to `Q[t]/tⁿ⁺¹` extends to `Q[t]/tⁿ⁺²` iff its
    obstruction class in `H²(φ)` vanishes. As done: the cochains are graded by parity only, so
    the vanishing is stated as the obstruction being minus the differential of a cochain of

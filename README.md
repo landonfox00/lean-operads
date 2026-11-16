@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 151,000 lines in 297 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,328
+About 152,000 lines in 298 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,341
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -752,7 +752,7 @@ quadratic relators over a field of characteristic zero, without generators witho
 `κ_T ⋆ κ_T` maps `P^¡` onto the relations, so that bracket vanishes exactly when `D` vanishes on
 the relators (`Koszul.bracket_ofDerT_eq_zero_iff`): **the cocycles of weight one are the
 derivations of `P` along `φ`** (`Koszul.derEquiv`, `Koszul.ofDerT_injective`). The coboundaries
-of weight one, the inner derivations, are not formalized.
+of weight one are the inner derivations (below).
 
 **Lifts of a morphism and their obstructions.** `Operad/TruncOperad.lean` constructs, for a
 graded operad `Q`, the power series `Q[[t]]` with the Cauchy product (`PowOp`) and the truncated
@@ -774,6 +774,21 @@ the cycles** (`Koszul.Lift.extends_iff_defD`, `Koszul.Lift.extend`). The cochain
 parity only, so the vanishing of the class of the obstruction is stated through the cochains of
 weight one. The complex `Hom_𝔖(P^¡, P)` is not compared with the cochains of
 `FormalDeformation.lean`.
+
+**Inner derivations as coboundaries.** `Operad/DeformationInner.lean` defines the inner
+derivation `[D, x] = D ∘ x - σ(p |x|) ∑_a x ∘_a D` of an operation `D` of parity `p` with one
+input (`GrOperad.adL`), a derivation of parity `p` (`GrOperad.adDer`); the odd case is
+`GrOperad.innerL`. For an invariant family `Θ` concentrated in arity one, the bracket with `Θ`
+is the inner derivation of its operation on the nonempty sets
+(`GrOperad.Inv.bracket_arityOne`), and in a convolution operad the inner derivation of `ε θ`,
+the counit followed by `θ`, is the inner derivation of `θ` after the maps (`ConvOp.adL_unitC`).
+So the cochain of weight zero `θ ε` of an operation `θ` of `Q` with one input (`Koszul.ofUnit`)
+has the differential `(dθ) ε - σ(|θ|) [θ, -] ∘ φ ∘ κ` in `Def(φ)` (`Koszul.defD_ofUnit`): **the
+coboundaries of weight one are the cochains of the inner derivations** `[θ, -] ∘ φ` of `P`
+along `φ`, for the cycles `θ` (`Koszul.defD_ofUnit_of_closed`). This is for generators with at
+least one input over a field of characteristic zero: the product of invariant families has no
+term on the empty set. The quotient of the derivations of `P` along `φ` by the inner ones is not
+formed.
 
 **Inner derivations, dg endomorphism operads and homotopy algebras.** `Operad/InnerDer.lean`
 defines, for an odd operation `D` with one input of a graded operad, the inner derivation

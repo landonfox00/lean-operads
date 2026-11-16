@@ -295,3 +295,4 @@ import Operad.TruncOperad
 import Operad.ConvCoef
 import Operad.InvObstruction
 import Operad.DeformationLift
+import Operad.DeformationInner
