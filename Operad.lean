@@ -315,3 +315,5 @@ import Operad.LInfHTT
 import Operad.InputPartition
 import Operad.LInfSeries
 import Operad.LInfMorphism
+import Operad.ShuffleSplit
+import Operad.CInfTransfer
