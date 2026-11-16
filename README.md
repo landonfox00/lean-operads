@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 158,000 lines in 310 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,435
+About 160,000 lines in 314 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,464
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1360,6 +1360,21 @@ and `h` on the internal edges form an **A∞-structure** (`HTT.isAInf_transfer`,
 `d ∘ f + μ (f, f) = f ⋆ b'` (`HTT.morphism_eq`). The proof is an induction on the arity through the
 Leibniz rule, associativity and the insertion law for binary composites of families
 (`HTT.comp_BIN`, `HTT.BIN_assoc`, `HTT.tstar_BIN`); the side conditions on `h` are not needed.
+
+**The homotopy transfer theorem for dg Lie algebras.** `Operad/LInfHTT.lean` proves the L∞
+version: over a ring in which `2` is invertible, for a super module with `ε² = 1`, an
+L∞[1]-structure `(d, b)` concentrated in arities one and two (a dg Lie algebra after
+`LInf.isLInf_of_dgLie`) and a retraction `(e, h)` with `h d + d h = e - 1`, the operations
+`ℓ'₁ = e d e`, `ℓ'ₙ = e ∘ ½ ∑ ± b (i∞, i∞)` over the splittings of the inputs into two nonempty
+parts, with the Koszul signs of the unshuffles, form an **L∞[1]-structure**
+(`LInfT.isLInf_transfer`), and the trees `i∞₁ = e`, `i∞ₙ = h ∘ ½ ∑ ± b (i∞, i∞)` satisfy **the
+∞-morphism equation** into `(d, b)` (`LInfT.morph_transfer`). The proof is Markl's induction of
+`Operad/HTT.lean`, carried out on finite sets of inputs of any linear order, where a composite
+with an inner operation puts its value as a new least input (`Operad/LInfTransfer.lean`); the
+combinatorics are the splittings into three parts and a least-input argument for the Jacobi
+identity, and the exchange of two adjacent inputs for graded symmetry (`Operad/LInfTree.lean`,
+`Operad/UnshuffleSign.lean`). ∞-morphisms of L∞-algebras in general, and their composition, are
+not yet formalized.
 
 ## Roadmap
 

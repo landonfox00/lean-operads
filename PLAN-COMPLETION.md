@@ -26,6 +26,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W10 | PR open | `w10-bar-adjunction-2026-11-15`, `BarAdjunction.lean`; with today's `CutCofreeConil`, so with its projectivity hypothesis, which holds over a field |
 | W11 | PRs open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); `w11-obstructions-2026-11-15`, `TruncOperad.lean`, `ConvCoef.lean`, `InvObstruction.lean`, `DeformationLift.lean`: target 3; `w11-inner-derivations-2026-11-16`, `DeformationInner.lean`: the inner derivations (the rest of target 2) |
 | W12 | PRs open | `w12-ql-dual-2026-11-16`, `KoszulInhom.lean`, `SpRetraction.lean`: item 1, in the graded symmetric setting, with the PBW property in weights one and two as the hypothesis, and the reduction of item 2 to the comparison morphism `(qP^¡, d_φ) → B(P, I)` being a quasi-isomorphism; `w12-ql-resolution-2026-11-16`, `KoszulInhomRes.lean`, `KoszulInhomQIso.lean`: item 2, with the PBW property in every weight as a hypothesis. Item 3 is a stretch item |
+| W13 (1) | part 1 PR open | `w13-linf-transfer-2026-11-16`, `LInfHTT.lean` and three supporting files: the HTT for dg Lie algebras, with `2` invertible; ∞-morphisms of L∞-algebras and their composition follow |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
