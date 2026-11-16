@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 160,000 lines in 314 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,464
+About 163,000 lines in 317 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,495
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1373,8 +1373,16 @@ parts, with the Koszul signs of the unshuffles, form an **L∞[1]-structure**
 with an inner operation puts its value as a new least input (`Operad/LInfTransfer.lean`); the
 combinatorics are the splittings into three parts and a least-input argument for the Jacobi
 identity, and the exchange of two adjacent inputs for graded symmetry (`Operad/LInfTree.lean`,
-`Operad/UnshuffleSign.lean`). ∞-morphisms of L∞-algebras in general, and their composition, are
-not yet formalized.
+`Operad/UnshuffleSign.lean`). **∞-morphisms of L∞[1]-algebras** are formalized in
+`Operad/LInfMorphism.lean`, in the coalgebra form with an odd parameter `θ`: series composed along
+the partitions of the inputs with their Koszul signs (`Operad/LInfSeries.lean`, partitions as root
+maps in `Operad/InputPartition.lean`), an L∞[1]-structure `ℓ` as `β_ℓ = (id, ℓ) : V ⇝ V ⊕ θV`, and
+an ∞-morphism as an even series `F` with `F̂ ∘ β_ℓ = β_ℓ' ∘ F` (`LSer.IsInfMorph`). Composition of
+series is associative (`LSer.comp_assoc`), the extension to `V ⊕ θV` takes composites to
+composites (`LSer.hat_comp`), and so **∞-morphisms compose** (`LSer.IsInfMorph.comp`); the
+identity is one (`LSer.isInfMorph_id`). For graded symmetric `F` the defining equation is
+`∑_T ± F(ℓ(v_T), v_{Tᶜ}) = ℓ' ∘ F`, the convention of `LInf.IsLInf` (`LSer.hat_beta_snd`), and the
+trees of the transfer form an ∞-morphism into the dg Lie algebra (`LSer.isInfMorph_transfer`).
 
 ## Roadmap
 
