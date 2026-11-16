@@ -312,3 +312,6 @@ import Operad.UnshuffleSign
 import Operad.LInfTree
 import Operad.LInfTransfer
 import Operad.LInfHTT
+import Operad.InputPartition
+import Operad.LInfSeries
+import Operad.LInfMorphism

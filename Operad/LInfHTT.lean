@@ -19,7 +19,8 @@ inputs are equal (`LInfT.ext_homog`). The Jacobi identities of the transferred s
 key equation on all the inputs (`LInfT.jac_lt`). As in `Operad.HTT`, the operations live on the
 image of `e`, and the side conditions on `h` are not needed.
 
-∞-morphisms of L∞-algebras in general, and their composition, are not in this file.
+∞-morphisms of L∞-algebras in general, and their composition, are in `Operad.LInfMorphism`,
+where `i∞` is shown to be one (`LSer.isInfMorph_transfer`).
 -/
 import Operad.LInfTransfer
 
@@ -74,14 +75,16 @@ lemma sum_proj (x : V) : ∑ q : Bool, proj ε q x = x := by
 
 omit hε in
 /-- **A multilinear map is the sum of its values on the homogeneous parts of its inputs.** -/
-lemma eq_sum_proj {k : ℕ} (f : End R V k) (v : Fin k → V) :
+lemma eq_sum_proj {W : Type*} [AddCommGroup W] [Module R W] {k : ℕ}
+    (f : MultilinearMap R (fun _ : Fin k => V) W) (v : Fin k → V) :
     f v = ∑ q : Fin k → Bool, f fun i => proj ε (q i) (v i) := by
   conv_lhs => rw [show v = fun i => ∑ q : Bool, proj ε q (v i) from
     funext fun i => (sum_proj (v i)).symm]
   exact f.map_sum fun i q => proj ε q (v i)
 
 /-- **Multilinear maps agreeing on homogeneous inputs are equal.** -/
-lemma ext_homog {k : ℕ} {f g : End R V k}
+lemma ext_homog {W : Type*} [AddCommGroup W] [Module R W] {k : ℕ}
+    {f g : MultilinearMap R (fun _ : Fin k => V) W}
     (hfg : ∀ (q : Fin k → Bool) (v : Fin k → V), (∀ i, IsPar ε (q i) (v i)) → f v = g v) :
     f = g := by
   ext v
@@ -90,7 +93,8 @@ lemma ext_homog {k : ℕ} {f g : End R V k}
 
 omit hε in
 /-- **On homogeneous inputs of parities `p`, only the projection of parities `p` survives.** -/
-lemma sum_proj_homog {k : ℕ} (F : (Fin k → Bool) → End R V k) {p : Fin k → Bool}
+lemma sum_proj_homog {W : Type*} [AddCommGroup W] [Module R W] {k : ℕ}
+    (F : (Fin k → Bool) → MultilinearMap R (fun _ : Fin k => V) W) {p : Fin k → Bool}
     {v : Fin k → V} (hv : ∀ i, IsPar ε (p i) (v i)) :
     ∑ q : Fin k → Bool, F q (fun i => proj ε (q i) (v i)) = F p v := by
   rw [Finset.sum_eq_single p]
