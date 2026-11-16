@@ -284,3 +284,6 @@ import Operad.BaseChange
 import Operad.ReesWeight
 import Operad.HyperComModel
 import Operad.HyperComFour
+import Operad.DualCooperad
+import Operad.CooperadTranspose
+import Operad.KoszulDualCooperad
