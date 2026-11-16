@@ -272,3 +272,4 @@ import Operad.SymPresIdent
 import Operad.FaithfulAlgebra
 import Operad.SymPresIsoGen
 import Operad.SymPresIso
+import Operad.SymGroebner
