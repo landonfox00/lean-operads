@@ -274,3 +274,6 @@ import Operad.SymPresIsoGen
 import Operad.SymPresIso
 import Operad.SymGroebner
 import Operad.FreeLin
+import Operad.ShufflePresIso
+import Operad.ShuffleIsoComAss
+import Operad.ShuffleIsoPoisLie

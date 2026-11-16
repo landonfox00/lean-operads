@@ -41,10 +41,10 @@ not `24`, in arity four, for every order of the four letters (checked by a scrip
 word order of `Operad.PoisDim.PW` puts the monomials with a product below a bracket on top, as the
 distributive law `Com ∘ Lie` wants.
 
-The identification of the presented shuffle operad with the shuffle operad of the symmetric
-`Operad.Pois` through `SymOperad.toShuffle` is not constructed: the statements above are in each
-arity, for the evaluation in the polynomials in words. `Operad.ShuffleBinPois` proves the Poisson
-operad Koszul as a binary shuffle operad, through the bridge.
+The presented shuffle operad is the underlying shuffle operad of the symmetric `Operad.Pois`
+(`PoisShGen.presIso`, in `Operad.ShuffleIsoPoisLie`); the statements above are in each arity, for
+the evaluation in the polynomials in words. `Operad.ShuffleBinPois` proves the Poisson operad
+Koszul as a binary shuffle operad, through the bridge.
 -/
 import Operad.PoisPBW
 import Operad.ShuffleAnyAss
