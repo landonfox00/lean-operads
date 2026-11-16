@@ -317,3 +317,4 @@ import Operad.LInfSeries
 import Operad.LInfMorphism
 import Operad.ShuffleSplit
 import Operad.CInfTransfer
+import Operad.CInfMorphism
