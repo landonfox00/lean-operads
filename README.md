@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 149,000 lines in 292 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,292
+About 149,000 lines in 293 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,305
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -736,6 +736,23 @@ so for an odd derivation `D` with `D² = 0` and `D α + α ⋆ α = 0`, **the tw
 `D + [α, -]` squares to zero** (`GrOperad.Inv.twD_twD`): for a twisting morphism, this is the
 twisted convolution complex (`Twisting.twD_twD`). When `2` is invertible, the Maurer–Cartan
 equation reads `∂α + ½ [α, α] = 0` (`Twisting.mc_bracket`).
+
+**The deformation complex of a morphism.** `Operad/DeformationComplex.lean` takes a presented
+operad `P = T(E)/(r)` over a field, a dg operad `Q` and a morphism `φ : P → Q` with values in the
+cycles of `Q`. The composite of a twisting morphism with a morphism of dg operads is a twisting
+morphism (`Twisting.map`), so `φ ∘ κ : P^¡ → Q` is one (`Koszul.twistingOf`), and **the
+deformation complex** `Def(φ) = Hom_𝔖(P^¡, Q)` with the differential `∂ + [φ κ, -]`
+(`Koszul.Def`, `Koszul.defD`) is a complex (`Koszul.defD_defD`), with cohomology `Koszul.DefH`;
+for the identity of `P` it is the deformation complex of `P`, with differential `[κ, -]`
+(`Koszul.defDOperad_apply`). A derivation `D` along a morphism `f` satisfies
+`D (q ⋆ q') = D q ⋆ f q' ± f q ⋆ D q'` on invariant families (`GrOperad.Inv.appDerAlong_star`,
+`ConvOp.postDerAlong`), so the cochain `D ∘ κ_T` of a derivation of `T(E)` along `T(E) → Q`
+(`Koszul.ofDerT`) has bracket `±D ∘ (κ_T ⋆ κ_T)` with `φ κ` (`Koszul.bracket_ofDerT`). For
+quadratic relators over a field of characteristic zero, without generators without inputs,
+`κ_T ⋆ κ_T` maps `P^¡` onto the relations, so that bracket vanishes exactly when `D` vanishes on
+the relators (`Koszul.bracket_ofDerT_eq_zero_iff`): **the cocycles of weight one are the
+derivations of `P` along `φ`** (`Koszul.derEquiv`, `Koszul.ofDerT_injective`). The coboundaries
+of weight one and the obstructions in weight two are not formalized.
 
 **Inner derivations, dg endomorphism operads and homotopy algebras.** `Operad/InnerDer.lean`
 defines, for an odd operation `D` with one input of a graded operad, the inner derivation
