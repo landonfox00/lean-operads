@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 152,000 lines in 298 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,341
+About 153,000 lines in 300 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,363
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1278,6 +1278,27 @@ with a PBW basis is Koszul (`Rules.top_isKoszul`). **The PBW theorem** (`Rules.p
 `Rules.grEquiv`): a combination of monomials of weight `n` is congruent to one of lower weight
 modulo the relations exactly when it lies in the ideal of the leading part, that is, the
 associated graded of the filtered operad presented by `G` is the operad presented by `G.top`.
+
+**The Koszul dual dg cooperad of quadratic-linear data.** `Operad/KoszulInhom.lean` is in the
+graded symmetric setting, over a field of characteristic zero. For `P = T(E)/(r)` with quadratic
+part `qP = T(E)/(q)`, quadratic-linear data (`Koszul.IsQL`) ask that every element of `q` is
+congruent to a generator modulo `(r)`, that the generators embed into `P`, and that the elements
+with two vertices of `(r)` lie in `(q)`: the PBW property in weights one and two, which implies
+the conditions `(ql₁)` and `(ql₂)` of Loday and Vallette. Then the Koszul dual cooperad `qP^¡`
+has a differential `d_φ` (`Koszul.dQL`), an odd coderivation of square zero: **the Koszul dual
+dg cooperad `(qP^¡, d_φ)`** (`Koszul.DualQL`), with `κ ∘ d_φ = -(κ ⋆ κ)` in `P`
+(`Koszul.proj_kapL_dQL`), and `d_φ = 0` when `r = q` (`Koszul.dQL_eq_zero`). It is the bar
+differential on the image of `qP^¡` in `B(P, I)`: the comparison morphism
+`i : (qP^¡, d_φ) → B(P, I)` is an injective morphism of dg cooperads (`Koszul.toBarDG`,
+`Koszul.toBarQ_dQL`). The proof that the bar differential preserves the image uses a retraction
+of the suspended generators `sE → sI` (`GrSpeciesHom.exists_retraction`, in
+`Operad/SpRetraction.lean`), the Maurer–Cartan equation `π ∘ d_B = -(π ⋆ π)` (`Bar.piL_d`) and
+the uniqueness of morphisms into a cut cooperad (`Koszul.mapSp_mapSp_retr`,
+`Koszul.imRetr_le`). The desuspension `κ : (qP^¡, d_φ) → P` is a twisting morphism
+(`Koszul.twistingQL`), the morphism `Ω(qP^¡, d_φ) → P` is the counit of the bar–cobar
+adjunction after `Ωi` (`Koszul.cobarMorQL`), and **it is a quasi-isomorphism iff `i` is one in
+the arities at least two** (`Koszul.cobarMorQL_bijective_iff`). That `i` is a
+quasi-isomorphism when `qP` is Koszul and `P` has the PBW property is not formalized.
 
 **L∞-algebras.** `Operad/LInfinity.lean` defines **L∞[1]-structures** on a super module (the
 shifted convention): odd, graded symmetric operations of every arity with the generalized Jacobi

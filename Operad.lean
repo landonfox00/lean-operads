@@ -296,3 +296,5 @@ import Operad.ConvCoef
 import Operad.InvObstruction
 import Operad.DeformationLift
 import Operad.DeformationInner
+import Operad.SpRetraction
+import Operad.KoszulInhom
