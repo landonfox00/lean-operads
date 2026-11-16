@@ -20,6 +20,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W3 | PR open | `w3-shuffle-isos-2026-11-15`, `ShufflePresIso.lean`, `ShuffleIsoComAss.lean`, `ShuffleIsoPoisLie.lean` |
 | W2 | PR open | `w2-rees-2026-11-15`, `PolyOperad.lean`, `ScalarRestriction.lean`, `ReesFiber.lean`, `BaseChange.lean`, `ReesWeight.lean` |
 | W6 | PR open | `w6-hypercom4-2026-11-15`, `HyperComModel.lean`, `HyperComFour.lean` |
+| W7 | PR open | `w7-koszul-dual-cooperad-2026-11-15`, `DualCooperad.lean`, `CooperadTranspose.lean`, `KoszulDualCooperad.lean` |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
