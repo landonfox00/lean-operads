@@ -28,8 +28,8 @@ The proof:
   operations) and under braces (`PreLie.brace_mem_Im`); in the grafting algebra every tree is the
   braces of its root with its subtrees (`RootedTree.brace_single_joinF`).
 
-The composition of operations, in the basis of trees, is not described here: the operad of
-rooted trees with composition by insertion at the vertices is not constructed.
+The composition of operations in the basis of trees, insertion at a vertex, is in
+`Operad.PreLieInsertion`.
 -/
 import Operad.GraftAlgebra
 import Operad.PreLieTreeVal

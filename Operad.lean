@@ -306,3 +306,5 @@ import Operad.PreLieTreeVal
 import Operad.GraftAlgebra
 import Operad.Cayley
 import Operad.PreLieTrees
+import Operad.RootedTreeOps
+import Operad.PreLieInsertion
