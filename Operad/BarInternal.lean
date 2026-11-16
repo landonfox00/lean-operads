@@ -9,8 +9,8 @@ differential**, `-∂` applied to the vertices of a tree one at a time (`Bar.dIn
 * The internal differential is the derivation of the free graded operad on `sI` extending
   `s a ↦ -s (∂ a)` on the generators (`Bar.dGen`, `FreeGrL.derSp`). Modulo the linearity
   relations it is the vertex derivation of the free graded operad on the homogeneous elements
-  (`FreeGrL.proj_vD`, through `FreeGr.der_ext`), so **it is a coderivation** (`Bar.decomp_dInt`) and **it squares to zero**
-  (`Bar.dInt_dInt`).
+  (`FreeGrL.proj_vD`, through `FreeGr.der_ext`), so **it is a coderivation**
+  (`Bar.decomp_dInt`) and **it squares to zero** (`Bar.dInt_dInt`).
 * **It anticommutes with the bar differential** (`Bar.d_dInt`). On two merged generators the
   defect is the Leibniz rule of `∂` through the merge `s a ⊛ s b = (-1)^{|a|} s (a ∘ b)`
   (`Bar.d_barVal`, `Bar.gam_gen_mem`), and `FreeGr.anti_mem` reduces every tree to that case.

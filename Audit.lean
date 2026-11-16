@@ -2715,6 +2715,11 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.Bar.decomp_dInt
 #print axioms Operad.Bar.dgCooperad
 #print axioms Operad.Bar.dgCooperad_d_one
+#print axioms Operad.Bar.piL_dInt
+#print axioms Operad.Bar.dTot_map
+#print axioms Operad.Bar.d_app_eq_app_d_dg
+#print axioms Operad.Bar.mc_apply
+#print axioms Operad.Bar.exists_hom_dg
 #print axioms Operad.FreeGrL.shEv_perm
 #print axioms Operad.FreeGrL.shEv_node_smul
 #print axioms Operad.FreeGrL.shEv_sortL
