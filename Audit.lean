@@ -2295,6 +2295,9 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.barBasisN_mem_sup
 #print axioms Operad.ShuffleBarSym.map_ΦL_Krel
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_shuffle
+#print axioms Operad.ShuffleBarSym.isKoszul_of_isGroebner
+#print axioms Operad.ShuffleBarSym.isKoszul_iff_rules
+#print axioms Operad.ShuffleBarSym.isKoszul_of_critical
 #print axioms Operad.FreeGrL.shEv_perm
 #print axioms Operad.FreeGrL.shEv_node_smul
 #print axioms Operad.FreeGrL.shEv_sortL
