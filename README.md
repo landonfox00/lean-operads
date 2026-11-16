@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 142,000 lines in 275 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,154
+About 142,000 lines in 276 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,162
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -491,6 +491,10 @@ composition and proves that the two constructions are inverse to each other
 modules indexed like operads, with the skeleton (a morphism of species is an equivariant family on
 the `Fin n`). `Operad/FreeSpecies.lean` builds the free operad on a set species and on a linear
 species, with their universal properties (`FreeSp.homEquiv`, `FreeL.homEquiv`).
+`Operad/FreeLin.lean` compares the two on the linearization `LinSp R X` of a set species `X`:
+**the free operad on the linearization is the linearization of the free set operad**,
+`FreeL R (LinSp R X) ≅ Lin R (FreeSp X)` (`FreeL.linIso`), so it has a basis indexed by
+`FreeSp X` (`FreeL.linBasis`).
 `Operad/Schur.lean` presents the Schur functor `S(P, V) = ⊕ₙ P(n) ⊗_{Σₙ} V^{⊗n}` as a module, and
 `Operad/FreeAlgebra.lean` makes it the free `P`-algebra on `V`. Operations act by total composition,
 every algebra acts through total composition (`SymAlgebra.act_total`), and morphisms of algebras out

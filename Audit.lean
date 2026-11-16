@@ -2298,6 +2298,14 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.ShuffleBarSym.isKoszul_of_isGroebner
 #print axioms Operad.ShuffleBarSym.isKoszul_iff_rules
 #print axioms Operad.ShuffleBarSym.isKoszul_of_critical
+#print axioms Operad.LinSp.homEquiv
+#print axioms Operad.LinSp.homEquiv_symm_single
+#print axioms Operad.FreeL.toLin_ι
+#print axioms Operad.FreeL.ofLin_single
+#print axioms Operad.FreeL.linIso
+#print axioms Operad.FreeL.linBasis
+#print axioms Operad.FreeL.linBasis_ι
+#print axioms Operad.FreeL.finrank_linSp
 #print axioms Operad.FreeGrL.shEv_perm
 #print axioms Operad.FreeGrL.shEv_node_smul
 #print axioms Operad.FreeGrL.shEv_sortL
