@@ -15,7 +15,7 @@ relations (`HyperCom.map_c22_eq_all`).
   sets `S`, and transposing `j` and `k` exchanges the two sides. With `c₂ = 1` the operation `m₃`
   vanishes and `m₂ ∘ m₂` does not; with `c₃ = 1` the reverse.
 
-The next dimension, `dim HyperCom(4) = 7`, is not formalized.
+The next dimension, `dim HyperCom(4) = 7`, is in `Operad.HyperComFour`.
 -/
 import Operad.HyperCom
 import Operad.SymSuboperad
