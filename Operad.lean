@@ -318,3 +318,6 @@ import Operad.LInfMorphism
 import Operad.ShuffleSplit
 import Operad.CInfTransfer
 import Operad.CInfMorphism
+import Operad.TreeVertex
+import Operad.FreeGrVertex
+import Operad.BarInternal
