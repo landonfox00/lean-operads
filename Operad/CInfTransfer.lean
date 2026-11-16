@@ -28,7 +28,7 @@ namespace CInfT
 open GerBV KS ShSplit LSer AInf End
 
 variable {R : Type u} [CommRing R] {V : Type v} [AddCommGroup V] [Module R V]
-  {α : Type*} [LinearOrder α]
+  {Z : Type*} [AddCommGroup Z] [Module R Z] {α : Type*} [LinearOrder α]
 
 /-! ## Families as series -/
 
@@ -45,7 +45,7 @@ lemma range_orderEmbOfFin (k : ℕ) {m : ℕ} (h : (Finset.range k).card = m) (j
   exact (congrFun this j).symm
 
 /-- **A word read along its positions** is the word itself. -/
-lemma ev_rank (F : Ser R V V) (S : Finset α) (q : ℕ → V) :
+lemma ev_rank (F : Ser R V Z) (S : Finset α) (q : ℕ → V) :
     ev F (fun t => q (rank S t)) S = ev F q (Finset.range S.card) := by
   rw [ev_eq F q _ (Finset.card_range S.card)]
   unfold ev
@@ -99,7 +99,7 @@ lemma shf_sum {ι : Type*} (s : Finset ι) (Φ : ι → (α → V) → Finset α
 end shf
 
 /-- **The shuffle sum with no letter of `x`** is the evaluation on `y`. -/
-lemma shf_zero (F : Ser R V V) (S : Finset α) (x y : ℕ → V) (px py : ℕ → Bool) :
+lemma shf_zero (F : Ser R V Z) (S : Finset α) (x y : ℕ → V) (px py : ℕ → Bool) :
     shf R (ev F) S 0 x y px py = ev F y (Finset.range S.card) := by
   classical
   unfold shf
@@ -108,7 +108,7 @@ lemma shf_zero (F : Ser R V V) (S : Finset α) (x y : ℕ → V) (px py : ℕ �
   simp [mergeA]
 
 /-- **The shuffle sum with only letters of `x`** is the evaluation on `x`. -/
-lemma shf_card (F : Ser R V V) (S : Finset α) (x y : ℕ → V) (px py : ℕ → Bool) :
+lemma shf_card (F : Ser R V Z) (S : Finset α) (x y : ℕ → V) (px py : ℕ → Bool) :
     shf R (ev F) S S.card x y px py = ev F x (Finset.range S.card) := by
   classical
   unfold shf
@@ -122,13 +122,13 @@ variable (ε : V →ₗ[R] V)
 variable (α) in
 /-- **Vanishing on shuffles in arity `n`**: the shuffle sums of an evaluation on sets of `n`
 positions vanish for homogeneous words, with letters of both words. -/
-def VanAt (F : Ser R V V) (n : ℕ) : Prop :=
+def VanAt (F : Ser R V Z) (n : ℕ) : Prop :=
   ∀ (M : Finset α), M.card = n → ∀ (A : ℕ) (x y : ℕ → V) (px py : ℕ → Bool),
     (∀ k, IsPar ε (px k) (x k)) → (∀ k, IsPar ε (py k) (y k)) → 0 < A → A < n →
     shf R (ev F) M A x y px py = 0
 
 /-- **The shuffle sums of a series vanishing on shuffles**: only the two words themselves. -/
-lemma shf_trich {F : Ser R V V} {S : Finset α} (hF : VanAt α ε F S.card) (A : ℕ) (x y : ℕ → V)
+lemma shf_trich {F : Ser R V Z} {S : Finset α} (hF : VanAt α ε F S.card) (A : ℕ) (x y : ℕ → V)
     (px py : ℕ → Bool) (hx : ∀ k, IsPar ε (px k) (x k)) (hy : ∀ k, IsPar ε (py k) (y k)) :
     shf R (ev F) S A x y px py = if A = 0 then ev F y (Finset.range S.card)
       else if A = S.card then ev F x (Finset.range S.card) else 0 := by
@@ -415,19 +415,27 @@ lemma univ_orderEmbOfFin {N m : ℕ} (h : (Finset.univ : Finset (Fin N)).card = 
     (fun _ => Finset.mem_univ _) (fun a b hab => hab)
   exact (congrFun this j).symm
 
+/-- **A dg algebra which is a C∞-algebra** satisfies the axioms of `HTT.DGA`, and its product is
+commutative. -/
+lemma dga_of_isCInf {μ : End R V 2} {d : V →ₗ[R] V} (hdo : ∀ x, d (ε x) = -ε (d x))
+    (hμ : IsHomog ε 1 μ) (hC : CInf.IsCInf ε (dga R V (HTT.op1 d) μ)) :
+    HTT.DGA ε d μ ∧ ∀ (x y : V) (px py : Bool), IsPar ε px x → IsPar ε py y →
+      μ ![x, y] + σ R (px && py) • μ ![y, x] = 0 := by
+  obtain ⟨hA, hcomm⟩ := (CInf.isCInf_dga_iff ε).1 hC
+  have hd1 : IsHomog ε 1 (HTT.op1 d) := fun v => by
+    change d (ε (v 0)) = (-1 : R) ^ 1 • ε (d (v 0))
+    rw [hdo, pow_one, neg_one_smul]
+  obtain ⟨h1, h2, h3⟩ := (isAInf_dga_iff ε hd1 hμ).1 hA
+  exact ⟨⟨hdo, hμ, fun x => h1 x, fun x y => h2 x y, h3⟩, hcomm⟩
+
 /-- **Homotopy transfer of C∞-structures**: the transferred A∞-structure of a dg algebra which is
 a C∞-algebra, along a retraction, is a C∞-structure. -/
 theorem isCInf_transfer {μ : End R V 2} {d e h : V →ₗ[R] V} (hdo : ∀ x, d (ε x) = -ε (d x))
     (hμ : IsHomog ε 1 μ) (hr : HTT.Retract ε d e h) (hC : CInf.IsCInf ε (dga R V (HTT.op1 d) μ)) :
     CInf.IsCInf ε (HTT.transfer μ e h d) := by
   classical
-  obtain ⟨hA, hcomm⟩ := (CInf.isCInf_dga_iff ε).1 hC
-  have hd1 : IsHomog ε 1 (HTT.op1 d) := fun v => by
-    change d (ε (v 0)) = (-1 : R) ^ 1 • ε (d (v 0))
-    rw [hdo, pow_one, neg_one_smul]
-  obtain ⟨h1, h2, h3⟩ := (isAInf_dga_iff ε hd1 hμ).1 hA
-  have hd : HTT.DGA ε d μ := ⟨hdo, hμ, fun x => h1 x, fun x y => h2 x y, h3⟩
-  refine ⟨HTT.isAInf_transfer_of_dga hr hdo hμ hA, fun a c x y px py hx hy => ?_⟩
+  obtain ⟨hd, hcomm⟩ := dga_of_isCInf ε hdo hμ hC
+  refine ⟨HTT.isAInf_transfer_of_dga hr hdo hμ hC.toIsAInf, fun a c x y px py hx hy => ?_⟩
   have hN : (Finset.univ : Finset (Fin (a + 1 + (c + 1)))).card = a + c + 1 + 1 := by
     rw [Finset.card_univ, Fintype.card_fin]
     omega

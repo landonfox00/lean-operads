@@ -308,27 +308,35 @@ lemma sum_powersetCard_split {Z : Type*} [AddCommMonoid Z] {P M : Finset α} (hP
   · intro T _
     rw [Finset.union_comm, Finset.sdiff_union_inter]
 
-/-- **The shuffle sum of a product cut at an initial segment** `P`: by the number `i` of letters
-of `x` before the cut, the product of the shuffle sums of the two sides, with the sign of the
-letters of `x` after the cut moving past those of `y` before it. -/
-theorem shf_cut (μ : End R V 2) (EX EY : (α → V) → Finset α → V)
-    (hX : ∀ w w' S, (∀ a ∈ S, w a = w' a) → EX w S = EX w' S)
-    (hY : ∀ w w' S, (∀ a ∈ S, w a = w' a) → EY w S = EY w' S)
-    {P M : Finset α} (hP : IsDown P M) (A : ℕ) (x y : ℕ → V) (px py : ℕ → Bool) :
-    shf R (fun w _ => μ ![EX w P, EY w (M \ P)]) M A x y px py
+/-- A product of two inputs as a bilinear map. -/
+def bil (μ : End R V 2) : V →ₗ[R] V →ₗ[R] V :=
+  LinearMap.mk₂ R (fun a b => μ ![a, b]) (fun a a' b => HTT.mu_add_left μ a a' b)
+    (fun c a b => HTT.mu_smul_left μ c a b) (fun a b b' => HTT.mu_add_right μ a b b')
+    (fun c a b => HTT.mu_smul_right μ c a b)
+
+omit [AddCommGroup V] [Module R V] in
+/-- **The shuffle sum of a bilinear product cut at an initial segment** `P`: by the number `i`
+of letters of `x` before the cut, the product of the shuffle sums of the two sides, with the sign
+of the letters of `x` after the cut moving past those of `y` before it. -/
+theorem shf_cut₂ {W₁ W₂ : Type*} [AddCommGroup W₁] [Module R W₁] [AddCommGroup W₂]
+    [Module R W₂] (β : W₁ →ₗ[R] W₂ →ₗ[R] W) (EX : (α → V) → W₁) (EY : (α → V) → W₂)
+    {P M : Finset α} (hP : IsDown P M) (hX : ∀ w w', (∀ a ∈ P, w a = w' a) → EX w = EX w')
+    (hY : ∀ w w', (∀ a ∈ M \ P, w a = w' a) → EY w = EY w') (A : ℕ) (x y : ℕ → V)
+    (px py : ℕ → Bool) :
+    shf R (fun w _ => β (EX w) (EY w)) M A x y px py
       = ∑ i ∈ Finset.range (A + 1),
         σ R (par (shift px i) (Finset.range (A - i)) && par py (Finset.range (P.card - i))) •
-          μ ![shf R EX P i x y px py,
-            shf R EY (M \ P) (A - i) (shift x i) (shift y (P.card - i)) (shift px i)
-              (shift py (P.card - i))] := by
+          β (shf R (fun w _ => EX w) P i x y px py)
+            (shf R (fun w _ => EY w) (M \ P) (A - i) (shift x i) (shift y (P.card - i))
+              (shift px i) (shift py (P.card - i))) := by
   classical
   unfold shf
   rw [sum_powersetCard_split hP.1 A]
   refine Finset.sum_congr rfl fun i _ => ?_
-  rw [LInfT.b_sum_left, Finset.smul_sum]
+  rw [map_sum β, LinearMap.sum_apply, Finset.smul_sum]
   refine Finset.sum_congr rfl fun T1 hT1 => ?_
   rw [Finset.mem_powersetCard] at hT1
-  rw [HTT.mu_smul_left, LInfT.b_sum_right, Finset.smul_sum, Finset.smul_sum]
+  rw [map_smul β, LinearMap.smul_apply, map_sum (β _), Finset.smul_sum, Finset.smul_sum]
   refine Finset.sum_congr rfl fun T2 hT2 => ?_
   rw [Finset.mem_powersetCard] at hT2
   set T := T1 ∪ T2
@@ -367,8 +375,7 @@ theorem shf_cut (μ : End R V 2) (EX EY : (α → V) → Finset α → V)
     fun a ha => by
       rw [mergeA_up hP px py (Finset.mem_sdiff.1 ha).1 (Finset.mem_sdiff.1 ha).2, e2, hi]
   dsimp only
-  rw [hX _ _ P hdl, hY _ _ (M \ P) hdr,
-    HTT.mu_smul_right, smul_smul, smul_smul]
+  rw [hX _ _ hdl, hY _ _ hdr, map_smul (β _), smul_smul, smul_smul]
   congr 1
   -- the signs
   set p := mergeA T M px py
@@ -420,6 +427,21 @@ theorem shf_cut (μ : End R V 2) (EX EY : (α → V) → Finset α → V)
     rw [h2, h3]
   rw [k1, k2, k3, k4]
   ring
+
+
+/-- **The shuffle sum of a product cut at an initial segment** `P` (`shf_cut₂` for `μ`). -/
+theorem shf_cut (μ : End R V 2) (EX EY : (α → V) → Finset α → V)
+    (hX : ∀ w w' S, (∀ a ∈ S, w a = w' a) → EX w S = EX w' S)
+    (hY : ∀ w w' S, (∀ a ∈ S, w a = w' a) → EY w S = EY w' S)
+    {P M : Finset α} (hP : IsDown P M) (A : ℕ) (x y : ℕ → V) (px py : ℕ → Bool) :
+    shf R (fun w _ => μ ![EX w P, EY w (M \ P)]) M A x y px py
+      = ∑ i ∈ Finset.range (A + 1),
+        σ R (par (shift px i) (Finset.range (A - i)) && par py (Finset.range (P.card - i))) •
+          μ ![shf R EX P i x y px py,
+            shf R EY (M \ P) (A - i) (shift x i) (shift y (P.card - i)) (shift px i)
+              (shift py (P.card - i))] :=
+  shf_cut₂ (bil μ) (fun w => EX w P) (fun w => EY w (M \ P)) hP (fun w w' h => hX w w' P h)
+    (fun w w' h => hY w w' (M \ P) h) A x y px py
 
 end ShSplit
 

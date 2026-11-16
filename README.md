@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 164,000 lines in 319 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,518
+About 165,000 lines in 320 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,541
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1395,6 +1395,18 @@ the product of two families at a set of positions is the sum over its cuts (`CIn
 induction on the arity, the trees vanish on shuffles (`CInfT.vanAt_tf`): of the cuts, only those
 with all letters of one word on each side survive, and the two surviving terms cancel by
 commutativity (`CInfT.shf_ev_BIN`, `CInfT.shf_BIN_self`).
+
+**∞-morphisms of C∞-algebras.** `Operad/CInfMorphism.lean` defines them as ∞-morphisms of
+A∞-algebras (`AInf.IsInfMorph`) whose components vanish on signed shuffles (`CInfM.IsCInfMorph`).
+The identity is one, a strict morphism is one exactly when it is an ∞-morphism of A∞-algebras
+(`CInfM.isCInfMorph_lin_iff`), and **∞-morphisms of C∞-algebras compose**
+(`CInfM.IsCInfMorph.comp`): for an even inner series, composites of series vanishing on shuffles
+vanish on shuffles (`CInfM.vanAt_comp`). The composite at a set of positions is a sum over the
+compositions of its size (`CInfM.ev_comp`); for each composition, only the choices of blocks
+holding letters of one word survive (`CInfM.shf_blocks`), and a composition with such a choice is
+a pair of compositions of the two words with a shuffle of their blocks (`CInfM.fwd`,
+`CInfM.bwd`). The trees of the transfer of a C∞ dg algebra vanish on shuffles
+(`CInfM.shuffle_tf`).
 
 ## Roadmap
 
