@@ -21,6 +21,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W2 | PR open | `w2-rees-2026-11-15`, `PolyOperad.lean`, `ScalarRestriction.lean`, `ReesFiber.lean`, `BaseChange.lean`, `ReesWeight.lean` |
 | W6 | PR open | `w6-hypercom4-2026-11-15`, `HyperComModel.lean`, `HyperComFour.lean` |
 | W7 | PR open | `w7-koszul-dual-cooperad-2026-11-15`, `DualCooperad.lean`, `CooperadTranspose.lean`, `KoszulDualCooperad.lean` |
+| W4 (a) | PR open | `w4a-lie-in-ass-2026-11-15`, `LieAss.lean`; the Gröbner basis of the Jacobi rule and `dim Lie(n) = (n - 1)!` follow in a separate PR |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and

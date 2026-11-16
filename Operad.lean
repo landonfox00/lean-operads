@@ -287,3 +287,4 @@ import Operad.HyperComFour
 import Operad.DualCooperad
 import Operad.CooperadTranspose
 import Operad.KoszulDualCooperad
+import Operad.LieAss
