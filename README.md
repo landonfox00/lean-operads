@@ -58,7 +58,7 @@ About 142,000 lines in 274 modules, **`sorry`-free**. `Audit.lean` runs `#print 
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
-24,000 of them with auxiliary ones, and CI runs both.
+28,000 of them with auxiliary ones, and CI runs both.
 
 | Item | Where | Status |
 |---|---|---|
