@@ -277,3 +277,8 @@ import Operad.FreeLin
 import Operad.ShufflePresIso
 import Operad.ShuffleIsoComAss
 import Operad.ShuffleIsoPoisLie
+import Operad.PolyOperad
+import Operad.ScalarRestriction
+import Operad.ReesFiber
+import Operad.BaseChange
+import Operad.ReesWeight
