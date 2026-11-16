@@ -24,6 +24,7 @@ symmetric bridge was 27k lines in 12 days with up to three agents in parallel.
 | W4 (a) | PR open | `w4a-lie-in-ass-2026-11-15`, `LieAss.lean`; `w4a-lie-groebner-2026-11-15`, `ShuffleAnyLie.lean` (the Gröbner basis of the Jacobi rule, `dim Lie(n) = (n - 1)!`) |
 | W10 | PR open | `w10-bar-adjunction-2026-11-15`, `BarAdjunction.lean`; with today's `CutCofreeConil`, so with its projectivity hypothesis, which holds over a field |
 | W11 | PRs open | `w11-deformation-complex-2026-11-15`, `DeformationComplex.lean`: the complex and its cocycles of weight one (targets 1 and half of 2); `w11-obstructions-2026-11-15`, `TruncOperad.lean`, `ConvCoef.lean`, `InvObstruction.lean`, `DeformationLift.lean`: target 3; `w11-inner-derivations-2026-11-16`, `DeformationInner.lean`: the inner derivations (the rest of target 2) |
+| W12 | part A PR open | `w12-ql-dual-2026-11-16`, `KoszulInhom.lean`, `SpRetraction.lean`: item 1, in the graded symmetric setting, with the PBW property in weights one and two as the hypothesis, and the reduction of item 2 to the comparison morphism `(qP^¡, d_φ) → B(P, I)` being a quasi-isomorphism; that quasi-isomorphism follows |
 
 W3 as done differs from its target below in two ways. For `Com` and `Ass` the isomorphism is
 with the operads without unit `Lin K ComSet` and `Lin K AssSet`, because `Sym.Com K` and
