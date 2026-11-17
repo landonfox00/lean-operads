@@ -323,3 +323,5 @@ import Operad.FreeGrVertex
 import Operad.BarInternal
 import Operad.BarInternalAdj
 import Operad.VanDerLaan
+import Operad.VanDerLaanTransfer
+import Operad.EndCorner
