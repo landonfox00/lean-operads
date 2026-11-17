@@ -322,3 +322,4 @@ import Operad.TreeVertex
 import Operad.FreeGrVertex
 import Operad.BarInternal
 import Operad.BarInternalAdj
+import Operad.VanDerLaan
