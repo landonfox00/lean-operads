@@ -325,3 +325,7 @@ import Operad.BarInternalAdj
 import Operad.VanDerLaan
 import Operad.VanDerLaanTransfer
 import Operad.EndCorner
+import Operad.FreeGrTwoVertex
+import Operad.GrCooperadSplit
+import Operad.CutCobar
+import Operad.CutLift
