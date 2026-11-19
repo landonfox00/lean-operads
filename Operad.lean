@@ -345,3 +345,7 @@ import Operad.ShuffleAnyProj
 import Operad.ShuffleAnyTop
 import Operad.ShuffleAnyDiag
 import Operad.ShuffleAnyCrit
+import Operad.ShuffleAnyKer
+import Operad.ShuffleAnyWindow
+import Operad.ShuffleAnyIdeal
+import Operad.ShuffleAnyBridge
