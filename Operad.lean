@@ -330,3 +330,4 @@ import Operad.GrCooperadSplit
 import Operad.CutCobar
 import Operad.CutLift
 import Operad.CutUnique
+import Operad.CofreeSpecies

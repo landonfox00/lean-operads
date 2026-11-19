@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 173,000 lines in 332 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,678
+About 173,000 lines in 333 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,692
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -554,7 +554,18 @@ with vertices (`FreeSet.shape`); its decomposition cooperad is **the cofree coni
 on generators of any arity: for a conilpotent cooperad `C`, a morphism of coaugmented cooperads into
 it is the same as a family of maps `C (Fin k) → R[T k]` killing the coaugmentation
 (`Cofree.homEquiv`, `Cofree.existsUnique_lift`), the point being that over a conilpotent cooperad
-every such family is locally finite (`Cofree.locallyFinite`).
+every such family is locally finite (`Cofree.locallyFinite`). `Operad/CofreeSpecies.lean` builds **the
+cofree conilpotent cooperad on any linear species** `V` over a `ℚ`-algebra (`CofreeSp R V`), the
+trees with vertices decorated by `V` cut in all possible ways, and proves its universal property
+with no freeness or projectivity: for `V` without elements without inputs and a conilpotent
+coaugmented symmetric cooperad `C`, the coaugmented morphisms of cooperads `C → T^c(V)` are the
+morphisms of linear species `C → V` killing the coaugmentation (`CofreeSp.homEquiv`,
+`CofreeSp.existsUnique_lift`). It is the even case of the graded statement of
+`Operad/CutLift.lean`: a symmetric cooperad is a graded cooperad concentrated in even parity
+(`Ev.instGrCooperad`), with the same coaugmentation and coradical filtration, and the cut
+cooperad on an even species is even, so its parallel coassociativity has no sign
+(`sswapLast_of_even`, `CofreeSp.instSymCooperad`). The comparison with `Cofree R T` for a species
+free over a collection is not included.
 
 **Shuffle operads.** `Operad/ShuffleOperad.lean` defines shuffle operads on ordered species, with
 partial compositions along shuffles (`IsShuffle`), their morphisms, ideals and quotients, and the
