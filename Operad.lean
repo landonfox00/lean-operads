@@ -329,3 +329,4 @@ import Operad.FreeGrTwoVertex
 import Operad.GrCooperadSplit
 import Operad.CutCobar
 import Operad.CutLift
+import Operad.CutUnique

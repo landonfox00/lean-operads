@@ -2811,6 +2811,17 @@ example (R : Type) [CommRing R] :
 #print axioms Operad.FreeGrL.genCoef_liftCut
 #print axioms Operad.FreeGrL.cofreeHomEquivCut
 #print axioms Operad.FreeGrL.existsUnique_liftCut
+#print axioms Operad.Sym.LinOrd.comp_cancel_of_rank
+#print axioms Operad.FreeGr.cuts
+#print axioms Operad.FreeGr.card_cuts
+#print axioms Operad.FreeGrL.euler
+#print axioms Operad.FreeGrL.euler_proj_bas
+#print axioms Operad.FreeGrL.euler_eq
+#print axioms Operad.FreeGrL.mem_vxGe_succ_of_euler
+#print axioms Operad.FreeGrL.euler_sub_mem
+#print axioms Operad.FreeGrL.app_eq_of_genCoef_any
+#print axioms Operad.FreeGrL.cofreeHomEquivConilAny
+#print axioms Operad.FreeGrL.existsUnique_liftConilAny
 #print axioms Operad.FreeGrL.shEv_perm
 #print axioms Operad.FreeGrL.shEv_node_smul
 #print axioms Operad.FreeGrL.shEv_sortL
