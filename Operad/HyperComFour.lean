@@ -24,7 +24,8 @@
   the seven operations (`HyperCom.linearIndependent_seven`): the first coordinates of their
   values on inputs equal to `1` or `(0, 1)` form a triangular system.
 
-The dimensions in arity five and beyond are not computed.
+The dimension in arity five is computed in `Operad.HyperComFiveDim`, over a field in which
+`2` and `3` are invertible. The dimensions in arity six and beyond are not computed.
 -/
 import Operad.HyperComModel
 import Operad.CyclicExt

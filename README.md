@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 174,000 lines in 335 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,729
+About 176,000 lines in 338 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,763
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -658,8 +658,28 @@ product `m₂` is associative in the operad, so the commutative operad maps to `
 `pOp i j + tOp k = pOp i k + tOp j` (`HyperCom.pOp_add_tOp`), which leaves seven operations
 (`HyperCom.span_seven`). They are independent (`HyperCom.linearIndependent_seven`) in a
 hypercommutative algebra on `K × K` (`HCAlg.model`, `Operad/HyperComModel.lean`): the product in
-arity two, and `μₙ(v) = cₙ h(v₁) ⋯ h(vₙ) · 1` with `h (p, q) = q - p` in arity `n ≥ 3`. The
-dimensions in arity five and beyond are not computed.
+arity two, and `μₙ(v) = cₙ h(v₁) ⋯ h(vₙ) · 1` with `h (p, q) = q - p` in arity `n ≥ 3`.
+
+`Operad/HyperComFiveDim.lean` computes **`dim HyperCom(5) = 34`** (`HyperCom.finrank_five`),
+over a field in which `2` and `3` are invertible. Thirty-four operations (`HyperCom.basis34`)
+span over any commutative ring (`HyperCom.span_basis34`, `Operad/HyperComFive.lean`): the
+iterated product, `m₅`, `m₃(x₀ x₁ x₂, x₃, x₄)`, `m₄(x₀ x₁, x₂, x₃, x₄)`, ten operations
+`m₃(x_S) · x_d · x_e`, ten operations `m₃(m₃(x_S), x_d, x_e)`, five operations
+`m₂(m₃(m₂(x_i, x_j), x_k, x_l), x_e)` and five operations `m₂(m₄(…), x_k)`. An operation of
+arity five is a combination of `m₅` and of composites of operations of lower arity
+(`HyperCom.mem_span_dec`); a composite of two totally symmetric operations only depends on the
+set of its inner inputs (`SymOperad.twoOp`); the WDVV relation of arity five
+(`HyperCom.wdvv_five`) identifies the operations `m₄(x_a x_b, …)` up to the others; and the
+operations `m₃(x_a x_b x_c, x_d, x_e)` agree up to the others because the relabellings moving
+one of them by an element of a span stable under relabelling form a subgroup containing every
+transposition (`HyperCom.bqStab_eq_top`). The thirty-four are independent
+(`HyperCom.linearIndependent_basis34`): the algebra on `K × K` separates all but the ten
+operations `m₃(m₃(x_S), x_d, x_e)` over any commutative ring (`HyperCom.coef_eq_zero`), and a
+second hypercommutative algebra, on `K[x]/(x³)` (`HCAlg.cub`, `Operad/HyperComCubic.lean`: the
+product, `μ₃(x, x, x²) = 1`, `μ₃(x, x², x²) = x`, `μ₄(x², x², x², x²) = 2`, and zero in higher
+arities), separates those ten when `6` is invertible, by a certificate on the triples and pairs
+of inputs checked by `decide` (`HyperCom.cert5`). The fields of characteristic two and three
+are not covered, and the dimensions in arity six and beyond are not computed.
 
 **Graded and dg operads.** `Operad/DGOperad.lean` defines graded operads in super modules, with a
 parity decomposition preserved by relabellings and compositions and parallel associativity up to
