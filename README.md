@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 173,000 lines in 333 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,692
+About 174,000 lines in 335 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,729
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -788,8 +788,26 @@ cocycle of `Def(φ)` (`Koszul.Lift.defD_obstruction`), and **a lift extends to `
 exactly when its obstruction is minus the differential of a cochain of weight one with values in
 the cycles** (`Koszul.Lift.extends_iff_defD`, `Koszul.Lift.extend`). The cochains are graded by
 parity only, so the vanishing of the class of the obstruction is stated through the cochains of
-weight one. The complex `Hom_𝔖(P^¡, P)` is not compared with the cochains of
-`FormalDeformation.lean`.
+weight one.
+
+**The deformation complex and the two-cochains of the operad.**
+`Operad/DeformationCompare.lean` compares `Def(φ)`, for `φ` with values in a symmetric operad
+`P` in modules, with the two-cochains of `P` of `Deformation.lean`. A two-cocycle `ω` of `P`
+has the cochain `ω(φκ, φκ)`, the convolution of `ω` with two copies of `φ κ`
+(`Koszul.cochainOf`, `Koszul.cochainOf_apply`). It is a cocycle of `Def(φ)`
+(`Koszul.defD_cochainOf`), and the cochain of `δψ` is `-d(ψ ∘ φκ)`
+(`Koszul.cochainOf_coboundary`); for a derivation `D` of `P`, `D ∘ φκ` is a cocycle
+(`Koszul.defD_postEndo_derivation`). **The two obstructions agree**
+(`Koszul.obstruction_trivLift`): a trivialization up to order `N` of the trivial formal
+deformation of `P` is a morphism `P → P[t]/tᴺ⁺¹`, its composite with `φ` is a lift of `φ`
+(`Koszul.trivLift`), and the obstruction of the lift is the cochain of the obstruction cocycle
+of `FormalDeformation.lean`. The proofs go through square-zero extensions of graded operads
+split as species (`Operad/SqZeroExt.lean`): the deformed operad `P_ω → P` is one
+(`SqZeroExt.ofCocycle`), an extension `Q̂ → Q` gives one of convolution operads
+(`SqZeroExt.conv`), and its cochain on an odd family of square zero is closed for the bracket
+with the family (`SqZeroExt.bracket_res`), by the associativity of the product of odd families
+in `Hom(C, Q̂)`. The map induced on cohomology is not shown to be injective or surjective, and
+the formal deformations other than the trivial one are not compared.
 
 **Inner derivations as coboundaries.** `Operad/DeformationInner.lean` defines the inner
 derivation `[D, x] = D ∘ x - σ(p |x|) ∑_a x ∘_a D` of an operation `D` of parity `p` with one

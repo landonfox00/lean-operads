@@ -28,8 +28,8 @@ with values in the cycles of `Q`, with deformation complex `Def(φ) = Hom_𝔖(P
 
 The cochains are graded by parity only, so the cohomology `Koszul.DefH` is not split by weight:
 the vanishing of the class of the obstruction in `H²` is stated as the obstruction being the
-differential of a cochain of weight one. The complex `Hom_𝔖(P^¡, P)` of the operad `P` is not
-compared with the cochains of `FormalDeformation.lean`.
+differential of a cochain of weight one. The comparison of the complex `Hom_𝔖(P^¡, P)` with the
+cochains of `Deformation.lean` and `FormalDeformation.lean` is `Operad.DeformationCompare`.
 -/
 import Operad.DeformationComplex
 import Operad.InvObstruction

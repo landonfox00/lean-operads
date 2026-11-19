@@ -248,7 +248,8 @@ match the obstruction of `Koszul.Lift` for the identity of `P` with the obstruct
 `Ω P^¡ → P`.
 
 *Size* 6–12k. *Time* 8–15 days. *Depends on* W10 and W11, and on W8 for the generality of the
-bar construction. A stretch item, next to W8 and W9: not started, and done only if asked.
+bar construction. A stretch item, next to W8 and W9. Done at the level of cocycles, without the
+statement on cohomology; see the row W14 of the table above.
 
 ## Totals
 
@@ -269,6 +270,7 @@ bar construction. A stretch item, next to W8 and W9: not started, and done only 
 | W11 L10/L12 deformation complex | 3–6 | 4–8 |
 | W12 inhomogeneous (items 1–2) | 5–10 | 6–12 |
 | W13 items 1–3 | 11–23 | 15–29 |
+| W14 | PR open | `w14-deformation-compare-2026-11-19`, `SqZeroExt.lean`, `DeformationCompare.lean`: the map from the two-cocycles of `P` to the cocycles of `Hom_𝔖(P^¡, P)`, carrying coboundaries to coboundaries (`Koszul.cochainOf`, `Koszul.defD_cochainOf`, `Koszul.cochainOf_coboundary`); the cocycles `D ∘ φκ` of the derivations of `P` (`Koszul.defD_postEndo_derivation`); and the match of the obstruction of `Koszul.Lift` with the obstruction cocycle of `FormalDeformation`, for the trivial formal deformation (`Koszul.obstruction_trivLift`). Not done: the bijectivity of the induced map on cohomology in degrees one and two for a Koszul presentation, which the target asks for. It needs the comparison of the twisted `Hom` complexes out of `B(P)` and out of `P^¡`, or the flatness of the deformation of the relations given by a cocycle of weight two; the library has neither. The formal deformations other than the trivial one are not compared, a `Koszul.Lift` having values in `P[t]/tⁿ⁺¹` with the composition of `P` |
 | **total, with the proposed cuts** | **41–89k** | **53–107 days** |
 | stretch: W6 `n = 5`; W12 item 3; W13 item 4 | +13–26k | +13–27 days |
 | stretch: W14 comparison with `FormalDeformation` | +6–12k | +8–15 days |
