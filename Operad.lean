@@ -349,3 +349,5 @@ import Operad.ShuffleAnyKer
 import Operad.ShuffleAnyWindow
 import Operad.ShuffleAnyIdeal
 import Operad.ShuffleAnyBridge
+import Operad.ShuffleAnyRelIdeal
+import Operad.ShuffleAnyCtxIdeal

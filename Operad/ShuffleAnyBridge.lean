@@ -15,8 +15,8 @@ whose ideal is the ideal of the relators in shuffle coordinates (`hR`). Then
 The clauses of `Rules.IsKoszul` on any set of leaves follow from those on `0, …, n - 1` by
 relabelling along the positions (`ShuffleAnySym.rules_clause_of_range`).
 
-The hypothesis `hR` is not derived here from relators stable under the symmetric groups; see
-`Operad.ShuffleAnyIdeal`.
+The hypothesis `hR` is derived from conditions on the relators and the rules in
+`Operad.ShuffleAnyCtxIdeal` (`ShuffleAnySym.isKoszul_iff_rules_of_stable`).
 -/
 import Operad.ShuffleAnyIdeal
 import Operad.ShuffleBridgeBar
