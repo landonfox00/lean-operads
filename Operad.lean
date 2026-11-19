@@ -336,3 +336,12 @@ import Operad.DeformationCompare
 import Operad.HyperComCubic
 import Operad.HyperComFive
 import Operad.HyperComFiveDim
+import Operad.ShuffleAnySym
+import Operad.ShuffleAnySymDiff
+import Operad.ShuffleAnySymSign
+import Operad.ShuffleAnySymExp
+import Operad.ShuffleAnyQuot
+import Operad.ShuffleAnyProj
+import Operad.ShuffleAnyTop
+import Operad.ShuffleAnyDiag
+import Operad.ShuffleAnyCrit
