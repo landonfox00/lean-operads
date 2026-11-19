@@ -331,3 +331,5 @@ import Operad.CutCobar
 import Operad.CutLift
 import Operad.CutUnique
 import Operad.CofreeSpecies
+import Operad.SqZeroExt
+import Operad.DeformationCompare
