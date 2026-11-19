@@ -333,3 +333,6 @@ import Operad.CutUnique
 import Operad.CofreeSpecies
 import Operad.SqZeroExt
 import Operad.DeformationCompare
+import Operad.HyperComCubic
+import Operad.HyperComFive
+import Operad.HyperComFiveDim
