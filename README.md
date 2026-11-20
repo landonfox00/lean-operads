@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 187,000 lines in 362 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,911
+About 189,000 lines in 369 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,962
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1172,7 +1172,30 @@ the Maurer–Cartan equation is the `A∞` relation (`PInfAss.mc_iff_tstar`,
 `Operad/PInfAss.lean`). Hence **the `Ass∞`-algebra structures on a dg super module `V` are the
 `A∞`-structures in the bar convention, for the sign involution of the parity shift of `V`,
 whose first operation is the differential** (`PInfAss.pinfEquiv`, `Operad/PInfAssEquiv.lean`).
-Not proved: the identifications of `Lie∞` with `L∞` and of `Com∞` with `C∞`.
+
+**`Lie∞`-algebras are `L∞`-algebras.** For binary quadratic data over a field of characteristic
+zero, `P^¡(Fin n)` is the top homology of the shuffle bar complex (`ShuffleBarSym.dualKDEquiv`,
+`Operad/KoszulDualKD.lean`), so `Lie^¡` has dimension one in every arity `n ≥ 2`
+(`LieDual.finrank_dual_lie`). The Koszul dual cooperad is functorial in the quadratic data
+(`Koszul.dualMap`, `Operad/KoszulDualFunctor.lean`), and the commutator, which satisfies the Jacobi
+identity (`LieDual.φL_jacobi`), embeds `Lie^¡` in the cooperad of signed linear orders
+(`LieDual.toOrd`, `LieDual.toOrd_injective`, `Operad/LieDual.lean`), onto the line of the
+alternating sum of the linear orders in every arity (`LieDual.toOrd_eq`, `LieDual.exists_nu`,
+`Operad/LieAlt.lean`). For a cooperad of alternating lines (`AltGen`, `Operad/AltFamily.lean`),
+which `Lie^¡` is (`LieDual.altGen`, `Operad/LieTwisting.lean`), the invariant families are the
+alternating families of operations (`AltGen.inv_ext`, `AltGen.exists_lam`), and the convolution
+product at a generator is the sum, over the nonempty subsets of the inputs, of the planar terms at
+the initial windows, moved to the subset by a permutation with its sign (`AltGen.star_nu`). In the
+endomorphism operad of a super module, relabelling by a permutation with its sign is, after the
+décalage, the Koszul sign of the permutation for the shifted parities (`PInfLie.dec_sv_map`), an
+operation alternates iff its décalage is graded symmetric (`PInfLie.dec_symm`,
+`PInfLie.map_of_dec_symm`), and the Koszul sign of an unshuffle is `LInf.usgn` (`PInfLie.ks_unsh`),
+so the convolution square at a generator is the generalized Jacobi expression (`PInfLie.dec_sv_sum`,
+`Operad/PInfLie.lean`). Hence **the `Lie∞`-algebra structures on a dg super module `V` are the
+`L∞`-structures in the bar convention (`LInf.IsLInf`), for the sign involution of the parity shift
+of `V`, with no operation of arity zero, whose first operation is the differential**
+(`PInfLie.pinfEquiv`, `Operad/PInfLieEquiv.lean`). Not proved: the identification of `Com∞` with
+`C∞`.
 
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`

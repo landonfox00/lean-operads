@@ -360,3 +360,10 @@ import Operad.TwistingIso
 import Operad.OrdTwisting
 import Operad.PInfAss
 import Operad.PInfAssEquiv
+import Operad.KoszulDualFunctor
+import Operad.LieDual
+import Operad.LieAlt
+import Operad.AltFamily
+import Operad.LieTwisting
+import Operad.PInfLie
+import Operad.PInfLieEquiv
