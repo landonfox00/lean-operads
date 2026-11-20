@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 189,000 lines in 369 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,962
+About 191,000 lines in 374 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,999
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1194,8 +1194,25 @@ so the convolution square at a generator is the generalized Jacobi expression (`
 `Operad/PInfLie.lean`). Hence **the `Lie∞`-algebra structures on a dg super module `V` are the
 `L∞`-structures in the bar convention (`LInf.IsLInf`), for the sign involution of the parity shift
 of `V`, with no operation of arity zero, whose first operation is the differential**
-(`PInfLie.pinfEquiv`, `Operad/PInfLieEquiv.lean`). Not proved: the identification of `Com∞` with
-`C∞`.
+(`PInfLie.pinfEquiv`, `Operad/PInfLieEquiv.lean`).
+
+**`Com∞`-algebras are `C∞`-algebras.** The symmetrization of the generators carries the relations of
+`Ass` into those of `Com` (`ComDual.jCom_rel`), so the signed linear orders map to `Com^¡`
+(`ComDual.rho`, `Operad/ComDual.lean`), which has dimension `(n - 1)!` in every arity `n ≥ 2`
+(`ComDual.finrank_dual_com`). The shuffles, the restrictions of the alternating sums to the sets of
+orders given by constraints on the two sides of a splitting of the inputs, span a coideal
+(`ComDual.shCoideal`), killed in `Com^¡` by the universal property of the cut cooperad
+(`ComDual.rho_eq_zero`, `Operad/ComShuffle.lean`). Every order is a combination of shuffles and of
+orders starting with the first input (`ComDual.single_mem_sup`), and these embed in `Com^¡`
+(`ComDual.rho_injective_first`), so `ComDual.rho` is onto, with kernel the span of the standard
+shuffle elements (`ComDual.rho_surjective`, `ComDual.rho_eq_zero_iff`, `Operad/ComKernel.lean`). The
+twisting morphisms out of a quotient of a coaugmented cooperad are the twisting morphisms vanishing
+on the kernel (`Twisting.equivOfSurjective`, `Operad/TwistingQuot.lean`), and an invariant family
+vanishes on a standard shuffle element iff its operation in the bar convention vanishes on the
+signed shuffles of homogeneous words (`PInfCom.shStd_eq_zero_iff`). Hence **the `Com∞`-algebra
+structures on a dg super module `V` are the `C∞`-structures in the bar convention (`CInf.IsCInf`),
+for the sign involution of the parity shift of `V`, whose first operation is the differential**
+(`PInfCom.pinfEquiv`, `Operad/PInfCom.lean`).
 
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
