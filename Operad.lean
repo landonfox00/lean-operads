@@ -351,3 +351,12 @@ import Operad.ShuffleAnyIdeal
 import Operad.ShuffleAnyBridge
 import Operad.ShuffleAnyRelIdeal
 import Operad.ShuffleAnyCtxIdeal
+import Operad.OrdCooperad
+import Operad.OrdStar
+import Operad.OrdCut
+import Operad.KoszulDualKD
+import Operad.OrdDual
+import Operad.TwistingIso
+import Operad.OrdTwisting
+import Operad.PInfAss
+import Operad.PInfAssEquiv

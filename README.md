@@ -54,7 +54,7 @@ whether the slot sits at position 0, 1 or 2. `Operad.compFin` bridges back to th
 
 ## Status
 
-About 184,000 lines in 353 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,865
+About 187,000 lines in 362 modules, **`sorry`-free**. `Audit.lean` runs `#print axioms` on 2,911
 declarations and confirms every one rests only on Lean's three standard axioms — `propext`,
 `Quot.sound`, and (wherever mathlib's multilinear machinery is involved) `Classical.choice`. Never
 `sorryAx`. `AxiomSweep.lean` checks the same for every constant of every `Operad` module, about
@@ -1152,6 +1152,27 @@ algebra over `ΩP^¡`, a twisting morphism `P^¡ → End_V` (`Koszul.PInfAlgebra
 `P`-algebra is one, by restriction along `ΩP^¡ → P`, with twisting morphism `φ ∘ κ` sending a
 generator `sv` to the operation `φ(v)`, and faithfully (`Koszul.DGAlgebra.toPInf`,
 `Koszul.DGAlgebra.toPInf_gen`, `Koszul.DGAlgebra.toPInf_injective`, `Operad/PInfinity.lean`).
+
+**`Ass∞`-algebras are `A∞`-algebras.** Over a field of characteristic zero, the Koszul dual
+cooperad of `Ass` is **the cooperad of signed linear orders** `OrdCo K`: the twisted
+linearization of the nonempty linear orders with the sign data of the planar binary trees
+(`NOrd.sgnD`, `Operad/OrdCooperad.lean`), mapped to `T^c(sE)` by the universal property of the
+cut cooperad, into `Ass^¡` since its image satisfies the corelations of `Ass`
+(`OrdCo.toDual`, `OrdCo.star_kapO_mem_ideal`, `Operad/OrdCut.lean`), injectively
+(`OrdCo.toCut_injective`), and onto by dimensions: `dim P^¡(Fin n)` is at most the dimension of
+the top homology of the shuffle bar complex, for binary quadratic data
+(`ShuffleBarSym.finrank_dual_le`, `Operad/KoszulDualKD.lean`), which is `n!` for `Ass`
+(`OrdCo.toDual_bijective`, `Operad/OrdDual.lean`). The invariant families on `OrdCo K` are the
+families of operations at the standard orders (`OrdCo.invEquiv`), and the convolution product
+at a standard order is a sum of planar terms (`NOrd.star_std`, `Operad/OrdStar.lean`,
+`Operad/OrdTwisting.lean`). In the endomorphism operad of a super module these are, after the
+décalage, the composites of the bar convention (`PInfAss.sign_core`, `PInfAss.sv_star`), the
+differential is the commutator with the family of the differential (`PInfAss.d_famOf`), and
+the Maurer–Cartan equation is the `A∞` relation (`PInfAss.mc_iff_tstar`,
+`Operad/PInfAss.lean`). Hence **the `Ass∞`-algebra structures on a dg super module `V` are the
+`A∞`-structures in the bar convention, for the sign involution of the parity shift of `V`,
+whose first operation is the differential** (`PInfAss.pinfEquiv`, `Operad/PInfAssEquiv.lean`).
+Not proved: the identifications of `Lie∞` with `L∞` and of `Com∞` with `C∞`.
 
 **The graded endomorphism operad.** `Operad/GradedEnd.lean` builds, for a super module (a module
 with parity projections, `SuperMod`), its **graded endomorphism operad** `EndGr R V`
