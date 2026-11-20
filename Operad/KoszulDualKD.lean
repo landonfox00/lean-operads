@@ -13,13 +13,17 @@ image in `B(T, Ī)` lies in the relator ideal, which `ΦL` carries onto `Shuffle
 (`ShuffleBarSym.map_ΦL_Krel`).
 
 Hence `dim P^¡(Fin n) ≤ dim ShuffleBar.KD K R n` (`ShuffleBarSym.finrank_dual_le`), the dimension
-of the operad presented by the Koszul dual relators (`ShuffleBar.finrank_quotient_dualRel`). The
-converse inequality is not proved here in general; for `Ass` it follows from the cooperad of
-signed linear orders (`Operad/OrdDual.lean`).
+of the operad presented by the Koszul dual relators (`ShuffleBar.finrank_quotient_dualRel`).
+
+**The embedding is onto** (`ShuffleBarSym.dualKD_surjective`, `ShuffleBarSym.dualKDEquiv`): a top
+chain whose differential lies in `ShuffleBar.J` has only binary vertices, so it is the image of
+an element of the cut cooperad (`ShuffleBarSym.freeGen_ret`, `FreeGrL.mapSp_eq_of_top`), which is
+a cycle of `B(P, Ī_P)`, hence in `P^¡` (`ShuffleBarSym.cutCyc_le`).
 -/
 import Operad.ShuffleBarJ
 import Operad.ShuffleKoszulOperad
 import Operad.KoszulInhom
+import Operad.ShuffleBarTop
 
 universe u
 
@@ -147,6 +151,89 @@ theorem finrank_dual_le (hr3 : ∀ n ≠ 3, r n = ∅)
   haveI : IsNoetherian K (ShuffleBar.KD K (Rsh c hc r) n) :=
     isNoetherian_of_isNoetherianRing_of_finite K (ShuffleBar.KD K (Rsh c hc r) n)
   exact ⟨Module.Finite.of_injective f hinj, LinearMap.finrank_le_finrank_of_injective hinj⟩
+
+omit [CharZero K] in
+/-- No suspended operations of `Ī` with at most one input. -/
+lemma freeGen_red (B : Type) [Fintype B] [DecidableEq B] (hB : Fintype.card B ≤ 1)
+    (v : BarGen (Ibar K E c hc) B) : v = 0 :=
+  IdealSp.ext _ (by
+    have h := IdealSp.mem _ v
+    rwa [GrOperadIdeal.atLeastTwo_sub_of_lt (by omega), Submodule.mem_bot] at h)
+
+/-- **`sĪ → sE → sĪ` is the identity with at most two inputs**, for relators with at least three
+inputs: the binary operations of the free operad are its generators. -/
+lemma freeGen_ret (hr2 : ∀ n, n < 3 → r n = ∅) {B : Type} [Fintype B] [DecidableEq B]
+    (hB : Fintype.card B ≤ 2) (w : BarGen (Ibar K E c hc) B) :
+    (freeGen c hc).app B ((barRet c hc r hr2).app B ((barProjGen c hc r).app B w)) = w := by
+  refine IdealSp.ext _ ?_
+  have h1 : (barProjGen c hc r).app B ((freeGen c hc).app B
+      ((barRet c hc r hr2).app B ((barProjGen c hc r).app B w)))
+      = (barProjGen c hc r).app B w := by
+    rw [barProjGen_freeGen]
+    exact barGen_barRet c hc r hr2 hB _
+  have h2 := congrArg (IdealSp.val _) h1
+  rw [val_barProjGen, val_barProjGen] at h2
+  have h3 : IdealSp.val _ ((freeGen c hc).app B
+      ((barRet c hc r hr2).app B ((barProjGen c hc r).app B w))) - IdealSp.val _ w
+      ∈ (GrOperadIdeal.span K r).sub B := by
+    rw [← GrOperadIdeal.proj_eq_zero_iff, map_sub, h2, sub_self]
+  exact sub_eq_zero.1 (eq_zero_of_mem_span c hc r hr2 hB h3)
+
+/-- **Every top cycle of the shuffle bar complex modulo the relators comes from the Koszul dual
+cooperad**: such a chain has only binary vertices, so it is the image of an element of the cut
+cooperad, which is a cycle of `B(P, Ī_P)`, hence in `P^¡`. -/
+theorem dualKD_surjective (hr3 : ∀ n ≠ 3, r n = ∅)
+    (hrS : ∀ σ : Equiv.Perm (Fin 3), ∀ x ∈ r 3,
+      GrOperad.map (R := K) σ x ∈ Submodule.span K (r 3)) {n : ℕ} (hn : 2 ≤ n)
+    {v : BarTree G →₀ K} (hv : v ∈ ShuffleBar.KD K (Rsh c hc r) n) :
+    ∃ x, dualKD c hc r n x = v := by
+  have hr2 : ∀ n, n < 3 → r n = ∅ := fun n hn => hr3 n (by omega)
+  obtain ⟨hvC, hvJ⟩ := Submodule.mem_inf.1 hv
+  obtain ⟨y, hy, rfl⟩ := (SetLike.ext_iff.1 (map_ΦL_deg c hc hn (n - 1)) v).2 hvC
+  rw [deg_eq_vx] at hy
+  have hdy : Bar.d (Ibar K E c hc) (Fin n) y ∈ (Krel K E c hc r).sub (Fin n) := by
+    have h1 : ΦL c hc n (Bar.d (Ibar K E c hc) (Fin n) y)
+        ∈ ShuffleBar.J K (Rsh c hc r) ⊓ Finsupp.supported K K (barSet G n) :=
+      Submodule.mem_inf.2 ⟨(ΦL_d c hc y) ▸ hvJ, (ΦL_range c hc n) ▸ ⟨_, rfl⟩⟩
+    obtain ⟨k, hk, hk'⟩ := (SetLike.ext_iff.1 (map_ΦL_Krel c hc hr3 hrS n) _).2 h1
+    rwa [← ΦL_injective c hc n hk']
+  have hyy : (FreeGrL.mapSp (freeGen c hc)).app (Fin n)
+      ((FreeGrL.mapSp ((barRet c hc r hr2).comp (barProjGen c hc r))).app (Fin n) y) = y := by
+    rw [FreeGrL.mapSp_comp]
+    exact (FreeGrL.mapSp_eq_of_top (freeGen_red c hc)
+      (g' := (GrSpEnd.id K (BarGen (Ibar K E c hc))).toHom)
+      (fun B _ _ hB w => freeGen_ret c hc r hr2 hB w)
+      (by rw [Fintype.card_fin]; omega) (by rw [Fintype.card_fin]; exact hy)).trans
+      (FreeGrL.mapSp_id y)
+  have e1 : (FreeGrL.mapSp (Koszul.barGen (Ipres K E c hc r) (hE_pres c hc r))).app (Fin n)
+      ((FreeGrL.mapSp ((barRet c hc r hr2).comp (barProjGen c hc r))).app (Fin n) y)
+      = (FreeGrL.mapSp (barProjGen c hc r)).app (Fin n) y :=
+    ((FreeGrL.mapSp_comp _ _ _).trans
+      (FreeGrL.mapSp_congr (fun A _ _ w => barProjGen_freeGen c hc r A w) _)).symm.trans
+      (congrArg _ hyy)
+  have hu : (FreeGrL.mapSp ((barRet c hc r hr2).comp (barProjGen c hc r))).app (Fin n) y
+      ∈ (cutCyc K E c hc r hr2).sub (Fin n) :=
+    LinearMap.mem_ker.2 ((congrArg (Bar.d (Ipres K E c hc r) (Fin n)) e1).trans
+      ((barProj_d c hc r y).symm.trans ((mem_Krel_iff c hc r _).1 hdy)))
+  exact ⟨⟨_, cutCyc_le c hc r hr2 (Fin n) hu⟩, congrArg (ΦL c hc n) hyy⟩
+
+/-- **The Koszul dual cooperad is the top homology of the shuffle bar complex**, in every arity
+`n ≥ 2`, for binary quadratic data with relators of arity three stable under the permutations,
+over a field of characteristic zero. -/
+noncomputable def dualKDEquiv (hr3 : ∀ n ≠ 3, r n = ∅)
+    (hrS : ∀ σ : Equiv.Perm (Fin 3), ∀ x ∈ r 3,
+      GrOperad.map (R := K) σ x ∈ Submodule.span K (r 3)) {n : ℕ} (hn : 2 ≤ n) :
+    Koszul.Dual K E r (Fin n) ≃ₗ[K] ShuffleBar.KD K (Rsh c hc r) n :=
+  LinearEquiv.ofBijective ((dualKD c hc r n).codRestrict _ (dualKD_mem c hc r hr3 hrS hn))
+    ⟨fun x y h => dualKD_injective c hc r (fun n hn => hr3 n (by omega)) n (by
+        have h' : (((dualKD c hc r n).codRestrict _ (dualKD_mem c hc r hr3 hrS hn)) x :
+            BarTree G →₀ K)
+            = ((dualKD c hc r n).codRestrict _ (dualKD_mem c hc r hr3 hrS hn)) y :=
+          congrArg _ h
+        exact h'),
+      fun v => by
+        obtain ⟨x, hx⟩ := dualKD_surjective c hc r hr3 hrS hn v.2
+        exact ⟨x, Subtype.ext hx⟩⟩
 
 end ShuffleBarSym
 
