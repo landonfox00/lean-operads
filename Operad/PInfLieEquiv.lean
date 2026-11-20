@@ -34,8 +34,6 @@ by no other sign. The identification is with the `L∞[1]`-structures of `Operad
 graded symmetric operations on the parity shift, the only `L∞` convention in the library.
 `LInf.IsLInf` asks for the identities on homogeneous inputs only. The condition `ℓ 0 = 0` is part
 of `LInfOver` because the generalized Jacobi expressions do not involve `ℓ 0`.
-
-Not proved: the identification of `Com∞` with `C∞`.
 -/
 import Operad.PInfLie
 

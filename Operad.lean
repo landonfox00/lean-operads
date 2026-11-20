@@ -367,3 +367,8 @@ import Operad.AltFamily
 import Operad.LieTwisting
 import Operad.PInfLie
 import Operad.PInfLieEquiv
+import Operad.ComDual
+import Operad.ComShuffle
+import Operad.ComKernel
+import Operad.TwistingQuot
+import Operad.PInfCom
